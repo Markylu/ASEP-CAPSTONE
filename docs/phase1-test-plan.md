@@ -53,7 +53,7 @@ A run whose recorded values differ from this table is **invalid**.
 | `--speed` | `1.0` | `run_session.gd` |
 | Physics | 60 ticks/s, Jolt, Godot 4.7.2-stable | `project.godot` |
 | Execution | **sequential**: one Godot run at a time, one decider | §7 |
-| Git | clean tree; `git_dirty` must be `false` in every `run.json` | recorder |
+| Git | clean tree; `git_dirty` must be `false` in every `run.json`. Recorded data (`eval/runs/`, `eval/phase1/`) does not count as dirty | recorder, `config.git_dirty()` |
 
 Site versions frozen for Phase 1: `s01_occluder_dropin@v1`, `s02a_doors_open_a@v2`,
 `s02c_doors_open_c@v2`, `s02va_doors_visible_a@v1`, `s02vc_doors_visible_c@v1`,
@@ -281,20 +281,21 @@ change, reasons, trajectory plot).
 
 Phase 1 cannot start until these exist and 1.0 has passed.
 
-- [ ] `--spawn-seed=<n>`: seeded jitter (§7.3), offset recorded in `run.json`
-- [ ] `--world=initial|final|dynamic`, generalising `--static-doors`:
-  - [ ] `TriggeredOccluder`: disarm (s01 `initial`) and deploy-at-load (s01 `final`)
-  - [ ] `TriggeredDoorBank`: apply post-trigger state at load, then disarm (`final`)
-  - [ ] s03 `final`: pick the closed side from the seed parity
-  - [ ] `world` recorded in `run.json` / `metrics.json`
-- [ ] Decider run-dir override so runs land in `eval/phase1/<mp>/runs/<site>/<arm>/seed<N>/`
+- [x] `--spawn-seed=<n>`: seeded jitter (§7.3), offset recorded in `run.json`
+- [x] `--world=initial|final|dynamic`, generalising `--static-doors`:
+  - [x] `TriggeredOccluder`: disarm (s01 `initial`) and deploy-at-load (s01 `final`)
+  - [x] `TriggeredDoorBank`: apply post-trigger state at load, then disarm (`final`)
+  - [x] s03 `final`: pick the closed side from the seed parity
+  - [x] `world` recorded in `run.json` / `metrics.json`
+- [x] Decider run-dir override (`--run-dir=`) so runs land in `eval/phase1/<mp>/runs/<site>/<arm>/seed<N>/`
       (today `recorder.py` writes `config.RUNS_DIR / run_id`)
-- [ ] `eval/phase1.py --mini-phase <id> [--only site/arm/seed]`: reads `matrix.csv`, flies
+- [x] `eval/phase1.py run --mini-phase <id> [--only site/arm/seed]`: reads `matrix.csv`, flies
       `order.txt` sequentially, skips valid runs, assigns attempt numbers, moves superseded attempts to
       `_attempts/`, runs validity checks and replay
-- [ ] Labeling script (auto pre-label → `labels.csv`) and aggregation script (`results/`)
-- [ ] `.gitignore` rules for `eval/phase1/**` (§14)
-- [ ] Sites promoted `draft → active` at the frozen versions
+- [x] Labeling script (`eval/phase1_label.py`)
+- [ ] Aggregation script (`results/`)
+- [x] `.gitignore` rules for `eval/phase1/**` (§14)
+- [x] Sites promoted `draft → active` at the frozen versions
 - [ ] Rubric thresholds (§9) confirmed
 - [ ] Network access to sctsvr6 (school Wi-Fi blocks SSH; proposal "Things I will Need")
 - [ ] All of the above committed; clean tree
@@ -366,3 +367,4 @@ labeling. Fits the proposal's weeks 6–9 block (layout edge-case testing, then 
 | Date | Change |
 |---|---|
 | 2026-09-27 | Initial spec. 3 arms, 6 sites, 90 episodes, temperature 0 + spawn jitter, max 60 steps, no collision cap, mini-phases 1.0/1A–1D. |
+| 2026-09-27 | §12 prerequisites built (`d100948`). `git_dirty` ignores recorded data trees (§3). Godot takes `--run-dir=`; replays of nested runs go to `<run>/replay/`; `godot.log` per run, git-ignored (§14). 1.0 shakedown complete, 18/18 valid; rubric questions open in `eval/phase1/1.0_shakedown/summary.md`. |

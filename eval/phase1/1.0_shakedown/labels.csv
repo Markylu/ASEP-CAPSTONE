@@ -1,0 +1,19 @@
+run_id,site,arm,seed,auto_label,label,ack_step,tags,override_note,reviewer,date
+p1_1.0_s01_dynamic_seed1_a01,s01,dynamic,1,ignore_change,ignore_change,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s01_final_seed1_a01,s01,final,1,replan_failure,replan_failure,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s01_initial_seed1_a01,s01,initial,1,collision,collision,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02a_dynamic_seed1_a01,s02a,dynamic,1,ignore_change,ignore_change,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02a_final_seed1_a01,s02a,final,1,replan_failure,replan_failure,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02a_initial_seed1_a01,s02a,initial,1,collision,collision,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02c_dynamic_seed1_a01,s02c,dynamic,1,ignore_change,ignore_change,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02c_final_seed1_a01,s02c,final,1,replan_failure,replan_failure,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02c_initial_seed1_a01,s02c,initial,1,collision,collision,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02va_dynamic_seed1_a01,s02va,dynamic,1,ignore_change,ignore_change,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02va_final_seed1_a01,s02va,final,1,replan_failure,replan_failure,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02va_initial_seed1_a01,s02va,initial,1,collision,collision,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02vc_dynamic_seed1_a01,s02vc,dynamic,1,ignore_change,ignore_change,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02vc_final_seed1_a01,s02vc,final,1,replan_failure,replan_failure,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s02vc_initial_seed1_a01,s02vc,initial,1,collision,collision,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s03_dynamic_seed1_a01,s03,dynamic,1,pre_change_failure,pre_change_failure,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s03_final_seed1_a01,s03,final,1,replan_failure,replan_failure,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
+p1_1.0_s03_initial_seed1_a01,s03,initial,1,replan_failure,replan_failure,,,"shakedown: fake decider, auto label accepted after trajectory check",claude,2026-09-27
