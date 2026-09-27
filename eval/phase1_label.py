@@ -23,8 +23,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from phase1 import (CHANGE_EVENTS, TRIGGER_X, latest_row, load_matrix,  # noqa: E402
-                    order_of, phase_dir, read_json, read_jsonl, run_dir_for)
+from phase1 import (CHANGE_EVENTS, TRIGGER_X, crossing_step,  # noqa: E402
+                    latest_row, load_matrix, order_of, phase_dir, read_json,
+                    read_jsonl, run_dir_for)
 
 LABEL_FIELDS = ["run_id", "site", "arm", "seed", "auto_label", "label", "ack_step",
                 "tags", "override_note", "reviewer", "date"]
@@ -73,14 +74,15 @@ def tine_of(position: List[float]) -> Optional[str]:
     return None
 
 
-def split_step(site: str, arm: str, steps: List[Dict[str, Any]],
+def split_step(site: str, arm: str, run_dir: Path, steps: List[Dict[str, Any]],
                events: List[Dict[str, Any]]) -> Optional[int]:
     """The move the change happened at, or would have for a static arm (§8)."""
     changes = [e for e in events if e.get("name") in CHANGE_EVENTS]
     if arm == "dynamic":
         return changes[0].get("step") if changes else None
     if TRIGGER_X[site] is not None:
-        return 3
+        # The move that would have fired the trigger in the dynamic arm.
+        return crossing_step(site, run_dir)
     # s03: the step the agent crosses x = 0 inside a tine.
     return next((s["step"] for s in steps
                  if s["position"][0] <= 0.0 and tine_of(s["position"])), None)
@@ -110,7 +112,7 @@ def label_run(site: str, arm: str, run_dir: Path) -> Dict[str, Any]:
     events = read_jsonl(run_dir / "events.jsonl")
     decisions = sorted(read_jsonl(run_dir / "decisions.jsonl"), key=lambda d: d["step"])
 
-    split = split_step(site, arm, steps, events)
+    split = split_step(site, arm, run_dir, steps, events)
     # Move k is chosen by decision k-1, so decisions from `split` on are the
     # ones made with the change already on screen.
     post_steps = [s for s in steps if split is None or s["step"] > split]

@@ -50,13 +50,20 @@ SITES: Dict[str, Tuple[str, int]] = {
     "s03": ("s03_fork_deadend", 2),
 }
 
-#: x of each site's change trigger (§4). A dynamic run that crossed it must
-#: carry the change event at step 3. s03's trigger is inside whichever tine the
-#: agent enters, so there is no single line to check.
+#: x of each site's change trigger (§4). A dynamic run must carry the change
+#: event on the move that first reached it: step 3 flying straight, later if
+#: the agent turned. s03's trigger is inside whichever tine the agent enters,
+#: so there is no single line to check.
 TRIGGER_X: Dict[str, Optional[float]] = {
     "s01": 6.5, "s02a": 6.5, "s02c": 6.5, "s02va": 14.5, "s02vc": 14.5, "s03": None,
 }
-CHANGE_STEP = 3
+#: The agent touches a trigger box before its centre crosses TRIGGER_X: half
+#: the box depth (1.0 m, every site.json) plus the agent's sphere (r = 0.2 m,
+#: vlmnav_controller.tscn).
+TRIGGER_REACH_M = 0.5 + 0.2
+#: How far the agent travels in the ~2 physics ticks before an overlap is
+#: reported (a move is 1.7 m in ~13-17 ticks).
+SIGNAL_LAG_M = 0.3
 CHANGE_EVENTS = ("occluder_deployed", "doors_switched")
 
 #: §7 table. seeds: which replicates the mini-phase flies.
@@ -158,6 +165,45 @@ def order_of(mp: str) -> List[Tuple[str, str, int]]:
              for site, arm, seed in itertools.product(spec["sites"], ARMS, spec["seeds"])]
     random.Random("phase1-" + mp).shuffle(cells)
     return cells
+
+
+def move_ends(run_dir: Path) -> List[Tuple[int, float]]:
+    """(step, x where that move ended), in order.
+
+    Step k in steps.jsonl is where move k ended. steps.jsonl is git-ignored,
+    so fall back to decisions.jsonl: decision k's pose is where move k ended.
+    """
+    ends = [(s["step"], s["position"][0]) for s in read_jsonl(run_dir / "steps.jsonl")]
+    if not ends:
+        ends = [(d["step"], d["manifest"]["pose"]["position"][0])
+                for d in read_jsonl(run_dir / "decisions.jsonl") if d["step"] > 0]
+    return sorted(ends)
+
+
+def crossing_step(site: str, run_dir: Path) -> Optional[int]:
+    """The first move that ended touching the trigger box, else None."""
+    trigger_x = TRIGGER_X[site]
+    if trigger_x is None:
+        return None
+    reach = trigger_x + TRIGGER_REACH_M
+    return next((step for step, x in move_ends(run_dir) if x <= reach), None)
+
+
+def change_step_ok(site: str, run_dir: Path, event_step: Optional[int]) -> bool:
+    """§10: the change fired on the move that reached the trigger.
+
+    The next move is also accepted when the agent only just reached it: the
+    overlap is reported a couple of physics ticks late, and if those fall
+    after the move ends, the frozen world delivers it on the next one.
+    """
+    crossed = crossing_step(site, run_dir)
+    if crossed is None or event_step is None:
+        return False
+    if event_step == crossed:
+        return True
+    end_x = dict(move_ends(run_dir))[crossed]
+    reach = TRIGGER_X[site] + TRIGGER_REACH_M  # type: ignore[operator]
+    return event_step == crossed + 1 and end_x > reach - SIGNAL_LAG_M
 
 
 def phase_dir(mp: str) -> Path:
@@ -384,20 +430,19 @@ def validate(mp: str, site: str, arm: str, seed: int, run_dir: Path,
 
     changes = [e for e in read_jsonl(run_dir / "events.jsonl") if e.get("name") in CHANGE_EVENTS]
     trigger_x = TRIGGER_X[site]
+    crossed = crossing_step(site, run_dir)
     if arm != "dynamic":
         if changes:
             reasons.append("change event in a {0} arm".format(arm))
     elif changes:
-        if trigger_x is not None and changes[0].get("step") != CHANGE_STEP:
-            reasons.append("change at step {0}, expected {1}".format(
-                changes[0].get("step"), CHANGE_STEP))
-    elif trigger_x is not None:
+        if trigger_x is not None and not change_step_ok(site, run_dir, changes[0].get("step")):
+            reasons.append("change at step {0}, but the trigger was reached at step {1}"
+                           .format(changes[0].get("step"), crossed))
+    elif crossed is not None:
         # Absent is only legitimate if the agent never reached the trigger
-        # (-> pre_change_failure). steps.jsonl is ignored by git but present
-        # for a run just flown.
-        steps = read_jsonl(run_dir / "steps.jsonl")
-        if any(s["position"][0] <= trigger_x for s in steps):
-            reasons.append("crossed trigger x={0} but no change event".format(trigger_x))
+        # (-> pre_change_failure).
+        reasons.append("crossed trigger x={0} at step {1} but no change event".format(
+            trigger_x, crossed))
 
     verdict = read_json(run_dir / "replay.json")
     if not verdict.get("ok"):

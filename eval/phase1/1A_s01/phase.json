@@ -7,5 +7,5 @@
   "started": null,
   "finished": null,
   "operator": null,
-  "notes": "2026-09-27: first start at 01cef05 aborted after 1 invalid run (network ~10 KB/s up through the tunnel; server compute 0.76 s). 0 valid runs; restarted at a new SHA with transport retries in the decider. Attempts kept in _attempts/s01/final/seed1/."
+  "notes": "2026-09-27: first start at 01cef05 aborted after 1 invalid run (network ~10 KB/s up through the tunnel; server compute 0.76 s). 0 valid runs; restarted at a new SHA with transport retries in the decider. Attempts kept in _attempts/s01/final/seed1/. Second start at f9bed02 stopped after 3 runs: the \u00a710 change-step check hard-coded step 3 and failed a legitimate turning run (dynamic seed4 a01). Check fixed; restarted at a new SHA; those runs kept in _attempts/ as superseded."
 }

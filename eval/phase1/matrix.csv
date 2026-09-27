@@ -20,7 +20,7 @@ mini_phase,site,site_version,arm,seed,run_id,attempt,status,end_reason,invalid_r
 1A,s01,1,dynamic,1,p1_1A_s01_dynamic_seed1_a01,1,planned,,
 1A,s01,1,dynamic,2,p1_1A_s01_dynamic_seed2_a01,1,planned,,
 1A,s01,1,dynamic,3,p1_1A_s01_dynamic_seed3_a01,1,planned,,
-1A,s01,1,dynamic,4,p1_1A_s01_dynamic_seed4_a01,1,planned,,
+1A,s01,1,dynamic,4,p1_1A_s01_dynamic_seed4_a01,1,invalid,max_steps,"change at step 4, expected 3"
 1A,s01,1,dynamic,5,p1_1A_s01_dynamic_seed5_a01,1,planned,,
 1A,s01,1,final,1,p1_1A_s01_final_seed1_a01,1,invalid,max_steps,"json_schema rung below 90%: {'json_schema': 31, 'json_object': 29}; cause: tunnel disconnects at ~10 KB/s uplink (RemoteProtocolError) pushed rungs to json_object"
 1A,s01,1,final,2,p1_1A_s01_final_seed2_a01,1,planned,,
@@ -30,7 +30,7 @@ mini_phase,site,site_version,arm,seed,run_id,attempt,status,end_reason,invalid_r
 1A,s01,1,initial,1,p1_1A_s01_initial_seed1_a01,1,planned,,
 1A,s01,1,initial,2,p1_1A_s01_initial_seed2_a01,1,planned,,
 1A,s01,1,initial,3,p1_1A_s01_initial_seed3_a01,1,planned,,
-1A,s01,1,initial,4,p1_1A_s01_initial_seed4_a01,1,planned,,
+1A,s01,1,initial,4,p1_1A_s01_initial_seed4_a01,1,invalid,goal_reached,superseded: 1A restarted at new SHA (§10 change step = move reaching the trigger)
 1A,s01,1,initial,5,p1_1A_s01_initial_seed5_a01,1,planned,,
 1B,s02a,2,dynamic,1,p1_1B_s02a_dynamic_seed1_a01,1,planned,,
 1B,s02a,2,dynamic,2,p1_1B_s02a_dynamic_seed2_a01,1,planned,,
@@ -108,4 +108,8 @@ mini_phase,site,site_version,arm,seed,run_id,attempt,status,end_reason,invalid_r
 1D,s03,2,initial,4,p1_1D_s03_initial_seed4_a01,1,planned,,
 1D,s03,2,initial,5,p1_1D_s03_initial_seed5_a01,1,planned,,
 1A,s01,1,final,1,p1_1A_s01_final_seed1_a02,2,invalid,,"interrupted by operator: network too slow, 1A restarted at new SHA"
-1A,s01,1,final,1,p1_1A_s01_final_seed1_a03,3,planned,,
+1A,s01,1,final,1,p1_1A_s01_final_seed1_a03,3,invalid,max_steps,superseded: 1A restarted at new SHA (§10 change step = move reaching the trigger)
+1A,s01,1,dynamic,4,p1_1A_s01_dynamic_seed4_a02,2,invalid,,interrupted: 1A restarted at new SHA
+1A,s01,1,final,1,p1_1A_s01_final_seed1_a04,4,planned,,
+1A,s01,1,initial,4,p1_1A_s01_initial_seed4_a02,2,planned,,
+1A,s01,1,dynamic,4,p1_1A_s01_dynamic_seed4_a03,3,planned,,

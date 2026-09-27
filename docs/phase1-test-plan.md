@@ -67,9 +67,9 @@ arrival radius and a 6 m beam, and spawn facing −X. Full geometry is in each s
 
 | Layout | Site | Spawn (x) | Goal dist / LOS at spawn | Change | Trigger → switch step | Straight-line collision | Post-change route |
 |---|---|---|---|---|---|---|---|
-| 1 Object Appearance | `s01_occluder_dropin` | 12 | 24.0 m / yes | 8 m cube rises at x = −2, blocking path and sightline | x = 6.5 → step 3; first occluded frame 4 | step 6, x = 2.2 | around either side (7.75 m side gaps) |
-| 2a Door Switch, out of view | `s02a_doors_open_a` / `s02c_doors_open_c` | 12 | 24.0 m / yes (through B) | B closes; A (−z, right) or C (+z, left) opens | x = 6.5 → step 3; first switched frame 4 | step 7, x = 0.45 | new door **56.3° off-axis** (outside 43.5° half-FOV); ≈ 26.5 m |
-| 2b Door Switch, in view | `s02va_doors_visible_a` / `s02vc_doors_visible_c` | 20 | 32.0 m / yes (through B) | same switch as 2a | x = 14.5 → step 3; first switched frame 4 | step 12, x = 0.45 | new door **in frame** (far edge 39.7°); ≈ 32.4 m ≈ 19 steps |
+| 1 Object Appearance | `s01_occluder_dropin` | 12 | 24.0 m / yes | 8 m cube rises at x = −2, blocking path and sightline | x = 6.5 → step 3 flying straight; first occluded frame 4 | step 6, x = 2.2 | around either side (7.75 m side gaps) |
+| 2a Door Switch, out of view | `s02a_doors_open_a` / `s02c_doors_open_c` | 12 | 24.0 m / yes (through B) | B closes; A (−z, right) or C (+z, left) opens | x = 6.5 → step 3 flying straight; first switched frame 4 | step 7, x = 0.45 | new door **56.3° off-axis** (outside 43.5° half-FOV); ≈ 26.5 m |
+| 2b Door Switch, in view | `s02va_doors_visible_a` / `s02vc_doors_visible_c` | 20 | 32.0 m / yes (through B) | same switch as 2a | x = 14.5 → step 3 flying straight; first switched frame 4 | step 12, x = 0.45 | new door **in frame** (far edge 39.7°); ≈ 32.4 m ≈ 19 steps |
 | 3 Split Path | `s03_fork_deadend` | 21 | 33.0 m / no | whichever tine is entered first has its exit door slam shut; the other bank disarms | mid-tine x = 0, step depends on the agent | ≈ 4 steps after the switch | back out, cross crossbar, take other tine; scripted recovery = 43 steps |
 
 ## 5. Arms
@@ -202,9 +202,10 @@ s03/final/1, s03/final/5, s03/dynamic/3
 | Output rung | `rungs_used` | `metrics.json` |
 
 For the `initial` and `final` arms, where nothing changes, "pre/post" is split at the step the
-`dynamic` arm's trigger would fire (step 3 for s01/s02/s02v; for s03, the step the agent crosses x = 0
-in a tine). An s03 `initial`/`final` run that never enters a tine has no split: the whole run counts
-as post-change.
+`dynamic` arm's trigger would fire: for s01/s02/s02v, the first move that ends with the agent touching
+the trigger box (centre x ≤ trigger x + 0.7 m: half the 1.0 m box plus the 0.2 m agent sphere); for
+s03, the step the agent crosses x = 0 in a tine. Flying straight that is step 3; a turning agent gets
+there later. A run that never gets there has no split: the whole run counts as post-change.
 
 ## 9. Failure-mode rubric
 
@@ -249,8 +250,10 @@ A run is **valid** only if all of these hold:
 - [ ] end reason ∈ {`goal_reached`, `max_steps`}
 - [ ] no `decision_error`; `rungs_used` is ≥ 90% `json_schema`
 - [ ] `run.json` matches `config.lock.json` (model, prompt sha, frame, config, site version, `git_dirty: false`)
-- [ ] `dynamic` arm: change event present in `events.jsonl` at the expected step (s01/s02/s02v: step 3),
-      or absent only if the agent never reached the trigger (→ `pre_change_failure`)
+- [ ] `dynamic` arm: change event present in `events.jsonl` on the move that reached the trigger
+      (s01/s02/s02v, §8 definition), or on the next move if that one ended within 0.3 m of first contact
+      (the overlap is reported ~2 physics ticks late and the world freezes between moves); absent only
+      if the agent never reached the trigger (→ `pre_change_failure`)
 - [ ] `initial` / `final` arm: **no** change event in `events.jsonl`
 - [ ] `eval/replay.py` reproduces the trajectory with drift < 1e-3 m, matching collisions and events
 
@@ -375,3 +378,4 @@ labeling. Fits the proposal's weeks 6–9 block (layout edge-case testing, then 
 | 2026-09-27 | §12 prerequisites built (`d100948`). `git_dirty` ignores recorded data trees (§3). Godot takes `--run-dir=`; replays of nested runs go to `<run>/replay/`; `godot.log` per run, git-ignored (§14). 1.0 shakedown complete, 18/18 valid; rubric questions open in `eval/phase1/1.0_shakedown/summary.md`. |
 | 2026-09-27 | §9 settled before 1A (1.0 findings 1–3): rubric order kept, `collision` only for runs that got through; `door` keyword needs a state word in the same sentence; §8 s03 static arms with no tine entry have no split. 1.0 auto labels unchanged under the new rules. |
 | 2026-09-27 | 1A first start (`01cef05`) aborted after one invalid run: the operator uplink ran at ~10 KB/s through the tunnel (server compute 0.76 s/decision), and dropped connections (`RemoteProtocolError`) pushed half the decisions from `json_schema` to `json_object`. Decider now retries the same rung up to 3× on a transport error and no longer turns streaming off for one. 1A reset to `planned` (0 valid runs); attempts kept in `_attempts/`. Fly citable phases only on a link where a real decision round-trips in a few seconds. |
+| 2026-09-27 | 1A restart #2: the §10 check and §8 split hard-coded step 3, which holds only for straight flight. `p1_1A_s01_dynamic_seed4_a01` turned, ended move 3 at x = 7.0008 and fired on move 4: a legitimate run marked invalid. Change step is now the move that reaches the trigger box (x ≤ trigger + 0.7 m), with the next move accepted within 0.3 m of first contact. 1A restarted at the new SHA; its 3 runs so far are kept in `_attempts/`. 1.0 still 18/18 valid, labels unchanged. |
