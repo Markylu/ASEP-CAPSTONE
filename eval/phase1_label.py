@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -29,8 +30,12 @@ LABEL_FIELDS = ["run_id", "site", "arm", "seed", "auto_label", "label", "ack_ste
                 "tags", "override_note", "reviewer", "date"]
 
 #: §9 auto pass: words that mean the reason noticed the change.
-ACK_KEYWORDS = ("closed", "blocked", "wall", "obstacle", "door", "box", "no longer",
+ACK_KEYWORDS = ("closed", "blocked", "wall", "obstacle", "box", "no longer",
                 "dead end", "cube", "shut", "barrier", "in the way")
+#: "door" alone is not enough: on s02/s02v the doors are in frame from spawn.
+#: It counts only in a sentence that also says what state the door is in.
+DOOR_STATES = ("closed", "closing", "shut", "open", "opened", "opening", "blocked",
+               "locked")
 
 #: §9 thresholds, fixed before 1A.
 ACK_WINDOW = 5
@@ -47,6 +52,15 @@ S03_EXIT_X = -7.0
 S02_WALL_FAR_X = -0.5
 #: "past the cube's x" (§9): the s01 cube is centred at x = -2.
 S01_CUBE_X = -2.0
+
+
+def acknowledges(reason: str) -> bool:
+    """§9 auto pass: does this reason refer to the change?"""
+    text = reason.lower()
+    if any(k in text for k in ACK_KEYWORDS):
+        return True
+    return any("door" in sentence and any(s in sentence for s in DOOR_STATES)
+               for sentence in re.split(r"[.!?;]", text))
 
 
 def tine_of(position: List[float]) -> Optional[str]:
@@ -102,8 +116,7 @@ def label_run(site: str, arm: str, run_dir: Path) -> Dict[str, Any]:
     post_steps = [s for s in steps if split is None or s["step"] > split]
     post_decisions = [d for d in decisions if split is None or d["step"] >= split]
 
-    ack = next((d for d in post_decisions
-                if any(k in (d.get("reason") or "").lower() for k in ACK_KEYWORDS)), None)
+    ack = next((d for d in post_decisions if acknowledges(d.get("reason") or "")), None)
     ack_step = ack["step"] if ack else None
     window = post_decisions[:ACK_WINDOW]
     acked_in_window = ack is not None and ack in window

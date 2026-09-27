@@ -203,7 +203,8 @@ s03/final/1, s03/final/5, s03/dynamic/3
 
 For the `initial` and `final` arms, where nothing changes, "pre/post" is split at the step the
 `dynamic` arm's trigger would fire (step 3 for s01/s02/s02v; for s03, the step the agent crosses x = 0
-in a tine).
+in a tine). An s03 `initial`/`final` run that never enters a tine has no split: the whole run counts
+as post-change.
 
 ## 9. Failure-mode rubric
 
@@ -216,8 +217,11 @@ in this order; the first match wins:
 | 1 | `pre_change_failure` | *dynamic arm only:* the change never fired (agent never reached the trigger) |
 | 2 | `ignore_change` | after the change, **no** `reason` in the next 5 decisions refers to the new obstacle / closed door / blocked route, **and** the agent keeps heading toward the goal bearing (≥ 3 of those 5 actions within ±30° of bearing) |
 | 3 | `replan_failure` | change acknowledged in `reason`, but the agent never gets through the new route: never passes the newly opened door (s02/s02v), never gets past the cube's x (s01), never enters the other tine (s03) |
-| 4 | `collision` | change acknowledged and a route attempted, but **≥ 50%** of post-change steps are collisions: stuck grinding on geometry |
+| 4 | `collision` | change acknowledged and the agent got through the new route (static arms: the available route), but **≥ 50%** of post-change steps are collisions: stuck grinding on geometry |
 | 5 | `timeout` | got through the new route but did not reach the goal within 60 steps |
+
+A run that never gets through is `replan_failure` (#3) whatever its collision count; `collision`
+only applies once the agent is through.
 
 For `initial` / `final` arms, labels 1–2 do not apply. Use `collision`, `timeout`, or
 `replan_failure` (the agent never found the available route).
@@ -227,8 +231,9 @@ For `initial` / `final` arms, labels 1–2 do not apply. Use `collision`, `timeo
 
 **Labeling procedure (two passes):**
 1. **Auto pre-label** by script: keyword match on post-change `reason` text (`closed`, `blocked`,
-   `wall`, `obstacle`, `door`, `box`, `no longer`, `dead end`, …) plus geometric checks from
-   `steps.jsonl`.
+   `wall`, `obstacle`, `box`, `cube`, `no longer`, `dead end`, …) plus geometric checks from
+   `steps.jsonl`. `door` counts only in a sentence that also says closed/closing/shut/open/opened/
+   opening/blocked/locked, because the s02/s02v doors are in frame from spawn.
 2. **Manual review** of every run: read post-change reasons and watch the replay. Confirm or override,
    with a note on every override.
 
@@ -296,8 +301,8 @@ Phase 1 cannot start until these exist and 1.0 has passed.
 - [ ] Aggregation script (`results/`)
 - [x] `.gitignore` rules for `eval/phase1/**` (§14)
 - [x] Sites promoted `draft → active` at the frozen versions
-- [ ] Rubric thresholds (§9) confirmed
-- [ ] Network access to sctsvr6 (school Wi-Fi blocks SSH; proposal "Things I will Need")
+- [x] Rubric thresholds (§9) confirmed
+- [x] Network access to sctsvr6 (school Wi-Fi blocks SSH; proposal "Things I will Need")
 - [ ] All of the above committed; clean tree
 
 ## 13. Pilot data (not citable)
@@ -368,3 +373,4 @@ labeling. Fits the proposal's weeks 6–9 block (layout edge-case testing, then 
 |---|---|
 | 2026-09-27 | Initial spec. 3 arms, 6 sites, 90 episodes, temperature 0 + spawn jitter, max 60 steps, no collision cap, mini-phases 1.0/1A–1D. |
 | 2026-09-27 | §12 prerequisites built (`d100948`). `git_dirty` ignores recorded data trees (§3). Godot takes `--run-dir=`; replays of nested runs go to `<run>/replay/`; `godot.log` per run, git-ignored (§14). 1.0 shakedown complete, 18/18 valid; rubric questions open in `eval/phase1/1.0_shakedown/summary.md`. |
+| 2026-09-27 | §9 settled before 1A (1.0 findings 1–3): rubric order kept, `collision` only for runs that got through; `door` keyword needs a state word in the same sentence; §8 s03 static arms with no tine entry have no split. 1.0 auto labels unchanged under the new rules. |
