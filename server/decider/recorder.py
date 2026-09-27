@@ -47,11 +47,33 @@ def _read_jsonl(path: Path) -> List[Dict[str, Any]]:
 #: `_occlusion_summary()` dates `occlusion_step` from the first of these.
 OCCLUSION_EVENTS = frozenset({"occluder_deployed", "doors_switched"})
 
+#: run_id -> directory, for runs whose /run/start asked for a `run_dir`. Every
+#: later request carries only the run_id, so the choice has to outlive the
+#: request that made it. Lost on a decider restart — a run is minutes long.
+_RUN_DIRS: Dict[str, Path] = {}
+
+#: A requested run_dir must land under here. Nothing a request says may write
+#: outside the eval tree.
+_RUN_DIR_ROOT = (config.REPO_ROOT / "eval").resolve()
+
+
+def resolve_run_dir(requested: str) -> Path:
+    """Repo-relative `run_dir` from /run/start -> absolute path under eval/."""
+    path = Path(requested)
+    if path.is_absolute():
+        raise ValueError("run_dir must be repo-relative: {0}".format(requested))
+    resolved = (config.REPO_ROOT / path).resolve()
+    if _RUN_DIR_ROOT not in resolved.parents:
+        raise ValueError("run_dir must be inside eval/: {0}".format(requested))
+    return resolved
+
 
 class Run:
-    def __init__(self, run_id: str) -> None:
+    def __init__(self, run_id: str, run_dir: Optional[Path] = None) -> None:
         self.run_id = run_id
-        self.dir = config.RUNS_DIR / run_id
+        if run_dir is not None:
+            _RUN_DIRS[run_id] = run_dir
+        self.dir = _RUN_DIRS.get(run_id) or config.RUNS_DIR / run_id
         self.frames = self.dir / "frames"
         self.decisions = self.dir / "decisions.jsonl"
         self.steps = self.dir / "steps.jsonl"
@@ -65,9 +87,13 @@ class Run:
         # since it writes <run_id>_replay every time. The result was a replay
         # that reported twice the steps and two deploy events, and read as
         # non-reproducible when nothing had changed.
-        for path in (self.decisions, self.steps, self.events):
+        for path in (self.decisions, self.steps, self.events, self.dir / "metrics.json"):
             if path.is_file():
                 path.unlink()
+        # Same for frames: a shorter second flight would otherwise keep the
+        # first one's later frames beside its own.
+        for frame in self.frames.glob("f*.png"):
+            frame.unlink()
         record = {
             "run_id": self.run_id,
             "started": _now(),
@@ -196,7 +222,13 @@ class Run:
             "physics_ticks_per_second": run_json.get("physics_ticks_per_second"),
             "freeze_world": run_json.get("freeze_world"),
             "static_doors": run_json.get("static_doors"),
+            "world": run_json.get("world"),
+            "spawn_seed": run_json.get("spawn_seed"),
+            "spawn_offset": run_json.get("spawn_offset"),
             "model": run_json.get("model"),
+            "vlm_profile": run_json.get("vlm_profile"),
+            "temperature": run_json.get("temperature"),
+            "git_dirty": run_json.get("git_dirty"),
             "prompt_version": run_json.get("prompt_version"),
             "prompt_sha": run_json.get("prompt_sha"),
             "git_sha": run_json.get("git_sha"),

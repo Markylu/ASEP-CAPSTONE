@@ -78,6 +78,11 @@ godot --path first-project -- \
 | `--scripted-indices=` | Replay a recorded index list; no model is called |
 | `--speed=` | Turn/move speed multiplier, for watching. 1.0 is recorded speed. |
 | `--freeze-world=` | Pause the world while waiting on `/decide`, default true |
+| `--frame-width=` | Width of the frame sent to the model, default the frame-size width |
+| `--world=` | `dynamic` (default, site as built), `initial` (pre-change layout held), `final` (post-change layout from load). Neither `initial` nor `final` emits a change event. |
+| `--static-doors=1` | Alias of `--world=initial` |
+| `--spawn-seed=` | Seeded spawn jitter: lateral z ±0.5 m, yaw ±5°. Recorded as `spawn_offset`. On s03, `final` closes L on odd seeds, R on even. |
+| `--run-dir=` | Repo-relative directory the decider records into (must be under `eval/`). Default `RUNS_DIR/<run-id>`. |
 
 `--frame-size` is not cosmetic. `fov_deg` is the *horizontal* FOV
 (`KEEP_WIDTH`), so a different window shape is a different vertical FOV and a

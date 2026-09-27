@@ -131,10 +131,17 @@ def git_sha() -> str:
         return "unknown"
 
 
+#: Recorded run data, not code. Runs land here while a phase is in progress, so
+#: counting them would mark every run after the first as dirty.
+_DATA_PATHS = ("eval/runs", "eval/phase1")
+
+
 def git_dirty() -> bool:
+    """Uncommitted changes to anything that could change a run's behaviour."""
+    excludes = [":(exclude){0}".format(p) for p in _DATA_PATHS]
     try:
         out = subprocess.run(
-            ["git", "-C", str(REPO_ROOT), "status", "--porcelain"],
+            ["git", "-C", str(REPO_ROOT), "status", "--porcelain", "--", "."] + excludes,
             capture_output=True, text=True, timeout=5,
         )
         return bool(out.stdout.strip())

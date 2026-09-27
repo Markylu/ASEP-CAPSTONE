@@ -84,6 +84,20 @@ func close() -> void:
 	_command(State.CLOSED)
 
 
+## Put the door in `target` with no travel, exactly as `_ready()` places it. For
+## the `final` arm (`--world=final`): the post-change layout has to be in place
+## on the first frame, and an animated open would freeze half-way under
+## `freeze_world` while the step-0 decision is pending.
+func set_state_immediate(target: State) -> void:
+	state = target
+	_moving = false
+	set_physics_process(false)
+	var visual := _visual()
+	visual.position = _rest_position()
+	visual.visible = not (state == State.OPEN and hide_when_open)
+	_set_solid(state == State.CLOSED)
+
+
 func state_name() -> String:
 	return "closed" if state == State.CLOSED else "open"
 

@@ -37,7 +37,27 @@ signal run_ended(reason: String, steps: int)
 ## whose numbers are being cited should fly at 1.0.
 @export var speed_scale: float = 1.0
 ## Disarm every door bank at load: the doors never open or close. `--static-doors=1`.
+## Kept as an alias of `--world=initial`.
 @export var static_doors: bool = false
+## Which layout the run flies — the phase 1 arms (docs/phase1-test-plan.md §5):
+##   `dynamic`  the site as built; the change fires at its trigger
+##   `initial`  the pre-change layout for the whole run; nothing fires
+##   `final`    the post-change layout from step 0; nothing fires
+@export_enum("dynamic", "initial", "final") var world: String = "dynamic"
+## Seeded spawn jitter (§7.3). -1 for none, the exact marker pose.
+@export var spawn_seed: int = -1
+
+const WORLDS := ["dynamic", "initial", "final"]
+## Jitter bounds: lateral (world z) metres and yaw degrees, uniform in ±.
+const SPAWN_JITTER_Z := 0.5
+const SPAWN_JITTER_YAW_DEG := 5.0
+
+## The jitter actually applied, recorded in run.json.
+var spawn_offset: Dictionary = {}
+## Which door a `final` fork run closed (s03), recorded in run.json.
+var final_closed: Array = []
+## Repo-relative directory the decider should record into. Empty = its default.
+var run_dir: String = ""
 
 var agent: VLMNavController
 var client: VLMNavDecisionClient
@@ -90,6 +110,11 @@ func _ready() -> void:
 			# of what makes a trajectory reproducible.
 			"physics_ticks_per_second": Engine.physics_ticks_per_second,
 			"static_doors": static_doors,
+			"world": world,
+			"spawn_seed": spawn_seed if spawn_seed >= 0 else null,
+			"spawn_offset": spawn_offset if spawn_seed >= 0 else null,
+			"final_closed": final_closed,
+			"run_dir": run_dir if run_dir != "" else null,
 		})
 
 
@@ -169,16 +194,23 @@ func _apply(args: Dictionary) -> void:
 		client.frame_width = int(args["frame-width"]) if args.has("frame-width") else frame_size.x
 	if client != null and args.has("freeze-world"):
 		client.freeze_world = str(args["freeze-world"]) not in ["0", "false", "no"]
-	# Control arm for the door sites: every bank is disarmed before the agent
-	# moves, so the doors hold their initial state for the whole run and the
-	# trigger never fires.
-	if args.has("static-doors"):
-		static_doors = str(args["static-doors"]) not in ["0", "false", "no"]
-	if static_doors:
-		for node in get_tree().get_nodes_in_group(SiteProp.EVENT_GROUP):
-			if node is TriggeredDoorBank:
-				(node as TriggeredDoorBank)._disarmed = true
-		print("VLMNAV STATIC DOORS — door triggers disarmed.")
+	if args.has("run-dir"):
+		run_dir = str(args["run-dir"])
+	if args.has("spawn-seed"):
+		spawn_seed = int(args["spawn-seed"])
+	if spawn_seed >= 0:
+		_apply_spawn_jitter()
+
+	# `--static-doors=1` predates the arms and means exactly `initial`.
+	if args.has("static-doors") and str(args["static-doors"]) not in ["0", "false", "no"]:
+		world = "initial"
+	if args.has("world"):
+		world = str(args["world"])
+		if world not in WORLDS:
+			push_error("--world=%s is not one of %s" % [world, WORLDS])
+			world = "dynamic"
+	static_doors = world == "initial"
+	_apply_world()
 
 	# Last, because it overrides the decision source `activate()` just set. A
 	# replay still reports to the decider — /run/start, /step and /run/end cost
@@ -191,6 +223,69 @@ func _apply(args: Dictionary) -> void:
 		agent.scripted_indices = indices
 		agent.decision_source = VLMNavController.DecisionSource.SCRIPTED
 		max_steps = min(max_steps, indices.size())
+
+
+## Replicates at temperature 0 differ only through their input, so each seed
+## nudges the start pose (docs/phase1-test-plan.md §7.3). The same seed gives
+## the same offset on every site and arm — the arms of a site are paired.
+##
+## Moves the rig, not the controller: the rig already sits on the Spawn marker
+## (`VLMNavRig._enter_tree`), and the controller has not run `_ready` yet, so
+## its cruise altitude is read after this. Lateral is world z — every site
+## spawns facing -X.
+func _apply_spawn_jitter() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = spawn_seed
+	var dz := rng.randf_range(-SPAWN_JITTER_Z, SPAWN_JITTER_Z)
+	var dyaw := rng.randf_range(-SPAWN_JITTER_YAW_DEG, SPAWN_JITTER_YAW_DEG)
+	var rig := agent.get_parent() as Node3D
+	rig.global_position.z += dz
+	rig.rotate_y(deg_to_rad(dyaw))
+	spawn_offset = {"dz": dz, "dyaw_deg": dyaw}
+	print("VLMNAV SPAWN seed %d: dz %+.3f m, dyaw %+.2f°" % [spawn_seed, dz, dyaw])
+
+
+## Put every site prop into the layout this arm flies. Props are under `Props`,
+## which precedes `Rig` in every site scene, so their `_ready` has already run.
+## Neither `initial` nor `final` emits an event: nothing changes during the run.
+func _apply_world() -> void:
+	if world == "dynamic":
+		return
+	var fork_banks := {}
+	for node in get_tree().get_nodes_in_group(SiteProp.EVENT_GROUP):
+		if node is TriggeredOccluder:
+			if world == "final":
+				(node as TriggeredOccluder).snap_deployed()
+			else:
+				(node as TriggeredOccluder).disarm()
+		elif node is TriggeredDoorBank:
+			var bank := node as TriggeredDoorBank
+			if world == "initial":
+				bank.disarm()
+			elif bank.latch_group != &"":
+				fork_banks[String(bank.name)] = bank
+			else:
+				bank.apply_final_state()
+	if not fork_banks.is_empty():
+		_close_one_fork_branch(fork_banks)
+	print("VLMNAV WORLD %s — triggers disarmed%s." % [
+		world, (", post-change layout at load" if world == "final" else "")])
+
+
+## A latched fork (s03) has no single post-change layout: the dynamic arm closes
+## whichever branch the agent enters. `final` closes the left branch on odd
+## seeds and the right on even ones (§5), picked by the bank name's L/R suffix.
+func _close_one_fork_branch(banks: Dictionary) -> void:
+	var side := "L" if spawn_seed % 2 == 1 else "R"
+	for bank_name in banks:
+		var bank: TriggeredDoorBank = banks[bank_name]
+		if String(bank_name).ends_with(side):
+			bank.close_immediate()
+			final_closed.append(bank_name)
+		else:
+			bank.disarm()
+	if final_closed.is_empty():
+		push_error("--world=final: no fork bank ends with '%s' among %s" % [side, banks.keys()])
 
 
 # ------------------------------------------------------------------ termination

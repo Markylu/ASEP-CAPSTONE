@@ -43,3 +43,11 @@ __pycache__/
 # Regenerable from the recorded index list, and large.
 eval/exports/
 .env.bak
+
+# Phase 1 data (docs/phase1-test-plan.md §14). Everything is committed except
+# what eval/replay.py regenerates from the recorded index list: frames, pose
+# streams, and each run's own replay/ flight (its verdict, replay.json, stays).
+eval/phase1/**/frames/
+eval/phase1/**/steps.jsonl
+eval/phase1/**/replay/
+eval/phase1/**/godot.log

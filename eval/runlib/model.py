@@ -226,7 +226,8 @@ class Run:
     @property
     def static_doors(self) -> bool:
         """Door banks were disarmed for the live run; a replay must match."""
-        return bool(self.meta.get("static_doors") or self.metrics.get("static_doors"))
+        return bool(self.meta.get("static_doors") or self.metrics.get("static_doors")
+                    or self.meta.get("world") == "initial")
 
     @property
     def frame_size(self) -> List[int]:
