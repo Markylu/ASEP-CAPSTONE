@@ -7,5 +7,5 @@
   "started": null,
   "finished": null,
   "operator": null,
-  "notes": ""
+  "notes": "2026-09-27: first start at 01cef05 aborted after 1 invalid run (network ~10 KB/s up through the tunnel; server compute 0.76 s). 0 valid runs; restarted at a new SHA with transport retries in the decider. Attempts kept in _attempts/s01/final/seed1/."
 }
