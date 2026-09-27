@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://common/three_doors/room.tscn" id="1_room"]
+[ext_resource type="PackedScene" path="res://common/three_doors/bank.tscn" id="2_bank"]
+[ext_resource type="PackedScene" path="res://common/vlmnav/vlmnav_rig.tscn" id="3_rig"]
+
+[node name="Site" type="Node3D"]
+
+[node name="Room" parent="." instance=ExtResource("1_room")]
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="ThreeDoorsBank" parent="Props" instance=ExtResource("2_bank")]
+doors_to_open = Array[NodePath]([NodePath("DoorC")])
+doors_to_close = Array[NodePath]([NodePath("DoorB")])
+
+[node name="Subjects" type="Node3D" parent="."]
+
+[node name="Rig" type="Node3D" parent="."]
+
+[node name="VLMNavRig" parent="Rig" instance=ExtResource("3_rig")]

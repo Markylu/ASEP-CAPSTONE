@@ -1,0 +1,49 @@
+{
+  "id": "s01_occluder_dropin",
+  "version": 1,
+  "class": "geometry",
+  "hypothesis": "A VLM agent flying a clear line of sight to the goal will keep committing to that heading after the goal is occluded, rather than replanning around the obstacle that replaced it.",
+  "created": "2026-09-17",
+  "godot_version": "4.7",
+  "scene": "res://sites/s01_occluder_dropin/site.tscn",
+  "units": "meters",
+  "extent": { "x": 48.0, "y": 24.0, "z": 23.5 },
+  "lighting": {
+    "preset": "daylight",
+    "sources": ["directional_key"]
+  },
+  "camera": {
+    "rig": "res://common/vlmnav/vlmnav_rig.tscn",
+    "fov_deg": 87,
+    "resolution": [768, 768],
+    "note": "horizontal FOV, KEEP_WIDTH — see vlmnav_controller.gd"
+  },
+  "spawn": { "position": [12.0, 1.75, 0.0], "yaw_deg": 90.0, "facing": "-X" },
+  "goal": { "position": [-12.0, 1.0, 0.0], "arrival_radius": 1.0, "beam_height": 6.0 },
+  "condition": {
+    "name": "occluder_dropin",
+    "los_at_spawn": true,
+    "distance_at_spawn_m": 24.0,
+    "bearing_at_spawn_deg": 0.0,
+    "occluder": {
+      "box_size": [8.0, 8.0, 8.0],
+      "deployed_position": [-2.0, 4.25, 0.0],
+      "park_position": [-2.0, -4.75, 0.0],
+      "travel_seconds": 0.3,
+      "collision_mode": "at_trigger",
+      "trigger_position": [6.5, 1.75, 0.0],
+      "trigger_size": [1.0, 4.0, 23.0]
+    },
+    "expected": {
+      "trigger_step": 3,
+      "first_occluded_frame": 4,
+      "straight_line_collision_step": 6,
+      "side_gap_width_m": 7.75
+    }
+  },
+  "routes": [],
+  "truth": {},
+  "physical_counterpart": { "exists": false },
+  "tags": ["occlusion", "replanning", "dynamic_obstacle"],
+  "status": "draft"
+}

@@ -1,0 +1,34 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="FirstProject"
+run/main_scene="uid://iwcmh1r5tsi7"
+config/features=PackedStringArray("4.7", "Forward Plus")
+config/icon="res://icon.svg"
+
+[display]
+
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+# Pinned, not left to the default: site props move in whole physics ticks, so
+# the tick rate is part of what makes a trajectory reproducible. Changing it
+# invalidates every recorded run's prop timing, which is why each run records
+# the value it flew at.
+common/physics_ticks_per_second=60
+
+[rendering]
+
+rendering_device/driver.windows="d3d12"

@@ -1,0 +1,45 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://common/vlmnav/goal_marker.gd" id="1_goal"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_goal"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.35, 0.35, 0.85)
+emission_enabled = true
+emission = Color(1, 0.35, 0.35, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_orb"]
+material = SubResource("StandardMaterial3D_goal")
+radius = 0.25
+height = 0.5
+radial_segments = 16
+rings = 8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_beam"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.35, 0.35, 0.25)
+emission_enabled = true
+emission = Color(1, 0.35, 0.35, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_beam"]
+material = SubResource("StandardMaterial3D_beam")
+top_radius = 0.04
+bottom_radius = 0.04
+height = 6.0
+radial_segments = 8
+rings = 1
+
+[node name="Goal" type="Node3D"]
+script = ExtResource("1_goal")
+
+[node name="Orb" type="MeshInstance3D" parent="."]
+cast_shadow = 0
+mesh = SubResource("SphereMesh_orb")
+
+[node name="Beam" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_beam")

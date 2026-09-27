@@ -1,0 +1,95 @@
+{
+  "run_id": "timing_smoke",
+  "ended": "2026-09-20T18:34:45+00:00",
+  "end_reason": "smoke",
+  "steps": 2,
+  "decisions": 2,
+  "collisions": 0,
+  "goal_reached": false,
+  "final_goal_distance_m": 12.0,
+  "latency_ms": {
+    "p50": 1529.8,
+    "p95": 1696.7,
+    "mean": 1529.8
+  },
+  "latency_breakdown_ms": {
+    "rtt_ms": {
+      "p50": 263.8,
+      "p95": 291.7,
+      "n": 2
+    },
+    "upload_ms": {
+      "p50": 2.0,
+      "p95": 2.1,
+      "n": 2
+    },
+    "ttft_ms": {
+      "p50": 311.6,
+      "p95": 313.8,
+      "n": 2
+    },
+    "prefill_ms": {
+      "p50": 45.8,
+      "p95": 71.3,
+      "n": 2
+    },
+    "decode_ms": {
+      "p50": 709.4,
+      "p95": 730.6,
+      "n": 2
+    },
+    "unaccounted_ms": {
+      "p50": 0.6,
+      "p95": 0.8,
+      "n": 2
+    },
+    "network_ms": {
+      "p50": 265.8,
+      "p95": 293.6,
+      "n": 2
+    },
+    "compute_ms": {
+      "p50": 755.1,
+      "p95": 759.3,
+      "n": 2
+    },
+    "total_ms": {
+      "p50": 1021.5,
+      "p95": 1045.2,
+      "n": 2
+    },
+    "decode_tok_s": {
+      "p50": 172.2,
+      "p95": 177.3,
+      "n": 2
+    },
+    "streamed_decisions": 2,
+    "request_bytes_mean": 206907
+  },
+  "tokens_per_frame": {
+    "prompt_mean": 645.0,
+    "completion_mean": 122.0
+  },
+  "tokens_total": {
+    "prompt": 1290,
+    "completion": 244
+  },
+  "rungs_used": {
+    "json_schema": 2
+  },
+  "events": [],
+  "site_id": "s01",
+  "site_version": 1,
+  "scene": null,
+  "physics_ticks_per_second": null,
+  "model": "Qwen3-VL-30B-A3B",
+  "prompt_version": "p01",
+  "prompt_sha": "da5445e057fb",
+  "git_sha": "f863061",
+  "frame_size": null,
+  "config": null,
+  "occlusion_step": null,
+  "goal_visible_steps": 2,
+  "goal_first_hidden_step": null,
+  "steps_to_reacquire": null
+}

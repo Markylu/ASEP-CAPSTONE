@@ -1,0 +1,62 @@
+{
+  "run_id": "fake_s01",
+  "ended": "2026-09-17T16:14:57+00:00",
+  "end_reason": "max_steps",
+  "steps": 8,
+  "decisions": 8,
+  "collisions": 3,
+  "goal_reached": false,
+  "final_goal_distance_m": 14.2,
+  "latency_ms": {
+    "p50": 9.4,
+    "p95": 44.6,
+    "mean": 16.0
+  },
+  "tokens_per_frame": {
+    "prompt_mean": 900.0,
+    "completion_mean": 30.0
+  },
+  "tokens_total": {
+    "prompt": 7200,
+    "completion": 240
+  },
+  "rungs_used": {
+    "json_schema": 8
+  },
+  "events": [
+    {
+      "name": "occluder_deployed",
+      "step": 3,
+      "t": "2026-09-17T16:14:56+00:00"
+    }
+  ],
+  "site_id": "s01_occluder_dropin",
+  "site_version": 1,
+  "scene": "res://sites/s01_occluder_dropin/site.tscn",
+  "physics_ticks_per_second": 60,
+  "model": "fake-straight",
+  "prompt_version": "p01",
+  "prompt_sha": "da5445e057fb",
+  "git_sha": "f863061",
+  "frame_size": [
+    512,
+    512
+  ],
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "occlusion_step": 3,
+  "goal_visible_steps": 3,
+  "goal_first_hidden_step": 4,
+  "steps_to_reacquire": null
+}

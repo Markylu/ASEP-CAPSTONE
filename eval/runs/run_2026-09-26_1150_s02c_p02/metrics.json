@@ -1,0 +1,118 @@
+{
+  "run_id": "run_2026-09-26_1150_s02c_p02",
+  "ended": "2026-09-26T15:53:02+00:00",
+  "end_reason": "max_steps",
+  "steps": 40,
+  "decisions": 40,
+  "collisions": 34,
+  "goal_reached": false,
+  "final_goal_distance_m": 12.454,
+  "latency_ms": {
+    "p50": 1702.0,
+    "p95": 2322.4,
+    "mean": 1774.3
+  },
+  "latency_breakdown_ms": {
+    "rtt_ms": {
+      "p50": 229.2,
+      "p95": 311.5,
+      "n": 40
+    },
+    "upload_ms": {
+      "p50": 1.3,
+      "p95": 2.5,
+      "n": 40
+    },
+    "ttft_ms": {
+      "p50": 342.3,
+      "p95": 412.5,
+      "n": 40
+    },
+    "prefill_ms": {
+      "p50": 100.8,
+      "p95": 176.8,
+      "n": 40
+    },
+    "decode_ms": {
+      "p50": 1054.2,
+      "p95": 1757.7,
+      "n": 40
+    },
+    "unaccounted_ms": {
+      "p50": 2.0,
+      "p95": 39.4,
+      "n": 40
+    },
+    "network_ms": {
+      "p50": 230.6,
+      "p95": 313.5,
+      "n": 40
+    },
+    "compute_ms": {
+      "p50": 1173.7,
+      "p95": 1863.8,
+      "n": 40
+    },
+    "total_ms": {
+      "p50": 1443.2,
+      "p95": 2093.9,
+      "n": 40
+    },
+    "decode_tok_s": {
+      "p50": 189.2,
+      "p95": 193.2,
+      "n": 40
+    },
+    "streamed_decisions": 40,
+    "request_bytes_mean": 70844
+  },
+  "tokens_per_frame": {
+    "prompt_mean": 995.9,
+    "completion_mean": 217.3
+  },
+  "tokens_total": {
+    "prompt": 39837,
+    "completion": 8694
+  },
+  "rungs_used": {
+    "json_schema": 40
+  },
+  "events": [
+    {
+      "name": "doors_switched",
+      "step": 3,
+      "t": "2026-09-26T15:51:51+00:00"
+    }
+  ],
+  "site_id": "s02c_doors_open_c",
+  "site_version": 2,
+  "scene": "res://sites/s02c_doors_open_c/site.tscn",
+  "physics_ticks_per_second": 60,
+  "freeze_world": true,
+  "static_doors": false,
+  "model": "Qwen3-VL-30B-A3B",
+  "prompt_version": "p02",
+  "prompt_sha": "26260774b60e",
+  "git_sha": "f863061",
+  "frame_size": [
+    768,
+    768
+  ],
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "occlusion_step": 3,
+  "goal_visible_steps": 3,
+  "goal_first_hidden_step": 4,
+  "steps_to_reacquire": null
+}

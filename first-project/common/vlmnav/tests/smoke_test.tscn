@@ -1,0 +1,47 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://common/vlmnav/tests/smoke_test.gd" id="1_test"]
+[ext_resource type="PackedScene" path="res://common/vlmnav/vlmnav_controller.tscn" id="2_agent"]
+[ext_resource type="PackedScene" path="res://common/vlmnav/goal_marker.tscn" id="3_goal"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(24, 1, 24)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_x"]
+size = Vector3(1, 6, 24)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_z"]
+size = Vector3(24, 6, 1)
+
+[node name="SmokeTest" type="Node3D"]
+script = ExtResource("1_test")
+
+[node name="Room" type="StaticBody3D" parent="."]
+
+[node name="Floor" type="CollisionShape3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_floor")
+
+[node name="WallXPos" type="CollisionShape3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 3, 0)
+shape = SubResource("BoxShape3D_wall_x")
+
+[node name="WallXNeg" type="CollisionShape3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 3, 0)
+shape = SubResource("BoxShape3D_wall_x")
+
+[node name="WallZPos" type="CollisionShape3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 12)
+shape = SubResource("BoxShape3D_wall_z")
+
+[node name="WallZNeg" type="CollisionShape3D" parent="Room"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -12)
+shape = SubResource("BoxShape3D_wall_z")
+
+[node name="VLMNavController" parent="." instance=ExtResource("2_agent")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+decision_source = 2
+scripted_indices = PackedInt32Array(1, 3, 5, 0, 2, 4)
+
+[node name="Goal" parent="." instance=ExtResource("3_goal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1, -7)

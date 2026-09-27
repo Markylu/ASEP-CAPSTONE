@@ -1,0 +1,212 @@
+{
+  "id": "s03_fork_deadend",
+  "version": 2,
+  "class": "geometry",
+  "hypothesis": "After the corridor it committed to becomes a dead end, a VLM agent will keep pressing against the closed exit rather than backing out and taking the remaining branch.",
+  "created": "2026-09-24",
+  "godot_version": "4.7",
+  "scene": "res://sites/s03_fork_deadend/site.tscn",
+  "units": "meters",
+  "extent": {
+    "x": 48.0,
+    "y": 24.0,
+    "z": 23.5
+  },
+  "lighting": {
+    "preset": "daylight",
+    "sources": [
+      "directional_key"
+    ]
+  },
+  "camera": {
+    "rig": "res://common/vlmnav/vlmnav_rig.tscn",
+    "fov_deg": 87,
+    "resolution": [
+      768,
+      768
+    ],
+    "note": "horizontal FOV, KEEP_WIDTH \u2014 see vlmnav_controller.gd"
+  },
+  "spawn": {
+    "position": [
+      21.0,
+      1.75,
+      0.0
+    ],
+    "yaw_deg": 90.0,
+    "facing": "-X"
+  },
+  "goal": {
+    "position": [
+      -12.0,
+      1.0,
+      0.0
+    ],
+    "arrival_radius": 1.0,
+    "beam_height": 6.0
+  },
+  "condition": {
+    "name": "fork_deadend",
+    "los_at_spawn": false,
+    "distance_at_spawn_m": 33.0,
+    "bearing_at_spawn_deg": 0.0,
+    "corridors": {
+      "L": {
+        "z": [
+          3.5,
+          6.5
+        ],
+        "side": "agent's left at spawn (+Z)"
+      },
+      "R": {
+        "z": [
+          -6.5,
+          -3.5
+        ],
+        "side": "agent's right at spawn (-Z)"
+      },
+      "width_m": 3.0,
+      "x": [
+        -6.0,
+        5.0
+      ],
+      "visible_from_spawn": false
+    },
+    "exit_wall": {
+      "x": [
+        -7.0,
+        -6.0
+      ],
+      "height": 12.0,
+      "opening_size": [
+        2.4,
+        3.2
+      ],
+      "doorways_z": {
+        "L": 5.0,
+        "R": -5.0
+      }
+    },
+    "doors": {
+      "L": {
+        "initial": "open",
+        "on_own_trigger": "close"
+      },
+      "R": {
+        "initial": "open",
+        "on_own_trigger": "close"
+      },
+      "panel": {
+        "size": [
+          0.5,
+          3.2,
+          2.4
+        ],
+        "closed_centre": "(-6.5, 1.85, \u00b15)",
+        "open_centre_y": -2.35,
+        "travel_seconds": 0.3,
+        "collision_mode": "at_trigger",
+        "leaf_texture": "res://common/props/door_leaf.svg"
+      }
+    },
+    "triggers": {
+      "L": {
+        "position": [
+          0.0,
+          1.75,
+          5.0
+        ],
+        "size": [
+          1.0,
+          4.0,
+          3.0
+        ]
+      },
+      "R": {
+        "position": [
+          0.0,
+          1.75,
+          -5.0
+        ],
+        "size": [
+          1.0,
+          4.0,
+          3.0
+        ]
+      },
+      "latch_group": "s03_fork",
+      "rule": "first trigger crossed closes its own corridor's exit door and disarms the other bank for the rest of the run"
+    },
+    "frames": {
+      "material": "res://common/props/door_frame.tres",
+      "band_m": 0.25,
+      "proud_m": 0.1
+    },
+    "expected": {
+      "trigger_to_door_face_m": 6.25,
+      "closing_margin": 2.6
+    },
+    "layout": "tuning_fork",
+    "stem": {
+      "x": [
+        8.0,
+        15.0
+      ],
+      "z": [
+        -1.5,
+        1.5
+      ],
+      "width_m": 3.0,
+      "note": "handle; tines not visible from spawn or from inside it"
+    },
+    "crossbar": {
+      "x": [
+        5.0,
+        8.0
+      ],
+      "z": [
+        -6.5,
+        6.5
+      ],
+      "note": "yoke; the stem dead-ends into the divider face at x = 5"
+    },
+    "divider": {
+      "x": [
+        -6.0,
+        5.0
+      ],
+      "z": [
+        -3.5,
+        3.5
+      ],
+      "height": 12.0
+    },
+    "lobby": {
+      "x": [
+        15.0,
+        23.75
+      ],
+      "z": [
+        -11.75,
+        11.75
+      ],
+      "note": "open room the agent spawns in; stem mouth centred in its -X wall"
+    }
+  },
+  "routes": [],
+  "truth": {},
+  "physical_counterpart": {
+    "exists": false
+  },
+  "tags": [
+    "backtracking",
+    "dead_end",
+    "doors",
+    "dynamic_obstacle",
+    "fork",
+    "replanning",
+    "t_junction",
+    "tuning_fork"
+  ],
+  "status": "draft"
+}

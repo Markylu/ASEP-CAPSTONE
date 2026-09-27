@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://common/props/triggered_occluder.gd" id="1_occluder"]
+[ext_resource type="Material" path="res://common/props/prototype_wall.tres" id="2_wall"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_occluder"]
+size = Vector3(8, 8, 8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_occluder"]
+size = Vector3(8, 8, 8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_trigger"]
+size = Vector3(1, 4, 23)
+
+[node name="TriggeredOccluder" type="Node3D"]
+script = ExtResource("1_occluder")
+box_material = ExtResource("2_wall")
+
+[node name="Body" type="StaticBody3D" parent="."]
+
+[node name="Shape" type="CollisionShape3D" parent="Body"]
+shape = SubResource("BoxShape3D_occluder")
+disabled = true
+
+[node name="Visual" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_occluder")
+
+[node name="Trigger" type="Area3D" parent="."]
+monitorable = false
+
+[node name="TriggerShape" type="CollisionShape3D" parent="Trigger"]
+shape = SubResource("BoxShape3D_trigger")

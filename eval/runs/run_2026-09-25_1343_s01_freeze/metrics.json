@@ -1,0 +1,117 @@
+{
+  "run_id": "run_2026-09-25_1343_s01_freeze",
+  "ended": "2026-09-25T17:44:55+00:00",
+  "end_reason": "max_steps",
+  "steps": 40,
+  "decisions": 40,
+  "collisions": 35,
+  "goal_reached": false,
+  "final_goal_distance_m": 14.203,
+  "latency_ms": {
+    "p50": 1733.3,
+    "p95": 2529.4,
+    "mean": 1826.2
+  },
+  "latency_breakdown_ms": {
+    "rtt_ms": {
+      "p50": 228.1,
+      "p95": 305.4,
+      "n": 40
+    },
+    "upload_ms": {
+      "p50": 1.0,
+      "p95": 1.5,
+      "n": 40
+    },
+    "ttft_ms": {
+      "p50": 390.6,
+      "p95": 470.1,
+      "n": 40
+    },
+    "prefill_ms": {
+      "p50": 151.2,
+      "p95": 232.9,
+      "n": 40
+    },
+    "decode_ms": {
+      "p50": 1081.2,
+      "p95": 1763.9,
+      "n": 40
+    },
+    "unaccounted_ms": {
+      "p50": 2.9,
+      "p95": 40.5,
+      "n": 40
+    },
+    "network_ms": {
+      "p50": 229.2,
+      "p95": 306.5,
+      "n": 40
+    },
+    "compute_ms": {
+      "p50": 1193.6,
+      "p95": 1849.8,
+      "n": 40
+    },
+    "total_ms": {
+      "p50": 1467.0,
+      "p95": 2101.6,
+      "n": 40
+    },
+    "decode_tok_s": {
+      "p50": 189.5,
+      "p95": 195.8,
+      "n": 40
+    },
+    "streamed_decisions": 40,
+    "request_bytes_mean": 89466
+  },
+  "tokens_per_frame": {
+    "prompt_mean": 966.0,
+    "completion_mean": 215.1
+  },
+  "tokens_total": {
+    "prompt": 38638,
+    "completion": 8605
+  },
+  "rungs_used": {
+    "json_schema": 40
+  },
+  "events": [
+    {
+      "name": "occluder_deployed",
+      "step": 3,
+      "t": "2026-09-25T17:43:45+00:00"
+    }
+  ],
+  "site_id": "s01_occluder_dropin",
+  "site_version": 1,
+  "scene": "res://sites/s01_occluder_dropin/site.tscn",
+  "physics_ticks_per_second": 60,
+  "freeze_world": true,
+  "model": "Qwen3-VL-30B-A3B",
+  "prompt_version": "p01",
+  "prompt_sha": "da5445e057fb",
+  "git_sha": "f863061",
+  "frame_size": [
+    768,
+    768
+  ],
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "occlusion_step": 3,
+  "goal_visible_steps": 3,
+  "goal_first_hidden_step": 4,
+  "steps_to_reacquire": null
+}

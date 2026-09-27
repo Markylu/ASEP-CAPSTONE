@@ -1,0 +1,112 @@
+{
+  "run_id": "run_2026-09-26_1150_s03_p02",
+  "ended": "2026-09-26T15:54:18+00:00",
+  "end_reason": "max_steps",
+  "steps": 40,
+  "decisions": 40,
+  "collisions": 37,
+  "goal_reached": false,
+  "final_goal_distance_m": 18.201,
+  "latency_ms": {
+    "p50": 1786.7,
+    "p95": 2217.2,
+    "mean": 1772.7
+  },
+  "latency_breakdown_ms": {
+    "rtt_ms": {
+      "p50": 232.1,
+      "p95": 353.8,
+      "n": 40
+    },
+    "upload_ms": {
+      "p50": 1.0,
+      "p95": 2.1,
+      "n": 40
+    },
+    "ttft_ms": {
+      "p50": 382.8,
+      "p95": 422.5,
+      "n": 40
+    },
+    "prefill_ms": {
+      "p50": 107.2,
+      "p95": 197.2,
+      "n": 40
+    },
+    "decode_ms": {
+      "p50": 1195.8,
+      "p95": 1571.7,
+      "n": 40
+    },
+    "unaccounted_ms": {
+      "p50": 1.6,
+      "p95": 10.8,
+      "n": 40
+    },
+    "network_ms": {
+      "p50": 232.7,
+      "p95": 355.2,
+      "n": 40
+    },
+    "compute_ms": {
+      "p50": 1269.2,
+      "p95": 1710.4,
+      "n": 40
+    },
+    "total_ms": {
+      "p50": 1550.7,
+      "p95": 1975.4,
+      "n": 40
+    },
+    "decode_tok_s": {
+      "p50": 189.5,
+      "p95": 197.7,
+      "n": 40
+    },
+    "streamed_decisions": 40,
+    "request_bytes_mean": 64141
+  },
+  "tokens_per_frame": {
+    "prompt_mean": 995.9,
+    "completion_mean": 216.0
+  },
+  "tokens_total": {
+    "prompt": 39835,
+    "completion": 8639
+  },
+  "rungs_used": {
+    "json_schema": 40
+  },
+  "events": [],
+  "site_id": "s03_fork_deadend",
+  "site_version": 1,
+  "scene": "res://sites/s03_fork_deadend/site.tscn",
+  "physics_ticks_per_second": 60,
+  "freeze_world": true,
+  "static_doors": false,
+  "model": "Qwen3-VL-30B-A3B",
+  "prompt_version": "p02",
+  "prompt_sha": "26260774b60e",
+  "git_sha": "f863061",
+  "frame_size": [
+    768,
+    768
+  ],
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "occlusion_step": null,
+  "goal_visible_steps": 0,
+  "goal_first_hidden_step": 1,
+  "steps_to_reacquire": null
+}

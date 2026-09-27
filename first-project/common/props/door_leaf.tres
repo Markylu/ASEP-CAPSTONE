@@ -1,0 +1,8 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://common/props/door_leaf.svg" id="1_leaf"]
+
+[resource]
+resource_name = "door_leaf"
+albedo_texture = ExtResource("1_leaf")
+texture_filter = 3

@@ -1,0 +1,17 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://common/vlmnav/rig.gd" id="1_rig"]
+[ext_resource type="PackedScene" path="res://common/vlmnav/vlmnav_controller.tscn" id="2_controller"]
+[ext_resource type="Script" path="res://common/vlmnav/decision_client.gd" id="3_client"]
+[ext_resource type="Script" path="res://common/vlmnav/run_session.gd" id="4_session"]
+
+[node name="VLMNavRig" type="Node3D"]
+script = ExtResource("1_rig")
+
+[node name="VLMNavController" parent="." instance=ExtResource("2_controller")]
+
+[node name="DecisionClient" type="Node" parent="VLMNavController"]
+script = ExtResource("3_client")
+
+[node name="RunSession" type="Node" parent="VLMNavController"]
+script = ExtResource("4_session")

@@ -1,0 +1,114 @@
+{
+  "run_id": "probe_s03_R",
+  "ended": "2026-09-24T16:20:46+00:00",
+  "end_reason": "max_steps",
+  "steps": 13,
+  "decisions": 0,
+  "collisions": 2,
+  "goal_reached": false,
+  "final_goal_distance_m": 6.955,
+  "latency_ms": {
+    "p50": null,
+    "p95": null,
+    "mean": null
+  },
+  "latency_breakdown_ms": {
+    "rtt_ms": {
+      "p50": null,
+      "p95": null,
+      "n": 0
+    },
+    "upload_ms": {
+      "p50": null,
+      "p95": null,
+      "n": 0
+    },
+    "ttft_ms": {
+      "p50": null,
+      "p95": null,
+      "n": 0
+    },
+    "prefill_ms": {
+      "p50": null,
+      "p95": null,
+      "n": 0
+    },
+    "decode_ms": {
+      "p50": null,
+      "p95": null,
+      "n": 0
+    },
+    "unaccounted_ms": {
+      "p50": null,
+      "p95": null,
+      "n": 0
+    },
+    "network_ms": {
+      "p50": null,
+      "p95": null,
+      "n": 0
+    },
+    "compute_ms": {
+      "p50": null,
+      "p95": null,
+      "n": 0
+    },
+    "total_ms": {
+      "p50": null,
+      "p95": null,
+      "n": 0
+    },
+    "decode_tok_s": {
+      "p50": null,
+      "p95": null,
+      "n": 0
+    },
+    "streamed_decisions": 0,
+    "request_bytes_mean": null
+  },
+  "tokens_per_frame": {
+    "prompt_mean": null,
+    "completion_mean": null
+  },
+  "tokens_total": {
+    "prompt": null,
+    "completion": null
+  },
+  "rungs_used": {},
+  "events": [
+    {
+      "name": "doors_switched",
+      "step": 8,
+      "t": "2026-09-24T16:20:45+00:00"
+    }
+  ],
+  "site_id": "s03_fork_deadend",
+  "site_version": 1,
+  "scene": "res://sites/s03_fork_deadend/site.tscn",
+  "physics_ticks_per_second": 60,
+  "model": "stub",
+  "prompt_version": "p01",
+  "prompt_sha": "da5445e057fb",
+  "git_sha": "f863061",
+  "frame_size": [
+    768,
+    768
+  ],
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "occlusion_step": 8,
+  "goal_visible_steps": 0,
+  "goal_first_hidden_step": 1,
+  "steps_to_reacquire": null
+}

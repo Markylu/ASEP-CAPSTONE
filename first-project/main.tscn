@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://iwcmh1r5tsi7"]
+
+[ext_resource type="Texture2D" uid="uid://cmw7cq78uwwec" path="res://addons/kenney_prototype-textures/Vector/texture_01.svg" id="1_0xm2m"]
+[ext_resource type="Texture2D" uid="uid://j43kx0u5wvwm" path="res://addons/kenney_prototype-textures/PNG/Dark/texture_01.png" id="2_floor"]
+[ext_resource type="PackedScene" path="res://common/vlmnav/vlmnav_controller.tscn" id="3_vlmnav"]
+[ext_resource type="PackedScene" path="res://common/vlmnav/goal_marker.tscn" id="4_goal"]
+[ext_resource type="Script" path="res://common/vlmnav/decision_client.gd" id="5_client"]
+[ext_resource type="Script" path="res://common/vlmnav/run_session.gd" id="6_session"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_7dm0k"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_ig7tw"]
+sky_material = SubResource("ProceduralSkyMaterial_7dm0k")
+
+[sub_resource type="Environment" id="Environment_0xm2m"]
+background_mode = 2
+sky = SubResource("Sky_ig7tw")
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_texture = ExtResource("1_0xm2m")
+uv1_scale = Vector3(0.25, 0.25, 0.25)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_texture = ExtResource("2_floor")
+uv1_scale = Vector3(0.25, 0.25, 0.25)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[node name="Main" type="Node3D" unique_id=1769295143]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2029228766]
+environment = SubResource("Environment_0xm2m")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=4176726]
+transform = Transform3D(-0.8251136, 0.50067574, -0.2617469, 0, 0.46329603, 0.8862036, 0.5649669, 0.73121864, -0.38227186, 0, 0, 0)
+light_energy = 3.05
+shadow_enabled = true
+directional_shadow_max_distance = 130.0
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="." unique_id=1293502052]
+use_collision = true
+
+[node name="Wall" type="CSGBox3D" parent="CSGCombiner3D" unique_id=215205592]
+transform = Transform3D(49.999992, 0, 0, 0, -2.1855692e-08, 25.030998, 0, -0.5, -1.0941397e-06, 0, 12, -12)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Wall2" type="CSGBox3D" parent="CSGCombiner3D" unique_id=613453507]
+transform = Transform3D(49.999992, 0, 0, 0, -2.1855692e-08, 25.030998, 0, -0.5, -1.0941397e-06, 0, 12, 12)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="floor" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1626527579]
+transform = Transform3D(50, 0, 0, 0, 0.5, 0, 0, 0, 25.031, 0, 0, 0)
+material = SubResource("StandardMaterial3D_floor")
+
+[node name="Small Wall" type="CSGBox3D" parent="CSGCombiner3D" unique_id=1809940739]
+transform = Transform3D(-1.0927847e-06, 0.5, 0, -25, -2.1855694e-08, 0, 0, 0, 25.031, 24, 12, 0)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Small Wall2" type="CSGBox3D" parent="CSGCombiner3D" unique_id=344629044]
+transform = Transform3D(-1.0927847e-06, 0.5, 0, -25, -2.1855694e-08, 0, 0, 0, 25.031, -24.5, 12.000002, 0)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="VLMNavController" parent="." instance=ExtResource("3_vlmnav")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.877512, 1.75, -0.15004516)
+
+[node name="DecisionClient" type="Node" parent="VLMNavController" unique_id=811204417]
+script = ExtResource("5_client")
+
+[node name="RunSession" type="Node" parent="VLMNavController" unique_id=811204418]
+script = ExtResource("6_session")
+
+[node name="Goal" parent="." instance=ExtResource("4_goal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -6)

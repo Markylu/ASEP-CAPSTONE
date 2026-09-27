@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://common/props/triggered_door_bank.gd" id="1_bank"]
+[ext_resource type="PackedScene" path="res://common/props/triggered_door.tscn" id="2_door"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_trigger"]
+size = Vector3(1, 4, 23)
+
+[node name="ThreeDoorsBank" type="Node3D"]
+script = ExtResource("1_bank")
+trigger_position = Vector3(6.5, 1.75, 0)
+trigger_size = Vector3(1, 4, 23)
+
+[node name="Trigger" type="Area3D" parent="."]
+monitorable = false
+
+[node name="TriggerShape" type="CollisionShape3D" parent="Trigger"]
+shape = SubResource("BoxShape3D_trigger")
+
+[node name="DoorA" parent="." instance=ExtResource("2_door")]
+closed_position = Vector3(0, 1.85, -9)
+open_position = Vector3(0, -2.35, -9)
+initial_state = 1
+
+[node name="DoorB" parent="." instance=ExtResource("2_door")]
+closed_position = Vector3(0, 1.85, 0)
+open_position = Vector3(0, -2.35, 0)
+initial_state = 0
+
+[node name="DoorC" parent="." instance=ExtResource("2_door")]
+closed_position = Vector3(0, 1.85, 9)
+open_position = Vector3(0, -2.35, 9)
+initial_state = 1

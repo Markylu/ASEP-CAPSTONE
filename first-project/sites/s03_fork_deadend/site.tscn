@@ -1,0 +1,187 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Texture2D" uid="uid://cmw7cq78uwwec" path="res://addons/kenney_prototype-textures/Vector/texture_01.svg" id="1_wall_tex"]
+[ext_resource type="Texture2D" uid="uid://j43kx0u5wvwm" path="res://addons/kenney_prototype-textures/PNG/Dark/texture_01.png" id="2_floor_tex"]
+[ext_resource type="PackedScene" path="res://common/vlmnav/goal_marker.tscn" id="3_goal"]
+[ext_resource type="Material" path="res://common/props/door_frame.tres" id="4_frame"]
+[ext_resource type="Script" path="res://common/props/triggered_door_bank.gd" id="5_bank"]
+[ext_resource type="PackedScene" path="res://common/props/triggered_door.tscn" id="6_door"]
+[ext_resource type="PackedScene" path="res://common/vlmnav/vlmnav_rig.tscn" id="7_rig"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_trigger_r"]
+size = Vector3(1, 4, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_trigger_l"]
+size = Vector3(1, 4, 3)
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_site"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_site"]
+sky_material = SubResource("ProceduralSkyMaterial_site")
+
+[sub_resource type="Environment" id="Environment_site"]
+background_mode = 2
+sky = SubResource("Sky_site")
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_texture = ExtResource("1_wall_tex")
+uv1_scale = Vector3(0.25, 0.25, 0.25)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_texture = ExtResource("2_floor_tex")
+uv1_scale = Vector3(0.25, 0.25, 0.25)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[node name="Site" type="Node3D"]
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_site")
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="DirectionalLight3D_00" type="DirectionalLight3D" parent="Lighting"]
+transform = Transform3D(-0.8251136, 0.50067574, -0.2617469, 0, 0.46329603, 0.8862036, 0.5649669, 0.73121864, -0.38227186, 0, 0, 0)
+light_energy = 3.05
+shadow_enabled = true
+directional_shadow_max_distance = 130.0
+
+[node name="Geometry" type="CSGCombiner3D" parent="."]
+use_collision = true
+
+[node name="Floor_00" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(50, 0, 0, 0, 0.5, 0, 0, 0, 25.031, 0, 0, 0)
+material = SubResource("StandardMaterial3D_floor")
+
+[node name="Wall_00" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(49.999992, 0, 0, 0, -2.1855692e-08, 25.030998, 0, -0.5, -1.0941397e-06, 0, 12, -12)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Wall_01" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(49.999992, 0, 0, 0, -2.1855692e-08, 25.030998, 0, -0.5, -1.0941397e-06, 0, 12, 12)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Wall_02" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(-1.0927847e-06, 0.5, 0, -25, -2.1855694e-08, 0, 0, 0, 25.031, 24, 12, 0)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Wall_03" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(-1.0927847e-06, 0.5, 0, -25, -2.1855694e-08, 0, 0, 0, 25.031, -24.5, 12.000002, 0)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="StemFill_L" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(7, 0, 0, 0, 12, 0, 0, 0, 10.5, 11.5, 6.25, 6.75)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="StemFill_R" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(7, 0, 0, 0, 12, 0, 0, 0, 10.5, 11.5, 6.25, -6.75)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="OuterFill_L" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(15, 0, 0, 0, 12, 0, 0, 0, 5.5, 1, 6.25, 9.25)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="OuterFill_R" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(15, 0, 0, 0, 12, 0, 0, 0, 5.5, 1, 6.25, -9.25)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Divider" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(11.5, 0, 0, 0, 12, 0, 0, 0, 7, -0.75, 6.25, 0)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="ExitWall" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 12, 0, 0, 0, 23.5, -6.5, 6.25, 0)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Opening_R" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(2, 0, 0, 0, 3.2, 0, 0, 0, 2.4, -6.5, 1.85, -5)
+operation = 2
+
+[node name="Opening_L" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(2, 0, 0, 0, 3.2, 0, 0, 0, 2.4, -6.5, 1.85, 5)
+operation = 2
+
+[node name="Frame_R_JambL" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 3.7, 0, 0, 0, 0.25, -6.5, 1.85, -6.325)
+material = ExtResource("4_frame")
+
+[node name="Frame_R_JambR" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 3.7, 0, 0, 0, 0.25, -6.5, 1.85, -3.675)
+material = ExtResource("4_frame")
+
+[node name="Frame_R_Lintel" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 0.25, 0, 0, 0, 2.9, -6.5, 3.575, -5)
+material = ExtResource("4_frame")
+
+[node name="Frame_L_JambL" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 3.7, 0, 0, 0, 0.25, -6.5, 1.85, 3.675)
+material = ExtResource("4_frame")
+
+[node name="Frame_L_JambR" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 3.7, 0, 0, 0, 0.25, -6.5, 1.85, 6.325)
+material = ExtResource("4_frame")
+
+[node name="Frame_L_Lintel" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 0.25, 0, 0, 0, 2.9, -6.5, 3.575, 5)
+material = ExtResource("4_frame")
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="BranchR" type="Node3D" parent="Props"]
+script = ExtResource("5_bank")
+doors_to_close = Array[NodePath]([NodePath("DoorR")])
+trigger_position = Vector3(0, 1.75, -5)
+trigger_size = Vector3(1, 4, 3)
+latch_group = &"s03_fork"
+
+[node name="Trigger" type="Area3D" parent="Props/BranchR"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, -5)
+monitorable = false
+
+[node name="TriggerShape" type="CollisionShape3D" parent="Props/BranchR/Trigger"]
+shape = SubResource("BoxShape3D_trigger_r")
+
+[node name="DoorR" parent="Props/BranchR" instance=ExtResource("6_door")]
+closed_position = Vector3(-6.5, 1.85, -5)
+open_position = Vector3(-6.5, -2.35, -5)
+initial_state = 0
+
+[node name="BranchL" type="Node3D" parent="Props"]
+script = ExtResource("5_bank")
+doors_to_close = Array[NodePath]([NodePath("DoorL")])
+trigger_position = Vector3(0, 1.75, 5)
+trigger_size = Vector3(1, 4, 3)
+latch_group = &"s03_fork"
+
+[node name="Trigger" type="Area3D" parent="Props/BranchL"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 5)
+monitorable = false
+
+[node name="TriggerShape" type="CollisionShape3D" parent="Props/BranchL/Trigger"]
+shape = SubResource("BoxShape3D_trigger_l")
+
+[node name="DoorL" parent="Props/BranchL" instance=ExtResource("6_door")]
+closed_position = Vector3(-6.5, 1.85, 5)
+open_position = Vector3(-6.5, -2.35, 5)
+initial_state = 0
+
+[node name="Subjects" type="Node3D" parent="."]
+
+[node name="Markers" type="Node3D" parent="."]
+
+[node name="Spawn" type="Marker3D" parent="Markers" groups=["vlmnav_spawn"]]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 21, 1.75, 0)
+
+[node name="Goal" parent="Markers" instance=ExtResource("3_goal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 0)
+
+[node name="Rig" type="Node3D" parent="."]
+
+[node name="VLMNavRig" parent="Rig" instance=ExtResource("7_rig")]

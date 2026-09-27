@@ -1,0 +1,45 @@
+# macOS
+.DS_Store
+
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Internal/project notes (not for repo)
+/notes/
+
+# Test site captures — regenerable from site@version + route
+first-project/sites/*/captures/
+
+# Eval runs — see PLAN.md §10. Frames and poses are regenerable from the
+# recorded index list (eval/replay.py), so they stay out. What comes in is what
+# a rerun would NOT reproduce: metrics.json and run.json as the scientific
+# record, and decisions.jsonl because the model's reasoning at each step is not
+# regenerable — a rerun gives different words. All three are small.
+# Re-including a file needs its parent directories un-ignored first, hence the
+# directory rule.
+eval/runs/**
+!eval/runs/**/
+!eval/runs/*/metrics.json
+!eval/runs/*/run.json
+!eval/runs/*/decisions.jsonl
+# Timeline of what the site did on its own. Small, and a rerun does not
+# reproduce it — a site can be revised out from under a recorded run.
+!eval/runs/*/events.jsonl
+
+# Python
+__pycache__/
+*.pyc
+
+# Large binaries & model weights
+*.mp4
+*.onnx
+*.pt
+
+# Secrets
+.env
+
+# Decision reels and flight videos rendered by eval/replay_tui.py.
+# Regenerable from the recorded index list, and large.
+eval/exports/
+.env.bak

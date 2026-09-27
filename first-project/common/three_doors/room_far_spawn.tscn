@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://common/three_doors/room.tscn" id="1_room"]
+
+[node name="ThreeDoorsRoom" instance=ExtResource("1_room")]
+
+[node name="Spawn" parent="Markers"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 20, 1.75, 0)

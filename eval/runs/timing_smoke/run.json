@@ -1,0 +1,16 @@
+{
+  "run_id": "timing_smoke",
+  "started": "2026-09-20T18:34:42+00:00",
+  "model": "Qwen3-VL-30B-A3B",
+  "vlm_profile": "remote",
+  "litellm_base_url": "http://127.0.0.1:8004",
+  "prompt_version": "p01",
+  "prompt_sha": "da5445e057fb",
+  "git_sha": "f863061",
+  "git_dirty": true,
+  "temperature": 0.0,
+  "site_id": "s01",
+  "site_version": 1,
+  "ended": "2026-09-20T18:34:45+00:00",
+  "end_reason": "smoke"
+}

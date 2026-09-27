@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Door leaf, 2.4 x 3.2 m, 1 SVG unit = 1 cm. Greybox: readable silhouette,
+     no decoration. Drawn so the features a VLM keys on - stiles, two recessed
+     panels, a mid rail, a lever handle at 1.05 m, hinges on the opposite edge -
+     survive at 768 px from several metres away. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="320" viewBox="0 0 240 320">
+  <rect width="240" height="320" fill="#b9bdc2"/>
+  <rect x="3" y="3" width="234" height="314" fill="#c6cace" stroke="#6f757b" stroke-width="6"/>
+
+  <!-- stiles and rails frame the two panels -->
+  <rect x="26" y="26" width="188" height="118" fill="#adb2b8" stroke="#6f757b" stroke-width="5"/>
+  <rect x="26" y="176" width="188" height="118" fill="#adb2b8" stroke="#6f757b" stroke-width="5"/>
+  <rect x="26" y="150" width="188" height="20" fill="#cdd1d5" stroke="#6f757b" stroke-width="4"/>
+
+  <!-- lever handle, rose centred 105 cm above the floor -->
+  <circle cx="206" cy="215" r="11" fill="#54595f"/>
+  <rect x="168" y="211" width="40" height="9" rx="4.5" fill="#54595f"/>
+
+  <!-- hinges on the far stile -->
+  <rect x="9" y="44" width="12" height="26" fill="#6f757b"/>
+  <rect x="9" y="147" width="12" height="26" fill="#6f757b"/>
+  <rect x="9" y="250" width="12" height="26" fill="#6f757b"/>
+
+  <!-- kickplate and floor gap -->
+  <rect x="14" y="296" width="212" height="16" fill="#9ba1a7"/>
+  <rect x="0" y="316" width="240" height="4" fill="#4a4f55"/>
+</svg>

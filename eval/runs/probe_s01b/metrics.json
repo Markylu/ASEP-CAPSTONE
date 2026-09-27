@@ -1,0 +1,60 @@
+{
+  "run_id": "probe_s01b",
+  "ended": "2026-09-17T16:11:54+00:00",
+  "end_reason": "max_steps",
+  "steps": 6,
+  "decisions": 0,
+  "collisions": 0,
+  "goal_reached": false,
+  "final_goal_distance_m": 15.5,
+  "latency_ms": {
+    "p50": null,
+    "p95": null,
+    "mean": null
+  },
+  "tokens_per_frame": {
+    "prompt_mean": null,
+    "completion_mean": null
+  },
+  "tokens_total": {
+    "prompt": null,
+    "completion": null
+  },
+  "rungs_used": {},
+  "events": [
+    {
+      "name": "occluder_deployed",
+      "step": 3,
+      "t": "2026-09-17T16:11:53+00:00"
+    }
+  ],
+  "site_id": "s01_occluder_dropin",
+  "site_version": 1,
+  "scene": "res://sites/s01_occluder_dropin/site.tscn",
+  "physics_ticks_per_second": 60,
+  "model": "qwen/qwen3-vl-30b",
+  "prompt_version": "p01",
+  "prompt_sha": "da5445e057fb",
+  "git_sha": "f863061",
+  "frame_size": [
+    768,
+    768
+  ],
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "occlusion_step": 3,
+  "goal_visible_steps": 3,
+  "goal_first_hidden_step": 4,
+  "steps_to_reacquire": null
+}

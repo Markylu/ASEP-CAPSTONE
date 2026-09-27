@@ -1,0 +1,154 @@
+{
+  "id": "s02va_doors_visible_a",
+  "version": 1,
+  "class": "geometry",
+  "hypothesis": "When the open route closes and a new one opens inside the field of view, a VLM agent will turn toward the visible new opening rather than keep pressing toward the closed route.",
+  "created": "2026-09-27",
+  "godot_version": "4.7",
+  "scene": "res://sites/s02va_doors_visible_a/site.tscn",
+  "paired_with": "s02vc_doors_visible_c",
+  "units": "meters",
+  "extent": {
+    "x": 48.0,
+    "y": 24.0,
+    "z": 23.5
+  },
+  "lighting": {
+    "preset": "daylight",
+    "sources": [
+      "directional_key"
+    ]
+  },
+  "camera": {
+    "rig": "res://common/vlmnav/vlmnav_rig.tscn",
+    "fov_deg": 87,
+    "resolution": [
+      768,
+      768
+    ],
+    "note": "horizontal FOV, KEEP_WIDTH \u2014 see vlmnav_controller.gd"
+  },
+  "spawn": {
+    "position": [
+      20.0,
+      1.75,
+      0.0
+    ],
+    "yaw_deg": 90.0,
+    "facing": "-X"
+  },
+  "goal": {
+    "position": [
+      -12.0,
+      1.0,
+      0.0
+    ],
+    "arrival_radius": 1.0,
+    "beam_height": 6.0
+  },
+  "condition": {
+    "name": "door_switch",
+    "variant": "A",
+    "los_at_spawn": true,
+    "distance_at_spawn_m": 32.0,
+    "bearing_at_spawn_deg": 0.0,
+    "wall": {
+      "x": 0.0,
+      "thickness": 1.0,
+      "height": 12.0,
+      "opening_size": [
+        2.4,
+        3.2
+      ]
+    },
+    "doors": {
+      "A": {
+        "z": -9.0,
+        "opening_z": [
+          -10.2,
+          -7.8
+        ],
+        "initial": "closed",
+        "on_trigger": "open"
+      },
+      "B": {
+        "z": 0.0,
+        "opening_z": [
+          -1.2,
+          1.2
+        ],
+        "initial": "open",
+        "on_trigger": "close"
+      },
+      "C": {
+        "z": 9.0,
+        "opening_z": [
+          7.8,
+          10.2
+        ],
+        "initial": "closed",
+        "on_trigger": "none"
+      }
+    },
+    "panel": {
+      "size": [
+        0.5,
+        3.2,
+        2.4
+      ],
+      "closed_centre_y": 1.85,
+      "open_centre_y": -2.35,
+      "centred_in_wall": true,
+      "travel_seconds": 0.3,
+      "collision_mode": "at_trigger",
+      "leaf_texture": "res://common/props/door_leaf.svg"
+    },
+    "trigger": {
+      "position": [
+        14.5,
+        1.75,
+        0.0
+      ],
+      "size": [
+        1.0,
+        4.0,
+        23.0
+      ]
+    },
+    "expected": {
+      "trigger_step": 3,
+      "first_switched_frame": 4,
+      "agent_x_at_first_switched_frame": 13.2,
+      "straight_line_collision_step": 12,
+      "straight_line_collision_x": 0.45,
+      "new_door_far_edge_bearing_at_switch_deg": 39.7,
+      "half_fov_deg": 43.5,
+      "flank_door_bearing_at_spawn_deg": 24.2,
+      "shortest_path_after_switch_m": 32.4
+    },
+    "frames": {
+      "material": "res://common/props/door_frame.tres",
+      "band_m": 0.25,
+      "proud_m": 0.1,
+      "note": "architrave around every opening, so an OPEN doorway still reads as a door"
+    }
+  },
+  "routes": [],
+  "truth": {},
+  "physical_counterpart": {
+    "exists": false
+  },
+  "tags": [
+    "doors",
+    "dynamic_obstacle",
+    "in_view_switch",
+    "occlusion",
+    "replanning",
+    "variant_pair"
+  ],
+  "status": "draft",
+  "contrast_with": [
+    "s02a_doors_open_a",
+    "s02c_doors_open_c"
+  ]
+}

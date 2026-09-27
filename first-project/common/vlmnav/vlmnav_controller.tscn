@@ -1,0 +1,48 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://common/vlmnav/vlmnav_controller.gd" id="1_ctrl"]
+[ext_resource type="Script" path="res://common/vlmnav/vlmnav_config.gd" id="2_cfg"]
+[ext_resource type="Script" path="res://common/vlmnav/action_overlay.gd" id="3_ovl"]
+[ext_resource type="Script" path="res://common/vlmnav/action_panel.gd" id="4_panel"]
+
+[sub_resource type="Resource" id="Resource_cfg"]
+script = ExtResource("2_cfg")
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_body"]
+radius = 0.2
+
+[node name="VLMNavController" type="CharacterBody3D"]
+script = ExtResource("1_ctrl")
+config = SubResource("Resource_cfg")
+
+[node name="Collider" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_body")
+
+[node name="Head" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="Head"]
+current = true
+near = 0.05
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Overlay" type="Control" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("3_ovl")
+
+[node name="Panel" type="PanelContainer" parent="UI"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -296.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 320.0
+grow_horizontal = 0
+grow_vertical = 1
+script = ExtResource("4_panel")

@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://common/vlmnav/goal_marker.tscn" id="1_goal"]
+[ext_resource type="PackedScene" path="res://common/vlmnav/vlmnav_rig.tscn" id="2_rig"]
+
+[node name="Site" type="Node3D"]
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="Geometry" type="CSGCombiner3D" parent="."]
+use_collision = true
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="Markers" type="Node3D" parent="."]
+
+[node name="Spawn" type="Marker3D" parent="Markers" groups=["vlmnav_spawn"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+
+[node name="Goal" parent="Markers" instance=ExtResource("1_goal")]
+
+[node name="Subjects" type="Node3D" parent="."]
+
+[node name="Rig" type="Node3D" parent="."]
+
+[node name="VLMNavRig" parent="Rig" instance=ExtResource("2_rig")]

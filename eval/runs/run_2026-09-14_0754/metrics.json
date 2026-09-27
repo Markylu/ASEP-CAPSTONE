@@ -1,0 +1,48 @@
+{
+  "run_id": "run_2026-09-14_0754",
+  "ended": "2026-09-14T11:57:23+00:00",
+  "end_reason": "goal_reached",
+  "steps": 9,
+  "decisions": 9,
+  "collisions": 0,
+  "goal_reached": true,
+  "final_goal_distance_m": 0.813,
+  "latency_ms": {
+    "p50": 17411.2,
+    "p95": 32391.2,
+    "mean": 19408.8
+  },
+  "tokens_per_frame": {
+    "prompt_mean": 396.0,
+    "completion_mean": 214.4
+  },
+  "tokens_total": {
+    "prompt": 3564,
+    "completion": 1930
+  },
+  "rungs_used": {
+    "json_schema": 6,
+    "text": 3
+  },
+  "model": "qwen/qwen3-vl-30b",
+  "prompt_version": "p01",
+  "prompt_sha": "da5445e057fb",
+  "git_sha": "f863061",
+  "frame_size": [
+    768,
+    768
+  ],
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  }
+}

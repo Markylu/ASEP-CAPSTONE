@@ -1,0 +1,62 @@
+{
+  "run_id": "fake_s02a",
+  "ended": "2026-09-20T18:06:54+00:00",
+  "end_reason": "max_steps",
+  "steps": 12,
+  "decisions": 12,
+  "collisions": 6,
+  "goal_reached": false,
+  "final_goal_distance_m": 12.45,
+  "latency_ms": {
+    "p50": 10.5,
+    "p95": 49.8,
+    "mean": 17.9
+  },
+  "tokens_per_frame": {
+    "prompt_mean": 900.0,
+    "completion_mean": 30.0
+  },
+  "tokens_total": {
+    "prompt": 10800,
+    "completion": 360
+  },
+  "rungs_used": {
+    "json_schema": 12
+  },
+  "events": [
+    {
+      "name": "doors_switched",
+      "step": 3,
+      "t": "2026-09-20T18:06:52+00:00"
+    }
+  ],
+  "site_id": "s02a_doors_open_a",
+  "site_version": 2,
+  "scene": "res://sites/s02a_doors_open_a/site.tscn",
+  "physics_ticks_per_second": 60,
+  "model": "qwen/qwen3-vl-30b",
+  "prompt_version": "p01",
+  "prompt_sha": "da5445e057fb",
+  "git_sha": "f863061",
+  "frame_size": [
+    768,
+    768
+  ],
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "occlusion_step": 3,
+  "goal_visible_steps": 3,
+  "goal_first_hidden_step": 4,
+  "steps_to_reacquire": null
+}

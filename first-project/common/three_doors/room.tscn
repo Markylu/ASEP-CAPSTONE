@@ -1,0 +1,128 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Texture2D" uid="uid://cmw7cq78uwwec" path="res://addons/kenney_prototype-textures/Vector/texture_01.svg" id="1_wall_tex"]
+[ext_resource type="Texture2D" uid="uid://j43kx0u5wvwm" path="res://addons/kenney_prototype-textures/PNG/Dark/texture_01.png" id="2_floor_tex"]
+[ext_resource type="PackedScene" path="res://common/vlmnav/goal_marker.tscn" id="3_goal"]
+[ext_resource type="Material" path="res://common/props/door_frame.tres" id="4_frame"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_site"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_site"]
+sky_material = SubResource("ProceduralSkyMaterial_site")
+
+[sub_resource type="Environment" id="Environment_site"]
+background_mode = 2
+sky = SubResource("Sky_site")
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_texture = ExtResource("1_wall_tex")
+uv1_scale = Vector3(0.25, 0.25, 0.25)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_texture = ExtResource("2_floor_tex")
+uv1_scale = Vector3(0.25, 0.25, 0.25)
+uv1_triplanar = true
+uv1_world_triplanar = true
+texture_filter = 5
+
+[node name="ThreeDoorsRoom" type="Node3D"]
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_site")
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="DirectionalLight3D_00" type="DirectionalLight3D" parent="Lighting"]
+transform = Transform3D(-0.8251136, 0.50067574, -0.2617469, 0, 0.46329603, 0.8862036, 0.5649669, 0.73121864, -0.38227186, 0, 0, 0)
+light_energy = 3.05
+shadow_enabled = true
+directional_shadow_max_distance = 130.0
+
+[node name="Geometry" type="CSGCombiner3D" parent="."]
+use_collision = true
+
+[node name="Floor_00" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(50, 0, 0, 0, 0.5, 0, 0, 0, 25.031, 0, 0, 0)
+material = SubResource("StandardMaterial3D_floor")
+
+[node name="Wall_00" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(49.999992, 0, 0, 0, -2.1855692e-08, 25.030998, 0, -0.5, -1.0941397e-06, 0, 12, -12)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Wall_01" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(49.999992, 0, 0, 0, -2.1855692e-08, 25.030998, 0, -0.5, -1.0941397e-06, 0, 12, 12)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Wall_02" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(-1.0927847e-06, 0.5, 0, -25, -2.1855694e-08, 0, 0, 0, 25.031, 24, 12, 0)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Wall_03" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(-1.0927847e-06, 0.5, 0, -25, -2.1855694e-08, 0, 0, 0, 25.031, -24.5, 12.000002, 0)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Divider_00" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1, 0, 0, 0, 12, 0, 0, 0, 23.5, 0, 6.25, 0)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Opening_A" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(2, 0, 0, 0, 3.2, 0, 0, 0, 2.4, 0, 1.85, -9)
+operation = 2
+
+[node name="Opening_B" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(2, 0, 0, 0, 3.2, 0, 0, 0, 2.4, 0, 1.85, 0)
+operation = 2
+
+[node name="Opening_C" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(2, 0, 0, 0, 3.2, 0, 0, 0, 2.4, 0, 1.85, 9)
+operation = 2
+
+[node name="Frame_A_JambL" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 3.7, 0, 0, 0, 0.25, 0, 1.85, -10.325)
+material = ExtResource("4_frame")
+
+[node name="Frame_A_JambR" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 3.7, 0, 0, 0, 0.25, 0, 1.85, -7.675)
+material = ExtResource("4_frame")
+
+[node name="Frame_A_Lintel" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 0.25, 0, 0, 0, 2.9, 0, 3.575, -9.000)
+material = ExtResource("4_frame")
+
+[node name="Frame_B_JambL" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 3.7, 0, 0, 0, 0.25, 0, 1.85, -1.325)
+material = ExtResource("4_frame")
+
+[node name="Frame_B_JambR" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 3.7, 0, 0, 0, 0.25, 0, 1.85, 1.325)
+material = ExtResource("4_frame")
+
+[node name="Frame_B_Lintel" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 0.25, 0, 0, 0, 2.9, 0, 3.575, 0.000)
+material = ExtResource("4_frame")
+
+[node name="Frame_C_JambL" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 3.7, 0, 0, 0, 0.25, 0, 1.85, 7.675)
+material = ExtResource("4_frame")
+
+[node name="Frame_C_JambR" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 3.7, 0, 0, 0, 0.25, 0, 1.85, 10.325)
+material = ExtResource("4_frame")
+
+[node name="Frame_C_Lintel" type="CSGBox3D" parent="Geometry"]
+transform = Transform3D(1.2, 0, 0, 0, 0.25, 0, 0, 0, 2.9, 0, 3.575, 9.000)
+material = ExtResource("4_frame")
+
+[node name="Markers" type="Node3D" parent="."]
+
+[node name="Spawn" type="Marker3D" parent="Markers" groups=["vlmnav_spawn"]]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 12, 1.75, 0)
+
+[node name="Goal" parent="Markers" instance=ExtResource("3_goal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 0)

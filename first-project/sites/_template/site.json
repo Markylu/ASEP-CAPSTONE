@@ -1,0 +1,24 @@
+{
+  "id": "sNN_snake_name",
+  "version": 1,
+  "class": "geometry",
+  "hypothesis": "WRITE THIS BEFORE BUILDING ANY GEOMETRY. One site, one hypothesis.",
+  "created": "YYYY-MM-DD",
+  "godot_version": "4.7",
+  "scene": "res://sites/sNN_snake_name/site.tscn",
+  "units": "meters",
+  "extent": { "x": 0.0, "y": 0.0, "z": 0.0 },
+  "lighting": { "preset": "daylight", "sources": [] },
+  "camera": {
+    "rig": "res://common/vlmnav/vlmnav_rig.tscn",
+    "fov_deg": 87,
+    "resolution": [768, 768]
+  },
+  "spawn": { "position": [0.0, 1.75, 0.0], "yaw_deg": 0.0 },
+  "goal": { "position": [0.0, 1.0, 0.0], "arrival_radius": 1.0 },
+  "routes": [],
+  "truth": {},
+  "physical_counterpart": { "exists": false },
+  "tags": [],
+  "status": "draft"
+}
