@@ -17,6 +17,7 @@ eval/docker/sweep.sh build        # once; again after godot-xvfb.sh or requireme
 eval/docker/sweep.sh smoke        # fake decider, one 60-step flight, headless replay
 eval/docker/sweep.sh decider      # real decider on :8100, detached (--fake for the stub)
 eval/docker/sweep.sh phase1 run --mini-phase 1Ba
+eval/docker/sweep.sh phase1 demo --mini-phase 1A   # fly 1A's order into eval/runs/demo_*; records nothing
 eval/docker/sweep.sh stop
 ```
 

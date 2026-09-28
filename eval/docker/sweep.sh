@@ -65,7 +65,7 @@ case "$cmd" in
         docker rm -f "$DECIDER"
         ;;
     phase1)
-        if [ "${1:-}" = "run" ] && ! printf '%s\n' "$@" | grep -q -- "--decider-url"; then
+        if { [ "${1:-}" = "run" ] || [ "${1:-}" = "demo" ]; } && ! printf '%s\n' "$@" | grep -q -- "--decider-url"; then
             set -- "$@" --decider-url "http://127.0.0.1:$DECIDER_PORT"
         fi
         run "$IMAGE" python eval/phase1.py "$@"

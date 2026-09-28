@@ -8,6 +8,7 @@ The spec is docs/phase1-test-plan.md. Section numbers below point into it.
     python eval/phase1.py run --mini-phase 1A --only s01/dynamic/3
     python eval/phase1.py validate --mini-phase 1A   # re-check without flying
     python eval/phase1.py status
+    python eval/phase1.py demo --mini-phase 1A --limit 3   # try a host; records nothing
 
 One Godot at a time, always (§7.1): parallel runs would inflate decision
 latency, which is a dependent variable. A decider must already be running.
@@ -596,6 +597,46 @@ def cmd_validate(args: argparse.Namespace) -> int:
     return 1 if bad else 0
 
 
+def cmd_demo(args: argparse.Namespace) -> int:
+    """Fly a mini-phase's order outside eval/phase1/, for trying a new host.
+
+    Nothing goes into matrix.csv or phase.json, so a complete or planned
+    mini-phase is untouched. Each run is replayed and put through §10 and the
+    verdict printed. Never cite these runs.
+    """
+    mp = args.mini_phase
+    health = decider_health(args.decider_url)
+    if not health.get("ok"):
+        print("decider not healthy at {0}: {1}".format(args.decider_url, health))
+        return 1
+    print("decider: profile {0}, model {1}".format(health.get("profile"), health.get("model")))
+    cells = order_of(mp)
+    if args.only:
+        site, arm, seed = args.only.split("/")
+        cells = [c for c in cells if c == (site, arm, int(seed))]
+    if args.limit:
+        cells = cells[:args.limit]
+    stamp = datetime.now().strftime("%Y-%m-%d_%H%M")
+    root = REPO_ROOT / "eval" / "runs" / "demo_{0}_{1}".format(mp, stamp)
+    valid = reached = 0
+    for index, (site, arm, seed) in enumerate(cells, 1):
+        run_dir = root / site / arm / "seed{0}".format(seed)
+        run_id = "demo_{0}_{1}_{2}_{3}_seed{4}".format(stamp, mp, site, arm, seed)
+        print("[{0}/{1}] {2}".format(index, len(cells), run_id))
+        fly(site, arm, seed, run_id, run_dir, args.decider_url, args.godot,
+            background=not args.foreground)
+        if read_json(run_dir / "run.json") and read_jsonl(run_dir / "decisions.jsonl"):
+            verdict = replay(run_dir, args.decider_url, args.godot, headless=not args.foreground)
+            print("    replay {0}".format("ok" if verdict.get("ok") else "FAILED"))
+        reasons = validate(mp, site, arm, seed, run_dir, None)
+        print("    would be valid" if not reasons else "    would be INVALID: " + "; ".join(reasons))
+        valid += not reasons
+        reached += read_json(run_dir / "metrics.json").get("end_reason") == "goal_reached"
+    print("{0}: {1}/{2} would be valid, {3} reached the goal; runs in {4}".format(
+        mp, valid, len(cells), reached, root.relative_to(REPO_ROOT)))
+    return 0
+
+
 def report(mp: str) -> int:
     rows = load_matrix()
     current = [latest_row(rows, mp, s, a, sd) for s, a, sd in order_of(mp)]
@@ -616,11 +657,14 @@ def main() -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("init").set_defaults(func=cmd_init)
     sub.add_parser("status").set_defaults(func=cmd_status)
-    for name, func in (("run", cmd_run), ("validate", cmd_validate)):
+    for name, func in (("run", cmd_run), ("validate", cmd_validate), ("demo", cmd_demo)):
         p = sub.add_parser(name)
         p.add_argument("--mini-phase", required=True, choices=list(MINI_PHASES))
         p.set_defaults(func=func)
-        if name == "run":
+        if name == "demo":
+            p.add_argument("--limit", type=int, default=0,
+                           help="fly only the first N runs of the order")
+        if name in ("run", "demo"):
             p.add_argument("--only", help="site/arm/seed, e.g. s01/dynamic/3")
             p.add_argument("--decider-url", default="http://127.0.0.1:8000")
             p.add_argument("--godot", default=shutil.which("godot") or "godot")
