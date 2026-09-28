@@ -1,0 +1,6 @@
+# The phase 1 image (eval/docker/Dockerfile) holds tools only; the repo is
+# bind-mounted at run time. Send the build nothing else.
+*
+!server/requirements.txt
+!eval/godot-xvfb.sh
+!eval/docker/entrypoint.sh
