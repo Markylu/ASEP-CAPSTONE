@@ -1,0 +1,15 @@
+s02c/initial/1
+s02c/initial/5
+s02c/initial/2
+s02c/dynamic/5
+s02c/final/3
+s02c/final/1
+s02c/dynamic/1
+s02c/dynamic/4
+s02c/initial/4
+s02c/dynamic/2
+s02c/final/2
+s02c/dynamic/3
+s02c/final/5
+s02c/final/4
+s02c/initial/3
