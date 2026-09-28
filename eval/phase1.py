@@ -471,6 +471,12 @@ def validate(mp: str, site: str, arm: str, seed: int, run_dir: Path,
     for key, value in wanted.items():
         if meta.get(key) != value:
             reasons.append("run.json {0}={1!r}, want {2!r}".format(key, meta.get(key), value))
+    # run.json holds the size asked for; the decider logs the size captured.
+    # They differed under Xvfb (768x432), and only the second is what the model saw.
+    captured = {tuple(d.get("frame_size") or ()) for d in read_jsonl(run_dir / "decisions.jsonl")}
+    if captured - {tuple(LOCK["frame_size"])}:
+        reasons.append("captured frame size {0}, want {1}".format(
+            sorted(captured), LOCK["frame_size"]))
     config = meta.get("config") or {}
     for key, value in LOCK["config"].items():
         if config.get(key) != value:
