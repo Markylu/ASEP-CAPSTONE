@@ -24,6 +24,7 @@ import random
 import shutil
 import subprocess
 import sys
+import time
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -356,8 +357,38 @@ def preflight(mp: str, decider_url: str) -> List[str]:
 
 # ------------------------------------------------------------------ flying
 
+def front_app(field: str = "bundleid") -> str:
+    """A field of the app in front (macOS), or "" when it cannot be read.
+
+    Godot launched as a bare binary has no bundle id, so it is spotted by name.
+    """
+    asn = subprocess.run(["lsappinfo", "front"], capture_output=True, text=True).stdout.strip()
+    if not asn:
+        return ""
+    out = subprocess.run(["lsappinfo", "info", "-only", field, asn],
+                         capture_output=True, text=True).stdout
+    parts = out.split('"')
+    return parts[3] if len(parts) > 3 else ""
+
+
+def hand_focus_back(process: "subprocess.Popen[str]", bundle_id: str) -> None:
+    """Godot activates itself once on launch, whatever the window mode (`open -g`,
+    LSUIElement and the no_focus flag were all tried). Give the front back to
+    whoever had it as soon as Godot takes it; it does not take it again."""
+    if not bundle_id or "godot" in bundle_id.lower():
+        return
+    deadline = time.monotonic() + 10.0
+    while time.monotonic() < deadline and process.poll() is None:
+        if "godot" in front_app("name").lower():
+            subprocess.run(["osascript", "-e",
+                            'tell application id "{0}" to activate'.format(bundle_id)],
+                           capture_output=True)
+            return
+        time.sleep(0.05)
+
+
 def fly(site: str, arm: str, seed: int, run_id: str, run_dir: Path,
-        decider_url: str, godot: str) -> int:
+        decider_url: str, godot: str, background: bool = True) -> int:
     command = [
         godot, "--path", str(GODOT_PROJECT),
         "res://sites/{0}/site.tscn".format(SITES[site][0]), "--",
@@ -370,14 +401,26 @@ def fly(site: str, arm: str, seed: int, run_id: str, run_dir: Path,
         "--world=" + arm,
         "--spawn-seed={0}".format(seed),
     ]
+    # Background: the window is minimized and focus goes back to the operator.
+    # Frames are byte-identical to a visible window's, so this is not a config
+    # change (§3); it only keeps a sweep from taking over the machine.
+    background = background and sys.platform == "darwin"
+    if background:
+        command.append("--window-mode=minimized")
     run_dir.mkdir(parents=True, exist_ok=True)
+    previous = front_app() if background else ""
+    process = subprocess.Popen(command, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, text=True)
+    if background:
+        hand_focus_back(process, previous)
     try:
         # Godot enforces the 900 s wall clock itself; this is the backstop.
-        result = subprocess.run(command, capture_output=True, text=True,
-                                timeout=LOCK["wall_clock_s"] + 120)
-        code, output = result.returncode, result.stdout + result.stderr
-    except subprocess.TimeoutExpired as exc:
-        code, output = 124, "subprocess timeout\n{0}".format(exc.stdout or "")
+        output, _ = process.communicate(timeout=LOCK["wall_clock_s"] + 120)
+        code = process.returncode
+    except subprocess.TimeoutExpired:
+        process.kill()
+        output, _ = process.communicate()
+        code, output = 124, "subprocess timeout\n{0}".format(output or "")
     (run_dir / "godot.log").write_text(output)
     ended = [line for line in output.splitlines() if "RUN ENDED" in line]
     print("    " + (ended[-1].strip()[:140] if ended
@@ -385,11 +428,12 @@ def fly(site: str, arm: str, seed: int, run_id: str, run_dir: Path,
     return code
 
 
-def replay(run_dir: Path, decider_url: str, godot: str) -> Dict[str, Any]:
+def replay(run_dir: Path, decider_url: str, godot: str,
+           headless: bool = True) -> Dict[str, Any]:
     verdict_path = run_dir / "replay.json"
     subprocess.run([sys.executable, str(REPLAY_CLI), str(run_dir),
                     "--decider-url", decider_url, "--godot", godot,
-                    "--json", str(verdict_path)],
+                    "--json", str(verdict_path)] + (["--headless"] if headless else []),
                    capture_output=True, text=True, timeout=LOCK["wall_clock_s"])
     return read_json(verdict_path) or {"ok": False, "error": "replay wrote no verdict"}
 
@@ -509,9 +553,11 @@ def cmd_run(args: argparse.Namespace) -> int:
             if run_dir.exists():
                 # Left by an interrupted flight of this same attempt.
                 retire(mp, site, arm, seed, "a{0:02d}_interrupted".format(attempt))
-            fly(site, arm, seed, row["run_id"], run_dir, args.decider_url, args.godot)
+            fly(site, arm, seed, row["run_id"], run_dir, args.decider_url, args.godot,
+                background=not args.foreground)
             if read_json(run_dir / "run.json") and read_jsonl(run_dir / "decisions.jsonl"):
-                verdict = replay(run_dir, args.decider_url, args.godot)
+                verdict = replay(run_dir, args.decider_url, args.godot,
+                                 headless=not args.foreground)
                 print("    replay {0}".format("ok" if verdict.get("ok") else "FAILED"))
             reasons = validate(mp, site, arm, seed, run_dir, phase["git_sha"])
             row["end_reason"] = read_json(run_dir / "metrics.json").get("end_reason", "")
@@ -579,6 +625,10 @@ def main() -> int:
             p.add_argument("--decider-url", default="http://127.0.0.1:8000")
             p.add_argument("--godot", default=shutil.which("godot") or "godot")
             p.add_argument("--max-attempts", type=int, default=3)
+            p.add_argument("--foreground", action="store_true",
+                           help="visible, focused flight window and windowed replay. "
+                                "Default: minimized flight, focus handed back, headless "
+                                "replay (same frames and trajectories)")
     args = parser.parse_args()
     return args.func(args)
 

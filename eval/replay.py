@@ -146,6 +146,10 @@ def main() -> int:
                              "but it is nonzero and accumulates, so cite runs flown at 1.0.")
     parser.add_argument("--json", type=Path, default=None,
                         help="also write the verdict here as JSON (phase 1 writes replay.json)")
+    parser.add_argument("--headless", action="store_true",
+                        help="no window. A replay is SCRIPTED: it never captures a frame, and "
+                             "line of sight and collisions are physics queries, so the pose "
+                             "stream is the same as a windowed replay's (drift 0.0 measured).")
     args = parser.parse_args()
 
     run_dir = args.run_dir.resolve()
@@ -168,8 +172,8 @@ def main() -> int:
 
     print("replaying {0} on {1}: {2} steps, indices {3}".format(
         run_id, meta.get("scene") or "project main_scene", len(indices), indices))
-    command = [
-        args.godot, "--path", str(GODOT_PROJECT)] + scene_args(meta) + [
+    command = [args.godot] + (["--headless"] if args.headless else []) + [
+        "--path", str(GODOT_PROJECT)] + scene_args(meta) + [
         "--",
         "--run-id=" + replay_id,
         "--decider-url=" + args.decider_url,
