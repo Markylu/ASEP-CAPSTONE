@@ -2,10 +2,10 @@
   "mini_phase": "1Bc",
   "title": "Door Switch, out of view, C opens",
   "citable": true,
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "21b103f",
+  "started": "2026-10-02T20:37:17+00:00",
+  "finished": "2026-10-02T21:22:01+00:00",
+  "operator": "Markylu",
+  "notes": "2026-10-02: complete at 21b103f, 15/15 valid, first start. initial seeds 1, 5 and seed 2 steps 1-2 carry server-load latency (prefill ~31 s, GPU contention on sctsvr6); trajectories unaffected. Labels reviewed by Claude, pending operator confirmation."
 }

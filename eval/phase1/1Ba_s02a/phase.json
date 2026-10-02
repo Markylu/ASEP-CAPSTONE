@@ -2,10 +2,10 @@
   "mini_phase": "1Ba",
   "title": "Door Switch, out of view, A opens",
   "citable": true,
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": "2026-10-02: first start at 80a0a2d stopped after 2 runs: dynamic seed5 a01 failed replay with 4.2 cm drift, but the replay was exact; two same-tick steps (agent pinned on a wall) were logged out of order and replay.py compared by line. Fixed (recorder sorts steps.jsonl at run end, replay compares by step); restarted at a new SHA; those runs kept in _attempts/ as superseded."
+  "status": "complete",
+  "git_sha": "21b103f",
+  "started": "2026-10-02T17:25:01+00:00",
+  "finished": "2026-10-02T17:52:19+00:00",
+  "operator": "Markylu",
+  "notes": "2026-10-02: first start at 80a0a2d stopped after 2 runs: dynamic seed5 a01 failed replay with 4.2 cm drift, but the replay was exact; two same-tick steps (agent pinned on a wall) were logged out of order and replay.py compared by line. Fixed (recorder sorts steps.jsonl at run end, replay compares by step); restarted at a new SHA; those runs kept in _attempts/ as superseded. Complete at 21b103f: 15/15 valid. Labels reviewed by Claude, pending operator confirmation."
 }
