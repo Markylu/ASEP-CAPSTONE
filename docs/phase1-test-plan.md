@@ -134,7 +134,8 @@ The letter after B/C names the mirror door that opens. 1Ba + 1Bc together make L
 - Mini-phases can run in any order and in separate sessions. Within one, runs go in the fixed order
   in §7.4.
 - **Strictly sequential.** One Godot instance at a time. Parallel runs would inflate decision
-  latency, which is a dependent variable.
+  latency, which is a dependent variable. This has nothing to do with determinism: parallel runs
+  would share one vLLM server, so their per-decision latencies would interfere.
 - 1.0 must pass before any citable mini-phase starts. It proves the flags, run-dir layout, replay
   and labeling scripts end to end without spending H100 time.
 
@@ -168,6 +169,28 @@ At temperature 0, runs differ only through their input. Each run applies a seede
 
 Known limitation: vLLM batching can make temperature-0 outputs not bit-exact across sessions. Trajectories stay exactly
 replayable from the recorded index list regardless.
+
+**Why five seeds, given near-determinism.** The five seeds are not samples of decoding noise. They are
+five fixed start poses, and they test whether a cell's outcome survives a small shift in the start.
+1A shows what that buys: the jitter changed the details (change fired on move 3 vs 4; goal reached in
+14 vs 15 steps; final distances 0.61–0.98 m) but not the outcome, which was the same on all five
+seeds of every arm. So the seeds are close to replicates of one behaviour, not independent draws.
+Read results that way: "5/5" means "robust to ±0.5 m / ±5° of start pose", not "5 independent
+successes".
+
+Five is still kept, because it is the smallest count where the planned contrasts (§11) can reach
+significance at all. The best possible Fisher two-sided p for an all-vs-none gap:
+
+| seeds per cell | all-vs-none gap | p |
+|---|---|---|
+| 5 | 5/5 vs 0/5 | 0.008 |
+| 4 | 4/4 vs 0/4 | 0.029 |
+| 3 | 3/3 vs 0/3 | 0.10 (never < 0.05) |
+
+Fewer seeds would also save less than it looks: flying is ~25 min per 15-run mini-phase (§7.5), and
+the lost time so far has come from the tunnel and uplink, not from run count. Cutting seeds mid-phase
+would also need a new config lock and leave 1A (n = 5, citable) on a different n from the rest.
+Decided 2026-10-02: keep seeds 1–5.
 
 ### 7.4 Run order (fixed)
 
@@ -338,6 +361,9 @@ would bias SR upward.
 
 Test: Fisher's exact test on success counts per contrast. **Caveat, stated up front:** n = 5 per site
 cell (10 per 2a/2b family) is underpowered. Only very large gaps (e.g. 5/5 vs 0/5) reach p < 0.05.
+Fisher's test also assumes independent runs. At temperature 0 the seeds are near-replicates (§7.3), so
+p-values overstate the evidence and are read as a robustness check across start poses, not as
+sampling inference.
 Results are reported as effect sizes with CIs; significance is secondary. Failure-mode distribution is
 the main qualitative result for Phase 2.
 
@@ -442,3 +468,4 @@ and labeling; ~4–4.5 h for the five remaining mini-phases (§7.5). Fits the pr
 | 2026-09-27 | 1A restart #2: the §10 check and §8 split hard-coded step 3, which holds only for straight flight. `p1_1A_s01_dynamic_seed4_a01` turned, ended move 3 at x = 7.0008 and fired on move 4: a legitimate run marked invalid. Change step is now the move that reaches the trigger box (x ≤ trigger + 0.7 m), with the next move accepted within 0.3 m of first contact. 1A restarted at the new SHA; its 3 runs so far are kept in `_attempts/`. 1.0 still 18/18 valid, labels unchanged. |
 | 2026-09-28 | 30-run mini-phases 1B and 1C split into 15-run chunks, one site each: 1Ba (s02a), 1Bc (s02c), 1Ca (s02va), 1Cc (s02vc). Every citable mini-phase is now 15 runs. New fixed orders from `random.Random("phase1-<mp>")` (§7.4). Mirror pairs must share a config lock (§7.1). Done before either had flown (0 runs), so no data moved. Design, lock and 90-run total unchanged. |
 | 2026-09-28 | §7.5 time estimates added, calibrated on 1A (7 s + 1.9 s/step per run; 25.5 min for 15 runs). |
+| 2026-10-02 | Docs only, no design change. §7.3 explains why five seeds are kept despite near-determinism (seeds are start-pose robustness, not decoding samples; 5 is the smallest n where a contrast can reach p < 0.05). §11 notes that Fisher's independence assumption is only approximate here. §7.1 notes that sequential execution is about latency, not determinism. Lock and seeds unchanged. |
