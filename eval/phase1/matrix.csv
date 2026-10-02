@@ -57,7 +57,7 @@ mini_phase,site,site_version,arm,seed,run_id,attempt,status,end_reason,invalid_r
 1Ba,s02a,2,dynamic,2,p1_1Ba_s02a_dynamic_seed2_a01,1,planned,,
 1Ba,s02a,2,dynamic,3,p1_1Ba_s02a_dynamic_seed3_a01,1,planned,,
 1Ba,s02a,2,dynamic,4,p1_1Ba_s02a_dynamic_seed4_a01,1,planned,,
-1Ba,s02a,2,dynamic,5,p1_1Ba_s02a_dynamic_seed5_a01,1,planned,,
+1Ba,s02a,2,dynamic,5,p1_1Ba_s02a_dynamic_seed5_a01,1,invalid,max_steps,"replay not ok: {'problems': 4, 'max_pos_drift': 0.04208481311798107, 'events_match': True}; cause: same-tick steps logged out of order, replay compared by line (false positive, drift 0 by step)"
 1Ba,s02a,2,final,1,p1_1Ba_s02a_final_seed1_a01,1,planned,,
 1Ba,s02a,2,final,2,p1_1Ba_s02a_final_seed2_a01,1,planned,,
 1Ba,s02a,2,final,3,p1_1Ba_s02a_final_seed3_a01,1,planned,,
@@ -65,7 +65,7 @@ mini_phase,site,site_version,arm,seed,run_id,attempt,status,end_reason,invalid_r
 1Ba,s02a,2,final,5,p1_1Ba_s02a_final_seed5_a01,1,planned,,
 1Ba,s02a,2,initial,1,p1_1Ba_s02a_initial_seed1_a01,1,planned,,
 1Ba,s02a,2,initial,2,p1_1Ba_s02a_initial_seed2_a01,1,planned,,
-1Ba,s02a,2,initial,3,p1_1Ba_s02a_initial_seed3_a01,1,planned,,
+1Ba,s02a,2,initial,3,p1_1Ba_s02a_initial_seed3_a01,1,invalid,goal_reached,superseded: 1Ba restarted at new SHA (replay matches steps by step number)
 1Ba,s02a,2,initial,4,p1_1Ba_s02a_initial_seed4_a01,1,planned,,
 1Ba,s02a,2,initial,5,p1_1Ba_s02a_initial_seed5_a01,1,planned,,
 1Bc,s02c,2,dynamic,1,p1_1Bc_s02c_dynamic_seed1_a01,1,planned,,
@@ -113,3 +113,6 @@ mini_phase,site,site_version,arm,seed,run_id,attempt,status,end_reason,invalid_r
 1Cc,s02vc,1,initial,3,p1_1Cc_s02vc_initial_seed3_a01,1,planned,,
 1Cc,s02vc,1,initial,4,p1_1Cc_s02vc_initial_seed4_a01,1,planned,,
 1Cc,s02vc,1,initial,5,p1_1Cc_s02vc_initial_seed5_a01,1,planned,,
+1Ba,s02a,2,dynamic,5,p1_1Ba_s02a_dynamic_seed5_a02,2,invalid,,interrupted: 1Ba restarted at new SHA
+1Ba,s02a,2,initial,3,p1_1Ba_s02a_initial_seed3_a02,2,planned,,
+1Ba,s02a,2,dynamic,5,p1_1Ba_s02a_dynamic_seed5_a03,3,planned,,

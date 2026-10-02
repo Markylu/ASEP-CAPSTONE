@@ -156,6 +156,14 @@ class Run:
         self.ensure()
         decisions = _read_jsonl(self.decisions)
         step_records = _read_jsonl(self.steps)
+        # Each step is its own POST, so two moves that end in the same physics
+        # tick (an agent pinned against a wall) can land swapped. Put the file
+        # back in step order once the run is over, for every reader after this.
+        ordered = sorted(step_records, key=lambda s: s.get("step", 0))
+        if ordered != step_records:
+            step_records = ordered
+            self.steps.write_text("".join(json.dumps(s) + "\n" for s in ordered),
+                                  encoding="utf-8")
         run_json = json.loads((self.dir / "run.json").read_text())
 
         latencies = [d["latency_ms"] for d in decisions if d.get("latency_ms") is not None]

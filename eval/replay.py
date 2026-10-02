@@ -95,7 +95,13 @@ def compare_events(original: List[Dict[str, Any]],
 
 def compare(original: List[Dict[str, Any]], replayed: List[Dict[str, Any]],
             tolerance: float, stats: Optional[Dict[str, Any]] = None) -> int:
-    """Per-step diff. `stats`, when given, collects the worst drift seen."""
+    """Per-step diff. `stats`, when given, collects the worst drift seen.
+
+    Matched by step number, not line: steps.jsonl from before the recorder
+    sorted it can hold two same-tick moves in arrival order.
+    """
+    original = sorted(original, key=lambda s: s.get("step", 0))
+    replayed = sorted(replayed, key=lambda s: s.get("step", 0))
     stats = stats if stats is not None else {}
     stats.update({"max_pos_drift": 0.0, "max_yaw_drift": 0.0,
                   "steps_original": len(original), "steps_replay": len(replayed)})

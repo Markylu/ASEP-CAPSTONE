@@ -7,5 +7,5 @@
   "started": null,
   "finished": null,
   "operator": null,
-  "notes": ""
+  "notes": "2026-10-02: first start at 80a0a2d stopped after 2 runs: dynamic seed5 a01 failed replay with 4.2 cm drift, but the replay was exact; two same-tick steps (agent pinned on a wall) were logged out of order and replay.py compared by line. Fixed (recorder sorts steps.jsonl at run end, replay compares by step); restarted at a new SHA; those runs kept in _attempts/ as superseded."
 }
