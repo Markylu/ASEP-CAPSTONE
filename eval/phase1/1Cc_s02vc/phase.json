@@ -2,10 +2,10 @@
   "mini_phase": "1Cc",
   "title": "Door Switch, in view, C opens",
   "citable": true,
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "3525982",
+  "started": "2026-10-03T15:22:10+00:00",
+  "finished": "2026-10-03T15:52:03+00:00",
+  "operator": "Markylu",
+  "notes": "2026-10-03: complete at 3525982, 15/15 valid, first start. Labels reviewed by Claude, pending operator confirmation."
 }
