@@ -1,0 +1,49 @@
+{
+  "run_id": "p1_1D_s03_final_seed1_a03",
+  "started": "2026-10-05T01:06:28+00:00",
+  "model": "Qwen3-VL-30B-A3B",
+  "vlm_profile": "remote",
+  "litellm_base_url": "http://127.0.0.1:8004",
+  "prompt_version": "p02",
+  "prompt_sha": "26260774b60e",
+  "git_sha": "78c1867",
+  "git_dirty": false,
+  "temperature": 0.0,
+  "scene": "res://sites/s03_fork_deadend/site.tscn",
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "frame_size": [
+    768,
+    768
+  ],
+  "godot_version": "4.7.2-stable (official)",
+  "max_steps": 60,
+  "site_id": "s03_fork_deadend",
+  "site_version": 2,
+  "physics_ticks_per_second": 60,
+  "freeze_world": true,
+  "static_doors": false,
+  "world": "final",
+  "spawn_seed": 1,
+  "spawn_offset": {
+    "dyaw_deg": -2.23405146598816,
+    "dz": -0.170440912246704
+  },
+  "final_closed": [
+    "BranchL"
+  ],
+  "run_dir": "eval/phase1/1D_s03/runs/s03/final/seed1",
+  "ended": "2026-10-05T01:06:30+00:00",
+  "end_reason": "decision_error: decider error at step 0: VLMError: every rung failed: [{\"rung\": \"json_schema\", \"error\": \"ConnectError: All connection attempts failed\", \"retry\": \"transport error, same rung\"}, {\"rung\": \"json_schema\", \"error\": \"ConnectError: All connection attempts failed\", \"retry\": \"transport error, same rung\"}, {\"rung\": \"json_schema\", \"error\": \"ConnectError: All connection attempts failed\"}, {\"rung\": \"json_object\", \"error\": \"ConnectError: All connection attempts failed\", \"retry\": \"transport error, same rung\"}, {\"rung\": \"json_object\", \"error\": \"ConnectError: All connection attempts failed\", \"retry\": \"transport error, same rung\"}, {\"rung\": \"json_object\", \"error\": \"ConnectError: All connection attempts failed\"}, {\"rung\": \"tool_call\", \"error\": \"ConnectError: All connection attempts failed\", \"retry\": \"transport error, same rung\"}, {\"rung\": \"tool_call\", \"error\": \"ConnectError: All connection attempts failed\", \"retry\": \"transport error, same rung\"}, {\"rung\": \"tool_call\", \"error\": \"ConnectError: All connection attempts failed\"}, {\"rung\": \"text\", \"error\": \"ConnectError: All connection attempts failed\", \"retry\": \"transport error, same rung\"}, {\"rung\": \"text\", \"error\": \"ConnectError: All connection attempts failed\", \"retry\": \"transport error, same rung\"}, {\"rung\": \"text\", \"error\": \"ConnectError: All connection attempts failed\"}]"
+}
