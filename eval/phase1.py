@@ -8,6 +8,7 @@ The spec is docs/phase1-test-plan.md. Section numbers below point into it.
     python eval/phase1.py run --mini-phase 1A --only s01/dynamic/3
     python eval/phase1.py validate --mini-phase 1A   # re-check without flying
     python eval/phase1.py status
+    python eval/phase1.py results                    # §11 tables -> eval/phase1/results/
 
 One Godot at a time, always (§7.1): parallel runs would inflate decision
 latency, which is a dependent variable. A decider must already be running.
@@ -20,6 +21,7 @@ import csv
 import getpass
 import itertools
 import json
+import math
 import random
 import shutil
 import subprocess
@@ -301,6 +303,9 @@ def write_readme() -> None:
             mp, spec["title"], "yes" if spec["citable"] else "no",
             phase.get("status", "planned"), valid, len(current),
             phase.get("git_sha") or "", summary))
+    if (PHASE_DIR / "results" / "results.md").is_file():
+        lines += ["", "Aggregate tables and contrasts (§11): [results/results.md](results/results.md), "
+                  "built by `eval/phase1.py results`."]
     (PHASE_DIR / "README.md").write_text("\n".join(lines) + "\n")
 
 
@@ -550,6 +555,207 @@ def cmd_validate(args: argparse.Namespace) -> int:
     return 1 if bad else 0
 
 
+# ------------------------------------------------------------------ results
+
+RESULTS_DIR = PHASE_DIR / "results"
+#: §9 terminal labels, in rubric order, as the §11 table columns.
+LABEL_COLUMNS = (("success", "success"), ("ignore", "ignore_change"),
+                 ("replan", "replan_failure"), ("collision", "collision"),
+                 ("timeout", "timeout"), ("pre-change", "pre_change_failure"))
+#: §4 layouts: (title, sites). The two door layouts pool their mirror pair.
+LAYOUTS = (("L1 Object Appearance", ["s01"]),
+           ("L2a Door Switch, out of view", ["s02a", "s02c"]),
+           ("L2b Door Switch, in view", ["s02va", "s02vc"]),
+           ("L3 Split Path", ["s03"]))
+RUN_FIELDS = ["mini_phase", "site", "arm", "seed", "run_id", "goal_reached", "label",
+              "reviewer", "steps", "collisions", "final_goal_distance_m", "end_reason",
+              "latency_p50_ms", "latency_p95_ms", "git_sha"]
+
+
+def wilson(k: int, n: int, z: float = 1.959964) -> Tuple[float, float]:
+    """Wilson score 95% interval for k successes in n (§8)."""
+    if n == 0:
+        return (0.0, 1.0)
+    p = k / n
+    centre = (p + z * z / (2 * n)) / (1 + z * z / n)
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+    return (max(0.0, centre - half), min(1.0, centre + half))
+
+
+def fisher(k1: int, n1: int, k2: int, n2: int) -> float:
+    """Two-sided Fisher's exact p for k1/n1 vs k2/n2 (§11).
+
+    Sums every table with the same margins that is no more likely than the
+    observed one, the usual two-sided definition.
+    """
+    total, hits = n1 + n2, k1 + k2
+
+    def prob(a: int) -> float:
+        return math.comb(n1, a) * math.comb(n2, hits - a) / math.comb(total, hits)
+
+    observed = prob(k1)
+    low, high = max(0, hits - n2), min(hits, n1)
+    return min(1.0, sum(prob(a) for a in range(low, high + 1)
+                        if prob(a) <= observed * (1 + 1e-9)))
+
+
+def pct(values: List[float], percentile: float) -> Optional[float]:
+    """Linear interpolation, the same rule as the recorder's per-run p50/p95."""
+    if not values:
+        return None
+    ordered = sorted(values)
+    position = (len(ordered) - 1) * percentile / 100.0
+    lower = int(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    return ordered[lower] + (ordered[upper] - ordered[lower]) * (position - lower)
+
+
+def collect_runs() -> List[Dict[str, Any]]:
+    """The current valid run of every cell in every complete, citable mini-phase."""
+    rows = load_matrix()
+    runs = []  # type: List[Dict[str, Any]]
+    for mp, spec in MINI_PHASES.items():
+        if not spec["citable"]:
+            continue
+        if read_json(phase_dir(mp) / "phase.json").get("status") != "complete":
+            continue
+        labels = {}  # type: Dict[str, Dict[str, str]]
+        labels_path = phase_dir(mp) / "labels.csv"
+        if labels_path.is_file():
+            with labels_path.open(newline="") as handle:
+                labels = {r["run_id"]: r for r in csv.DictReader(handle)}
+        for site, arm, seed in sorted(order_of(mp)):
+            row = latest_row(rows, mp, site, arm, seed)
+            if row["status"] != "valid":
+                raise SystemExit("{0} {1}/{2}/{3} is not valid; a complete mini-phase "
+                                 "must be".format(mp, site, arm, seed))
+            run_dir = run_dir_for(mp, site, arm, seed)
+            metrics = read_json(run_dir / "metrics.json")
+            latencies = [float(d["latency_ms"]) for d in read_jsonl(run_dir / "decisions.jsonl")
+                         if d.get("latency_ms") is not None]
+            label = labels.get(row["run_id"], {})
+            runs.append({
+                "mini_phase": mp, "site": site, "arm": arm, "seed": seed,
+                "run_id": row["run_id"], "goal_reached": bool(metrics.get("goal_reached")),
+                "label": label.get("label", ""), "reviewer": label.get("reviewer", ""),
+                "steps": metrics.get("steps"), "collisions": metrics.get("collisions"),
+                "final_goal_distance_m": metrics.get("final_goal_distance_m"),
+                "end_reason": metrics.get("end_reason"),
+                "latency_p50_ms": (metrics.get("latency_ms") or {}).get("p50"),
+                "latency_p95_ms": (metrics.get("latency_ms") or {}).get("p95"),
+                "git_sha": metrics.get("git_sha"), "_latencies": latencies,
+            })
+    return runs
+
+
+def table_row(name: str, arm: str, cell: List[Dict[str, Any]]) -> str:
+    n = len(cell)
+    k = sum(1 for r in cell if r["goal_reached"])
+    low, high = wilson(k, n)
+    counts = [str(sum(1 for r in cell if r["label"] == label)) for _, label in LABEL_COLUMNS]
+    latencies = [x for r in cell for x in r["_latencies"]]
+    p50, p95 = pct(latencies, 50), pct(latencies, 95)
+    latency = ("{0:.2f} / {1:.2f} s".format(p50 / 1000, p95 / 1000)
+               if p50 is not None and p95 is not None else "")
+    return "| {0} | {1} | {2} | **{3:.2f}** | {4:.2f}–{5:.2f} | {6} | {7} |".format(
+        name, arm, n, k / n if n else 0.0, low, high, " | ".join(counts), latency)
+
+
+def contrast_line(tag: str, scope: str, left: str, a: List[Dict[str, Any]],
+                  right: str, b: List[Dict[str, Any]]) -> str:
+    k1, n1 = sum(1 for r in a if r["goal_reached"]), len(a)
+    k2, n2 = sum(1 for r in b if r["goal_reached"]), len(b)
+    if not n1 or not n2:
+        return "| {0} | {1} | {2} vs {3} | n/a | | |".format(tag, scope, left, right)
+    return "| {0} | {1} | {2} vs {3} | {4}/{5} vs {6}/{7} | {8:+.2f} | {9:.3g} |".format(
+        tag, scope, left, right, k1, n1, k2, n2, k1 / n1 - k2 / n2, fisher(k1, n1, k2, n2))
+
+
+def cmd_results(_args: argparse.Namespace) -> int:
+    """§11 tables and contrasts over every complete citable mini-phase.
+
+    Deterministic: no timestamps, sorted inputs, so a rerun on the same data
+    gives byte-identical files.
+    """
+    runs = collect_runs()
+    if not runs:
+        print("no complete citable mini-phases")
+        return 1
+
+    def pick(sites: List[str], arm: Optional[str] = None,
+             seeds: Optional[List[int]] = None) -> List[Dict[str, Any]]:
+        return [r for r in runs if r["site"] in sites and (arm is None or r["arm"] == arm)
+                and (seeds is None or r["seed"] in seeds)]
+
+    all_sites = [s for _, sites in LAYOUTS for s in sites]
+    header = ("| Site | Arm | n | SR | 95% CI | " + " | ".join(c for c, _ in LABEL_COLUMNS)
+              + " | latency p50 / p95 |")
+    rule = "|---" * (6 + len(LABEL_COLUMNS)) + "|"
+    pending = sum(1 for r in runs if "pending" in r["reviewer"].lower())
+    mps = sorted({r["mini_phase"] for r in runs}, key=list(MINI_PHASES).index)
+
+    lines = ["# Phase 1 results", "",
+             "Generated by `python eval/phase1.py results` from every complete, citable "
+             "mini-phase ({0}). Do not edit by hand.".format(", ".join(mps)), "",
+             "Spec: `docs/phase1-test-plan.md`. SR CI is Wilson 95% (§8). Latency is "
+             "pooled over every decision in the cell, linear-interpolated percentiles. "
+             "Label counts come from each mini-phase's `labels.csv` (§9).", ""]
+    if pending:
+        lines += ["> **{0} of {1} labels are still pending operator confirmation.** "
+                  "Rerun this after confirming them.".format(pending, len(runs)), ""]
+
+    lines += ["## Main table (§11)", ""]
+    for title, sites in LAYOUTS:
+        lines += ["### " + title, "", header, rule]
+        for site in sites:
+            for arm in ARMS:
+                lines.append(table_row(site, arm, pick([site], arm)))
+        if len(sites) > 1:
+            for arm in ARMS:
+                lines.append(table_row("pooled", arm, pick(sites, arm)))
+        lines.append("")
+    lines += ["### Pooled, all six sites", "", header, rule]
+    for arm in ARMS:
+        lines.append(table_row("all", arm, pick(all_sites, arm)))
+    lines.append("")
+
+    lines += ["## Planned contrasts (§11)", "",
+              "Fisher's exact test, two-sided. Seeds are near-replicates at temperature 0 "
+              "(§7.3), so p is a robustness check across start poses, not sampling "
+              "inference.", "",
+              "| # | Scope | Contrast | Successes | ΔSR | p |", "|---|---|---|---|---|---|"]
+    scopes = [(site, [site]) for site in all_sites]
+    scopes += [(title.split(" ")[0] + " pooled", sites) for title, sites in LAYOUTS
+               if len(sites) > 1]
+    scopes.append(("all sites", all_sites))
+    for tag, other in (("a", "initial"), ("b", "final")):
+        for scope, sites in scopes:
+            lines.append(contrast_line(tag, scope, "dynamic", pick(sites, "dynamic"),
+                                       other, pick(sites, other)))
+    lines.append(contrast_line("c", "dynamic arm", "L2b", pick(["s02va", "s02vc"], "dynamic"),
+                               "L2a", pick(["s02a", "s02c"], "dynamic")))
+    for a_site, c_site in (("s02a", "s02c"), ("s02va", "s02vc")):
+        for arm in ("final", "dynamic"):
+            lines.append(contrast_line("d", arm, a_site + " (A)", pick([a_site], arm),
+                                       c_site + " (C)", pick([c_site], arm)))
+    # s03 final: the closed exit is L on odd seeds and R on even seeds (§5).
+    lines.append(contrast_line("d", "s03 final", "L closed (odd seeds)",
+                               pick(["s03"], "final", [1, 3, 5]),
+                               "R closed (even seeds)", pick(["s03"], "final", [2, 4])))
+    lines.append("")
+
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    (RESULTS_DIR / "results.md").write_text("\n".join(lines))
+    with (RESULTS_DIR / "runs.csv").open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=RUN_FIELDS, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(sorted(runs, key=lambda r: (all_sites.index(r["site"]),
+                                                     ARMS.index(r["arm"]), r["seed"])))
+    print("{0} runs from {1} -> {2}".format(len(runs), ", ".join(mps),
+                                             RESULTS_DIR.relative_to(REPO_ROOT)))
+    return 0
+
+
 def report(mp: str) -> int:
     rows = load_matrix()
     current = [latest_row(rows, mp, s, a, sd) for s, a, sd in order_of(mp)]
@@ -570,6 +776,7 @@ def main() -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("init").set_defaults(func=cmd_init)
     sub.add_parser("status").set_defaults(func=cmd_status)
+    sub.add_parser("results").set_defaults(func=cmd_results)
     for name, func in (("run", cmd_run), ("validate", cmd_validate)):
         p = sub.add_parser(name)
         p.add_argument("--mini-phase", required=True, choices=list(MINI_PHASES))

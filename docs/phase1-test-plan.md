@@ -386,7 +386,7 @@ Phase 1 cannot start until these exist and 1.0 has passed.
       `order.txt` sequentially, skips valid runs, assigns attempt numbers, moves superseded attempts to
       `_attempts/`, runs validity checks and replay
 - [x] Labeling script (`eval/phase1_label.py`)
-- [ ] Aggregation script (`results/`)
+- [x] Aggregation script (`results/`): `eval/phase1.py results`
 - [x] `.gitignore` rules for `eval/phase1/**` (§14)
 - [x] Sites promoted `draft → active` at the frozen versions
 - [x] Rubric thresholds (§9) confirmed
@@ -470,3 +470,4 @@ and labeling; ~4–4.5 h for the five remaining mini-phases (§7.5). Fits the pr
 | 2026-09-28 | §7.5 time estimates added, calibrated on 1A (7 s + 1.9 s/step per run; 25.5 min for 15 runs). |
 | 2026-10-02 | Docs only, no design change. §7.3 explains why five seeds are kept despite near-determinism (seeds are start-pose robustness, not decoding samples; 5 is the smallest n where a contrast can reach p < 0.05). §11 notes that Fisher's independence assumption is only approximate here. §7.1 notes that sequential execution is about latency, not determinism. Lock and seeds unchanged. |
 | 2026-10-02 | 1Ba restart: `p1_1Ba_s02a_dynamic_seed5_a01` failed replay with 4.2 cm drift, but the replay was exact. The agent was pinned on a wall, two moves ended in the same physics tick, their `/step` POSTs landed swapped, and `replay.py` compared by line. The recorder now sorts `steps.jsonl` by step at run end and `replay.py` compares by step. 1Ba restarted at the new SHA; its 2 runs so far are kept in `_attempts/`. All 66 step logs of 1.0 and 1A were already in order, so neither is affected; both re-validated without flying. |
+| 2026-10-07 | §12 aggregation script built: `eval/phase1.py results` writes `eval/phase1/results/results.md` (§11 tables per layout, pooled rows, contrasts a–d) and `runs.csv`, deterministic. Latency percentiles pool every decision in a cell with the recorder's linear rule, so a few p95s differ by ≤ 0.04 s from the hand-written summaries; `results.md` is the reference. No design change. |
