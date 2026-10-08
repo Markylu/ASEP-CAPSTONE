@@ -5,7 +5,7 @@
 (`26260774b60e`). They covered s01 v1 × {initial, final, dynamic} × seeds 1–5.
 
 - **15 / 15 runs are valid.** Every replay was exact, and every run passes §10.
-- Labels were reviewed by Claude on the operator's behalf. **They still need confirmation from Markus Lu.**
+- Labels were reviewed by Claude on the operator's behalf and confirmed by Markus Lu on 2026-10-07, unchanged.
 
 ## Result
 

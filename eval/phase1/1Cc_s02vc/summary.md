@@ -6,7 +6,7 @@
 1Ca: door C (z = +9) opens in view instead of door A (z = −9).
 
 - **15 / 15 runs are valid.** Every replay was exact, and every run passes §10.
-- Labels were reviewed by Claude on the operator's behalf. **They still need confirmation from Markus Lu.**
+- Labels were reviewed by Claude on the operator's behalf and confirmed by Markus Lu on 2026-10-07, unchanged.
 
 ## Result
 
