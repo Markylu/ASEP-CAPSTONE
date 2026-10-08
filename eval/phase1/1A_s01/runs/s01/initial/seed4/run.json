@@ -1,0 +1,47 @@
+{
+  "run_id": "p1_1A_s01_initial_seed4_a02",
+  "started": "2026-09-27T22:43:32+00:00",
+  "model": "Qwen3-VL-30B-A3B",
+  "vlm_profile": "remote",
+  "litellm_base_url": "http://127.0.0.1:8004",
+  "prompt_version": "p02",
+  "prompt_sha": "26260774b60e",
+  "git_sha": "19cbec5",
+  "git_dirty": false,
+  "temperature": 0.0,
+  "scene": "res://sites/s01_occluder_dropin/site.tscn",
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "frame_size": [
+    768,
+    768
+  ],
+  "godot_version": "4.7.2-stable (official)",
+  "max_steps": 60,
+  "site_id": "s01_occluder_dropin",
+  "site_version": 1,
+  "physics_ticks_per_second": 60,
+  "freeze_world": true,
+  "static_doors": true,
+  "world": "initial",
+  "spawn_seed": 4,
+  "spawn_offset": {
+    "dyaw_deg": -2.16658329963684,
+    "dz": 0.400177001953125
+  },
+  "final_closed": [],
+  "run_dir": "eval/phase1/1A_s01/runs/s01/initial/seed4",
+  "ended": "2026-09-27T22:44:11+00:00",
+  "end_reason": "goal_reached"
+}

@@ -1,0 +1,47 @@
+{
+  "run_id": "p1_1Ca_s02va_dynamic_seed3_a01",
+  "started": "2026-10-02T21:47:11+00:00",
+  "model": "Qwen3-VL-30B-A3B",
+  "vlm_profile": "remote",
+  "litellm_base_url": "http://127.0.0.1:8004",
+  "prompt_version": "p02",
+  "prompt_sha": "26260774b60e",
+  "git_sha": "b352189",
+  "git_dirty": false,
+  "temperature": 0.0,
+  "scene": "res://sites/s02va_doors_visible_a/site.tscn",
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "frame_size": [
+    768,
+    768
+  ],
+  "godot_version": "4.7.2-stable (official)",
+  "max_steps": 60,
+  "site_id": "s02va_doors_visible_a",
+  "site_version": 1,
+  "physics_ticks_per_second": 60,
+  "freeze_world": true,
+  "static_doors": false,
+  "world": "dynamic",
+  "spawn_seed": 3,
+  "spawn_offset": {
+    "dyaw_deg": 2.14925098419189,
+    "dz": -0.000508874654769897
+  },
+  "final_closed": [],
+  "run_dir": "eval/phase1/1Ca_s02va/runs/s02va/dynamic/seed3",
+  "ended": "2026-10-02T21:50:44+00:00",
+  "end_reason": "max_steps"
+}

@@ -66,6 +66,19 @@ def run_command(site_id: str, run_id: str,
     ]
 
 
+def world_args(run: Run) -> List[str]:
+    """The layout and start pose the live run flew; a replay must match both."""
+    meta = {**run.metrics, **run.meta}
+    out = []
+    if meta.get("world"):
+        out.append("--world=" + str(meta["world"]))
+    elif run.static_doors:
+        out.append("--static-doors=1")
+    if meta.get("spawn_seed") is not None:
+        out.append("--spawn-seed={0}".format(int(meta["spawn_seed"])))
+    return out
+
+
 def indices_arg(run: Run) -> str:
     if not run.replayable:
         raise ValueError(run.unreplayable_reason)
@@ -87,7 +100,7 @@ def watch_command(run: Run, speed: float = 1.0,
         "--speed={0}".format(speed),
         "--frame-size={0}x{1}".format(int(width), int(height)),
         "--stop-on-goal=false",
-    ] + (["--static-doors=1"] if run.static_doors else [])
+    ] + world_args(run)
 
 
 def verify_command(run: Run, speed: float = 1.0,
@@ -115,7 +128,7 @@ def record_command(run: Run, avi_path: Path, speed: float = 0.3,
         "--max-collisions=-1",
         "--speed={0}".format(speed),
         "--stop-on-goal=false",
-    ] + (["--static-doors=1"] if run.static_doors else [])
+    ] + world_args(run)
 
 
 def transcode_command(avi_path: Path, out_path: Path, crf: int = 20,
@@ -150,6 +163,9 @@ def ffprobe_command(path: Path) -> List[str]:
 
 def replay_dir_for(run: Run) -> Path:
     """Where replay.py will write, and what a stale directory poisons."""
+    # A run recorded with --run-dir replays into its own replay/ folder.
+    if run.meta.get("run_dir"):
+        return run.path / "replay"
     return run.path.parent / (run.path.name + "_replay")
 
 

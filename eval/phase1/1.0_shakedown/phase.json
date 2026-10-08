@@ -1,0 +1,11 @@
+{
+  "mini_phase": "1.0",
+  "title": "Shakedown (fake decider)",
+  "citable": false,
+  "status": "complete",
+  "git_sha": "d100948",
+  "started": "2026-09-27T21:23:27+00:00",
+  "finished": "2026-09-27T21:27:32+00:00",
+  "operator": "Markylu",
+  "notes": "Fake decider (fake_litellm FAKE_PICK=straight, VLM_STREAM=0, VLM_RTT_PROBE=0) on :8010. Not citable. See summary.md."
+}

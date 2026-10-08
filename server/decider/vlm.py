@@ -32,6 +32,11 @@ RUNGS = ["json_schema", "json_object", "tool_call", "text"]
 # whole run to a weaker rung. Capability is sticky, bad luck is not.
 _unsupported: set = set()
 
+#: Tries per rung when the connection itself fails (dropped tunnel, reset,
+#: timeout). That is the network, not the rung: falling to a weaker rung would
+#: record a capability problem the model does not have (phase 1A, a01).
+TRANSPORT_TRIES = 3
+
 
 class VLMError(RuntimeError):
     pass
@@ -461,6 +466,9 @@ async def _request(client: httpx.AsyncClient, url: str,
         try:
             status, payload, error_text, timing = await _post_stream(
                 client, url, headers, body, rtt_ms)
+        except httpx.TransportError:
+            # A dropped connection says nothing about streaming support.
+            raise
         except (httpx.HTTPError, json.JSONDecodeError, KeyError) as exc:
             _stream_ok = False
             log_note = "stream failed ({0}); falling back".format(type(exc).__name__)
@@ -502,7 +510,9 @@ async def decide(manifest: Dict[str, Any], frame_b64: str) -> Decision:
         # answer; dropping to a weaker rung would hide the real cause and
         # make every later step weaker too.
         budget = config.MAX_TOKENS
-        for attempt in range(2):
+        attempt = 0
+        transport_failures = 0
+        while attempt < 2:
             try:
                 body = _body(rung, manifest, frame_b64, indices)
                 body["max_tokens"] = budget
@@ -521,12 +531,21 @@ async def decide(manifest: Dict[str, Any], frame_b64: str) -> Decision:
             except (httpx.HTTPError, VLMError, KeyError, ValueError,
                     json.JSONDecodeError) as exc:
                 note = {"rung": rung, "error": "{0}: {1}".format(type(exc).__name__, exc)[:300]}
+                if isinstance(exc, httpx.TransportError):
+                    transport_failures += 1
+                    if transport_failures < TRANSPORT_TRIES:
+                        note["retry"] = "transport error, same rung"
+                        attempts.append(note)
+                        continue
+                    attempts.append(note)
+                    break
                 retry_worth_it = (attempt == 0 and isinstance(
                     exc, (json.JSONDecodeError, ValueError)))
                 if retry_worth_it:
                     note["retry"] = "doubling max_tokens to {0}".format(budget * 2)
                     attempts.append(note)
                     budget *= 2
+                    attempt += 1
                     continue
                 attempts.append(note)
                 break
@@ -535,6 +554,7 @@ async def decide(manifest: Dict[str, Any], frame_b64: str) -> Decision:
                                  "retry": "doubling max_tokens to {0}".format(budget * 2)})
                 if attempt == 0:
                     budget *= 2
+                    attempt += 1
                     continue
 
             usage = payload.get("usage") or {}

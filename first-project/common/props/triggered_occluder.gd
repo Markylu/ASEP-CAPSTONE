@@ -77,6 +77,9 @@ var _tick: int = 0
 var _trigger_tick: int = 0
 var _trigger_step: int = 0
 var _fired: bool = false
+## Set by `--world=initial|final`: the trigger never fires. Separate from
+## `_fired` so it holds with `trigger_once` off.
+var _disarmed: bool = false
 
 
 func _ready() -> void:
@@ -98,11 +101,28 @@ func _ready() -> void:
 # ------------------------------------------------------------------- deployment
 
 func _on_body_entered(body: Node3D) -> void:
-	if _fired and trigger_once:
+	if _disarmed or (_fired and trigger_once):
 		return
 	if not (body is VLMNavController):
 		return
 	_deploy(body as VLMNavController)
+
+
+## The `initial` arm: the box stays parked for the whole run.
+func disarm() -> void:
+	_disarmed = true
+
+
+## The `final` arm: the box is up and solid from load, and the trigger never
+## fires. No event is emitted — nothing changes during the run.
+func snap_deployed() -> void:
+	_disarmed = true
+	_fired = true
+	state = State.IN_PLACE
+	set_physics_process(false)
+	_visual().position = deployed_position
+	_visual().visible = true
+	_set_solid(true)
 
 
 ## The box becomes solid HERE, on the trigger tick, not when the mesh arrives.

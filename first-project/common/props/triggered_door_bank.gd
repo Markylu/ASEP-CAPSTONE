@@ -97,6 +97,38 @@ func _switch(agent: VLMNavController) -> void:
 	event_fired.emit(event_name, info)
 
 
+## The `final` arm (`--world=final`): the post-trigger state is in place from
+## load and the bank never fires. Doors snap rather than travel, and no event is
+## emitted — the phase 1 validity check requires `events.jsonl` to carry no
+## change event for an arm where nothing changes.
+func apply_final_state() -> void:
+	_snap(doors_to_close, TriggeredDoor.State.CLOSED)
+	_snap(doors_to_open, TriggeredDoor.State.OPEN)
+	disarm()
+
+
+## Snap only this bank's `doors_to_close` shut, with no event. For a latched
+## fork (s03), where the `final` arm closes one branch picked by seed.
+func close_immediate() -> void:
+	_snap(doors_to_close, TriggeredDoor.State.CLOSED)
+	disarm()
+
+
+## The trigger never fires for the rest of the run.
+func disarm() -> void:
+	_fired = true
+	_disarmed = true
+
+
+func _snap(paths: Array[NodePath], target: TriggeredDoor.State) -> void:
+	for path in paths:
+		var door := get_node_or_null(path) as TriggeredDoor
+		if door == null:
+			push_warning("TriggeredDoorBank: no TriggeredDoor at '%s'" % path)
+			continue
+		door.set_state_immediate(target)
+
+
 ## Disarm every other bank in `latch_group`, on this same tick. Returns their
 ## node names for the event record.
 func _disarm_peers() -> Array:

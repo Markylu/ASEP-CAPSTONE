@@ -1,0 +1,11 @@
+{
+  "mini_phase": "1Ca",
+  "title": "Door Switch, in view, A opens",
+  "citable": true,
+  "status": "complete",
+  "git_sha": "b352189",
+  "started": "2026-10-02T21:47:11+00:00",
+  "finished": "2026-10-02T22:18:13+00:00",
+  "operator": "Markylu",
+  "notes": "2026-10-02: complete at b352189, 15/15 valid, first start. Labels reviewed by Claude; confirmed by the operator 2026-10-07, unchanged."
+}

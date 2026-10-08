@@ -45,5 +45,5 @@
   "truth": {},
   "physical_counterpart": { "exists": false },
   "tags": ["occlusion", "replanning", "dynamic_obstacle"],
-  "status": "draft"
+  "status": "active"
 }

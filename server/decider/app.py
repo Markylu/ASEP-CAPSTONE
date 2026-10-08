@@ -23,7 +23,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from . import config, prompt, vlm
-from .recorder import Run
+from .recorder import Run, resolve_run_dir
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(message)s")
 log = logging.getLogger("decider")
@@ -58,6 +58,15 @@ class StartRequest(BaseModel):
     freeze_world: Optional[bool] = None
     # Door banks disarmed for the whole run (control arm). Null = not set.
     static_doors: Optional[bool] = None
+    # Phase 1 arm: dynamic | initial | final (docs/phase1-test-plan.md §5).
+    world: Optional[str] = None
+    # Seeded spawn jitter and the offset it produced (§7.3).
+    spawn_seed: Optional[int] = None
+    spawn_offset: Optional[Dict[str, Any]] = None
+    # s03 `final` arm: which fork bank was closed at load.
+    final_closed: Optional[list] = None
+    # Repo-relative directory to record into, under eval/. Null = RUNS_DIR/run_id.
+    run_dir: Optional[str] = None
 
 
 class DecideRequest(BaseModel):
@@ -110,10 +119,18 @@ def health() -> Dict[str, Any]:
 
 
 @app.post("/run/start")
-def run_start(request: StartRequest) -> Dict[str, Any]:
+def run_start(request: StartRequest):
     meta = request.model_dump(exclude={"run_id"}, exclude_none=True)
-    record = Run(request.run_id).start(meta)
-    log.info("run %s started -> %s", request.run_id, config.RUNS_DIR / request.run_id)
+    run_dir = None
+    if request.run_dir:
+        try:
+            run_dir = resolve_run_dir(request.run_dir)
+        except ValueError as exc:
+            log.error("run %s refused: %s", request.run_id, exc)
+            return JSONResponse({"error": str(exc)}, status_code=400)
+    run = Run(request.run_id, run_dir)
+    record = run.start(meta)
+    log.info("run %s started -> %s", request.run_id, run.dir)
     return {"ok": True, "run": record}
 
 

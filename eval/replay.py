@@ -10,8 +10,9 @@ models: YOLO and Depth Anything V2 do not steer.)
 
     python eval/replay.py eval/runs/run_2026-09-14_1830
 
-Writes <run_id>_replay next to the original and diffs the two pose streams.
-Exit 0 when they match.
+Writes <run_id>_replay next to the original (or into <run_dir>/replay/ for a
+run recorded with --run-dir) and diffs the two pose streams. Exit 0 when they
+match. `--json replay.json` also saves the verdict.
 """
 from __future__ import annotations
 
@@ -21,7 +22,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 GODOT_PROJECT = REPO_ROOT / "first-project"
@@ -56,6 +57,20 @@ def scene_args(meta: Dict[str, Any]) -> List[str]:
     return [str(scene)] if scene else []
 
 
+def world_args(meta: Dict[str, Any]) -> List[str]:
+    """The layout and start pose the run flew. Without these a seeded or
+    non-dynamic run replays from the wrong pose through the wrong world."""
+    out = []
+    world = meta.get("world")
+    if world:
+        out.append("--world=" + str(world))
+    elif meta.get("static_doors"):
+        out.append("--static-doors=1")
+    if meta.get("spawn_seed") is not None:
+        out.append("--spawn-seed={0}".format(int(meta["spawn_seed"])))
+    return out
+
+
 def compare_events(original: List[Dict[str, Any]],
                    replayed: List[Dict[str, Any]]) -> int:
     """Site props must fire at the same step in a replay as in the run.
@@ -79,7 +94,17 @@ def compare_events(original: List[Dict[str, Any]],
 
 
 def compare(original: List[Dict[str, Any]], replayed: List[Dict[str, Any]],
-            tolerance: float) -> int:
+            tolerance: float, stats: Optional[Dict[str, Any]] = None) -> int:
+    """Per-step diff. `stats`, when given, collects the worst drift seen.
+
+    Matched by step number, not line: steps.jsonl from before the recorder
+    sorted it can hold two same-tick moves in arrival order.
+    """
+    original = sorted(original, key=lambda s: s.get("step", 0))
+    replayed = sorted(replayed, key=lambda s: s.get("step", 0))
+    stats = stats if stats is not None else {}
+    stats.update({"max_pos_drift": 0.0, "max_yaw_drift": 0.0,
+                  "steps_original": len(original), "steps_replay": len(replayed)})
     problems = 0
     if len(original) != len(replayed):
         print("STEP COUNT: original {0}, replay {1}".format(len(original), len(replayed)))
@@ -92,6 +117,8 @@ def compare(original: List[Dict[str, Any]], replayed: List[Dict[str, Any]],
         collide_a, collide_b = bool(a.get("collided")), bool(b.get("collided"))
         los_a = (a.get("goal") or {}).get("line_of_sight")
         los_b = (b.get("goal") or {}).get("line_of_sight")
+        stats["max_pos_drift"] = max(stats["max_pos_drift"], drift)
+        stats["max_yaw_drift"] = max(stats["max_yaw_drift"], yaw_drift)
         flag = ""
         if drift > tolerance or yaw_drift > tolerance:
             flag, problems = "  <-- DRIFT", problems + 1
@@ -106,6 +133,11 @@ def compare(original: List[Dict[str, Any]], replayed: List[Dict[str, Any]],
     return problems
 
 
+def write_verdict(path: Optional[Path], verdict: Dict[str, Any]) -> None:
+    if path is not None:
+        path.write_text(json.dumps(verdict, indent=2) + "\n")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run_dir", type=Path)
@@ -118,15 +150,27 @@ def main() -> int:
                         help="turn/move speed multiplier, for watching at a human pace. "
                              "Measured drift at 0.25x is 2.4e-5 m, well inside --tolerance, "
                              "but it is nonzero and accumulates, so cite runs flown at 1.0.")
+    parser.add_argument("--json", type=Path, default=None,
+                        help="also write the verdict here as JSON (phase 1 writes replay.json)")
     args = parser.parse_args()
 
     run_dir = args.run_dir.resolve()
-    run_id = run_dir.name
+    meta = json.loads((run_dir / "run.json").read_text())
+    run_id = meta.get("run_id") or run_dir.name
     replay_id = run_id + "_replay"
     indices = indices_of(run_dir)
-
-    meta = json.loads((run_dir / "run.json").read_text())
     frame_size = meta.get("frame_size") or [768, 768]
+
+    # A run recorded into a chosen directory (phase 1's nested
+    # <site>/<arm>/seed<N>/) replays into a `replay/` folder inside it, so the
+    # two never depend on sharing a parent. Older flat runs keep writing
+    # <run_id>_replay beside themselves under the decider's RUNS_DIR.
+    if meta.get("run_dir"):
+        replay_dir = run_dir / "replay"
+        dir_args = ["--run-dir=" + str(replay_dir.relative_to(REPO_ROOT))]
+    else:
+        replay_dir = run_dir.parent / replay_id
+        dir_args = []
 
     print("replaying {0} on {1}: {2} steps, indices {3}".format(
         run_id, meta.get("scene") or "project main_scene", len(indices), indices))
@@ -148,9 +192,7 @@ def main() -> int:
         # comparison below never even ran. Sites where the agent grinds against a
         # wall — s02's closed door — are exactly the ones worth replaying.
         "--max-collisions=-1",
-    ]
-    if meta.get("static_doors"):
-        command.append("--static-doors=1")
+    ] + world_args(meta) + dir_args
     if args.speed != 1.0:
         command.append("--speed={0}".format(args.speed))
         print("watch mode at {0}x — trajectory is within tolerance but not "
@@ -159,14 +201,21 @@ def main() -> int:
     sys.stdout.write(result.stdout)
     if result.returncode != 0:
         sys.stderr.write(result.stderr)
+        write_verdict(args.json, {"ok": False, "godot_exit": result.returncode})
         return result.returncode
 
-    replay_dir = run_dir.parent / replay_id
+    stats: Dict[str, Any] = {}
     problems = compare(read_jsonl(run_dir / "steps.jsonl"),
                        read_jsonl(replay_dir / "steps.jsonl"),
-                       args.tolerance)
-    problems += compare_events(read_jsonl(run_dir / "events.jsonl"),
-                               read_jsonl(replay_dir / "events.jsonl"))
+                       args.tolerance, stats)
+    event_problems = compare_events(read_jsonl(run_dir / "events.jsonl"),
+                                    read_jsonl(replay_dir / "events.jsonl"))
+    problems += event_problems
+    write_verdict(args.json, dict(stats, ok=problems == 0, problems=problems,
+                                  events_match=event_problems == 0,
+                                  tolerance=args.tolerance,
+                                  replay_dir=str(replay_dir.relative_to(REPO_ROOT))
+                                  if REPO_ROOT in replay_dir.parents else str(replay_dir)))
     print()
     if problems:
         print("REPLAY MISMATCH: {0} problem(s). The trajectory is not reproducible "

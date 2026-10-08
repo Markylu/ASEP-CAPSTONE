@@ -53,7 +53,7 @@ A run whose recorded values differ from this table is **invalid**.
 | `--speed` | `1.0` | `run_session.gd` |
 | Physics | 60 ticks/s, Jolt, Godot 4.7.2-stable | `project.godot` |
 | Execution | **sequential**: one Godot run at a time, one decider | §7 |
-| Git | clean tree; `git_dirty` must be `false` in every `run.json` | recorder |
+| Git | clean tree; `git_dirty` must be `false` in every `run.json`. Recorded data (`eval/runs/`, `eval/phase1/`) does not count as dirty | recorder, `config.git_dirty()` |
 
 Site versions frozen for Phase 1: `s01_occluder_dropin@v1`, `s02a_doors_open_a@v2`,
 `s02c_doors_open_c@v2`, `s02va_doors_visible_a@v1`, `s02vc_doors_visible_c@v1`,
@@ -67,9 +67,9 @@ arrival radius and a 6 m beam, and spawn facing −X. Full geometry is in each s
 
 | Layout | Site | Spawn (x) | Goal dist / LOS at spawn | Change | Trigger → switch step | Straight-line collision | Post-change route |
 |---|---|---|---|---|---|---|---|
-| 1 Object Appearance | `s01_occluder_dropin` | 12 | 24.0 m / yes | 8 m cube rises at x = −2, blocking path and sightline | x = 6.5 → step 3; first occluded frame 4 | step 6, x = 2.2 | around either side (7.75 m side gaps) |
-| 2a Door Switch, out of view | `s02a_doors_open_a` / `s02c_doors_open_c` | 12 | 24.0 m / yes (through B) | B closes; A (−z, right) or C (+z, left) opens | x = 6.5 → step 3; first switched frame 4 | step 7, x = 0.45 | new door **56.3° off-axis** (outside 43.5° half-FOV); ≈ 26.5 m |
-| 2b Door Switch, in view | `s02va_doors_visible_a` / `s02vc_doors_visible_c` | 20 | 32.0 m / yes (through B) | same switch as 2a | x = 14.5 → step 3; first switched frame 4 | step 12, x = 0.45 | new door **in frame** (far edge 39.7°); ≈ 32.4 m ≈ 19 steps |
+| 1 Object Appearance | `s01_occluder_dropin` | 12 | 24.0 m / yes | 8 m cube rises at x = −2, blocking path and sightline | x = 6.5 → step 3 flying straight; first occluded frame 4 | step 6, x = 2.2 | around either side (7.75 m side gaps) |
+| 2a Door Switch, out of view | `s02a_doors_open_a` / `s02c_doors_open_c` | 12 | 24.0 m / yes (through B) | B closes; A (−z, right) or C (+z, left) opens | x = 6.5 → step 3 flying straight; first switched frame 4 | step 7, x = 0.45 | new door **56.3° off-axis** (outside 43.5° half-FOV); ≈ 26.5 m |
+| 2b Door Switch, in view | `s02va_doors_visible_a` / `s02vc_doors_visible_c` | 20 | 32.0 m / yes (through B) | same switch as 2a | x = 14.5 → step 3 flying straight; first switched frame 4 | step 12, x = 0.45 | new door **in frame** (far edge 39.7°); ≈ 32.4 m ≈ 19 steps |
 | 3 Split Path | `s03_fork_deadend` | 21 | 33.0 m / no | whichever tine is entered first has its exit door slam shut; the other bank disarms | mid-tine x = 0, step depends on the agent | ≈ 4 steps after the switch | back out, cross crossbar, take other tine; scripted recovery = 43 steps |
 
 ## 5. Arms
@@ -106,16 +106,22 @@ godot --path first-project res://sites/<site>/site.tscn -- \
 
 ## 7. Mini-phases
 
-Phase 1 is split by map into self-contained **mini-phases**. A mini-phase is the smallest unit that
-can be rerun wholesale. If something goes wrong in 1C, only 1C is rerun.
+Phase 1 is split by site into self-contained **mini-phases** of **15 runs each** (1 site × 3 arms ×
+5 seeds). A mini-phase is the smallest unit that can be rerun wholesale. If something goes wrong in
+1Ca, only 1Ca is rerun.
 
-| Mini-phase | Folder | Sites | Runs | Citable |
-|---|---|---|---|---|
-| 1.0 Shakedown | `1.0_shakedown/` | all 6, **fake decider**, seed 1, one run per arm | 18 | **no** |
-| 1A Object Appearance | `1A_s01/` | s01 | 15 | yes |
-| 1B Door Switch, out of view | `1B_s02/` | s02a, s02c | 30 | yes |
-| 1C Door Switch, in view | `1C_s02v/` | s02va, s02vc | 30 | yes |
-| 1D Split Path | `1D_s03/` | s03 | 15 | yes |
+| Mini-phase | Folder | Layout | Site | Runs | Citable |
+|---|---|---|---|---|---|
+| 1.0 Shakedown | `1.0_shakedown/` | all | all 6, **fake decider**, seed 1, one run per arm | 18 | **no** |
+| 1A | `1A_s01/` | 1 Object Appearance | s01 | 15 | yes |
+| 1Ba | `1Ba_s02a/` | 2a Door Switch, out of view | s02a (A opens) | 15 | yes |
+| 1Bc | `1Bc_s02c/` | 2a Door Switch, out of view | s02c (C opens) | 15 | yes |
+| 1Ca | `1Ca_s02va/` | 2b Door Switch, in view | s02va (A opens) | 15 | yes |
+| 1Cc | `1Cc_s02vc/` | 2b Door Switch, in view | s02vc (C opens) | 15 | yes |
+| 1D | `1D_s03/` | 3 Split Path | s03 | 15 | yes |
+
+The letter after B/C names the mirror door that opens. 1Ba + 1Bc together make Layout 2a, and
+1Ca + 1Cc make Layout 2b. The layout-level and mirror contrasts in §11 need both chunks of a pair.
 
 ### 7.1 Rules
 
@@ -123,10 +129,13 @@ can be rerun wholesale. If something goes wrong in 1C, only 1C is rerun.
   mid-phase, the whole mini-phase restarts (old runs move to `_attempts/`, `phase.json` status →
   `superseded`).
 - A single invalid run is rerun on its own, with the same seed and the next attempt number (`a02`, …).
+- Mirror pairs (1Ba/1Bc, 1Ca/1Cc) can fly in different sessions and at different git SHAs, but
+  must share the same config lock. A lock change that restarts one chunk of a pair restarts the other.
 - Mini-phases can run in any order and in separate sessions. Within one, runs go in the fixed order
   in §7.4.
 - **Strictly sequential.** One Godot instance at a time. Parallel runs would inflate decision
-  latency, which is a dependent variable.
+  latency, which is a dependent variable. This has nothing to do with determinism: parallel runs
+  would share one vLLM server, so their per-decision latencies would interfere.
 - 1.0 must pass before any citable mini-phase starts. It proves the flags, run-dir layout, replay
   and labeling scripts end to end without spending H100 time.
 
@@ -143,7 +152,7 @@ can be rerun wholesale. If something goes wrong in 1C, only 1C is rerun.
 4. **Replay:** every valid run is replayed; `replay.json` saved.
 5. **Label:** auto pre-label, then manual review (§9).
 6. **Sign-off:**
-   - [ ] 15 or 30 valid runs, one per (site, arm, seed)
+   - [ ] 15 valid runs, one per (arm, seed)
    - [ ] `labels.csv` complete, no blank manual labels
    - [ ] `summary.md` written (table + notes)
    - [ ] `phase.json` status → `complete`, committed
@@ -161,6 +170,28 @@ At temperature 0, runs differ only through their input. Each run applies a seede
 Known limitation: vLLM batching can make temperature-0 outputs not bit-exact across sessions. Trajectories stay exactly
 replayable from the recorded index list regardless.
 
+**Why five seeds, given near-determinism.** The five seeds are not samples of decoding noise. They are
+five fixed start poses, and they test whether a cell's outcome survives a small shift in the start.
+1A shows what that buys: the jitter changed the details (change fired on move 3 vs 4; goal reached in
+14 vs 15 steps; final distances 0.61–0.98 m) but not the outcome, which was the same on all five
+seeds of every arm. So the seeds are close to replicates of one behaviour, not independent draws.
+Read results that way: "5/5" means "robust to ±0.5 m / ±5° of start pose", not "5 independent
+successes".
+
+Five is still kept, because it is the smallest count where the planned contrasts (§11) can reach
+significance at all. The best possible Fisher two-sided p for an all-vs-none gap:
+
+| seeds per cell | all-vs-none gap | p |
+|---|---|---|
+| 5 | 5/5 vs 0/5 | 0.008 |
+| 4 | 4/4 vs 0/4 | 0.029 |
+| 3 | 3/3 vs 0/3 | 0.10 (never < 0.05) |
+
+Fewer seeds would also save less than it looks: flying is ~25 min per 15-run mini-phase (§7.5), and
+the lost time so far has come from the tunnel and uplink, not from run count. Cutting seeds mid-phase
+would also need a new config lock and leave 1A (n = 5, citable) on a different n from the rest.
+Decided 2026-10-02: keep seeds 1–5.
+
 ### 7.4 Run order (fixed)
 
 Generated once with `random.Random("phase1-<mp>")` over (site, arm, seed). Format `site/arm/seed`.
@@ -169,22 +200,73 @@ Generated once with `random.Random("phase1-<mp>")` over (site, arm, seed). Forma
 s01/final/2, s01/initial/2, s01/dynamic/1, s01/dynamic/5, s01/initial/5, s01/final/5,
 s01/dynamic/2, s01/initial/3, s01/dynamic/3
 
-**1B:** s02a/dynamic/5, s02c/final/2, s02a/final/3, s02c/initial/2, s02c/final/1, s02a/final/5,
-s02a/final/4, s02a/final/1, s02a/initial/3, s02c/initial/4, s02a/final/2, s02a/dynamic/1,
-s02a/dynamic/4, s02c/dynamic/4, s02a/initial/1, s02a/dynamic/2, s02c/dynamic/3, s02a/dynamic/3,
-s02c/final/3, s02c/initial/3, s02c/initial/1, s02c/dynamic/1, s02c/dynamic/2, s02c/dynamic/5,
-s02c/initial/5, s02a/initial/4, s02a/initial/5, s02c/final/5, s02a/initial/2, s02c/final/4
+**1Ba:** s02a/initial/3, s02a/dynamic/5, s02a/dynamic/4, s02a/initial/4, s02a/final/2,
+s02a/final/5, s02a/final/1, s02a/initial/5, s02a/initial/1, s02a/final/3, s02a/final/4,
+s02a/dynamic/3, s02a/initial/2, s02a/dynamic/1, s02a/dynamic/2
 
-**1C:** s02va/dynamic/5, s02vc/initial/5, s02va/dynamic/3, s02vc/dynamic/4, s02vc/initial/4,
-s02va/dynamic/1, s02va/dynamic/2, s02vc/initial/3, s02vc/dynamic/1, s02vc/final/5,
-s02va/initial/4, s02va/dynamic/4, s02vc/final/2, s02vc/dynamic/2, s02vc/final/4,
-s02vc/dynamic/5, s02va/final/4, s02vc/initial/2, s02va/final/1, s02vc/dynamic/3,
-s02va/initial/1, s02va/final/3, s02vc/final/3, s02va/initial/2, s02va/final/2, s02va/final/5,
-s02vc/final/1, s02va/initial/3, s02va/initial/5, s02vc/initial/1
+**1Bc:** s02c/initial/1, s02c/initial/5, s02c/initial/2, s02c/dynamic/5, s02c/final/3,
+s02c/final/1, s02c/dynamic/1, s02c/dynamic/4, s02c/initial/4, s02c/dynamic/2, s02c/final/2,
+s02c/dynamic/3, s02c/final/5, s02c/final/4, s02c/initial/3
+
+**1Ca:** s02va/dynamic/3, s02va/dynamic/2, s02va/final/2, s02va/final/5, s02va/final/4,
+s02va/dynamic/1, s02va/initial/2, s02va/dynamic/4, s02va/initial/3, s02va/initial/5,
+s02va/initial/1, s02va/dynamic/5, s02va/final/1, s02va/final/3, s02va/initial/4
+
+**1Cc:** s02vc/dynamic/3, s02vc/final/3, s02vc/initial/5, s02vc/initial/2, s02vc/dynamic/2,
+s02vc/initial/3, s02vc/final/4, s02vc/initial/1, s02vc/final/1, s02vc/dynamic/1,
+s02vc/final/5, s02vc/dynamic/5, s02vc/final/2, s02vc/dynamic/4, s02vc/initial/4
 
 **1D:** s03/final/2, s03/dynamic/4, s03/initial/4, s03/initial/2, s03/dynamic/5, s03/final/3,
 s03/initial/3, s03/dynamic/2, s03/final/4, s03/initial/1, s03/dynamic/1, s03/initial/5,
 s03/final/1, s03/final/5, s03/dynamic/3
+
+### 7.5 Time estimates
+
+**Calibration, from 1A** (`19cbec5`, 2026-09-27 22:41 → 23:06 UTC, 25.5 min flying for 15 runs):
+
+| 1A outcome | Runs | Steps | Wall time per run |
+|---|---|---|---|
+| `initial`: goal reached | 5 | 14–15 | 30–39 s (mean 34 s) |
+| `final` + `dynamic`: `max_steps` | 10 | 60 | 116–136 s, one outlier 176 s (p95 latency spike) |
+
+Fit: **run time ≈ 7 s + 1.9 s × steps**, plus ~5.6 s between runs. A 60-step failure ≈ 2 min and a
+15-step success ≈ 35 s. The fit reproduces 1A's 25.5 min to within 1 min. Duration is set almost
+entirely by **how many runs hit the 60-step limit**, so each site's difficulty is expressed as
+expected steps per arm.
+
+**Difficulty assumptions** (from geometry §4, pilots §13 and 1A, where every `final` and
+`dynamic` run failed):
+
+| Site | `initial` | `final` | `dynamic` |
+|---|---|---|---|
+| s02a / s02c | success, ~14 steps (pilot static run: 14) | likely fail (60): open door at 36.9°, straight bearing points at a closed door | likely fail (60): every pilot failed |
+| s02va / s02vc | success, ~20 steps (32 m straight) | likely fail (60); success possible, ~22 steps (new door in view) | likely fail (60); success possible, ~22 steps |
+| s03 | uncertain: blind turn at crossbar, ≥ ~25 steps if it succeeds | likely fail (60) | likely fail (60): every pilot failed; scripted recovery needs 43 |
+
+**ETA per mini-phase:**
+
+| Mini-phase | Best case (flying) | **Expected (flying)** | Worst case (flying) | + preflight | + labeling | **Expected session** |
+|---|---|---|---|---|---|---|
+| 1A (actual) | n/a | **25.5 min** | n/a | done | done | done |
+| 1Ba s02a | ~12 min | **~24.5 min** | ~32 min | ~5 min | ~15–20 min | **~45–50 min** |
+| 1Bc s02c | ~12 min | **~24.5 min** | ~32 min | ~5 min | ~15–20 min | **~45–50 min** |
+| 1Ca s02va | ~13 min | **~25.5 min** | ~32 min | ~5 min | ~15–20 min | **~45–50 min** |
+| 1Cc s02vc | ~13 min | **~25.5 min** | ~32 min | ~5 min | ~15–20 min | **~45–50 min** |
+| 1D s03 | ~26 min | **~27–32 min** | ~32 min | ~5 min | ~15–20 min | **~50–55 min** |
+| **Remaining total** | ~1.3 h | **~2.1 h** | ~2.7 h | ~25 min | ~1.5 h | **~4–4.5 h** |
+
+- **Best case:** every arm that *can* succeed does, at its shortest route. **Expected:** `initial`
+  succeeds, `final` and `dynamic` fail, as in 1A. **Worst case:** all 15 runs hit 60 steps
+  (15 × ~127 s).
+- **Preflight** covers tunnel/health check, lock check and one scripted probe (§7.2 step 1).
+  **Labeling** covers auto pre-label plus manual review of every run (§9). About two thirds of runs
+  are 60-step failures with post-change reasoning to read, so review, not flying, is the larger
+  cost.
+- **Risk not in the table:** 1A had two aborted starts before its clean run (slow uplink; a
+  validity-check bug), about 45 min lost. Budget one extra attempt per session until a mini-phase
+  flies clean first time, and fly only on a link where a real decision round-trips in a few seconds (§15).
+- Re-estimate after each mini-phase. If `final`/`dynamic` start succeeding (the Phase 2 hope, and
+  plausible on 2b where the new door is in view), flying time drops toward the best case.
 
 ## 8. Dependent variables
 
@@ -202,8 +284,10 @@ s03/final/1, s03/final/5, s03/dynamic/3
 | Output rung | `rungs_used` | `metrics.json` |
 
 For the `initial` and `final` arms, where nothing changes, "pre/post" is split at the step the
-`dynamic` arm's trigger would fire (step 3 for s01/s02/s02v; for s03, the step the agent crosses x = 0
-in a tine).
+`dynamic` arm's trigger would fire: for s01/s02/s02v, the first move that ends with the agent touching
+the trigger box (centre x ≤ trigger x + 0.7 m: half the 1.0 m box plus the 0.2 m agent sphere); for
+s03, the step the agent crosses x = 0 in a tine. Flying straight that is step 3; a turning agent gets
+there later. A run that never gets there has no split: the whole run counts as post-change.
 
 ## 9. Failure-mode rubric
 
@@ -216,8 +300,11 @@ in this order; the first match wins:
 | 1 | `pre_change_failure` | *dynamic arm only:* the change never fired (agent never reached the trigger) |
 | 2 | `ignore_change` | after the change, **no** `reason` in the next 5 decisions refers to the new obstacle / closed door / blocked route, **and** the agent keeps heading toward the goal bearing (≥ 3 of those 5 actions within ±30° of bearing) |
 | 3 | `replan_failure` | change acknowledged in `reason`, but the agent never gets through the new route: never passes the newly opened door (s02/s02v), never gets past the cube's x (s01), never enters the other tine (s03) |
-| 4 | `collision` | change acknowledged and a route attempted, but **≥ 50%** of post-change steps are collisions: stuck grinding on geometry |
+| 4 | `collision` | change acknowledged and the agent got through the new route (static arms: the available route), but **≥ 50%** of post-change steps are collisions: stuck grinding on geometry |
 | 5 | `timeout` | got through the new route but did not reach the goal within 60 steps |
+
+A run that never gets through is `replan_failure` (#3) whatever its collision count; `collision`
+only applies once the agent is through.
 
 For `initial` / `final` arms, labels 1–2 do not apply. Use `collision`, `timeout`, or
 `replan_failure` (the agent never found the available route).
@@ -227,8 +314,9 @@ For `initial` / `final` arms, labels 1–2 do not apply. Use `collision`, `timeo
 
 **Labeling procedure (two passes):**
 1. **Auto pre-label** by script: keyword match on post-change `reason` text (`closed`, `blocked`,
-   `wall`, `obstacle`, `door`, `box`, `no longer`, `dead end`, …) plus geometric checks from
-   `steps.jsonl`.
+   `wall`, `obstacle`, `box`, `cube`, `no longer`, `dead end`, …) plus geometric checks from
+   `steps.jsonl`. `door` counts only in a sentence that also says closed/closing/shut/open/opened/
+   opening/blocked/locked, because the s02/s02v doors are in frame from spawn.
 2. **Manual review** of every run: read post-change reasons and watch the replay. Confirm or override,
    with a note on every override.
 
@@ -244,8 +332,10 @@ A run is **valid** only if all of these hold:
 - [ ] end reason ∈ {`goal_reached`, `max_steps`}
 - [ ] no `decision_error`; `rungs_used` is ≥ 90% `json_schema`
 - [ ] `run.json` matches `config.lock.json` (model, prompt sha, frame, config, site version, `git_dirty: false`)
-- [ ] `dynamic` arm: change event present in `events.jsonl` at the expected step (s01/s02/s02v: step 3),
-      or absent only if the agent never reached the trigger (→ `pre_change_failure`)
+- [ ] `dynamic` arm: change event present in `events.jsonl` on the move that reached the trigger
+      (s01/s02/s02v, §8 definition), or on the next move if that one ended within 0.3 m of first contact
+      (the overlap is reported ~2 physics ticks late and the world freezes between moves); absent only
+      if the agent never reached the trigger (→ `pre_change_failure`)
 - [ ] `initial` / `final` arm: **no** change event in `events.jsonl`
 - [ ] `eval/replay.py` reproduces the trajectory with drift < 1e-3 m, matching collisions and events
 
@@ -271,6 +361,9 @@ would bias SR upward.
 
 Test: Fisher's exact test on success counts per contrast. **Caveat, stated up front:** n = 5 per site
 cell (10 per 2a/2b family) is underpowered. Only very large gaps (e.g. 5/5 vs 0/5) reach p < 0.05.
+Fisher's test also assumes independent runs. At temperature 0 the seeds are near-replicates (§7.3), so
+p-values overstate the evidence and are read as a robustness check across start poses, not as
+sampling inference.
 Results are reported as effect sizes with CIs; significance is secondary. Failure-mode distribution is
 the main qualitative result for Phase 2.
 
@@ -281,22 +374,23 @@ change, reasons, trajectory plot).
 
 Phase 1 cannot start until these exist and 1.0 has passed.
 
-- [ ] `--spawn-seed=<n>`: seeded jitter (§7.3), offset recorded in `run.json`
-- [ ] `--world=initial|final|dynamic`, generalising `--static-doors`:
-  - [ ] `TriggeredOccluder`: disarm (s01 `initial`) and deploy-at-load (s01 `final`)
-  - [ ] `TriggeredDoorBank`: apply post-trigger state at load, then disarm (`final`)
-  - [ ] s03 `final`: pick the closed side from the seed parity
-  - [ ] `world` recorded in `run.json` / `metrics.json`
-- [ ] Decider run-dir override so runs land in `eval/phase1/<mp>/runs/<site>/<arm>/seed<N>/`
+- [x] `--spawn-seed=<n>`: seeded jitter (§7.3), offset recorded in `run.json`
+- [x] `--world=initial|final|dynamic`, generalising `--static-doors`:
+  - [x] `TriggeredOccluder`: disarm (s01 `initial`) and deploy-at-load (s01 `final`)
+  - [x] `TriggeredDoorBank`: apply post-trigger state at load, then disarm (`final`)
+  - [x] s03 `final`: pick the closed side from the seed parity
+  - [x] `world` recorded in `run.json` / `metrics.json`
+- [x] Decider run-dir override (`--run-dir=`) so runs land in `eval/phase1/<mp>/runs/<site>/<arm>/seed<N>/`
       (today `recorder.py` writes `config.RUNS_DIR / run_id`)
-- [ ] `eval/phase1.py --mini-phase <id> [--only site/arm/seed]`: reads `matrix.csv`, flies
+- [x] `eval/phase1.py run --mini-phase <id> [--only site/arm/seed]`: reads `matrix.csv`, flies
       `order.txt` sequentially, skips valid runs, assigns attempt numbers, moves superseded attempts to
       `_attempts/`, runs validity checks and replay
-- [ ] Labeling script (auto pre-label → `labels.csv`) and aggregation script (`results/`)
-- [ ] `.gitignore` rules for `eval/phase1/**` (§14)
-- [ ] Sites promoted `draft → active` at the frozen versions
-- [ ] Rubric thresholds (§9) confirmed
-- [ ] Network access to sctsvr6 (school Wi-Fi blocks SSH; proposal "Things I will Need")
+- [x] Labeling script (`eval/phase1_label.py`)
+- [x] Aggregation script (`results/`): `eval/phase1.py results`
+- [x] `.gitignore` rules for `eval/phase1/**` (§14)
+- [x] Sites promoted `draft → active` at the frozen versions
+- [x] Rubric thresholds (§9) confirmed
+- [x] Network access to sctsvr6 (school Wi-Fi blocks SSH; proposal "Things I will Need")
 - [ ] All of the above committed; clean tree
 
 ## 13. Pilot data (not citable)
@@ -339,8 +433,10 @@ eval/phase1/
 │   ├── labels.csv            ← §9
 │   ├── summary.md            ← mini-phase table + notes
 │   └── _attempts/<site>/<arm>/seed<N>/a<NN>/   ← invalid or superseded attempts, never deleted
-├── 1B_s02/
-├── 1C_s02v/
+├── 1Ba_s02a/
+├── 1Bc_s02c/
+├── 1Ca_s02va/
+├── 1Cc_s02vc/
 ├── 1D_s03/
 └── results/                  ← aggregate tables + figures, built only from `complete` mini-phases
 ```
@@ -358,11 +454,20 @@ eval/phase1/
 - Ignored: `frames/`, `steps.jsonl` (regenerable by `eval/replay.py`)
 - `decisions.jsonl` is committed because the model's reasoning is the one thing a rerun does not reproduce.
 
-**Timeline:** ~90 runs × ~2 min ≈ 3–4 h of sequential compute (~30–60 min per mini-phase), plus
-labeling. Fits the proposal's weeks 6–9 block (layout edge-case testing, then all Phase 1 episodes).
+**Timeline:** ~25 min of flying per 15-run mini-phase, ~45–55 min per session including preflight
+and labeling; ~4–4.5 h for the five remaining mini-phases (§7.5). Fits the proposal's weeks 6–9 block (layout edge-case testing, then all Phase 1 episodes).
 
 ## 15. Changelog
 
 | Date | Change |
 |---|---|
 | 2026-09-27 | Initial spec. 3 arms, 6 sites, 90 episodes, temperature 0 + spawn jitter, max 60 steps, no collision cap, mini-phases 1.0/1A–1D. |
+| 2026-09-27 | §12 prerequisites built (`d100948`). `git_dirty` ignores recorded data trees (§3). Godot takes `--run-dir=`; replays of nested runs go to `<run>/replay/`; `godot.log` per run, git-ignored (§14). 1.0 shakedown complete, 18/18 valid; rubric questions open in `eval/phase1/1.0_shakedown/summary.md`. |
+| 2026-09-27 | §9 settled before 1A (1.0 findings 1–3): rubric order kept, `collision` only for runs that got through; `door` keyword needs a state word in the same sentence; §8 s03 static arms with no tine entry have no split. 1.0 auto labels unchanged under the new rules. |
+| 2026-09-27 | 1A first start (`01cef05`) aborted after one invalid run: the operator uplink ran at ~10 KB/s through the tunnel (server compute 0.76 s/decision), and dropped connections (`RemoteProtocolError`) pushed half the decisions from `json_schema` to `json_object`. Decider now retries the same rung up to 3× on a transport error and no longer turns streaming off for one. 1A reset to `planned` (0 valid runs); attempts kept in `_attempts/`. Fly citable phases only on a link where a real decision round-trips in a few seconds. |
+| 2026-09-27 | 1A restart #2: the §10 check and §8 split hard-coded step 3, which holds only for straight flight. `p1_1A_s01_dynamic_seed4_a01` turned, ended move 3 at x = 7.0008 and fired on move 4: a legitimate run marked invalid. Change step is now the move that reaches the trigger box (x ≤ trigger + 0.7 m), with the next move accepted within 0.3 m of first contact. 1A restarted at the new SHA; its 3 runs so far are kept in `_attempts/`. 1.0 still 18/18 valid, labels unchanged. |
+| 2026-09-28 | 30-run mini-phases 1B and 1C split into 15-run chunks, one site each: 1Ba (s02a), 1Bc (s02c), 1Ca (s02va), 1Cc (s02vc). Every citable mini-phase is now 15 runs. New fixed orders from `random.Random("phase1-<mp>")` (§7.4). Mirror pairs must share a config lock (§7.1). Done before either had flown (0 runs), so no data moved. Design, lock and 90-run total unchanged. |
+| 2026-09-28 | §7.5 time estimates added, calibrated on 1A (7 s + 1.9 s/step per run; 25.5 min for 15 runs). |
+| 2026-10-02 | Docs only, no design change. §7.3 explains why five seeds are kept despite near-determinism (seeds are start-pose robustness, not decoding samples; 5 is the smallest n where a contrast can reach p < 0.05). §11 notes that Fisher's independence assumption is only approximate here. §7.1 notes that sequential execution is about latency, not determinism. Lock and seeds unchanged. |
+| 2026-10-02 | 1Ba restart: `p1_1Ba_s02a_dynamic_seed5_a01` failed replay with 4.2 cm drift, but the replay was exact. The agent was pinned on a wall, two moves ended in the same physics tick, their `/step` POSTs landed swapped, and `replay.py` compared by line. The recorder now sorts `steps.jsonl` by step at run end and `replay.py` compares by step. 1Ba restarted at the new SHA; its 2 runs so far are kept in `_attempts/`. All 66 step logs of 1.0 and 1A were already in order, so neither is affected; both re-validated without flying. |
+| 2026-10-07 | §12 aggregation script built: `eval/phase1.py results` writes `eval/phase1/results/results.md` (§11 tables per layout, pooled rows, contrasts a–d) and `runs.csv`, deterministic. Latency percentiles pool every decision in a cell with the recorder's linear rule, so a few p95s differ by ≤ 0.04 s from the hand-written summaries; `results.md` is the reference. No design change. |
