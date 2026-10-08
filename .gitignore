@@ -51,3 +51,9 @@ eval/phase1/**/frames/
 eval/phase1/**/steps.jsonl
 eval/phase1/**/replay/
 eval/phase1/**/godot.log
+
+# Phase 2 data (docs/phase2-test-plan.md): same rule as Phase 1.
+eval/phase2/**/frames/
+eval/phase2/**/steps.jsonl
+eval/phase2/**/replay/
+eval/phase2/**/godot.log
