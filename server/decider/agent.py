@@ -48,6 +48,8 @@ class Agent:
 
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
+    Agent("a01", "p03", {}, "No goal hint: p03 drops the goal's distance and bearing "
+          "and each action's angle and distance. The goal is found from the image alone."),
 )}
 
 DEFAULT_AGENT = "a00"

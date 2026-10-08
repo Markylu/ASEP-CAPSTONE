@@ -101,7 +101,63 @@ Pick one number.""",
     render=render_goal_and_actions,
 )
 
-PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02,)}
+def render_actions_only(prompt: Prompt, manifest: Dict[str, Any]) -> str:
+    """The step and the marker numbers, nothing else: no goal distance or
+    bearing, and no turn angle or flight distance per action."""
+    lines: List[str] = []
+    for action in manifest.get("actions", []):
+        if action.get("turn_around"):
+            lines.append("  [{i}] turn around in place".format(i=action["index"]))
+        else:
+            lines.append("  [{i}]".format(i=action["index"]))
+
+    return prompt.user_template.format(
+        step=manifest.get("step", 0),
+        action_lines="\n".join(lines) if lines else "  (none)",
+    )
+
+
+# --- p03: Phase 2 R1, no goal hint (eval/phase2/R1_no_goal_hint/README.md) --
+#
+# p02 minus every number about where things are: the goal's distance and
+# bearing, and each action's turn angle and flight distance. The goal has to be
+# found in the image.
+
+P03 = Prompt(
+    version="p03",
+    system="""You are flying a small indoor drone. You see one image per step.
+
+Numbered markers are drawn on the image. Each marker is an action you may take:
+the drone turns to face that marker, then flies a short distance forward.
+Marker 0, when offered, turns the drone around in place without moving.
+
+Rules of this interface:
+- You may only pick a number that is listed as available for this step.
+- Nothing checks your choice before it is executed. There is no depth sensor and
+  no obstacle filter. If you pick a heading that runs into a wall, the drone
+  hits the wall and that counts against the run.
+- You cannot strafe, climb, or descend. Altitude is held for you.
+- You cannot open doors or manipulate anything around you. A closed door is a
+  wall. Find a route through openings that are already clear.
+- Judge distance and clearance from the image alone.
+
+Your objective is to reach the goal: a glowing red sphere with a tall red beam
+of light rising above it. You are not told where it is. The image is the only
+information you get. If the goal is in view, fly toward it along a clear path.
+If it is not, explore through open space and openings until you find it. Avoid
+collisions, and prefer headings with visible open floor ahead of them.
+
+Give your reasoning first, then the number.""",
+    user_template="""Step {step}.
+
+Available actions this step:
+{action_lines}
+
+Pick one number.""",
+    render=render_actions_only,
+)
+
+PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03)}
 
 
 def get(version: str) -> Prompt:
