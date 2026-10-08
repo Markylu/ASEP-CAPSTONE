@@ -48,7 +48,7 @@ def _indices_from(body: Dict[str, Any]) -> List[int]:
         return list(params["properties"]["action"]["enum"])
     # Rung 4 has no schema at all; read the numbers off the prompt text.
     text = json.dumps(body.get("messages", []))
-    return [int(n) for n in re.findall(r"\\\\n  \[(\d+)\]", text)] or \
+    return [int(n) for n in re.findall(r"\\n  \[(\d+)\]", text)] or \
            [int(n) for n in re.findall(r"\[(\d+)\] turn", text)]
 
 

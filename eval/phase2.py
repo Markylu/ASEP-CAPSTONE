@@ -83,9 +83,39 @@ for _round, _spec in ROUNDS.items():
     if not _spec.get("agent"):
         raise SystemExit("round {0} names no agent".format(_round))
 
+def round_readme(unit: str) -> str:
+    """Stub for a round's write-up (docs/phase2-test-plan.md §4 step 1).
+
+    Filled in and committed before the round flies; after it flies only the
+    Outcome section changes. Every claim under Evidence cites a path.
+    """
+    spec = ROUNDS[unit]
+    ident = agents.describe(spec["agent"])
+    return "\n".join([
+        "# {0}: {1}".format(unit, spec["title"]), "",
+        "**Agent:** `{agent_version}` (`{agent_sha}`) · **Prompt:** `{prompt_version}` "
+        "(`{prompt_sha}`) · **Status:** pre-registered, not flown".format(**ident), "",
+        "Written before flying. Spec: `docs/phase2-test-plan.md`.", "",
+        "## Change", "", "<!-- One change, and how it differs from the agent it builds on. -->", "",
+        "## Evidence", "",
+        "<!-- Past data that points at this change. Every claim cites a path: results tables,",
+        "     summary.md, run IDs and steps, evidence.md (python eval/agent_evidence.py ...). -->", "",
+        "## Hypothesis", "", "<!-- One falsifiable sentence. -->", "",
+        "## Predictions", "", "<!-- Per arm, and per site where it differs. Direction and size. -->", "",
+        "| Arm | Baseline (R0) | Predicted |", "|---|---|---|",
+        "| initial | | |", "| final | | |", "| dynamic | | |", "",
+        "## Manipulation check", "",
+        "<!-- A measurable sign the change took effect, independent of success. -->", "",
+        "## Drop criterion", "", "<!-- The result that means this change is not carried forward. -->", "",
+        "## Builds on", "", "<!-- Previous round and agent. -->", "",
+        "## Outcome", "", "Not flown. After the round: one line on whether the hypothesis held, "
+        "and a link to [summary.md](summary.md).", ""])
+
+
 PHASE = Phase(number=2, root=PHASE_DIR, unit_key="round", unit_label="Round",
               units=ROUNDS, lock=LOCK, script="eval/phase2.py",
-              spec="docs/phase2-test-plan.md", agent_lock=agents.describe)
+              spec="docs/phase2-test-plan.md", agent_lock=agents.describe,
+              unit_readme=round_readme)
 
 BASELINE = "R0"
 BASELINE_NOTE = ("R0 is the Phase 1 agent (a00), not flown again: its seed-1 runs from "
