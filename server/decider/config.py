@@ -133,7 +133,7 @@ def git_sha() -> str:
 
 #: Recorded run data, not code. Runs land here while a phase is in progress, so
 #: counting them would mark every run after the first as dirty.
-_DATA_PATHS = ("eval/runs", "eval/phase1")
+_DATA_PATHS = ("eval/runs", "eval/phase1", "eval/phase2")
 
 
 def git_dirty() -> bool:
