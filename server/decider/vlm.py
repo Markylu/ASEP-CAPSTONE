@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 
-from . import config, prompt, schema
+from . import agent, config, schema
 
 RUNGS = ["json_schema", "json_object", "tool_call", "text"]
 
@@ -149,11 +149,12 @@ class Decision:
 
 
 def _messages(manifest: Dict[str, Any], frame_b64: str, schema_hint: str = "") -> List[Dict[str, Any]]:
-    text = prompt.render_user_prompt(manifest)
+    prompt = agent.current().prompt
+    text = prompt.render(prompt, manifest)
     if schema_hint:
         text += "\n\n" + schema_hint
     return [
-        {"role": "system", "content": prompt.SYSTEM_PROMPT},
+        {"role": "system", "content": prompt.system},
         {"role": "user", "content": [
             {"type": "text", "text": text},
             {"type": "image_url",

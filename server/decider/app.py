@@ -22,13 +22,13 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from . import config, prompt, vlm
+from . import agent, config, vlm
 from .recorder import Run, resolve_run_dir
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(message)s")
 log = logging.getLogger("decider")
 
-app = FastAPI(title="VLMnav decider", version=prompt.PROMPT_VERSION)
+app = FastAPI(title="VLMnav decider", version=agent.current().version)
 
 
 @app.on_event("shutdown")
@@ -112,8 +112,7 @@ def health() -> Dict[str, Any]:
         "profile": config.VLM_PROFILE,
         "model": config.VLM_MODEL,
         "litellm_base_url": config.LITELLM_BASE_URL,
-        "prompt_version": prompt.PROMPT_VERSION,
-        "prompt_sha": prompt.prompt_sha(),
+        **agent.record(),
         "runs_dir": str(config.RUNS_DIR),
     }
 
@@ -161,8 +160,7 @@ async def decide(request: DecideRequest):
         "frame": frame_path,
         "frame_size": request.frame_size,
         "manifest": request.manifest,
-        "prompt_version": prompt.PROMPT_VERSION,
-        "prompt_sha": prompt.prompt_sha(),
+        **agent.record(),
     })
     run.record_decision(record)
     timing = decision.timing.to_dict() if decision.timing else {}

@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from . import config, prompt
+from . import agent, config
 
 
 def _now() -> str:
@@ -103,8 +103,7 @@ class Run:
             # metrics.json finds that out.
             "vlm_profile": config.VLM_PROFILE,
             "litellm_base_url": config.LITELLM_BASE_URL,
-            "prompt_version": prompt.PROMPT_VERSION,
-            "prompt_sha": prompt.prompt_sha(),
+            **agent.record(),
             "git_sha": config.git_sha(),
             "git_dirty": config.git_dirty(),
             "temperature": config.TEMPERATURE,
@@ -239,6 +238,9 @@ class Run:
             "git_dirty": run_json.get("git_dirty"),
             "prompt_version": run_json.get("prompt_version"),
             "prompt_sha": run_json.get("prompt_sha"),
+            # Null on Phase 1 runs, which predate agent versions; those are a00.
+            "agent_version": run_json.get("agent_version"),
+            "agent_sha": run_json.get("agent_sha"),
             "git_sha": run_json.get("git_sha"),
             "frame_size": run_json.get("frame_size"),
             "config": run_json.get("config"),
