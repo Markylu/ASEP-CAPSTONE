@@ -36,7 +36,7 @@ This is screening and is not citable. The final round flies the full Phase 1 pro
 
 ## 1. Phase 2 setup (branch `phase2/setup`)
 
-- [ ] Create GitHub milestone "Phase 2"
+- [x] Create GitHub milestone "Phase 2"
 - [x] Add `.github/ISSUE_TEMPLATE/round.md` (blank fields: change, why, expected outcome, drop criterion)
 - [x] Write `docs/phase2-test-plan.md`
   - [x] Frozen config: model, temp 0, frame, action fan, 60 steps, no collision cap, Phase 1 site versions
@@ -53,7 +53,7 @@ This is screening and is not citable. The final round flies the full Phase 1 pro
 - [x] Generalise `eval/phase1.py` to take phase root + round definition
 - [x] Reuse `eval/phase1_label.py` rubric unchanged
 - [x] R0 baseline: Phase 1 seed-1 runs, all 3 arms (no new flying)
-- [ ] Shakedown round `P2.0` with fake decider: 18/18 valid, agent fields recorded, replay exact
+- [x] Shakedown round `P2.0` with fake decider: 18/18 valid, agent fields recorded, replay exact
 - [ ] PR → `main`, merge, tag `p2-setup`
 
 ## 2. Per round (repeat for R1, R2, …)

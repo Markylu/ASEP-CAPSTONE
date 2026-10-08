@@ -3,10 +3,10 @@
   "title": "Shakedown (fake decider)",
   "citable": false,
   "agent_version": "a00",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "92b3a2b",
+  "started": "2026-10-08T15:07:08+00:00",
+  "finished": "2026-10-08T15:11:50+00:00",
+  "operator": "Markylu",
+  "notes": "2026-10-08: complete at 92b3a2b, 18/18 valid, first start. Fake decider (FAKE_PICK=straight) on :4001, decider --agent a00 on :8010. Every run matches 1.0 (collisions, final distance, auto label)."
 }
