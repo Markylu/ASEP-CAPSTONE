@@ -312,7 +312,8 @@ class Phase:
     def __init__(self, *, number: int, root: Path, unit_key: str, unit_label: str,
                  units: Dict[str, Dict[str, Any]], lock: Dict[str, Any], script: str,
                  spec: str, orders: Optional[Dict[str, str]] = None,
-                 agent_lock: Optional[Callable[[str], Dict[str, Any]]] = None) -> None:
+                 agent_lock: Optional[Callable[[str], Dict[str, Any]]] = None,
+                 unit_readme: Optional[Callable[[str], str]] = None) -> None:
         self.number = number
         self.root = root
         self.unit_key = unit_key
@@ -323,6 +324,7 @@ class Phase:
         self.spec = spec
         self.orders = orders or {}
         self.agent_lock = agent_lock
+        self.unit_readme = unit_readme
         self.lock_path = root / "config.lock.json"
         self.matrix_path = root / "matrix.csv"
         self.results_dir = root / "results"
@@ -425,6 +427,13 @@ class Phase:
                 phase.update({"status": "planned", "git_sha": None, "started": None,
                               "finished": None, "operator": None, "notes": ""})
                 write_json(folder / "phase.json", phase)
+            # The unit's write-up, written before it flies. Only a stub, only
+            # once, and never for a unit already flown: a hypothesis written
+            # after the result is not one.
+            readme = folder / "README.md"
+            if (self.unit_readme and not readme.is_file()
+                    and read_json(folder / "phase.json").get("status") == "planned"):
+                readme.write_text(self.unit_readme(unit))
             for site, arm, seed in sorted(order):
                 if (unit, site, arm, str(seed)) in have:
                     continue
@@ -454,8 +463,10 @@ class Phase:
             current = ([self.latest_row(rows, unit, s, a, sd)
                         for s, a, sd in self.order_of(unit)] if rows else [])
             valid = sum(1 for r in current if r["status"] == "valid")
-            summary = ("[summary]({0}/summary.md)".format(spec["folder"])
-                       if (folder / "summary.md").is_file() else "")
+            summary = " · ".join(
+                "[{0}]({1}/{2})".format(name, spec["folder"], file)
+                for name, file in (("write-up", "README.md"), ("summary", "summary.md"))
+                if (folder / file).is_file())
             agent_cell = " {0} |".format(spec.get("agent", "")) if with_agent else ""
             lines.append("| {0} | {1} |{2} {3} | {4} | {5} / {6} | {7} | {8} |".format(
                 unit, spec["title"], agent_cell, "yes" if spec["citable"] else "no",
