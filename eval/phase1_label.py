@@ -2,11 +2,13 @@
 """Auto pre-label for the phase 1 failure-mode rubric (docs/phase1-test-plan.md §9).
 
     python eval/phase1_label.py --mini-phase 1A
+    python eval/phase1_label.py --round R1          # Phase 2: same rubric, same columns
 
 Writes <mini-phase>/labels.csv with `auto_label` and `ack_step` filled and
 `label` blank: every run still gets a manual review (read the post-change
 reasons, watch the replay) before `label` is filled. Re-running keeps whatever
-manual columns are already there. The evidence behind each auto label goes to
+manual columns are already there, and a reviewed row (one with a `label`)
+keeps its `ack_step`: review may correct it, and a rerun must not undo that. The evidence behind each auto label goes to
 auto_labels.json beside it.
 
 Only the current valid attempt of each cell is labelled. Needs steps.jsonl,
@@ -23,9 +25,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from phase1 import (CHANGE_EVENTS, TRIGGER_X, crossing_step,  # noqa: E402
-                    latest_row, load_matrix, order_of, phase_dir, read_json,
-                    read_jsonl, run_dir_for)
+from phaselib import (CHANGE_EVENTS, TRIGGER_X, crossing_step,  # noqa: E402
+                      read_json, read_jsonl)
 
 LABEL_FIELDS = ["run_id", "site", "arm", "seed", "auto_label", "label", "ack_step",
                 "tags", "override_note", "reviewer", "date"]
@@ -169,10 +170,19 @@ def label_run(site: str, arm: str, run_dir: Path) -> Dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--mini-phase", required=True)
+    unit_arg = parser.add_mutually_exclusive_group(required=True)
+    unit_arg.add_argument("--mini-phase", help="Phase 1 mini-phase, e.g. 1A")
+    unit_arg.add_argument("--round", help="Phase 2 round, e.g. R1")
     args = parser.parse_args()
-    mp = args.mini_phase
-    folder = phase_dir(mp)
+    if args.round:
+        from phase2 import PHASE
+        mp = args.round
+    else:
+        from phase1 import PHASE
+        mp = args.mini_phase
+    if mp not in PHASE.units:
+        raise SystemExit("unknown unit {0}; known: {1}".format(mp, ", ".join(PHASE.units)))
+    folder = PHASE.phase_dir(mp)
     labels_path = folder / "labels.csv"
 
     existing: Dict[str, Dict[str, str]] = {}
@@ -183,19 +193,20 @@ def main() -> int:
     rows: List[Dict[str, Any]] = []
     evidence: Dict[str, Any] = {}
     skipped = 0
-    matrix = load_matrix()
-    for site, arm, seed in order_of(mp):
-        row = latest_row(matrix, mp, site, arm, seed)
+    matrix = PHASE.load_matrix()
+    for site, arm, seed in PHASE.order_of(mp):
+        row = PHASE.latest_row(matrix, mp, site, arm, seed)
         if row["status"] != "valid":
             skipped += 1
             continue
-        result = label_run(site, arm, run_dir_for(mp, site, arm, seed))
+        result = label_run(site, arm, PHASE.run_dir_for(mp, site, arm, seed))
         manual = existing.get(row["run_id"], {})
+        auto_ack = "" if result["ack_step"] is None else result["ack_step"]
         rows.append({
             "run_id": row["run_id"], "site": site, "arm": arm, "seed": seed,
             "auto_label": result["auto_label"],
             "label": manual.get("label", ""),
-            "ack_step": "" if result["ack_step"] is None else result["ack_step"],
+            "ack_step": manual.get("ack_step", "") if manual.get("label") else auto_ack,
             "tags": manual.get("tags", ""), "override_note": manual.get("override_note", ""),
             "reviewer": manual.get("reviewer", ""), "date": manual.get("date", ""),
         })
