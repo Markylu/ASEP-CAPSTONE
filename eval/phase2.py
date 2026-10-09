@@ -51,6 +51,8 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     "P2.0": {"folder": "P2.0_shakedown", "title": "Shakedown (fake decider)",
              "agent": "a00", "sites": ROUND_SITES, "seeds": ROUND_SEEDS,
              "citable": False},
+    "R1": {"folder": "R1_no_goal_hint", "title": "No goal hint", "agent": "a01",
+           "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
