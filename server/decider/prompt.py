@@ -20,8 +20,9 @@ class Prompt:
     system: str
     user_template: str
     #: manifest -> user text. Most versions share render_goal_and_actions; a
-    #: version that shows the model something new brings its own.
-    render: Callable[["Prompt", Dict[str, Any]], str]
+    #: version that shows the model something new brings its own. A version
+    #: whose agent has memory also takes the run's earlier decisions.
+    render: Callable[..., str]
 
     def sha(self) -> str:
         """Identity of the wording, independent of the version label."""
@@ -157,7 +158,92 @@ Pick one number.""",
     render=render_actions_only,
 )
 
-PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03)}
+def render_actions_with_memory(prompt: Prompt, manifest: Dict[str, Any],
+                               memory: List[Dict[str, Any]]) -> str:
+    """p03's step and marker numbers, after the agent's own earlier steps.
+
+    `memory` is every earlier decision of this run, oldest first, as
+    recorder.Run.memory() reads it from decisions.jsonl: the step, the marker
+    picked, whether it was the turn-around, and the reason verbatim.
+    """
+    if memory:
+        lines = ["Your earlier steps in this run, oldest first:"]
+        for entry in memory:
+            if entry.get("turn_around"):
+                picked = "you turned around [0]"
+            else:
+                picked = "you picked [{0}]".format(entry["index"])
+            reason = " ".join(str(entry.get("reason", "")).split())
+            lines.append("Step {0}: {1}. Your reasoning: {2}".format(
+                entry["step"], picked, reason or "(none given)"))
+        memory_block = "\n".join(lines)
+    else:
+        memory_block = "Your earlier steps in this run: none yet, this is the first step."
+
+    actions: List[str] = []
+    for action in manifest.get("actions", []):
+        if action.get("turn_around"):
+            actions.append("  [{i}] turn around in place".format(i=action["index"]))
+        else:
+            actions.append("  [{i}]".format(i=action["index"]))
+
+    return prompt.user_template.format(
+        step=manifest.get("step", 0),
+        memory_block=memory_block,
+        action_lines="\n".join(actions) if actions else "  (none)",
+    )
+
+
+# --- p04: Phase 2 R2, text memory of the whole run --------------------------
+# (eval/phase2/R2_text_memory/README.md)
+#
+# p03 plus the agent's own earlier steps in this run: the marker it picked and
+# the reasoning it gave, every step, oldest first. Still no numbers about where
+# anything is; the record holds only what the model itself wrote.
+
+P04 = Prompt(
+    version="p04",
+    system="""You are flying a small indoor drone. You see one image per step.
+
+Numbered markers are drawn on the image. Each marker is an action you may take:
+the drone turns to face that marker, then flies a short distance forward.
+Marker 0, when offered, turns the drone around in place without moving.
+
+Rules of this interface:
+- You may only pick a number that is listed as available for this step.
+- Nothing checks your choice before it is executed. There is no depth sensor and
+  no obstacle filter. If you pick a heading that runs into a wall, the drone
+  hits the wall and that counts against the run.
+- You cannot strafe, climb, or descend. Altitude is held for you.
+- You cannot open doors or manipulate anything around you. A closed door is a
+  wall. Find a route through openings that are already clear.
+- Judge distance and clearance from the image alone.
+
+Your objective is to reach the goal: a glowing red sphere with a tall red beam
+of light rising above it. You are not told where it is. The image is the only
+information you get. If the goal is in view, fly toward it along a clear path.
+If it is not, explore through open space and openings until you find it. Avoid
+collisions, and prefer headings with visible open floor ahead of them.
+
+Each step also lists your own earlier steps in this run, oldest first: the
+marker you picked and the reasoning you gave. Marker numbers refer to the view
+at that step, so read the reasoning to know where you went. Use this record to
+avoid going back over ground you have already covered, and to remember where
+you last saw the goal.
+
+Give your reasoning first, then the number.""",
+    user_template="""Step {step}.
+
+{memory_block}
+
+Available actions this step:
+{action_lines}
+
+Pick one number.""",
+    render=render_actions_with_memory,
+)
+
+PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04)}
 
 
 def get(version: str) -> Prompt:

@@ -50,6 +50,9 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
     Agent("a01", "p03", {}, "No goal hint: p03 drops the goal's distance and bearing "
           "and each action's angle and distance. The goal is found from the image alone."),
+    Agent("a02", "p04", {"memory": {"kind": "text", "scope": "full_run"}},
+          "Text memory: a01 plus every earlier step of the run in the prompt, oldest "
+          "first: the marker picked and the reason given, verbatim."),
 )}
 
 DEFAULT_AGENT = "a00"
