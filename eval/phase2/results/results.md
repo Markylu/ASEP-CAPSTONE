@@ -9,36 +9,37 @@ Spec: `docs/phase2-test-plan.md`. One run per cell (seed 1), so each cell is a s
 | Round | Agent | Title |
 |---|---|---|
 | R0 | a00 | Phase 1 baseline |
+| R1 | a01 | No goal hint |
 
 ## Success by arm
 
-| Arm | R0 |
-|---|---|
-| initial | 5/6 |
-| final | 0/6 |
-| dynamic | 0/6 |
+| Arm | R0 | R1 |
+|---|---|---|
+| initial | 5/6 | 5/6 |
+| final | 0/6 | 2/6 |
+| dynamic | 0/6 | 1/6 |
 
 ## Every cell
 
 ✓ steps to goal, or ✗ and the §9 label (end reason if not yet labelled).
 
-| Site | Arm | R0 |
-|---|---|---|
-| s01 | initial | ✓ 14 |
-| s01 | final | ✗ replan_failure |
-| s01 | dynamic | ✗ ignore_change |
-| s02a | initial | ✓ 14 |
-| s02a | final | ✗ replan_failure |
-| s02a | dynamic | ✗ ignore_change |
-| s02c | initial | ✓ 14 |
-| s02c | final | ✗ replan_failure |
-| s02c | dynamic | ✗ ignore_change |
-| s02va | initial | ✓ 19 |
-| s02va | final | ✗ replan_failure |
-| s02va | dynamic | ✗ ignore_change |
-| s02vc | initial | ✓ 19 |
-| s02vc | final | ✗ replan_failure |
-| s02vc | dynamic | ✗ ignore_change |
-| s03 | initial | ✗ replan_failure |
-| s03 | final | ✗ replan_failure |
-| s03 | dynamic | ✗ pre_change_failure |
+| Site | Arm | R0 | R1 |
+|---|---|---|---|
+| s01 | initial | ✓ 14 | ✓ 14 |
+| s01 | final | ✗ replan_failure | ✗ timeout |
+| s01 | dynamic | ✗ ignore_change | ✗ replan_failure |
+| s02a | initial | ✓ 14 | ✓ 14 |
+| s02a | final | ✗ replan_failure | ✗ timeout |
+| s02a | dynamic | ✗ ignore_change | ✓ 60 |
+| s02c | initial | ✓ 14 | ✓ 14 |
+| s02c | final | ✗ replan_failure | ✓ 34 |
+| s02c | dynamic | ✗ ignore_change | ✗ timeout |
+| s02va | initial | ✓ 19 | ✓ 55 |
+| s02va | final | ✗ replan_failure | ✗ replan_failure |
+| s02va | dynamic | ✗ ignore_change | ✗ timeout |
+| s02vc | initial | ✓ 19 | ✓ 55 |
+| s02vc | final | ✗ replan_failure | ✓ 24 |
+| s02vc | dynamic | ✗ ignore_change | ✗ timeout |
+| s03 | initial | ✗ replan_failure | ✗ replan_failure |
+| s03 | final | ✗ replan_failure | ✗ replan_failure |
+| s03 | dynamic | ✗ pre_change_failure | ✗ replan_failure |

@@ -114,4 +114,4 @@ R0 / `a00` (`p02`, sha `fb65adbe3317`), the Phase 1 agent.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Held (screening, seed 1).** Flown 2026-10-08 at `32ef803`: `final` + `dynamic` 0/12 → 3/12, `initial` 5/6 → 5/6, manipulation check passed, drop criterion not met. New failure: the agent finds the route, then loses the goal and doubles back. See [summary.md](summary.md).
