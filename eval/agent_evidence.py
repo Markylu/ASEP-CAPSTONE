@@ -21,12 +21,18 @@ Columns, over every decision in the cell:
   keyword hits, negations included ("no visible obstacles"): read the reasons
   before citing it.
 - turn-around pick: action 0.
+- reason cites memory: the reason refers back to earlier steps (earlier,
+  previous, already, before, again, last time, "step N"). Raw keyword hits, so
+  agents without memory score above zero too; compare against a baseline round.
+- revisit: the drone is within 1 m of where it was at least 5 decisions
+  earlier in the same run (manifest pose), i.e. it is going back over ground.
 
 Deterministic: the same runs give the same file.
 """
 from __future__ import annotations
 
 import argparse
+import math
 import re
 import sys
 from collections import defaultdict
@@ -39,10 +45,14 @@ from phaselib import ARMS, REPO_ROOT, read_json, read_jsonl  # noqa: E402
 BEARING = re.compile(r"\bbearing\b")
 DISTANCE = re.compile(r"\d+(?:\.\d+)?\s*(?:m|meters?|metres?)\s+away")
 OBSTACLE = re.compile(r"\b(?:wall|door|obstacle|block|cube|dead end|barrier)")
+MEMORY = re.compile(r"\b(?:earlier|previous(?:ly)?|already|before|again|last time|step \d+)\b")
+REVISIT_M = 1.0
+REVISIT_GAP = 5
 
 COLUMNS = [("bearing", "reason cites bearing"), ("distance", "reason cites distance"),
            ("nearest", "nearest-bearing pick"), ("obstacle", "obstacle word"),
-           ("turn", "turn-around pick")]
+           ("turn", "turn-around pick"), ("memory", "reason cites memory"),
+           ("revisit", "revisit")]
 
 
 def units_under(path: Path) -> List[Path]:
@@ -83,10 +93,17 @@ def tally(units: List[Path]) -> Tuple[Dict[Tuple[str, str], Dict[str, int]], Dic
             meta["agents"].add(info.get("agent_version") or "a00")
             c = cells[(site, arm)]
             c["runs"] += 1
+            seen: List[List[float]] = []
             for d in read_jsonl(run / "decisions.jsonl"):
                 reason = (d.get("reason") or "").lower()
                 manifest = d.get("manifest") or {}
                 c["n"] += 1
+                c["memory"] += bool(MEMORY.search(reason))
+                here = (manifest.get("pose") or {}).get("position")
+                if here:
+                    c["revisit"] += any(math.dist(here, p) < REVISIT_M
+                                        for p in seen[:max(0, len(seen) - REVISIT_GAP + 1)])
+                    seen.append(here)
                 c["bearing"] += bool(BEARING.search(reason))
                 c["distance"] += bool(DISTANCE.search(reason))
                 c["obstacle"] += bool(OBSTACLE.search(reason))
