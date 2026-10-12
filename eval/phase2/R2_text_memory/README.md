@@ -132,5 +132,4 @@ R1 / `a01` (`p03`, sha `48f6b3973760`).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to
-[summary.md](summary.md).
+**Did not hold (screening, seed 1).** Flown 2026-10-09 at `dd20d3b`: 1/18 succeeded (R1: 8/18), `initial` 5/6 → 1/6, `final` + `dynamic` 3/12 → 0/12, collisions 31 → 596. The memory was delivered and read, and the model used it to repeat one marker to the end of every failing run. Drop criterion met on all three counts. See [summary.md](summary.md).
