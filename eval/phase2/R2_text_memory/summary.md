@@ -130,19 +130,99 @@ builds on `a01`.
 
 ## For the next round
 
-The operator picks the change. R2 separates two parts of "memory". The information R1 lacked (where
-it had been, where it last saw the goal) may still help. The form R2 delivered it in clearly does
-not. A verbatim log of its own reasons, at temperature 0, gives this model text to copy and a streak
-to keep. Candidates that keep the information but remove the copy target:
+R2 separates two parts of "memory". The information R1 lacked (where it had been, where it last saw
+the goal) may still help. The form R2 delivered it in clearly does not. The failure is the model
+misunderstanding its own system. It read a verbatim log of its reasons as a plan to continue, counted
+streaks in marker numbers whose meaning changes every step, and trusted its own old claims over the
+current frame.
 
-- **Facts, not reasons.** The record holds only what was observed: "step 27: beam seen,
-  ahead-left", "step 40: wall, turned around". It holds no prose the model wrote and no marker
-  numbers.
-- **Short buffer.** The last few steps only, so a streak cannot build. This gives up the long
-  horizon that motivated full-run memory.
-- **Memory without marker numbers.** Drop "you picked [k]", since the streak is counted in markers.
+### R3 plan: a memory log, formatted for the model (operator's choice)
 
-Each of these is one change against `a01`, not `a02`.
+Chosen by the operator: fix the memory's **format**, and the prompt that explains it, without
+spending more compute. Collision feedback stays out, so R3 remains one change. It builds on `a01`,
+not `a02`. To be written up as `eval/phase2/R3_<slug>/README.md` before flight (§4.1).
+
+**Change: agent `a03`, prompt `p05` (from `p03`).**
+
+1. **The log is written by code, not by the model.** One line per earlier step, full run, in a fixed
+   format, for example:
+
+   ```
+   Log of your earlier steps (what happened, not a plan):
+   Step 25: flew straight. Goal: not visible.
+   Step 26: flew slight left. Goal: ahead.
+   Step 27: flew straight. Goal: right.
+   Step 28: turned around. Goal: not visible.
+   ```
+
+   - The **move** comes from the chosen action's heading in the manifest: straight (0°), slight
+     left/right (±22°), sharp left/right (±44°), or turned around. It records what the drone did,
+     so it cannot be false the way R2's "turning left at each step" was.
+   - There are **no marker numbers**, so there is no "marker 3 for 38 consecutive steps".
+   - There are **no reasons**, so there is no prose to copy. R2 copied 62% of its reasons word for
+     word.
+2. **Goal sighting is a structured field in the same call.** The reply schema gains
+   `goal: ahead | left | right | not_visible`, emitted before `reason`, so the model reports the
+   current frame before it argues. The log shows this field. There is no extra model call: about
+   5 more output tokens per step.
+3. **The prompt explains the system.** `p05` adds a short paragraph:
+   - The log is a record of what happened, kept by the system, not a plan.
+   - Directions in the log are relative to the heading at that step.
+   - The current image is the only view of the world now; if it disagrees with the log, trust the
+     image.
+   - Repeating a move is right only while the image shows it is still working.
+   - Turning around is a normal move when the way ahead is blocked. R2 picked it 0 times in 1034
+     decisions.
+
+**Compute.** About 10 tokens per log line, so at most ~600 tokens at step 60. The prompt is about
+R1's 922 plus that, against R2's 8.8k median at step 60. It is still one model call per step. Latency
+should be close to R1's ~1.4 / 1.8 s, not R2's 1.5 / 2.4 s.
+
+**Evidence.**
+- R1 lost the goal after finding the route: sightings 15–30 steps apart and 5 timeouts (R2 README,
+  Evidence 1–2).
+- R2's verbatim log drove the lock-in: 97% same pick as the step before, 62% copied reasons and 0
+  turn-arounds. Its reasons count streaks in markers and repeat false history (sections above).
+- R1 showed the model reads the frame correctly when nothing tells it otherwise (door switch on
+  s02va and s02vc).
+
+**Hypothesis.** The model can use a record of its moves and goal sightings when the record is
+factual, compact and framed as history. It keeps R1's reading of the frame and gains the persistence
+R1 lacked.
+
+**Predictions** against R1 (best so far):
+- `initial` 5/6.
+- `final` + `dynamic` ≥ 4/12 (R1: 3/12), with gains in R1's `timeout` cells.
+- s03 is unchanged.
+
+**Manipulation check.**
+- The goal field is filled on every decision, and it agrees with the manifest's `line_of_sight`
+  well above chance. This is a new `agent_evidence.py` column. It also measures perception
+  directly.
+- Same pick as the step before stays near R1's 60%, not R2's 97%.
+- Reasons copied word for word from the step before stay rare (< 10%).
+- The turn-around is picked again (R1: 8–12%).
+- The revisit rate falls below R1's 28% / 33%.
+
+**Drop criterion.** Drop `a03` if any of these holds:
+- `final` + `dynamic` ≤ 3/12 while the log is read.
+- `initial` ≤ 3/6.
+- The lock-in returns: same pick as the step before ≥ 90%.
+
+**Code, building on what R2 added.**
+- `schema.py`: the `goal` field, only when the agent's memory feature asks for it, and a `GOAL:`
+  line on the text rung.
+- `recorder.Run.memory()`: return the move and the goal, not the reason.
+- `prompt.py`: `p05` and its renderer.
+- `agent.py`: `a03`, with `memory: {kind: log, scope: full_run, fields: [move, goal]}`.
+- `fake_litellm.py`: emit `goal` so the dry run exercises it.
+- `agent_evidence.py`: goal-report accuracy, same-pick rate and copied-reason rate as columns.
+
+**If R3 fails** with the log in use, the next candidates are, in order:
+- **Collision feedback:** "hit something" as a fact in the log.
+- **A short buffer.**
+
+Both build on `a01` or `a03`, depending on what R3 shows.
 
 ## Validity notes
 
