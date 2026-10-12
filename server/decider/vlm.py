@@ -148,9 +148,13 @@ class Decision:
         }
 
 
-def _messages(manifest: Dict[str, Any], frame_b64: str, schema_hint: str = "") -> List[Dict[str, Any]]:
+def _messages(manifest: Dict[str, Any], frame_b64: str, schema_hint: str = "",
+              memory: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
     prompt = agent.current().prompt
-    text = prompt.render(prompt, manifest)
+    if memory is None:
+        text = prompt.render(prompt, manifest)
+    else:
+        text = prompt.render(prompt, manifest, memory)
     if schema_hint:
         text += "\n\n" + schema_hint
     return [
@@ -163,22 +167,23 @@ def _messages(manifest: Dict[str, Any], frame_b64: str, schema_hint: str = "") -
     ]
 
 
-def _body(rung: str, manifest: Dict[str, Any], frame_b64: str, indices: List[int]) -> Dict[str, Any]:
+def _body(rung: str, manifest: Dict[str, Any], frame_b64: str, indices: List[int],
+          memory: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     body: Dict[str, Any] = {
         "model": config.VLM_MODEL,
         "max_tokens": config.MAX_TOKENS,
         "temperature": config.TEMPERATURE,
     }
     if rung == "json_schema":
-        body["messages"] = _messages(manifest, frame_b64)
+        body["messages"] = _messages(manifest, frame_b64, memory=memory)
         body["response_format"] = schema.response_format(indices)
     elif rung == "json_object":
         hint = ("Reply with JSON only, matching this schema exactly:\n"
                 + json.dumps(schema.action_schema(indices)))
-        body["messages"] = _messages(manifest, frame_b64, hint)
+        body["messages"] = _messages(manifest, frame_b64, hint, memory)
         body["response_format"] = {"type": "json_object"}
     elif rung == "tool_call":
-        body["messages"] = _messages(manifest, frame_b64)
+        body["messages"] = _messages(manifest, frame_b64, memory=memory)
         body["tools"] = [schema.tool_spec(indices)]
         # "required" rather than the object form: with exactly one tool it means
         # the same thing, and LM Studio rejects {"type": "function", ...} with
@@ -186,7 +191,7 @@ def _body(rung: str, manifest: Dict[str, Any], frame_b64: str, indices: List[int
         body["tool_choice"] = "required"
     else:
         hint = ('Reply with a line "REASON: ..." then a line "ACTION: <number>".')
-        body["messages"] = _messages(manifest, frame_b64, hint)
+        body["messages"] = _messages(manifest, frame_b64, hint, memory)
     return body
 
 
@@ -485,7 +490,10 @@ async def _request(client: httpx.AsyncClient, url: str,
     return await _post_plain(client, url, headers, body, rtt_ms)
 
 
-async def decide(manifest: Dict[str, Any], frame_b64: str) -> Decision:
+async def decide(manifest: Dict[str, Any], frame_b64: str,
+                 memory: Optional[List[Dict[str, Any]]] = None) -> Decision:
+    """`memory` is the run's earlier decisions for an agent that has memory,
+    None for one that does not (the prompt is then rendered without it)."""
     indices = schema.visible_indices(manifest)
     if not indices:
         raise VLMError("manifest offers no actions")
@@ -515,7 +523,7 @@ async def decide(manifest: Dict[str, Any], frame_b64: str) -> Decision:
         transport_failures = 0
         while attempt < 2:
             try:
-                body = _body(rung, manifest, frame_b64, indices)
+                body = _body(rung, manifest, frame_b64, indices, memory)
                 body["max_tokens"] = budget
                 status, payload, error_text, timing = await _request(
                     http, url, headers, body, rtt_ms)

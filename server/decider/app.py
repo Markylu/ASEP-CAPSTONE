@@ -137,9 +137,11 @@ def run_start(request: StartRequest):
 async def decide(request: DecideRequest):
     run = Run(request.run_id)
     frame_path = run.save_frame(request.step, request.frame_png_b64)
+    # An agent with memory sees its own earlier decisions in this run (agent.py).
+    memory = run.memory(request.step) if agent.current().features.get("memory") else None
 
     try:
-        decision = await vlm.decide(request.manifest, request.frame_png_b64)
+        decision = await vlm.decide(request.manifest, request.frame_png_b64, memory)
     except Exception as exc:
         message = "{0}: {1}".format(type(exc).__name__, exc)
         run.record_decision({
@@ -162,6 +164,8 @@ async def decide(request: DecideRequest):
         "manifest": request.manifest,
         **agent.record(),
     })
+    if memory is not None:
+        record["memory_steps"] = len(memory)
     run.record_decision(record)
     timing = decision.timing.to_dict() if decision.timing else {}
     # net/gpu at a glance: a step that is slow because of the tunnel and one

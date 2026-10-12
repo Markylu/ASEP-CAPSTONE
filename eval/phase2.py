@@ -52,6 +52,7 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
              "agent": "a00", "sites": ROUND_SITES, "seeds": ROUND_SEEDS,
              "citable": False},
     "R1": {"folder": "R1_no_goal_hint", "title": "No goal hint", "agent": "a01",
+           "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},    "R2": {"folder": "R2_text_memory", "title": "Text memory, full run", "agent": "a02",
            "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 

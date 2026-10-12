@@ -128,6 +128,23 @@ class Run:
         record["t"] = _now()
         _append(self.decisions, record)
 
+    def memory(self, before_step: int) -> List[Dict[str, Any]]:
+        """This run's earlier decisions, oldest first, for an agent with memory.
+
+        Read back from decisions.jsonl, so the model is shown exactly what was
+        recorded. Failed decisions carry no choice and are skipped.
+        """
+        out: List[Dict[str, Any]] = []
+        for d in _read_jsonl(self.decisions):
+            if d.get("error") or d.get("index") is None or d.get("step", 0) >= before_step:
+                continue
+            actions = (d.get("manifest") or {}).get("actions") or []
+            turn_around = any(a.get("index") == d["index"] and a.get("turn_around")
+                              for a in actions)
+            out.append({"step": d["step"], "index": d["index"],
+                        "turn_around": turn_around, "reason": d.get("reason", "")})
+        return out
+
     def record_step(self, pose: Dict[str, Any],
                     goal: Optional[Dict[str, Any]] = None) -> None:
         self.ensure()
