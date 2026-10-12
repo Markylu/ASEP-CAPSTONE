@@ -11,8 +11,8 @@ effect size (`docs/phase2-test-plan.md` §3). Pre-registration: [README.md](READ
 **Not citable.** Flown at `dd20d3b` on 2026-10-09, 17:15–17:51 UTC. The runs used
 `Qwen3-VL-30B-A3B` on the remote profile, at temperature 0, with agent `a02` (`f53deb3d5b14`) and
 prompt `p04` (`d514fe7a2ded`). The decider ran on :8011, because the R1 decider still held :8010.
-The served context is 32,768 tokens. Labels were reviewed by Claude and are **pending operator
-confirmation**.
+The served context is 32,768 tokens. Labels were reviewed by Claude and confirmed by the operator on
+2026-10-12.
 
 - **18 / 18 runs valid on the first attempt.** Every replay was exact, every `run.json` has
   `git_dirty: false`, and the agent sha matches the round lock.
