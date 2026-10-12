@@ -132,9 +132,12 @@ class Decision:
     #: that had to fall back — deliberately: one answers "what did this step
     #: cost", the other "what did the model cost once it worked".
     timing: Optional[Timing] = None
+    #: Where the model said the goal is in this frame (schema.GOAL_REPORTS), for
+    #: an agent whose reply reports it; None otherwise, and then not recorded.
+    goal: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        out = {
             "index": self.index,
             "reason": self.reason,
             "rung": self.rung,
@@ -146,6 +149,9 @@ class Decision:
             "raw": self.raw,
             "timing": self.timing.to_dict() if self.timing else None,
         }
+        if self.goal is not None:
+            out["goal"] = self.goal
+        return out
 
 
 def _messages(manifest: Dict[str, Any], frame_b64: str, schema_hint: str = "",
@@ -167,8 +173,15 @@ def _messages(manifest: Dict[str, Any], frame_b64: str, schema_hint: str = "",
     ]
 
 
+def _reports_goal() -> bool:
+    """Whether this agent's reply carries a goal report (agent.py features)."""
+    memory = agent.current().features.get("memory") or {}
+    return "goal" in memory.get("fields", [])
+
+
 def _body(rung: str, manifest: Dict[str, Any], frame_b64: str, indices: List[int],
           memory: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+    goal = _reports_goal()
     body: Dict[str, Any] = {
         "model": config.VLM_MODEL,
         "max_tokens": config.MAX_TOKENS,
@@ -176,27 +189,34 @@ def _body(rung: str, manifest: Dict[str, Any], frame_b64: str, indices: List[int
     }
     if rung == "json_schema":
         body["messages"] = _messages(manifest, frame_b64, memory=memory)
-        body["response_format"] = schema.response_format(indices)
+        body["response_format"] = schema.response_format(indices, goal)
     elif rung == "json_object":
         hint = ("Reply with JSON only, matching this schema exactly:\n"
-                + json.dumps(schema.action_schema(indices)))
+                + json.dumps(schema.action_schema(indices, goal)))
         body["messages"] = _messages(manifest, frame_b64, hint, memory)
         body["response_format"] = {"type": "json_object"}
     elif rung == "tool_call":
         body["messages"] = _messages(manifest, frame_b64, memory=memory)
-        body["tools"] = [schema.tool_spec(indices)]
+        body["tools"] = [schema.tool_spec(indices, goal)]
         # "required" rather than the object form: with exactly one tool it means
         # the same thing, and LM Studio rejects {"type": "function", ...} with
         # "Invalid tool_choice type: 'object'".
         body["tool_choice"] = "required"
     else:
-        hint = ('Reply with a line "REASON: ..." then a line "ACTION: <number>".')
+        if goal:
+            hint = ('Reply with a line "GOAL: ' + "|".join(schema.GOAL_REPORTS) + '", then a '
+                    'line "REASON: ...", then a line "ACTION: <number>".')
+        else:
+            hint = ('Reply with a line "REASON: ..." then a line "ACTION: <number>".')
         body["messages"] = _messages(manifest, frame_b64, hint, memory)
     return body
 
 
 def _extract(rung: str, payload: Dict[str, Any], indices: List[int]) -> Dict[str, Any]:
-    """Pull (index, reason, raw) out of a completion, or raise VLMError."""
+    """Pull (index, reason, goal, raw) out of a completion, or raise VLMError.
+
+    `goal` is None when the reply has no valid goal report; that never fails
+    the decision, which is about the action."""
     choice = payload["choices"][0]
     message = choice.get("message", {})
 
@@ -212,9 +232,11 @@ def _extract(rung: str, payload: Dict[str, Any], indices: List[int]) -> Dict[str
         if not match:
             raise VLMError("no integer in response")
         reason_match = re.search(r"REASON:\s*(.+)", raw)
+        goal_match = re.search(r"GOAL:\s*(\w+)", raw)
         parsed = {
             "action": int(match.group(1)),
             "reason": reason_match.group(1).strip() if reason_match else raw.strip()[:500],
+            "goal": goal_match.group(1).lower() if goal_match else None,
         }
     else:
         raw = message.get("content") or ""
@@ -225,7 +247,9 @@ def _extract(rung: str, payload: Dict[str, Any], indices: List[int]) -> Dict[str
     index = int(parsed["action"])
     if index not in indices:
         raise VLMError("model chose {0}, not on this frame ({1})".format(index, indices))
-    return {"index": index, "reason": str(parsed.get("reason", "")), "raw": raw}
+    goal = parsed.get("goal")
+    return {"index": index, "reason": str(parsed.get("reason", "")),
+            "goal": goal if goal in schema.GOAL_REPORTS else None, "raw": raw}
 
 
 # Set False for the process the first time a provider refuses a streamed
@@ -578,6 +602,7 @@ async def decide(manifest: Dict[str, Any], frame_b64: str,
                 attempts=attempts,
                 raw=result["raw"],
                 timing=timing,
+                goal=result["goal"],
             )
 
     raise VLMError("every rung failed: " + json.dumps(attempts))

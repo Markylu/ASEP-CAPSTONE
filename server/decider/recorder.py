@@ -133,16 +133,22 @@ class Run:
 
         Read back from decisions.jsonl, so the model is shown exactly what was
         recorded. Failed decisions carry no choice and are skipped.
+
+        Each entry carries everything a memory renderer may show; the prompt
+        version chooses (p04 shows marker and reason, p05 the move and the goal
+        report). `theta_deg` is the chosen action's heading from the manifest,
+        `goal` the reply's goal report, None when the agent does not make one.
         """
         out: List[Dict[str, Any]] = []
         for d in _read_jsonl(self.decisions):
             if d.get("error") or d.get("index") is None or d.get("step", 0) >= before_step:
                 continue
             actions = (d.get("manifest") or {}).get("actions") or []
-            turn_around = any(a.get("index") == d["index"] and a.get("turn_around")
-                              for a in actions)
+            chosen = next((a for a in actions if a.get("index") == d["index"]), {})
             out.append({"step": d["step"], "index": d["index"],
-                        "turn_around": turn_around, "reason": d.get("reason", "")})
+                        "turn_around": bool(chosen.get("turn_around")),
+                        "theta_deg": chosen.get("theta_deg"),
+                        "reason": d.get("reason", ""), "goal": d.get("goal")})
         return out
 
     def record_step(self, pose: Dict[str, Any],
