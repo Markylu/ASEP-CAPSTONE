@@ -161,4 +161,6 @@ R1 / `a01` (`p03`, sha `48f6b3973760`). Uses R2's memory plumbing (`Run.memory()
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Flown 2026-10-12, 18/18 valid, **0/18 success**; `a03` dropped. The hypothesis was not tested: the
+`goal` field, answered first, stopped the model seeing the goal (0/30 early frames that R1 saw
+30/30), so 13 of 18 logs never held a sighting. See [summary.md](summary.md).
