@@ -52,6 +52,19 @@ def _indices_from(body: Dict[str, Any]) -> List[int]:
            [int(n) for n in re.findall(r"\[(\d+)\] turn", text)]
 
 
+def _wants_goal(body: Dict[str, Any]) -> bool:
+    """Whether the request asks for a goal report (agent a03 and later)."""
+    fmt = body.get("response_format") or {}
+    schema = (fmt.get("json_schema") or {}).get("schema")
+    if schema:
+        return "goal" in schema["properties"]
+    for tool in body.get("tools") or []:
+        return "goal" in tool["function"]["parameters"]["properties"]
+    # json_object and text carry the contract in the prompt text.
+    text = json.dumps(body.get("messages", []))
+    return '\\"goal\\"' in text or "GOAL:" in text
+
+
 def _pick(body: Dict[str, Any], indices: List[int]) -> int:
     """Index 0 is turn-around, so the forward headings are everything else."""
     forward = [i for i in indices if i != 0]
@@ -84,6 +97,10 @@ async def completions(body: Dict[str, Any]):
         return JSONResponse({"error": {"message": "no actions found in request"}}, status_code=400)
     choice = _pick(body, indices)
     reason = "stub router: taking the straightest of {0}".format(indices)
+    # It never looks at the image, so it never claims to see the goal.
+    reply: Dict[str, Any] = {"reason": reason, "action": choice}
+    if _wants_goal(body):
+        reply = {"goal": "not_visible", **reply}
 
     if rung == "tool_call":
         message: Dict[str, Any] = {
@@ -91,15 +108,16 @@ async def completions(body: Dict[str, Any]):
             "tool_calls": [{
                 "id": "call_stub", "type": "function",
                 "function": {"name": "choose_action",
-                             "arguments": json.dumps({"reason": reason, "action": choice})},
+                             "arguments": json.dumps(reply)},
             }],
         }
     elif rung == "text":
         message = {"role": "assistant",
-                   "content": "REASON: {0}\nACTION: {1}".format(reason, choice)}
+                   "content": ("GOAL: not_visible\n" if "goal" in reply else "")
+                   + "REASON: {0}\nACTION: {1}".format(reason, choice)}
     else:
         message = {"role": "assistant",
-                   "content": json.dumps({"reason": reason, "action": choice})}
+                   "content": json.dumps(reply)}
 
     return {
         "id": "chatcmpl-stub",

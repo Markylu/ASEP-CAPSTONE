@@ -53,6 +53,11 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a02", "p04", {"memory": {"kind": "text", "scope": "full_run"}},
           "Text memory: a01 plus every earlier step of the run in the prompt, oldest "
           "first: the marker picked and the reason given, verbatim."),
+    Agent("a03", "p05", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal"]}},
+          "Memory log: a01 plus a log written by code of every earlier step's move "
+          "and reported goal, with no marker numbers or reasons; the reply reports "
+          "where the goal is before it reasons."),
 )}
 
 DEFAULT_AGENT = "a00"

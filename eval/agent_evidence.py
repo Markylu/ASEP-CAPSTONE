@@ -26,6 +26,22 @@ Columns, over every decision in the cell:
   agents without memory score above zero too; compare against a baseline round.
 - revisit: the drone is within 1 m of where it was at least 5 decisions
   earlier in the same run (manifest pose), i.e. it is going back over ground.
+- same pick: the action index equals the previous decision's. Of decisions
+  that have a previous one. Index meaning changes with the view, so a high rate
+  is a lock-in on one marker, not on one direction.
+- copied reason: the reason, whitespace-normalised, equals the previous
+  decision's word for word. Same denominator as same pick.
+- goal visible: ground truth, the goal is in line of sight and inside the
+  camera's horizontal field of view (|bearing| <= fov / 2). Line of sight is a
+  ray to the sphere (vlmnav_controller.gd), so a beam showing above an occluder
+  counts as not visible. 1 - this is the majority-class rate a goal report has
+  to beat.
+- goal report agrees: of decisions that carry a `goal` field (agents whose reply
+  reports it), the share matching ground truth: not_visible as above, else
+  ahead when the straight action is the nearest heading, left or right by the
+  sign of the bearing (positive is left). "–" for agents without the field.
+- goal seen when visible: of decisions with a `goal` field where the goal is
+  visible, the share not reported as not_visible.
 
 Deterministic: the same runs give the same file.
 """
@@ -48,11 +64,16 @@ OBSTACLE = re.compile(r"\b(?:wall|door|obstacle|block|cube|dead end|barrier)")
 MEMORY = re.compile(r"\b(?:earlier|previous(?:ly)?|already|before|again|last time|step \d+)\b")
 REVISIT_M = 1.0
 REVISIT_GAP = 5
+GOAL_REPORTS = ("ahead", "left", "right", "not_visible")
 
-COLUMNS = [("bearing", "reason cites bearing"), ("distance", "reason cites distance"),
-           ("nearest", "nearest-bearing pick"), ("obstacle", "obstacle word"),
-           ("turn", "turn-around pick"), ("memory", "reason cites memory"),
-           ("revisit", "revisit")]
+#: (counter, title, denominator counter)
+COLUMNS = [("bearing", "reason cites bearing", "n"), ("distance", "reason cites distance", "n"),
+           ("nearest", "nearest-bearing pick", "n"), ("obstacle", "obstacle word", "n"),
+           ("turn", "turn-around pick", "n"), ("memory", "reason cites memory", "n"),
+           ("revisit", "revisit", "n"), ("same_pick", "same pick", "pairs"),
+           ("copied", "copied reason", "pairs"), ("visible", "goal visible", "n"),
+           ("goal_ok", "goal report agrees", "reports"),
+           ("goal_seen", "goal seen when visible", "reports_visible")]
 
 
 def units_under(path: Path) -> List[Path]:
@@ -81,6 +102,23 @@ def nearest_forward(manifest: Dict[str, Any]) -> Tuple[Optional[int], int]:
     return best["index"], len(forward)
 
 
+def true_goal(manifest: Dict[str, Any]) -> Optional[str]:
+    """Where the goal is in this frame, in the reply's terms; None if unknown."""
+    goal = manifest.get("goal") or {}
+    bearing = goal.get("bearing_deg")
+    if bearing is None:
+        return None
+    half_fov = float((manifest.get("config") or {}).get("fov_deg", 87.0)) / 2.0
+    if not goal.get("line_of_sight") or abs(float(bearing)) > half_fov:
+        return "not_visible"
+    forward = [a for a in manifest.get("actions", []) if not a.get("turn_around")]
+    if forward:
+        nearest = min(forward, key=lambda a: abs(float(a["theta_deg"]) - float(bearing)))
+        if float(nearest["theta_deg"]) == 0.0:
+            return "ahead"
+    return "left" if float(bearing) > 0 else "right"
+
+
 def tally(units: List[Path]) -> Tuple[Dict[Tuple[str, str], Dict[str, int]], Dict[str, Any]]:
     cells: Dict[Tuple[str, str], Dict[str, int]] = defaultdict(lambda: defaultdict(int))
     meta: Dict[str, Any] = {"runs": 0, "prompts": set(), "agents": set(), "forward": set()}
@@ -94,10 +132,25 @@ def tally(units: List[Path]) -> Tuple[Dict[Tuple[str, str], Dict[str, int]], Dic
             c = cells[(site, arm)]
             c["runs"] += 1
             seen: List[List[float]] = []
+            previous: Optional[Dict[str, Any]] = None
             for d in read_jsonl(run / "decisions.jsonl"):
                 reason = (d.get("reason") or "").lower()
                 manifest = d.get("manifest") or {}
                 c["n"] += 1
+                if previous is not None:
+                    c["pairs"] += 1
+                    c["same_pick"] += d.get("index") == previous.get("index")
+                    c["copied"] += (" ".join(reason.split()) ==
+                                    " ".join((previous.get("reason") or "").lower().split()))
+                previous = d
+                truth = true_goal(manifest)
+                c["visible"] += truth not in (None, "not_visible")
+                if d.get("goal") in GOAL_REPORTS and truth is not None:
+                    c["reports"] += 1
+                    c["goal_ok"] += d["goal"] == truth
+                    if truth != "not_visible":
+                        c["reports_visible"] += 1
+                        c["goal_seen"] += d["goal"] != "not_visible"
                 c["memory"] += bool(MEMORY.search(reason))
                 here = (manifest.get("pose") or {}).get("position")
                 if here:
@@ -135,8 +188,10 @@ def render(paths: List[Path], units: List[Path],
                  ", ".join("`{0}`".format(rel(u)) for u in units), meta["runs"],
                  ", ".join(sorted(meta["prompts"])), ", ".join(sorted(meta["agents"]))), "",
              "Percentages are of decisions. Nearest-bearing chance: {0}. Obstacle word "
-             "counts negations too; check reasons before citing it.".format(chance or "–"), "",
-             "| Site | Arm | runs | decisions | " + " | ".join(t for _, t in COLUMNS) + " |",
+             "counts negations too; check reasons before citing it. Same pick and copied reason "
+             "are of decisions with a previous one; goal report columns are of decisions that "
+             "carry a report (agreement must beat 1 − goal visible).".format(chance or "–"), "",
+             "| Site | Arm | runs | decisions | " + " | ".join(t for _, t, _ in COLUMNS) + " |",
              "|---|---|---|---|" + "---|" * len(COLUMNS)]
     pooled: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
     for (site, arm) in sorted(cells, key=lambda k: (k[0], arm_rank.get(k[1], 9), k[1])):
@@ -144,11 +199,11 @@ def render(paths: List[Path], units: List[Path],
         for key, value in c.items():
             pooled[arm][key] += value
         lines.append("| {0} | {1} | {2} | {3} | {4} |".format(
-            site, arm, c["runs"], c["n"], " | ".join(pct(c[k], c["n"]) for k, _ in COLUMNS)))
+            site, arm, c["runs"], c["n"], " | ".join(pct(c[k], c[d]) for k, _, d in COLUMNS)))
     for arm in sorted(pooled, key=lambda a: (arm_rank.get(a, 9), a)):
         c = pooled[arm]
         lines.append("| **all** | {0} | {1} | {2} | {3} |".format(
-            arm, c["runs"], c["n"], " | ".join(pct(c[k], c["n"]) for k, _ in COLUMNS)))
+            arm, c["runs"], c["n"], " | ".join(pct(c[k], c[d]) for k, _, d in COLUMNS)))
     return "\n".join(lines) + "\n"
 
 

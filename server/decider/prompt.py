@@ -243,7 +243,115 @@ Pick one number.""",
     render=render_actions_with_memory,
 )
 
-PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04)}
+def _move(entry: Dict[str, Any]) -> str:
+    """What the drone did at a step, from the chosen action's heading.
+
+    Nearest of the fan's headings (0, about 22 and about 44 degrees either
+    side; positive is left), so it states the command executed, which no
+    reasoning can misreport.
+    """
+    if entry.get("turn_around"):
+        return "turned around"
+    theta = entry.get("theta_deg")
+    if theta is None:
+        return "flew (heading not recorded)"
+    theta = float(theta)
+    if abs(theta) < 11.0:
+        return "flew straight"
+    side = "left" if theta > 0 else "right"
+    return "flew {0} {1}".format("slight" if abs(theta) < 33.0 else "sharp", side)
+
+
+GOAL_WORDS = {"ahead": "ahead", "left": "to the left", "right": "to the right",
+              "not_visible": "not visible"}
+
+
+def render_memory_log(prompt: Prompt, manifest: Dict[str, Any],
+                      memory: List[Dict[str, Any]]) -> str:
+    """p03's step and marker numbers, after a log the system writes.
+
+    One line per earlier step of this run, oldest first: the move the drone
+    made and where the model said the goal was. No marker numbers (they mean
+    something else in every view) and no reasons (R2: copied forward as a plan).
+    """
+    if memory:
+        lines = ["Log of your earlier steps (what happened, not a plan):"]
+        for entry in memory:
+            lines.append("Step {0}: {1}. Goal: {2}.".format(
+                entry["step"], _move(entry),
+                GOAL_WORDS.get(entry.get("goal") or "", "not reported")))
+        memory_block = "\n".join(lines)
+    else:
+        memory_block = "Log of your earlier steps: none yet, this is the first step."
+
+    actions: List[str] = []
+    for action in manifest.get("actions", []):
+        if action.get("turn_around"):
+            actions.append("  [{i}] turn around in place".format(i=action["index"]))
+        else:
+            actions.append("  [{i}]".format(i=action["index"]))
+
+    return prompt.user_template.format(
+        step=manifest.get("step", 0),
+        memory_block=memory_block,
+        action_lines="\n".join(actions) if actions else "  (none)",
+    )
+
+
+# --- p05: Phase 2 R3, a memory log written by code ---------------------------
+# (eval/phase2/R3_memory_log/README.md)
+#
+# p03 plus a log of every earlier step: the move made and the goal report the
+# reply gave (the reply now reports the goal first, schema.GOAL_REPORTS). One
+# paragraph says what the log is and that the current image outranks it.
+
+P05 = Prompt(
+    version="p05",
+    system="""You are flying a small indoor drone. You see one image per step.
+
+Numbered markers are drawn on the image. Each marker is an action you may take:
+the drone turns to face that marker, then flies a short distance forward.
+Marker 0, when offered, turns the drone around in place without moving.
+
+Rules of this interface:
+- You may only pick a number that is listed as available for this step.
+- Nothing checks your choice before it is executed. There is no depth sensor and
+  no obstacle filter. If you pick a heading that runs into a wall, the drone
+  hits the wall and that counts against the run.
+- You cannot strafe, climb, or descend. Altitude is held for you.
+- You cannot open doors or manipulate anything around you. A closed door is a
+  wall. Find a route through openings that are already clear.
+- Judge distance and clearance from the image alone.
+
+Your objective is to reach the goal: a glowing red sphere with a tall red beam
+of light rising above it. You are not told where it is. The image is the only
+information you get. If the goal is in view, fly toward it along a clear path.
+If it is not, explore through open space and openings until you find it. Avoid
+collisions, and prefer headings with visible open floor ahead of them.
+
+Each step also shows a log of your earlier steps in this run, kept by the
+system. It records the move the drone made at each step and where you said the
+goal was. It is a record of what happened, not a plan. Directions in the log
+are relative to the way the drone faced at that step. The current image is your
+only view of the world now: if it disagrees with the log, trust the image.
+Repeat a move only while the image shows it is still working. Turning around is
+a normal move when the way ahead is blocked. Use the log to remember where you
+last saw the goal and to avoid flying back over ground you have already covered.
+
+First say where the goal is in this image, then give your reasoning, then the
+number.""",
+    user_template="""Step {step}.
+
+{memory_block}
+
+Available actions this step:
+{action_lines}
+
+Pick one number.""",
+    render=render_memory_log,
+)
+
+PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05)}
 
 
 def get(version: str) -> Prompt:
