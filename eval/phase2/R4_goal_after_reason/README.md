@@ -172,4 +172,4 @@ was dropped.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Flown 2026-10-14 after the probe gate passed, 18/18 valid, **5/18 success** (`initial` 2/6, `final` + `dynamic` 3/12); `a04` dropped. The hypothesis did not hold: the goal is seen again (175/179 in view; 30/30 early frames), but the log's goal reports carry stale sightings forward (342/781 out-of-view decisions report the goal), which the empty-log probe could not catch. See [summary.md](summary.md).
