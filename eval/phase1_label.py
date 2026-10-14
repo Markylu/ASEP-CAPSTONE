@@ -55,6 +55,14 @@ S02_WALL_FAR_X = -0.5
 #: "past the cube's x" (§9): the s01 cube is centred at x = -2.
 S01_CUBE_X = -2.0
 
+#: Phase 2 secondary tag `failed_goal_identification` (docs/phase2-test-plan.md
+#: §5), failed runs only. Any one facet is enough.
+GOAL_ID_TAG = "failed_goal_identification"
+PHANTOM_MIN = 5         # goal reported while not in view, decisions
+MISSED_MIN = 3          # goal in view but reported not_visible, decisions ...
+MISSED_SHARE = 0.5      # ... and at least this share of the in-view decisions
+CLOSE_RANGE_M = 3.0     # closest approach, metres, without reaching the goal
+
 
 def acknowledges(reason: str) -> bool:
     """§9 auto pass: does this reason refer to the change?"""
@@ -105,6 +113,41 @@ def got_through(site: str, arm: str, post: List[Dict[str, Any]]) -> bool:
         first = next((t for t in tines if t), None)
         return any(t not in (None, first) for t in tines)
     return min(xs) < S03_EXIT_X
+
+
+def goal_identification(decisions: List[Dict[str, Any]], reached: bool) -> Dict[str, Any]:
+    """Evidence for the `failed_goal_identification` tag (Phase 2 §5).
+
+    - phantom: the reply reports the goal while ground truth has it out of view.
+    - missed: the goal is in view but the reply says not_visible.
+    - close range: the agent got within CLOSE_RANGE_M and still did not arrive.
+    `missed` and `phantom` need a `goal` field (a03 on); for an agent without
+    one they are None and only close range is checked, so the reviewer reads
+    the reasons instead. Ground truth is agent_evidence.true_goal().
+    """
+    from agent_evidence import true_goal
+    reported = [d for d in decisions if d.get("goal") is not None]
+    truths = [(d, true_goal(d.get("manifest") or {})) for d in reported]
+    visible = sum(1 for d in decisions
+                  if true_goal(d.get("manifest") or {}) not in (None, "not_visible"))
+    phantom = missed = None
+    if reported:
+        phantom = sum(1 for d, t in truths if t == "not_visible" and d["goal"] != "not_visible")
+        missed = sum(1 for d, t in truths
+                     if t not in (None, "not_visible") and d["goal"] == "not_visible")
+    closest = min((float(d["manifest"]["goal"]["distance"]) for d in decisions
+                   if (d.get("manifest") or {}).get("goal")), default=None)
+    facets = []
+    if not reached:
+        if phantom is not None and phantom >= PHANTOM_MIN:
+            facets.append("phantom")
+        if missed is not None and missed >= MISSED_MIN and missed >= MISSED_SHARE * visible:
+            facets.append("missed")
+        if closest is not None and closest <= CLOSE_RANGE_M:
+            facets.append("close_range")
+    return {"phantom": phantom, "missed": missed, "visible": visible,
+            "closest_m": None if closest is None else round(closest, 2),
+            "facets": facets, "tag": GOAL_ID_TAG if facets else None}
 
 
 def label_run(site: str, arm: str, run_dir: Path) -> Dict[str, Any]:
@@ -164,6 +207,7 @@ def label_run(site: str, arm: str, run_dir: Path) -> Dict[str, Any]:
         "goal_reached": metrics.get("goal_reached"),
         "final_goal_distance_m": metrics.get("final_goal_distance_m"),
         "end_reason": metrics.get("end_reason"),
+        "goal_id": goal_identification(decisions, bool(metrics.get("goal_reached"))),
     }}
 
 

@@ -1,0 +1,129 @@
+{
+  "run_id": "p2_R4_s02va_dynamic_seed1_a01",
+  "ended": "2026-10-14T14:58:49+00:00",
+  "end_reason": "goal_reached",
+  "steps": 40,
+  "decisions": 40,
+  "collisions": 4,
+  "goal_reached": true,
+  "final_goal_distance_m": 0.139,
+  "latency_ms": {
+    "p50": 1538.4,
+    "p95": 1954.8,
+    "mean": 1543.3
+  },
+  "latency_breakdown_ms": {
+    "rtt_ms": {
+      "p50": 241.9,
+      "p95": 573.7,
+      "n": 40
+    },
+    "upload_ms": {
+      "p50": 1.4,
+      "p95": 1.8,
+      "n": 40
+    },
+    "ttft_ms": {
+      "p50": 438.9,
+      "p95": 531.4,
+      "n": 40
+    },
+    "prefill_ms": {
+      "p50": 191.6,
+      "p95": 268.3,
+      "n": 40
+    },
+    "decode_ms": {
+      "p50": 812.1,
+      "p95": 1123.5,
+      "n": 40
+    },
+    "unaccounted_ms": {
+      "p50": 0.9,
+      "p95": 14.3,
+      "n": 40
+    },
+    "network_ms": {
+      "p50": 243.4,
+      "p95": 575.6,
+      "n": 40
+    },
+    "compute_ms": {
+      "p50": 995.8,
+      "p95": 1308.3,
+      "n": 40
+    },
+    "total_ms": {
+      "p50": 1254.9,
+      "p95": 1575.9,
+      "n": 40
+    },
+    "decode_tok_s": {
+      "p50": 191.3,
+      "p95": 216.5,
+      "n": 40
+    },
+    "streamed_decisions": 40,
+    "request_bytes_mean": 279491
+  },
+  "tokens_per_frame": {
+    "prompt_mean": 1306.7,
+    "completion_mean": 151.5
+  },
+  "tokens_total": {
+    "prompt": 52267,
+    "completion": 6059
+  },
+  "rungs_used": {
+    "json_schema": 40
+  },
+  "events": [
+    {
+      "name": "doors_switched",
+      "step": 3,
+      "t": "2026-10-14T14:57:36+00:00"
+    }
+  ],
+  "site_id": "s02va_doors_visible_a",
+  "site_version": 1,
+  "scene": "res://sites/s02va_doors_visible_a/site.tscn",
+  "physics_ticks_per_second": 60,
+  "freeze_world": true,
+  "static_doors": false,
+  "world": "dynamic",
+  "spawn_seed": 1,
+  "spawn_offset": {
+    "dyaw_deg": -2.23405146598816,
+    "dz": -0.170440912246704
+  },
+  "model": "Qwen3-VL-30B-A3B",
+  "vlm_profile": "remote",
+  "temperature": 0.0,
+  "git_dirty": false,
+  "prompt_version": "p06",
+  "prompt_sha": "d9059847942e",
+  "agent_version": "a04",
+  "agent_sha": "a90e249c14a1",
+  "git_sha": "60118e8",
+  "frame_size": [
+    768,
+    768
+  ],
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "occlusion_step": 3,
+  "goal_visible_steps": 21,
+  "goal_first_hidden_step": 4,
+  "steps_to_reacquire": 19
+}
