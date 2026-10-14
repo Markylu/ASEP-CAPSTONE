@@ -144,6 +144,28 @@ As P1 §8 and §9, unchanged, so labels compare across phases. The round compari
 `eval/phase2/results/results.md` shows, per round: success by arm, and per cell either the steps
 to goal or the failure label.
 
+**Added secondary tag: `failed_goal_identification`.** It goes in the `tags` column only, so it
+leaves the terminal labels, their order and the frozen thresholds untouched. Several tags in one
+cell are separated by `;`. The tag applies to a failed run (not `success`) that meets any one of
+three facets:
+
+| Facet | Rule |
+|---|---|
+| phantom goal | ≥ 5 decisions report the goal while ground truth has it out of view |
+| missed goal | ≥ 3 decisions report `not_visible` while the goal is in view, and that is ≥ 50% of the in-view decisions |
+| lost at close range | closest approach ≤ 3.0 m (arrival radius 1.0 m) without arriving |
+
+- Ground truth is `true_goal()` in `eval/agent_evidence.py`: line of sight, and a bearing inside
+  the camera's field of view.
+- The first two facets need a `goal` field in the reply (`a03` on). For an agent without one,
+  the reviewer judges them from the reasons.
+- `eval/phase1_label.py` writes the facet counts and the suggested tag to `auto_labels.json`
+  (`goal_id`). The reviewer confirms the tag like any other.
+- Added in R4, whose phantom sightings came from the log. R1–R3 keep their labels and tags as
+  they were reviewed (operator, 2026-10-14). The rubric grew with the experiment, and the round
+  where a tag first appears records when that failure mode was recognised. R3's missed goals
+  (R3 summary) would have met the "missed goal" facet.
+
 ## 6. Final round
 
 The agent chosen from the screening rounds is frozen and flown under the full Phase 1 design
@@ -181,6 +203,7 @@ Git: same committed and ignored files as P1 §14.
 
 | Date | Change |
 |---|---|
+| 2026-10-14 | Secondary tag `failed_goal_identification` (§5): phantom goal, missed goal or lost at close range, computed by `eval/phase1_label.py`. Tags only; the rubric's terminal labels are unchanged. |
 | 2026-10-14 | Probe step (§4 step 2) and a Probe gate section in the write-up: `eval/goal_probe.py` checks offline, on recorded frames, whether an agent sees the goal before a round flies. R3 flew 0/18 on an agent that had stopped seeing it. |
 | 2026-10-08 | Round write-ups (§4.1): `README.md` per round before flying, `evidence.md` from `eval/agent_evidence.py`. Branches (§4.2): one branch and PR per round, stacked on the previous round, never merged; replaces "merge, never squash". |
 | 2026-10-08 | Initial spec. Agent versions (`agent.py`, a00 = Phase 1 agent). Rounds are 6 sites × 3 arms × seed 1 = 18 runs; R0 is Phase 1's seed-1 runs; final round is the full 90-run design. Runner shared with Phase 1 (`eval/phaselib.py`). |
