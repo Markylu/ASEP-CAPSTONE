@@ -25,11 +25,15 @@ def visible_indices(manifest: Dict[str, Any]) -> List[int]:
     return [int(a["index"]) for a in manifest.get("actions", [])]
 
 
-def action_schema(indices: List[int], goal: bool = False) -> Dict[str, Any]:
+def action_schema(indices: List[int], goal: bool = False,
+                  goal_after_reason: bool = False) -> Dict[str, Any]:
     """`goal` adds a report of where the goal is, emitted first, so the model
-    states what the current frame shows before it argues from anything else."""
+    states what the current frame shows before it argues from anything else.
+
+    `goal_after_reason` moves that report between `reason` and `action` (a04):
+    answered first, it stopped the model seeing the goal (R3 summary)."""
     properties: Dict[str, Any] = {}
-    if goal:
+    if goal and not goal_after_reason:
         properties["goal"] = {
             "type": "string",
             "enum": GOAL_REPORTS,
@@ -41,6 +45,13 @@ def action_schema(indices: List[int], goal: bool = False) -> Dict[str, Any]:
         "type": "string",
         "description": "What you see and why this heading is the best of those offered.",
     }
+    if goal and goal_after_reason:
+        properties["goal"] = {
+            "type": "string",
+            "enum": GOAL_REPORTS,
+            "description": ("Where the goal (the glowing red sphere) is in this image "
+                            "now, as described in your reason."),
+        }
     properties["action"] = {
         "type": "integer",
         "enum": indices,
@@ -54,24 +65,26 @@ def action_schema(indices: List[int], goal: bool = False) -> Dict[str, Any]:
     }
 
 
-def response_format(indices: List[int], goal: bool = False) -> Dict[str, Any]:
+def response_format(indices: List[int], goal: bool = False,
+                    goal_after_reason: bool = False) -> Dict[str, Any]:
     return {
         "type": "json_schema",
         "json_schema": {
             "name": SCHEMA_NAME,
             "strict": True,
-            "schema": action_schema(indices, goal),
+            "schema": action_schema(indices, goal, goal_after_reason),
         },
     }
 
 
-def tool_spec(indices: List[int], goal: bool = False) -> Dict[str, Any]:
+def tool_spec(indices: List[int], goal: bool = False,
+              goal_after_reason: bool = False) -> Dict[str, Any]:
     """Fallback rung 3: the same contract expressed as a single tool."""
     return {
         "type": "function",
         "function": {
             "name": "choose_action",
             "description": "Take one of the numbered actions drawn on the frame.",
-            "parameters": action_schema(indices, goal),
+            "parameters": action_schema(indices, goal, goal_after_reason),
         },
     }

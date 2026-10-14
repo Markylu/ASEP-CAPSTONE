@@ -179,9 +179,15 @@ def _reports_goal() -> bool:
     return "goal" in memory.get("fields", [])
 
 
+def _goal_after_reason() -> bool:
+    """Whether the goal report comes after the reason, not first (a04)."""
+    return agent.current().features.get("goal_order") == "after_reason"
+
+
 def _body(rung: str, manifest: Dict[str, Any], frame_b64: str, indices: List[int],
           memory: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     goal = _reports_goal()
+    after = _goal_after_reason()
     body: Dict[str, Any] = {
         "model": config.VLM_MODEL,
         "max_tokens": config.MAX_TOKENS,
@@ -189,21 +195,24 @@ def _body(rung: str, manifest: Dict[str, Any], frame_b64: str, indices: List[int
     }
     if rung == "json_schema":
         body["messages"] = _messages(manifest, frame_b64, memory=memory)
-        body["response_format"] = schema.response_format(indices, goal)
+        body["response_format"] = schema.response_format(indices, goal, after)
     elif rung == "json_object":
         hint = ("Reply with JSON only, matching this schema exactly:\n"
-                + json.dumps(schema.action_schema(indices, goal)))
+                + json.dumps(schema.action_schema(indices, goal, after)))
         body["messages"] = _messages(manifest, frame_b64, hint, memory)
         body["response_format"] = {"type": "json_object"}
     elif rung == "tool_call":
         body["messages"] = _messages(manifest, frame_b64, memory=memory)
-        body["tools"] = [schema.tool_spec(indices, goal)]
+        body["tools"] = [schema.tool_spec(indices, goal, after)]
         # "required" rather than the object form: with exactly one tool it means
         # the same thing, and LM Studio rejects {"type": "function", ...} with
         # "Invalid tool_choice type: 'object'".
         body["tool_choice"] = "required"
     else:
-        if goal:
+        if goal and after:
+            hint = ('Reply with a line "REASON: ...", then a line "GOAL: '
+                    + "|".join(schema.GOAL_REPORTS) + '", then a line "ACTION: <number>".')
+        elif goal:
             hint = ('Reply with a line "GOAL: ' + "|".join(schema.GOAL_REPORTS) + '", then a '
                     'line "REASON: ...", then a line "ACTION: <number>".')
         else:

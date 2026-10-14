@@ -65,6 +65,23 @@ def _wants_goal(body: Dict[str, Any]) -> bool:
     return '\\"goal\\"' in text or "GOAL:" in text
 
 
+def _goal_last(body: Dict[str, Any]) -> bool:
+    """Whether the goal report is asked for after the reason (agent a04)."""
+    fmt = body.get("response_format") or {}
+    schema = (fmt.get("json_schema") or {}).get("schema")
+    for tool in body.get("tools") or []:
+        schema = tool["function"]["parameters"]
+    if schema:
+        keys = list(schema["properties"])
+        return "goal" in keys and keys.index("goal") > keys.index("reason")
+    # json_object embeds the schema in the prompt; text names the line order.
+    text = json.dumps(body.get("messages", []))
+    reason_at, goal_at = text.find('\\"reason\\": {'), text.find('\\"goal\\": {')
+    if reason_at >= 0 and goal_at >= 0:
+        return reason_at < goal_at
+    return 'then a line \\"GOAL:' in text
+
+
 def _pick(body: Dict[str, Any], indices: List[int]) -> int:
     """Index 0 is turn-around, so the forward headings are everything else."""
     forward = [i for i in indices if i != 0]
@@ -100,7 +117,10 @@ async def completions(body: Dict[str, Any]):
     # It never looks at the image, so it never claims to see the goal.
     reply: Dict[str, Any] = {"reason": reason, "action": choice}
     if _wants_goal(body):
-        reply = {"goal": "not_visible", **reply}
+        if _goal_last(body):
+            reply = {"reason": reason, "goal": "not_visible", "action": choice}
+        else:
+            reply = {"goal": "not_visible", **reply}
 
     if rung == "tool_call":
         message: Dict[str, Any] = {
@@ -113,8 +133,8 @@ async def completions(body: Dict[str, Any]):
         }
     elif rung == "text":
         message = {"role": "assistant",
-                   "content": ("GOAL: not_visible\n" if "goal" in reply else "")
-                   + "REASON: {0}\nACTION: {1}".format(reason, choice)}
+                   "content": "\n".join("{0}: {1}".format(k.upper(), v)
+                                        for k, v in reply.items())}
     else:
         message = {"role": "assistant",
                    "content": json.dumps(reply)}

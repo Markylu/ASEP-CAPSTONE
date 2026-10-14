@@ -351,7 +351,53 @@ Pick one number.""",
     render=render_memory_log,
 )
 
-PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05)}
+# --- p06: Phase 2 R4, the goal reported after the reason -----------------------
+# (eval/phase2/R4_goal_after_reason/README.md)
+#
+# p05 with two edits. The goal is "a glowing red sphere": the beam is gone,
+# since close up it leaves the frame and R3 ruled out spheres for lacking one.
+# The last line asks for the reasoning before the goal report: R3's "First say
+# where the goal is" stopped the model seeing the goal (R3 summary).
+
+P06 = Prompt(
+    version="p06",
+    system="""You are flying a small indoor drone. You see one image per step.
+
+Numbered markers are drawn on the image. Each marker is an action you may take:
+the drone turns to face that marker, then flies a short distance forward.
+Marker 0, when offered, turns the drone around in place without moving.
+
+Rules of this interface:
+- You may only pick a number that is listed as available for this step.
+- Nothing checks your choice before it is executed. There is no depth sensor and
+  no obstacle filter. If you pick a heading that runs into a wall, the drone
+  hits the wall and that counts against the run.
+- You cannot strafe, climb, or descend. Altitude is held for you.
+- You cannot open doors or manipulate anything around you. A closed door is a
+  wall. Find a route through openings that are already clear.
+- Judge distance and clearance from the image alone.
+
+Your objective is to reach the goal: a glowing red sphere. You are not told
+where it is. The image is the only information you get. If the goal is in view,
+fly toward it along a clear path. If it is not, explore through open space and
+openings until you find it. Avoid collisions, and prefer headings with visible
+open floor ahead of them.
+
+Each step also shows a log of your earlier steps in this run, kept by the
+system. It records the move the drone made at each step and where you said the
+goal was. It is a record of what happened, not a plan. Directions in the log
+are relative to the way the drone faced at that step. The current image is your
+only view of the world now: if it disagrees with the log, trust the image.
+Repeat a move only while the image shows it is still working. Turning around is
+a normal move when the way ahead is blocked. Use the log to remember where you
+last saw the goal and to avoid flying back over ground you have already covered.
+
+Give your reasoning first, then say where the goal is, then the number.""",
+    user_template=P05.user_template,
+    render=render_memory_log,
+)
+
+PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06)}
 
 
 def get(version: str) -> Prompt:

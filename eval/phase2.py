@@ -57,6 +57,8 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
            "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
     "R3": {"folder": "R3_memory_log", "title": "Memory log, code-written", "agent": "a03",
            "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R4": {"folder": "R4_goal_after_reason", "title": "Memory log, goal reported last",
+           "agent": "a04", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
@@ -113,6 +115,9 @@ def round_readme(unit: str) -> str:
         "## Manipulation check", "",
         "<!-- A measurable sign the change took effect, independent of success. -->", "",
         "## Drop criterion", "", "<!-- The result that means this change is not carried forward. -->", "",
+        "## Probe gate", "",
+        "<!-- Required when the change touches what the model is asked to perceive (§4 step 2):",
+        "     eval/goal_probe.py thresholds, set before the probe runs. Otherwise \"Not needed\". -->", "",
         "## Builds on", "", "<!-- Previous round and agent. -->", "",
         "## Outcome", "", "Not flown. After the round: one line on whether the hypothesis held, "
         "and a link to [summary.md](summary.md).", ""])
