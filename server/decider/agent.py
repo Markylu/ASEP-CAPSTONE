@@ -82,6 +82,12 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "reports where the goal is. The navigator (p07) gets that answer and a log of "
           "moves with only the last sighting, its age and the turn since; it no longer "
           "reports the goal. R4: the log carried stale sightings forward."),
+    Agent("a06", "p07", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal"],
+                                    "goal_log": "last_sighting"},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a05 with the identifier shown the camera frame without annotations (g02). "
+          "R5 probe: g01 took the pink '0 TURN AROUND' marker for the goal."),
 )}
 
 DEFAULT_AGENT = "a00"
@@ -92,6 +98,12 @@ def get(version: str) -> Agent:
         raise KeyError("unknown agent version {0!r}; known: {1}".format(
             version, ", ".join(AGENTS)))
     return AGENTS[version]
+
+
+def wants_clean_frame(version: str) -> bool:
+    """Whether the agent's goal identifier reads the frame without annotations."""
+    ident = get(version).features.get("goal_identifier") or {}
+    return ident.get("frame") == "clean"
 
 
 def current() -> Agent:

@@ -223,6 +223,11 @@ func _apply(args: Dictionary) -> void:
 		agent.scripted_indices = indices
 		agent.decision_source = VLMNavController.DecisionSource.SCRIPTED
 		max_steps = min(max_steps, indices.size())
+		# Absolute directory for the clean frame of every step (replay only).
+		if args.has("save-clean-frames"):
+			var dir := str(args["save-clean-frames"])
+			DirAccess.make_dir_recursive_absolute(dir)
+			agent.clean_frame_dir = dir
 
 
 ## Replicates at temperature 0 differ only through their input, so each seed

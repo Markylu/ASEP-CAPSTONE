@@ -427,6 +427,28 @@ is: "ahead" if it is near the vertical centre line of the image, "left" or
 )
 
 
+# --- g02: Phase 2 R5, the goal identifier on the unmarked frame ----------------
+# (eval/phase2/R5_goal_identifier/README.md)
+#
+# g01 minus the sentence about markers: the identifier now gets the camera image
+# with nothing drawn on it (agent a06, `goal_identifier.frame: clean`). g01 took
+# the pink "0 TURN AROUND" marker for the sphere (R5 probe).
+
+G02 = Prompt(
+    version="g02",
+    system="""You check one image from the front camera of a small indoor drone.
+
+Your only job is to say whether the goal is in this image, and where. The goal
+is a glowing red sphere. Judge this image alone.
+
+First describe what you see that could be the goal. Then report where the goal
+is: "ahead" if it is near the vertical centre line of the image, "left" or
+"right" if it is clearly to that side, "not_visible" if it is not in the image.""",
+    user_template="Is the goal in this image?",
+    render=render_identifier_question,
+)
+
+
 IDENTIFIER_WORDS = {"ahead": "ahead", "left": "to the left", "right": "to the right",
                     "not_visible": "not visible"}
 
@@ -568,7 +590,7 @@ Pick one number.""",
     render=render_identifier_log,
 )
 
-PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, G01)}
+PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, G01, G02)}
 
 
 def get(version: str) -> Prompt:

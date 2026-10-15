@@ -1,6 +1,6 @@
-# R5: Goal identifier, sighting age
+# R5: Goal identifier on the clean frame, sighting age
 
-**Agent:** `a05` (`7e9a54f898bc`) · **Prompt:** `p07` (`fc7175f7b803`) · **Identifier prompt:** `g01` (`46df663da25f`) · **Status:** pre-registered, not flown
+**Agent:** `a06` (`9cc1e3f9a121`) · **Prompt:** `p07` (`fc7175f7b803`) · **Identifier prompt:** `g02` (`bf175c973dfb`) · **Status:** pre-registered, not flown
 
 Written before flying. Spec: `docs/phase2-test-plan.md`.
 
@@ -33,7 +33,37 @@ and the reason-first navigator.
   `vlm.py`.
 - `agent_sha` also hashes `g01`'s sha, so the identifier's wording is part of the agent.
 
-**These are two changes in one round, by the operator's choice.** The probe (below) measures each
+3. **The identifier reads the frame without annotations** (`a06`, added before flying, see
+   below). Godot captures the view twice per step inside the frozen-world pause: once clean
+   (`capture_clean_frame()`, overlay and panel hidden) and once annotated. When the decider's
+   `/run/start` reply asks for it (`agent.wants_clean_frame()`), both go to `/decide`. The
+   identifier (`g02`, which is `g01` without the sentence about markers) reads the clean frame.
+   The navigator still decides from the annotated one. The clean frame is saved as
+   `frames/c<step>.png`. A step whose clean frame is missing fails, and never falls back to the
+   annotated frame.
+
+### Before flying: `a05` failed its probe, the round moved to `a06`
+
+R5 was written and committed for `a05` (`7e9a54f898bc`, identifier `g01` on the annotated
+frame), and probed first ([probe/probe.md](probe/probe.md), `a05` column).
+- Five of six checks passed. The identifier saw the goal in 107 / 107 visible frames (30 / 30
+  early), with 3 / 66 false positives, and the `a04` calibration reproduced its phantom claims
+  (10 / 40).
+- `a05`'s navigator placed the goal around the drone in 5 / 40 out-of-view replay frames (12.5%,
+  gate ≤ 10%), so `a05` did not fly.
+- All 5 follow a false identifier report of `ahead`. Where the identifier said `not_visible`, the
+  navigator never placed the goal from the log (0 / 35).
+- The false sightings are the pink "0 TURN AROUND" marker drawn at the top centre of every frame:
+  "a glowing red sphere at the top center of the image, labeled with the number 0" (s02a
+  `initial` step 43; the frame holds no sphere). The same mistake accounts for 2 of the
+  identifier's 3 single-frame false positives.
+
+The operator chose to remove the confusion at its source: show the identifier the camera view
+with nothing drawn on it, and keep R5 as the round. `a06` is `a05` with that one difference.
+The hypothesis, predictions, manipulation check, drop criterion and probe thresholds below are
+unchanged, and apply to `a06`.
+
+**These are now three changes in one round, by the operator's choice.** The probe (below) measures each
 one's precondition before flying, but cannot split their effect on flight.
 
 **Cost:** two calls per step. Expect latency p50 near 2.8 s per step (R4: ~1.56 s) and a round
@@ -133,7 +163,7 @@ Run `python eval/agent_evidence.py eval/phase2/R5_goal_identifier` and compare w
 
 ## Drop criterion
 
-Drop `a05` (do not build on it) if any of these holds:
+Drop `a06` (do not build on it) if any of these holds:
 - `final` + `dynamic` ≤ 3/12 (no better than R1) while the identifier is delivered.
 - `initial` ≤ 3/6.
 - The lock-in returns: same pick ≥ 90% on `final` or `dynamic`.
@@ -151,10 +181,19 @@ The probe is required, because R5 changes what the model is asked to perceive an
 (`docs/phase2-test-plan.md` §4 step 2). It has two parts, both in `eval/goal_probe.py`, and runs
 before any flight.
 
+**Clean frames for the probe.** The recorded frames all carry the overlay. Each source run (43
+runs of R1, R3 and R4) was replayed with `python eval/replay.py <run> --save-clean-frames`, which
+re-flies the recorded indices and saves the view at each step without annotations.
+- Every replay must reproduce its run to 1e-3 m.
+- `goal_probe.py attach-clean` pairs each probe frame with its clean twin and refuses a twin
+  that differs from the recorded frame in more than 5% of the pixels. On R4 s02a `initial`,
+  every one of the 60 pairs differs in 1.4%, the area of the overlay.
+- The identifier reads the clean twin, and the navigator reads the recorded annotated frame.
+
 **Part 1, the identifier on single frames.** The frame set is R4's
-[probe_set.jsonl](probe/probe_set.jsonl), copied unchanged: 173 frames, with the `early` 30 and
-the `step0` 18. The identifier never sees a log, so a single frame is exactly its in-flight
-condition. That was not true of R4's navigator. `run --agent a05` scores `identify_goal()`'s
+[probe_set.jsonl](probe/probe_set.jsonl), the same 173 frames, with the `early` 30 and the
+`step0` 18. The identifier never sees a log, so a single frame is exactly its in-flight
+condition. That was not true of R4's navigator. `run --agent a06` scores `identify_goal()`'s
 report and asks the navigator for the step-0 pick.
 - [probe_a04.jsonl](probe/probe_a04.jsonl) is R4's answers, copied for comparison and not re-run.
 - `a04`'s probe result matched its in-flight perception when the goal was in view (107 / 107
@@ -172,8 +211,8 @@ the log that `a04` had at that step (`Run.memory()`). There are 60 frames:
 
 `run-replay` sends each frame at its recorded step:
 - **`a04` (calibration)** gets its recorded log. If the replay does not reproduce its in-flight
-  phantom claims, the replay does not reflect flight, and its result for `a05` means nothing.
-- **`a05` (candidate)** gets a log whose goal entries are ground truth, which is what a perfect
+  phantom claims, the replay does not reflect flight, and its result for `a06` means nothing.
+- **`a06` (candidate)** gets a log whose goal entries are ground truth, which is what a perfect
   identifier would have written. Its identifier answers the current frame live, then the
   navigator answers.
 
@@ -188,12 +227,12 @@ in view or in a direction now (`claims_goal()`, `eval/agent_evidence.py`)?
 
 | Check | Pass |
 |---|---|
-| `a05` identifier, `early` | ≥ 27 / 30 (`a04` probe: 30 / 30) |
-| `a05` identifier, seen when visible, pooled | ≥ 90% (`a04` probe: 100%) |
-| `a05` identifier, seen when visible, under 5 m | ≥ 90% (`a04` probe: 26 / 26) |
-| `a05` identifier, false positives on not-visible frames | ≤ 5% (`a04` probe: 1 / 66) |
+| `a06` identifier, `early` | ≥ 27 / 30 (`a04` probe: 30 / 30) |
+| `a06` identifier, seen when visible, pooled | ≥ 90% (`a04` probe: 100%) |
+| `a06` identifier, seen when visible, under 5 m | ≥ 90% (`a04` probe: 26 / 26) |
+| `a06` identifier, false positives on not-visible frames | ≤ 5% (`a04` probe: 1 / 66) |
 | Calibration: `a04` replay, reason places the goal now, out of view | ≥ 25% (in flight on these 40: 13 / 40). Otherwise stop and look at the probe |
-| `a05` replay, reason places the goal now, out of view | ≤ 10% |
+| `a06` replay, reason places the goal now, out of view | ≤ 10% |
 
 Reported but not gated:
 - identifier direction agreement;
@@ -203,7 +242,8 @@ Reported but not gated:
 - the latency of both calls.
 
 `python eval/goal_probe.py report eval/phase2/R5_goal_identifier/probe --gate R5 --calibration
-a04 --candidate a05`.
+a04 --candidate a06`. The `a04` calibration replay is the one already run for `a05`, and its
+input did not change.
 
 If every check passes, R5 flies. If any fails, R5 does not fly: the Outcome records the probe, and
 the next wording is a new prompt version, probed the same way.
@@ -216,6 +256,4 @@ the next wording is a new prompt version, probed the same way.
 
 ## Outcome
 
-**Not flown: probe gate failed** (2026-10-15, [probe/probe.md](probe/probe.md)). Five of six checks passed. The identifier saw the goal in 107 / 107 visible frames (30 / 30 early), with 3 / 66 false positives, and the `a04` calibration reproduced its phantom claims (10 / 40). `a05`'s navigator placed the goal around the drone in 5 / 40 out-of-view replay frames (12.5%, gate ≤ 10%).
-
-Every one of those 5 follows a false identifier report of `ahead`. Where the identifier said `not_visible`, the navigator never placed the goal from the log (0 / 35). The identifier's false sightings are the pink "0 TURN AROUND" marker drawn at the top centre of the frame. It names it in its reasons ("a glowing red sphere at the top center of the image, labeled with the number 0"), and the frames hold no sphere (s01 `initial` step 25, s02a `initial` step 43). The same mistake accounts for 2 of its 3 single-frame false positives. The fix belongs to the identifier's wording, as a new prompt version probed the same way.
+Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).

@@ -38,6 +38,12 @@ a probe that only tests step 0 cannot see a failure that builds up in the log.
 whose goal reports are ground truth (what a perfect identifier would have
 written) and its identifier is asked about the current frame live.
 
+An identifier that reads the frame without annotations (a06 on) needs each
+frame's clean twin. Replay the source runs with `eval/replay.py
+--save-clean-frames` (same pose, checked to 1e-3 m), then pair them:
+
+    python eval/goal_probe.py attach-clean eval/phase2/R5_goal_identifier/probe
+
 Only an agent whose reply carries a `goal` field, or that has a goal
 identifier, can be probed. `run` uses the
 decider's profile settings (`--profile`, default remote, so the operator's
@@ -180,6 +186,7 @@ def cmd_sample(args: argparse.Namespace) -> int:
 async def probe(rows: List[Dict[str, Any]], out: Path) -> None:
     from server.decider import agent, vlm  # after the env is set
     ident = agent.record()
+    wants_clean = agent.wants_clean_frame(ident["agent_version"])
     done = {r["sha"] for r in read_jsonl(out)} if out.is_file() else set()
     todo = [r for r in rows if r["sha"] not in done]
     print("{0}: {1} frames, {2} already done".format(ident["agent_version"], len(rows), len(done)))
@@ -198,7 +205,8 @@ async def probe(rows: List[Dict[str, Any]], out: Path) -> None:
                     if agent.current().features.get("goal_identifier"):
                         # As in flight: the identifier sees the frame alone,
                         # and its report is what is scored.
-                        sighting = await vlm.identify_goal(manifest, b64)
+                        sighting = await vlm.identify_goal(
+                            manifest, identifier_frame(row, b64, wants_clean))
                         decision = await vlm.decide(manifest, b64, [], sighting.goal)
                         result.update(goal=sighting.goal, identifier_reason=sighting.reason,
                                       identifier_rung=sighting.rung,
@@ -235,6 +243,70 @@ def cmd_run(args: argparse.Namespace) -> int:
         rows = rows[:args.limit]
     asyncio.run(probe(rows, args.out / "probe_{0}.jsonl".format(args.agent)))
     return 0
+
+
+#: A clean twin may differ from its annotated frame only where the overlay is
+#: drawn: 1.4% of the pixels on every frame checked (R4 s02a `initial`).
+OVERLAY_SHARE_MAX = 0.05
+
+
+def clean_twin(frame: str) -> Path:
+    """runs/<site>/<arm>/seedN/frames/f000012.png -> .../replay/frames/clean/c000012.png"""
+    path = REPO_ROOT / frame
+    return path.parent.parent / "replay" / "frames" / "clean" / ("c" + path.name[1:])
+
+
+def overlay_share(annotated: Path, clean: Path) -> float:
+    """Share of pixels that differ by more than 8 levels between the two."""
+    from PIL import Image, ImageChops
+    a, b = Image.open(annotated).convert("RGB"), Image.open(clean).convert("RGB")
+    if a.size != b.size:
+        return 1.0
+    diff = ImageChops.difference(a, b).convert("L").point(lambda v: 255 if v > 8 else 0)
+    return diff.histogram()[255] / float(a.size[0] * a.size[1])
+
+
+def cmd_attach_clean(args: argparse.Namespace) -> int:
+    missing: Dict[str, int] = defaultdict(int)
+    bad = 0
+    for name in ("probe_set.jsonl", "replay_set.jsonl"):
+        path = args.dir / name
+        if not path.is_file():
+            continue
+        rows = read_jsonl(path)
+        for row in rows:
+            clean = clean_twin(row["frame"])
+            if not clean.is_file():
+                missing[rel(clean.parent.parent.parent.parent)] += 1
+                continue
+            share = overlay_share(REPO_ROOT / row["frame"], clean)
+            if share > OVERLAY_SHARE_MAX:
+                bad += 1
+                print("  {0}: clean twin differs in {1:.1%} of pixels".format(row["frame"], share))
+                continue
+            row["clean_frame"] = rel(clean)
+            row["clean_sha"] = hashlib.sha256(clean.read_bytes()).hexdigest()[:16]
+            row["overlay_share"] = round(share, 4)
+        path.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in rows))
+        paired = sum(1 for r in rows if r.get("clean_frame"))
+        print("{0}: {1} / {2} frames paired with a clean twin".format(name, paired, len(rows)))
+    for run, n in sorted(missing.items()):
+        print("  no clean frames for {0} frames of {1}: python eval/replay.py {1} "
+              "--save-clean-frames".format(n, run))
+    return 1 if missing or bad else 0
+
+
+def identifier_frame(row: Dict[str, Any], b64: str, wants_clean: bool) -> str:
+    """The frame the identifier reads: the clean twin for an agent that wants
+    it (refused if not paired or changed), the annotated frame otherwise."""
+    if not wants_clean:
+        return b64
+    if not row.get("clean_frame"):
+        raise SystemExit("{0} has no clean twin; run attach-clean first".format(row["frame"]))
+    png = (REPO_ROOT / row["clean_frame"]).read_bytes()
+    if hashlib.sha256(png).hexdigest()[:16] != row["clean_sha"]:
+        raise SystemExit("{0} no longer matches sha {1}".format(row["clean_frame"], row["clean_sha"]))
+    return base64.b64encode(png).decode()
 
 
 def reports_goal(version: str) -> bool:
@@ -316,6 +388,7 @@ async def replay(rows: List[Dict[str, Any]], out: Path) -> None:
     from server.decider import agent, vlm  # after the env is set
     ident = agent.record()
     identifier = bool(agent.current().features.get("goal_identifier"))
+    wants_clean = agent.wants_clean_frame(ident["agent_version"])
     done = {r["sha"] for r in read_jsonl(out)} if out.is_file() else set()
     todo = [r for r in rows if r["sha"] not in done]
     print("{0}: {1} replay frames, {2} already done".format(
@@ -335,7 +408,8 @@ async def replay(rows: List[Dict[str, Any]], out: Path) -> None:
                         # The log a perfect identifier would have written.
                         for entry in memory:
                             entry["goal"] = row["truth_log"].get(str(entry["step"]))
-                        sighting = await vlm.identify_goal(manifest, b64)
+                        sighting = await vlm.identify_goal(
+                            manifest, identifier_frame(row, b64, wants_clean))
                         decision = await vlm.decide(manifest, b64, memory, sighting.goal)
                         result.update(goal=sighting.goal, identifier_reason=sighting.reason)
                     else:
@@ -617,6 +691,8 @@ def main() -> int:
     sr = sub.add_parser("sample-replay", help="build replay_set.jsonl from recorded rounds")
     sr.add_argument("rounds", nargs="+", type=Path)
     sr.add_argument("--out", type=Path, required=True)
+    ac = sub.add_parser("attach-clean", help="pair every frame with its clean twin")
+    ac.add_argument("dir", type=Path)
     rr = sub.add_parser("run-replay", help="replay every frame in the set with its log")
     rr.add_argument("--agent", required=True)
     rr.add_argument("--out", type=Path, required=True)
@@ -630,7 +706,8 @@ def main() -> int:
     g.add_argument("--gate", choices=sorted(GATES), default="R4")
     args = parser.parse_args()
     return {"sample": cmd_sample, "run": cmd_run, "sample-replay": cmd_sample_replay,
-            "run-replay": cmd_run_replay, "report": cmd_report}[args.cmd](args)
+            "run-replay": cmd_run_replay, "attach-clean": cmd_attach_clean,
+            "report": cmd_report}[args.cmd](args)
 
 
 if __name__ == "__main__":

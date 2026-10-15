@@ -152,6 +152,10 @@ def main() -> int:
                              "but it is nonzero and accumulates, so cite runs flown at 1.0.")
     parser.add_argument("--json", type=Path, default=None,
                         help="also write the verdict here as JSON (phase 1 writes replay.json)")
+    parser.add_argument("--save-clean-frames", action="store_true",
+                        help="also save each step's frame without annotations, at the "
+                             "recorded pose, as <replay dir>/frames/clean/c<step>.png "
+                             "(eval/goal_probe.py attach-clean)")
     args = parser.parse_args()
 
     run_dir = args.run_dir.resolve()
@@ -193,6 +197,8 @@ def main() -> int:
         # wall — s02's closed door — are exactly the ones worth replaying.
         "--max-collisions=-1",
     ] + world_args(meta) + dir_args
+    if args.save_clean_frames:
+        command.append("--save-clean-frames=" + str(replay_dir / "frames" / "clean"))
     if args.speed != 1.0:
         command.append("--speed={0}".format(args.speed))
         print("watch mode at {0}x — trajectory is within tolerance but not "

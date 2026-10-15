@@ -59,8 +59,11 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
            "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
     "R4": {"folder": "R4_goal_after_reason", "title": "Memory log, goal reported last",
            "agent": "a04", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
-    "R5": {"folder": "R5_goal_identifier", "title": "Goal identifier, sighting age",
-           "agent": "a05", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # Defined with a05; its probe failed (the identifier took the drawn turn-around
+    # marker for the goal), so before flying the round moved to a06, which shows
+    # the identifier the unannotated frame. R5 README, "Change".
+    "R5": {"folder": "R5_goal_identifier", "title": "Goal identifier on the clean frame, sighting age",
+           "agent": "a06", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

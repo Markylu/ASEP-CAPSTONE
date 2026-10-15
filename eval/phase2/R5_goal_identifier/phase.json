@@ -1,8 +1,8 @@
 {
   "round": "R5",
-  "title": "Goal identifier, sighting age",
+  "title": "Goal identifier on the clean frame, sighting age",
   "citable": false,
-  "agent_version": "a05",
+  "agent_version": "a06",
   "status": "planned",
   "git_sha": null,
   "started": null,

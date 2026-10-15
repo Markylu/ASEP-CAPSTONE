@@ -42,10 +42,10 @@
     "s02vc_doors_visible_c": 1,
     "s03_fork_deadend": 2
   },
-  "agent_version": "a05",
-  "agent_sha": "7e9a54f898bc",
+  "agent_version": "a06",
+  "agent_sha": "9cc1e3f9a121",
   "prompt_version": "p07",
   "prompt_sha": "fc7175f7b803",
-  "identifier_prompt_version": "g01",
-  "identifier_prompt_sha": "46df663da25f"
+  "identifier_prompt_version": "g02",
+  "identifier_prompt_sha": "bf175c973dfb"
 }
