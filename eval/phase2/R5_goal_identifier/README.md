@@ -216,4 +216,6 @@ the next wording is a new prompt version, probed the same way.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Not flown: probe gate failed** (2026-10-15, [probe/probe.md](probe/probe.md)). Five of six checks passed. The identifier saw the goal in 107 / 107 visible frames (30 / 30 early), with 3 / 66 false positives, and the `a04` calibration reproduced its phantom claims (10 / 40). `a05`'s navigator placed the goal around the drone in 5 / 40 out-of-view replay frames (12.5%, gate ≤ 10%).
+
+Every one of those 5 follows a false identifier report of `ahead`. Where the identifier said `not_visible`, the navigator never placed the goal from the log (0 / 35). The identifier's false sightings are the pink "0 TURN AROUND" marker drawn at the top centre of the frame. It names it in its reasons ("a glowing red sphere at the top center of the image, labeled with the number 0"), and the frames hold no sphere (s01 `initial` step 25, s02a `initial` step 43). The same mistake accounts for 2 of its 3 single-frame false positives. The fix belongs to the identifier's wording, as a new prompt version probed the same way.
