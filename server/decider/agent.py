@@ -25,7 +25,7 @@ import hashlib
 import json
 import os
 from dataclasses import dataclass, field
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from . import prompt as prompts
 
@@ -41,8 +41,18 @@ class Agent:
     def prompt(self) -> prompts.Prompt:
         return prompts.get(self.prompt_version)
 
+    @property
+    def identifier_prompt(self) -> Optional[prompts.Prompt]:
+        """The goal identifier's prompt (a05 on), None for an agent without one."""
+        ident = self.features.get("goal_identifier")
+        return prompts.get(ident["prompt"]) if ident else None
+
     def sha(self) -> str:
         blob = self.prompt.sha() + "\x00" + json.dumps(self.features, sort_keys=True)
+        # The identifier's wording is part of the agent too. Appended only when
+        # there is one, so every earlier agent keeps its sha.
+        if self.identifier_prompt is not None:
+            blob += "\x00" + self.identifier_prompt.sha()
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
@@ -64,6 +74,14 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "a03 with the goal report moved after the reason, and the goal described as "
           "a glowing red sphere (no beam). R3: the report answered first stopped the "
           "model seeing the goal."),
+    Agent("a05", "p07", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal"],
+                                    "goal_log": "last_sighting"},
+                         "goal_identifier": {"prompt": "g01"}},
+          "Goal identifier: a second call per step (g01) with the frame and no log "
+          "reports where the goal is. The navigator (p07) gets that answer and a log of "
+          "moves with only the last sighting, its age and the turn since; it no longer "
+          "reports the goal. R4: the log carried stale sightings forward."),
 )}
 
 DEFAULT_AGENT = "a00"
@@ -84,12 +102,16 @@ def current() -> Agent:
 def describe(version: str) -> Dict[str, Any]:
     """An agent's identity as run.json records it; eval/phase2.py locks rounds on it."""
     agent = get(version)
-    return {
+    out = {
         "agent_version": agent.version,
         "agent_sha": agent.sha(),
         "prompt_version": agent.prompt_version,
         "prompt_sha": agent.prompt.sha(),
     }
+    if agent.identifier_prompt is not None:
+        out["identifier_prompt_version"] = agent.identifier_prompt.version
+        out["identifier_prompt_sha"] = agent.identifier_prompt.sha()
+    return out
 
 
 def record() -> Dict[str, Any]:

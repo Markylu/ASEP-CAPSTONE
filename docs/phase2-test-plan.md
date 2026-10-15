@@ -77,7 +77,10 @@ failing runs take 60 steps), plus preflight and labelling.
    `python eval/goal_probe.py sample <earlier rounds> --out <round>/probe`, `run --agent` for the
    new agent and for a calibration agent whose failure in flight is known, and `report`. The probe
    sends recorded frames with ground truth to the model, one call per frame and no Godot, at about
-   5 min per agent. If the gate fails, the round does not fly: the README's Outcome records the
+   5 min per agent. An agent with a log is also replayed with the log in place (`sample-replay`,
+   `run-replay`): recorded decisions whose last sighting is 5–20 steps old, scored on whether the
+   reason still places the goal around the drone (R4's phantoms needed a log, which step-0 frames
+   lack). If the gate fails, the round does not fly: the README's Outcome records the
    probe, and the next idea is a new version. Commit `probe/` before flying.
 3. **Preflight** (P1 §7.2 step 1): clean tree; tunnel up; decider started with
    `python -m server.decider --profile remote --agent <aNN>`; `/health` reports the round's
@@ -203,6 +206,7 @@ Git: same committed and ignored files as P1 §14.
 
 | Date | Change |
 |---|---|
+| 2026-10-15 | Replay probe (§4 step 2): `eval/goal_probe.py sample-replay` / `run-replay` send recorded frames with the log the agent had, scored by `claims_goal()` (`eval/agent_evidence.py`). Gates are per round (`report --gate`). Agents may carry a goal identifier, a second call per step whose prompt sha is part of `agent_sha` (R5). |
 | 2026-10-14 | Secondary tag `failed_goal_identification` (§5): phantom goal, missed goal or lost at close range, computed by `eval/phase1_label.py`. Tags only; the rubric's terminal labels are unchanged. |
 | 2026-10-14 | Probe step (§4 step 2) and a Probe gate section in the write-up: `eval/goal_probe.py` checks offline, on recorded frames, whether an agent sees the goal before a round flies. R3 flew 0/18 on an agent that had stopped seeing it. |
 | 2026-10-08 | Round write-ups (§4.1): `README.md` per round before flying, `evidence.md` from `eval/agent_evidence.py`. Branches (§4.2): one branch and PR per round, stacked on the previous round, never merged; replaces "merge, never squash". |

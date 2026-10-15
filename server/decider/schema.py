@@ -88,3 +88,54 @@ def tool_spec(indices: List[int], goal: bool = False,
             "parameters": action_schema(indices, goal, goal_after_reason),
         },
     }
+
+
+#: The goal identifier's reply (agent.py: feature `goal_identifier`, a05 on).
+IDENTIFIER_SCHEMA_NAME = "goal_identifier"
+
+
+def identifier_schema() -> Dict[str, Any]:
+    """What the goal identifier answers: a description, then where the goal is.
+
+    Reason first, the order that saw the goal in R4 (a04: 107/107 in the probe);
+    goal first stopped the model seeing it (R3 summary)."""
+    return {
+        "type": "object",
+        "properties": {
+            "reason": {
+                "type": "string",
+                "description": "What you see in this image that could be the goal.",
+            },
+            "goal": {
+                "type": "string",
+                "enum": GOAL_REPORTS,
+                "description": ("Where the goal (the glowing red sphere) is in this image, "
+                                "as described in your reason."),
+            },
+        },
+        "required": ["reason", "goal"],
+        "additionalProperties": False,
+    }
+
+
+def identifier_response_format() -> Dict[str, Any]:
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": IDENTIFIER_SCHEMA_NAME,
+            "strict": True,
+            "schema": identifier_schema(),
+        },
+    }
+
+
+def identifier_tool_spec() -> Dict[str, Any]:
+    """Fallback rung 3 for the identifier: the same contract as a single tool."""
+    return {
+        "type": "function",
+        "function": {
+            "name": "report_goal",
+            "description": "Report whether the goal is in this image, and where.",
+            "parameters": identifier_schema(),
+        },
+    }

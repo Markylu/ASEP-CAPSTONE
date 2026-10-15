@@ -140,8 +140,16 @@ async def decide(request: DecideRequest):
     # An agent with memory sees its own earlier decisions in this run (agent.py).
     memory = run.memory(request.step) if agent.current().features.get("memory") else None
 
+    # An agent with a goal identifier asks it about this frame first, with no
+    # log, and the navigator is given its answer (a05 on). It never fails the
+    # step: a failed identifier is a Sighting with goal None.
+    sighting = None
+    if agent.current().features.get("goal_identifier"):
+        sighting = await vlm.identify_goal(request.manifest, request.frame_png_b64)
+
     try:
-        decision = await vlm.decide(request.manifest, request.frame_png_b64, memory)
+        decision = await vlm.decide(request.manifest, request.frame_png_b64, memory,
+                                    sighting.goal if sighting else None)
     except Exception as exc:
         message = "{0}: {1}".format(type(exc).__name__, exc)
         run.record_decision({
@@ -149,6 +157,7 @@ async def decide(request: DecideRequest):
             "frame": frame_path,
             "manifest": request.manifest,
             "error": message,
+            **({"goal_identifier": sighting.to_dict()} if sighting else {}),
         })
         log.error("step %d decision failed: %s", request.step, message)
         # 200 with an error body: the client treats this as a failed run, and a
@@ -166,6 +175,12 @@ async def decide(request: DecideRequest):
     })
     if memory is not None:
         record["memory_steps"] = len(memory)
+    if sighting is not None:
+        # `goal` is the identifier's report, so Run.memory(), agent_evidence.py,
+        # the labeller's goal facets and the probe read it where they always have.
+        record["goal"] = sighting.goal
+        record["goal_identifier"] = sighting.to_dict()
+        record["step_latency_ms"] = round(sighting.latency_ms + decision.latency_ms, 1)
     run.record_decision(record)
     timing = decision.timing.to_dict() if decision.timing else {}
     # net/gpu at a glance: a step that is slow because of the tunnel and one
