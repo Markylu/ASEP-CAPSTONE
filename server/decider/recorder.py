@@ -145,17 +145,28 @@ class Run:
         version chooses (p04 shows marker and reason, p05 the move and the goal
         report). `theta_deg` is the chosen action's heading from the manifest,
         `goal` the reply's goal report, None when the agent does not make one.
+
+        `pose` is the drone's ground-truth pose when the step was decided, and
+        `pose_after` the pose at the next recorded step (failed decisions count:
+        they still record where the drone was). The last entry's `pose_after`
+        is None; the current manifest holds it (p08 on).
         """
+        records = [d for d in _read_jsonl(self.decisions) if d.get("step", 0) < before_step]
+        poses = {d["step"]: (d.get("manifest") or {}).get("pose")
+                 for d in records if "step" in d}
         out: List[Dict[str, Any]] = []
-        for d in _read_jsonl(self.decisions):
-            if d.get("error") or d.get("index") is None or d.get("step", 0) >= before_step:
+        for d in records:
+            if d.get("error") or d.get("index") is None:
                 continue
             actions = (d.get("manifest") or {}).get("actions") or []
             chosen = next((a for a in actions if a.get("index") == d["index"]), {})
+            later = [s for s in poses if s > d["step"]]
             out.append({"step": d["step"], "index": d["index"],
                         "turn_around": bool(chosen.get("turn_around")),
                         "theta_deg": chosen.get("theta_deg"),
-                        "reason": d.get("reason", ""), "goal": d.get("goal")})
+                        "reason": d.get("reason", ""), "goal": d.get("goal"),
+                        "pose": poses.get(d["step"]),
+                        "pose_after": poses[min(later)] if later else None})
         return out
 
     def record_step(self, pose: Dict[str, Any],
