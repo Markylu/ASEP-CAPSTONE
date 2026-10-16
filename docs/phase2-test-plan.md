@@ -169,6 +169,18 @@ three facets:
   where a tag first appears records when that failure mode was recognised. R3's missed goals
   (R3 summary) would have met the "missed goal" facet.
 
+**Added secondary tag: `spin_failure`.** In the `tags` column like the tag above. It applies to a
+failed run in which the agent picks turn-around in place on **≥ 5 consecutive decisions**: two
+turn-arounds cancel, so the drone stands still while the run's steps run out.
+
+- `eval/phase1_label.py` reads the chosen action's `turn_around` flag from each manifest and writes
+  the longest streak, where it starts, the total number of turn-arounds and the suggested tag to
+  `auto_labels.json` (`spin`). The reviewer confirms it like any other tag.
+- The threshold sits above every successful run in R1–R5 (longest streak 4, R5 s03 `final`).
+- Added in R5, whose failures turned around in place in streaks of 7–36 (operator, 2026-10-16).
+  R1–R4 keep their labels and tags as reviewed. By the rule, 9 of R3's 18 failures and 6 of R4's 13
+  would have met it.
+
 ## 6. Final round
 
 The agent chosen from the screening rounds is frozen and flown under the full Phase 1 design
@@ -206,6 +218,7 @@ Git: same committed and ignored files as P1 §14.
 
 | Date | Change |
 |---|---|
+| 2026-10-16 | Secondary tag `spin_failure` (§5): a failed run with ≥ 5 consecutive turn-around picks, computed by `eval/phase1_label.py`. Tags only; applies from R5. |
 | 2026-10-15 | Clean frames: an agent whose goal identifier reads the frame without annotations (`goal_identifier.frame: clean`, a06) gets it from Godot beside the annotated frame, saved as `frames/c<step>.png`. `eval/replay.py --save-clean-frames` recovers clean frames for recorded runs at their exact poses, and `goal_probe.py attach-clean` pairs them with probe frames. |
 | 2026-10-15 | Replay probe (§4 step 2): `eval/goal_probe.py sample-replay` / `run-replay` send recorded frames with the log the agent had, scored by `claims_goal()` (`eval/agent_evidence.py`). Gates are per round (`report --gate`). Agents may carry a goal identifier, a second call per step whose prompt sha is part of `agent_sha` (R5). |
 | 2026-10-14 | Secondary tag `failed_goal_identification` (§5): phantom goal, missed goal or lost at close range, computed by `eval/phase1_label.py`. Tags only; the rubric's terminal labels are unchanged. |
