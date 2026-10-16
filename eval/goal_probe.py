@@ -95,6 +95,8 @@ GATES = {
     "R5": {"early_min": 27, "seen_pooled_min": 0.90, "seen_near_min": 0.90,
            "false_positive_max": 0.05, "calibration_claim_min": 0.25,
            "claim_max": 0.10},
+    "R6": {"calibration_spin_min": 0.60, "spin_ratio_max": 0.50,
+           "visible_turn_max": 0.05, "claim_max": 0.10, "tie_points": 0.05},
 }
 GATE = GATES["R4"]
 
@@ -104,6 +106,11 @@ REPLAY_AGE = (5, 20)
 REPLAY_PER_GROUP = 20
 REPLAY_TURN_SPLIT = 90.0
 REPLAY_GROUPS = ("stale, turned < 90°", "stale, turned ≥ 90°", "visible")
+
+#: Spin set (R6): decisions in R5's turn-around loop, and two controls.
+SPIN_GROUPS = ("spin", "moving", "visible")
+SPIN_PER_GROUP = {"spin": 40, "moving": 20, "visible": 20}
+SPIN_MOVED_M = 1.0
 
 
 def band_of(distance: float) -> str:
@@ -251,8 +258,12 @@ OVERLAY_SHARE_MAX = 0.05
 
 
 def clean_twin(frame: str) -> Path:
-    """runs/<site>/<arm>/seedN/frames/f000012.png -> .../replay/frames/clean/c000012.png"""
+    """runs/<site>/<arm>/seedN/frames/f000012.png -> .../replay/frames/clean/c000012.png,
+    or the clean frame recorded in flight beside it (frames/c000012.png, a06 on)."""
     path = REPO_ROOT / frame
+    in_flight = path.parent / ("c" + path.name[1:])
+    if in_flight.is_file():
+        return in_flight
     return path.parent.parent / "replay" / "frames" / "clean" / ("c" + path.name[1:])
 
 
@@ -429,6 +440,121 @@ async def replay(rows: List[Dict[str, Any]], out: Path) -> None:
         await vlm.aclose()
 
 
+# --- spin replay (R6) ------------------------------------------------------------
+
+def _pose_xy(d: Dict[str, Any]) -> Any:
+    pose = (d.get("manifest") or {}).get("pose") or {}
+    pos = pose.get("position")
+    return (float(pos[0]), float(pos[2])) if pos else None
+
+
+def cmd_sample_spin(args: argparse.Namespace) -> int:
+    """Recorded decisions taken in the turn-around loop, plus controls, each with
+    its log as Run.memory() gives it now (poses included).
+
+    - spin: `final` or `dynamic`, the move before was a turn-around in place;
+    - moving: `final` or `dynamic`, the move before was a flight that took the
+      drone at least SPIN_MOVED_M, and the recorded pick was not a turn-around;
+    - visible: any arm, the goal in view (true_goal), the recorded pick not a
+      turn-around.
+    The log keeps the goal reports recorded in flight (`truth_log` holds them,
+    so replay() writes them back unchanged). The identifier reads the clean
+    frame recorded in flight."""
+    from server.decider.recorder import Run
+    pools: Dict[str, Dict[str, Dict[str, Any]]] = {g: {} for g in SPIN_GROUPS}
+    for unit in args.rounds:
+        for run in run_dirs(unit):
+            run_id = "/".join(run.parts[-3:])
+            arm = run.parts[-2]
+            decisions = [d for d in read_jsonl(run / "decisions.jsonl")
+                         if not d.get("error") and d.get("index") is not None]
+
+            def turned(d: Dict[str, Any]) -> bool:
+                acts = (d.get("manifest") or {}).get("actions") or []
+                return any(a.get("index") == d["index"] and a.get("turn_around") for a in acts)
+
+            for prev, d in zip(decisions, decisions[1:]):
+                if not d.get("frame") or not d.get("clean_frame"):
+                    continue
+                truth = true_goal(d.get("manifest") or {})
+                if truth in ("ahead", "left", "right"):
+                    group = SPIN_GROUPS[2] if not turned(d) else None
+                elif arm in ("final", "dynamic") and turned(prev):
+                    group = SPIN_GROUPS[0]
+                elif arm in ("final", "dynamic") and not turned(d):
+                    a, b = _pose_xy(prev), _pose_xy(d)
+                    moved = a is not None and b is not None and \
+                        ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5 >= SPIN_MOVED_M
+                    group = SPIN_GROUPS[1] if moved else None
+                else:
+                    group = None
+                if group is None:
+                    continue
+                step = int(d["step"])
+                memory = Run("spin:{0}:{1}".format(unit.name, run_id), run).memory(step)
+                png, clean = run / d["frame"], run / d["clean_frame"]
+                sha = hashlib.sha256(png.read_bytes()).hexdigest()[:16]
+                pools[group].setdefault(sha, {
+                    "sha": sha, "frame": rel(png), "manifest": d["manifest"], "truth": truth,
+                    "group": group, "clean_frame": rel(clean),
+                    "clean_sha": hashlib.sha256(clean.read_bytes()).hexdigest()[:16],
+                    "source": {"round": unit.name, "run": run_id, "step": step,
+                               "index": d["index"], "turn_around": turned(d),
+                               "goal": d.get("goal")},
+                    "memory": memory,
+                    "truth_log": {str(e["step"]): e.get("goal") for e in memory}})
+
+    rng = random.Random(SEED)
+    rows: List[Dict[str, Any]] = []
+    for group in SPIN_GROUPS:
+        pool = sorted(pools[group].values(), key=lambda r: r["sha"])
+        rows += rng.sample(pool, min(len(pool), SPIN_PER_GROUP[group]))
+    out = args.out / "spin_set.jsonl"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in rows))
+    print("{0} spin frames -> {1}".format(len(rows), rel(out)))
+    for group in SPIN_GROUPS:
+        pool = list(pools[group].values())
+        chosen = [r for r in rows if r["group"] == group]
+        print("  {0}: {1} of {2}; turned around in flight: {3} of the pool, {4} of the "
+              "chosen".format(group, len(chosen), len(pool),
+                              frac(sum(r["source"]["turn_around"] for r in pool), len(pool)),
+                              frac(sum(r["source"]["turn_around"] for r in chosen),
+                                   len(chosen))))
+    return 0
+
+
+def cmd_run_spin(args: argparse.Namespace) -> int:
+    os.environ["VLM_PROFILE"] = args.profile
+    os.environ["VLM_AGENT"] = args.agent
+    from server.decider import agent
+    if not agent.get(args.agent).features.get("memory"):
+        print("agent {0} keeps no log; nothing to replay".format(args.agent))
+        return 1
+    rows = read_jsonl(args.out / "spin_set.jsonl")
+    if args.limit:
+        rows = rows[:args.limit]
+    asyncio.run(replay(rows, args.out / "spin_{0}.jsonl".format(args.agent)))
+    return 0
+
+
+def score_spin(rows: Dict[str, Dict[str, Any]],
+               answers: Dict[str, Dict[str, Any]]) -> Dict[str, List[int]]:
+    """Per group: [answered, turned around, same pick as recorded in flight]."""
+    out = {g: [0, 0, 0] for g in SPIN_GROUPS}
+    for sha, a in answers.items():
+        row = rows.get(sha)
+        if row is None or a.get("error") or a.get("index") is None:
+            continue
+        acts = row["manifest"].get("actions") or []
+        turn = any(x.get("index") == a["index"] and x.get("turn_around") for x in acts)
+        cell = out[row["group"]]
+        cell[0] += 1
+        cell[1] += int(turn)
+        cell[2] += int(a["index"] == row["source"]["index"])
+    return out
+
+
 def cmd_run_replay(args: argparse.Namespace) -> int:
     os.environ["VLM_PROFILE"] = args.profile
     os.environ["VLM_AGENT"] = args.agent
@@ -530,7 +656,7 @@ def recorded_step0(rows: Dict[str, Dict[str, Any]], answers: Dict[str, Dict[str,
 def cmd_report(args: argparse.Namespace) -> int:
     rows = {r["sha"]: r for r in read_jsonl(args.dir / "probe_set.jsonl")}
     agents = sorted(p.stem[len("probe_"):] for p in args.dir.glob("probe_a*.jsonl"))
-    if not agents:
+    if not agents and args.gate != "R6":
         print("no probe_aNN.jsonl in {0}".format(args.dir))
         return 1
     answers = {a: {r["sha"]: r for r in read_jsonl(args.dir / "probe_{0}.jsonl".format(a))}
@@ -546,30 +672,37 @@ def cmd_report(args: argparse.Namespace) -> int:
         values = sorted(values)
         return "{0:.2f}".format(values[min(len(values) - 1, int(q * len(values)))] / 1000.0)
 
-    out = ["# Goal-detection probe", "",
-           "`python eval/goal_probe.py report {0}`. Each frame is sent as step 0 with an empty "
-           "log; the reply's `goal` report is scored against the manifest's ground truth "
-           "(`true_goal()`, eval/agent_evidence.py). Seen = any report other than "
-           "`not_visible`. Early and step-0 rows count recorded decisions; every other row "
-           "counts distinct frames.".format(rel(args.dir)), "",
-           "| Measure | {0} |".format(" | ".join("`{0}`".format(a) for a in agents)),
-           "|---|{0}".format("---|" * len(agents)),
-           line("frames answered", lambda s: "{0} / {1}".format(s["answered"], len(rows))),
-           line("model", lambda s: ", ".join(s["models"]) or "–"),
-           line("no valid report", lambda s: str(s["no_report"])),
-           line("**early** (first round, steps 0-2, goal visible)",
-                lambda s: frac(s["early_seen"], s["early"])),
-           line("**seen when visible**, pooled", lambda s: frac(s["seen"], s["visible"]))]
-    for name, _, _ in BANDS:
-        out.append(line("seen when visible, {0}".format(name),
-                        lambda s, n=name: frac(*s["bands"][n])))
-    out += [line("**false positive**, not visible", lambda s: frac(s["false_pos"], s["hidden"])),
-            line("false positive, not visible under 5 m",
-                 lambda s: frac(s["false_pos_near"], s["hidden_near"])),
-            line("direction right, of seen", lambda s: frac(s["dir_ok"], s["seen_dir"])),
-            line("step-0 pick = first round's pick", lambda s: frac(s["step0_same"], s["step0"])),
-            line("latency p50 / p95 (s)",
-                 lambda s: "{0} / {1}".format(pq(s["latency"], 0.5), pq(s["latency"], 0.95)))]
+    if agents:
+        out = ["# Goal-detection probe", "",
+               "`python eval/goal_probe.py report {0}`. Each frame is sent as step 0 with an empty "
+               "log; the reply's `goal` report is scored against the manifest's ground truth "
+               "(`true_goal()`, eval/agent_evidence.py). Seen = any report other than "
+               "`not_visible`. Early and step-0 rows count recorded decisions; every other row "
+               "counts distinct frames.".format(rel(args.dir)), "",
+               "| Measure | {0} |".format(" | ".join("`{0}`".format(a) for a in agents)),
+               "|---|{0}".format("---|" * len(agents)),
+               line("frames answered", lambda s: "{0} / {1}".format(s["answered"], len(rows))),
+               line("model", lambda s: ", ".join(s["models"]) or "–"),
+               line("no valid report", lambda s: str(s["no_report"])),
+               line("**early** (first round, steps 0-2, goal visible)",
+                    lambda s: frac(s["early_seen"], s["early"])),
+               line("**seen when visible**, pooled", lambda s: frac(s["seen"], s["visible"]))]
+        for name, _, _ in BANDS:
+            out.append(line("seen when visible, {0}".format(name),
+                            lambda s, n=name: frac(*s["bands"][n])))
+        out += [line("**false positive**, not visible", lambda s: frac(s["false_pos"], s["hidden"])),
+                line("false positive, not visible under 5 m",
+                     lambda s: frac(s["false_pos_near"], s["hidden_near"])),
+                line("direction right, of seen", lambda s: frac(s["dir_ok"], s["seen_dir"])),
+                line("step-0 pick = first round's pick", lambda s: frac(s["step0_same"], s["step0"])),
+                line("latency p50 / p95 (s)",
+                     lambda s: "{0} / {1}".format(pq(s["latency"], 0.5), pq(s["latency"], 0.95)))]
+
+    else:
+        # R6 changes no perception: the identifier is a06's, so only the
+        # replays run (README, "Probe gate").
+        out = ["# Probe", "", "`python eval/goal_probe.py report {0}`. No single-frame "
+               "probe in this round.".format(rel(args.dir))]
 
     replay_rows = ({r["sha"]: r for r in read_jsonl(args.dir / "replay_set.jsonl")}
                    if (args.dir / "replay_set.jsonl").is_file() else {})
@@ -604,7 +737,70 @@ def cmd_report(args: argparse.Namespace) -> int:
                 rline("goal reported seen, in view (control)",
                       lambda s: frac(s[REPLAY_GROUPS[2]][2], s[REPLAY_GROUPS[2]][0]))]
 
-    if args.gate == "R5" and args.candidate in scores:
+    spin_rows = ({r["sha"]: r for r in read_jsonl(args.dir / "spin_set.jsonl")}
+                 if (args.dir / "spin_set.jsonl").is_file() else {})
+    spun = sorted(p.stem[len("spin_"):] for p in args.dir.glob("spin_a*.jsonl"))
+    spin_scores = {a: score_spin(spin_rows, {r["sha"]: r for r in read_jsonl(
+        args.dir / "spin_{0}.jsonl".format(a))}) for a in spun}
+    if spin_scores:
+        def sline(title: str, cell) -> str:
+            return "| {0} | {1} |".format(title, " | ".join(cell(spin_scores[a]) for a in spun))
+        out += ["", "## Spin replay", "",
+                "Recorded R5 decisions with the log in place (`spin_set.jsonl`): `spin`, the "
+                "move before was a turn-around (`final`/`dynamic`); `moving`, the move before "
+                "took the drone ≥ {0:.0f} m and flight did not turn around; `visible`, the goal "
+                "in view and flight did not turn around.".format(SPIN_MOVED_M), "",
+                "| Measure | {0} |".format(" | ".join("`{0}`".format(a) for a in spun)),
+                "|---|{0}".format("---|" * len(spun))]
+        for g in SPIN_GROUPS:
+            out += [sline("**turn-around**, {0}".format(g),
+                          lambda s, g=g: frac(s[g][1], s[g][0])),
+                    sline("same pick as in flight, {0}".format(g),
+                          lambda s, g=g: frac(s[g][2], s[g][0]))]
+
+    if args.gate == "R6":
+        gate = GATES["R6"]
+
+        def rate(cell: List[int], k: int = 1) -> float:
+            return cell[k] / cell[0] if cell[0] else float("nan")
+
+        cal = spin_scores.get(args.calibration, {}).get("spin", [0, 0, 0])
+        checks = [("Calibration: `{0}` spin replay turns around ≥ {1:.0%}".format(
+            args.calibration, gate["calibration_spin_min"]),
+            cal[0] > 0 and rate(cal) >= gate["calibration_spin_min"], frac(cal[1], cal[0]))]
+        passers: List[str] = []
+        for cand in args.candidate.split(","):
+            s = spin_scores.get(cand, {g: [0, 0, 0] for g in SPIN_GROUPS})
+            r = replay_scores.get(cand, {}).get("stale", [0, 0, 0])
+            mine = [
+                ("`{0}` spin: turn-around ≤ {1:.0%} of the calibration's".format(
+                    cand, gate["spin_ratio_max"]),
+                 s["spin"][0] > 0 and cal[0] > 0
+                 and rate(s["spin"]) <= gate["spin_ratio_max"] * rate(cal),
+                 frac(s["spin"][1], s["spin"][0])),
+                ("`{0}` visible: turn-around ≤ {1:.0%}".format(cand, gate["visible_turn_max"]),
+                 s["visible"][0] > 0 and rate(s["visible"]) <= gate["visible_turn_max"],
+                 frac(s["visible"][1], s["visible"][0])),
+                ("`{0}` replay, reason places the goal now ≤ {1:.0%}".format(
+                    cand, gate["claim_max"]),
+                 r[0] > 0 and r[1] / r[0] <= gate["claim_max"], frac(r[1], r[0])),
+            ]
+            checks += mine
+            if checks[0][1] and all(ok for _, ok, _ in mine):
+                passers.append(cand)
+        order = args.candidate.split(",")
+        winner = None
+        if passers:
+            best = min(rate(spin_scores[c]["spin"]) for c in passers)
+            # Within the tie margin, the earlier candidate (fewer changes) wins.
+            winner = next(c for c in order if c in passers
+                          and rate(spin_scores[c]["spin"]) <= best + gate["tie_points"])
+        out += ["", "## Gate (R6): **{0}**".format(
+            "PASS, fly `{0}`".format(winner) if winner else "FAIL, do not fly"),
+            "", "| Check | Result | |", "|---|---|---|"]
+        out += ["| {0} | {1} | {2} |".format(t, v, "pass" if ok else "**fail**")
+                for t, ok, v in checks]
+    elif args.gate == "R5" and args.candidate in scores:
         gate = GATES["R5"]
         cand = scores[args.candidate]
         near = cand["bands"][BANDS[0][0]]
@@ -698,15 +894,25 @@ def main() -> int:
     rr.add_argument("--out", type=Path, required=True)
     rr.add_argument("--profile", choices=("remote", "local"), default="remote")
     rr.add_argument("--limit", type=int, default=0, help="first N frames only (smoke test)")
+    ss = sub.add_parser("sample-spin", help="build spin_set.jsonl from recorded rounds")
+    ss.add_argument("rounds", nargs="+", type=Path)
+    ss.add_argument("--out", type=Path, required=True)
+    rs = sub.add_parser("run-spin", help="replay every spin-set frame with its log")
+    rs.add_argument("--agent", required=True)
+    rs.add_argument("--out", type=Path, required=True)
+    rs.add_argument("--profile", choices=("remote", "local"), default="remote")
+    rs.add_argument("--limit", type=int, default=0, help="first N frames only (smoke test)")
     g = sub.add_parser("report", help="score every probe_aNN.jsonl and write probe.md")
     g.add_argument("dir", type=Path)
     g.add_argument("--calibration", default="a03")
     g.add_argument("--calibration-round", default="R3_memory_log")
-    g.add_argument("--candidate", default="a04")
+    g.add_argument("--candidate", default="a04",
+                   help="R6: comma-separated, in tie-break order")
     g.add_argument("--gate", choices=sorted(GATES), default="R4")
     args = parser.parse_args()
     return {"sample": cmd_sample, "run": cmd_run, "sample-replay": cmd_sample_replay,
             "run-replay": cmd_run_replay, "attach-clean": cmd_attach_clean,
+            "sample-spin": cmd_sample_spin, "run-spin": cmd_run_spin,
             "report": cmd_report}[args.cmd](args)
 
 
