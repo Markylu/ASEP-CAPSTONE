@@ -21,6 +21,13 @@ Columns, over every decision in the cell:
   keyword hits, negations included ("no visible obstacles"): read the reasons
   before citing it.
 - turn-around pick: action 0.
+- two turn-arounds in a row: a turn-around right after a turn-around, of
+  decisions with a previous one (R5's loop, spin_failure).
+- reason cites position: the reason reads the pose log (position, coordinates,
+  "moved 0.0", the same spot, has not moved). Raw keyword hits; R5, without the
+  pose log, scores 10-13%.
+- pose in manifest: the decision's manifest has the position and yaw the pose
+  log (p08 on) is built from.
 - reason cites memory: the reason refers back to earlier steps (earlier,
   previous, already, before, again, last time, "step N"). Raw keyword hits, so
   agents without memory score above zero too; compare against a baseline round.
@@ -62,6 +69,9 @@ BEARING = re.compile(r"\bbearing\b")
 DISTANCE = re.compile(r"\d+(?:\.\d+)?\s*(?:m|meters?|metres?)\s+away")
 OBSTACLE = re.compile(r"\b(?:wall|door|obstacle|block|cube|dead end|barrier)")
 MEMORY = re.compile(r"\b(?:earlier|previous(?:ly)?|already|before|again|last time|step \d+)\b")
+#: The pose log (R6): the reason reads the drone's position or the distance moved.
+POSITION = re.compile(r"\b(?:position|coordinates?|moved 0\.0|same (?:spot|position|place|location)|"
+                      r"(?:has|have|hasn't|has not|did not|didn't) (?:not )?moved?)\b")
 #: A reason that places the goal in the drone's surroundings now ("the goal is
 #: still reported as ahead", "the goal is visible on the right"), per sentence.
 #: A sentence does not count if it negates, looks back or is conditional. Built
@@ -86,7 +96,9 @@ GOAL_REPORTS = ("ahead", "left", "right", "not_visible")
 #: (counter, title, denominator counter)
 COLUMNS = [("bearing", "reason cites bearing", "n"), ("distance", "reason cites distance", "n"),
            ("nearest", "nearest-bearing pick", "n"), ("obstacle", "obstacle word", "n"),
-           ("turn", "turn-around pick", "n"), ("memory", "reason cites memory", "n"),
+           ("turn", "turn-around pick", "n"), ("turn2", "two turn-arounds in a row", "pairs"),
+           ("memory", "reason cites memory", "n"), ("position", "reason cites position", "n"),
+           ("pose", "pose in manifest", "n"),
            ("revisit", "revisit", "n"), ("same_pick", "same pick", "pairs"),
            ("copied", "copied reason", "pairs"), ("visible", "goal visible", "n"),
            ("goal_ok", "goal report agrees", "reports"),
@@ -156,6 +168,7 @@ def tally(units: List[Path]) -> Tuple[Dict[Tuple[str, str], Dict[str, int]], Dic
             c["runs"] += 1
             seen: List[List[float]] = []
             previous: Optional[Dict[str, Any]] = None
+            was_turn = False
             for d in read_jsonl(run / "decisions.jsonl"):
                 reason = (d.get("reason") or "").lower()
                 manifest = d.get("manifest") or {}
@@ -187,8 +200,13 @@ def tally(units: List[Path]) -> Tuple[Dict[Tuple[str, str], Dict[str, int]], Dic
                 if forward:
                     meta["forward"].add(forward)
                 c["nearest"] += best is not None and d.get("index") == best
-                c["turn"] += any(a.get("turn_around") and a["index"] == d.get("index")
-                                 for a in manifest.get("actions", []))
+                turned = any(a.get("turn_around") and a["index"] == d.get("index")
+                             for a in manifest.get("actions", []))
+                c["turn"] += turned
+                c["turn2"] += turned and was_turn
+                was_turn = turned
+                c["position"] += bool(POSITION.search(reason))
+                c["pose"] += here is not None and (manifest.get("pose") or {}).get("yaw") is not None
     return cells, meta
 
 
