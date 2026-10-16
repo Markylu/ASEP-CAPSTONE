@@ -397,7 +397,200 @@ Give your reasoning first, then say where the goal is, then the number.""",
     render=render_memory_log,
 )
 
-PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06)}
+def render_identifier_question(prompt: Prompt, manifest: Dict[str, Any]) -> str:
+    """The identifier's question. It gets the frame and nothing else: no log,
+    no step number, no actions."""
+    return prompt.user_template
+
+
+# --- g01: Phase 2 R5, the goal identifier --------------------------------------
+# (eval/phase2/R5_goal_identifier/README.md)
+#
+# A second call per step with one job: is the goal in this image, and where.
+# It never sees the log, so a stale sighting cannot reach it (R4 summary: 342
+# phantom reports, 272 of them argued from the log). Its reply is reason, then
+# goal (schema.identifier_schema), the order that saw the goal in R4.
+
+G01 = Prompt(
+    version="g01",
+    system="""You check one image from the front camera of a small indoor drone.
+
+Your only job is to say whether the goal is in this image, and where. The goal
+is a glowing red sphere. Numbered markers are drawn on the image; they are not
+the goal. Judge this image alone.
+
+First describe what you see that could be the goal. Then report where the goal
+is: "ahead" if it is near the vertical centre line of the image, "left" or
+"right" if it is clearly to that side, "not_visible" if it is not in the image.""",
+    user_template="Is the goal in this image?",
+    render=render_identifier_question,
+)
+
+
+# --- g02: Phase 2 R5, the goal identifier on the unmarked frame ----------------
+# (eval/phase2/R5_goal_identifier/README.md)
+#
+# g01 minus the sentence about markers: the identifier now gets the camera image
+# with nothing drawn on it (agent a06, `goal_identifier.frame: clean`). g01 took
+# the pink "0 TURN AROUND" marker for the sphere (R5 probe).
+
+G02 = Prompt(
+    version="g02",
+    system="""You check one image from the front camera of a small indoor drone.
+
+Your only job is to say whether the goal is in this image, and where. The goal
+is a glowing red sphere. Judge this image alone.
+
+First describe what you see that could be the goal. Then report where the goal
+is: "ahead" if it is near the vertical centre line of the image, "left" or
+"right" if it is clearly to that side, "not_visible" if it is not in the image.""",
+    user_template="Is the goal in this image?",
+    render=render_identifier_question,
+)
+
+
+IDENTIFIER_WORDS = {"ahead": "ahead", "left": "to the left", "right": "to the right",
+                    "not_visible": "not visible"}
+
+
+def _turn(entry: Dict[str, Any]) -> float:
+    """Degrees the drone turned at a step, positive left; turn-around is 180."""
+    if entry.get("turn_around"):
+        return 180.0
+    theta = entry.get("theta_deg")
+    return float(theta) if theta is not None else 0.0
+
+
+def _net_turn(turns: List[float]) -> str:
+    """Sum of executed turns, wrapped to (-180, 180] and rounded to 10 degrees."""
+    total = sum(turns) % 360.0
+    if total > 180.0:
+        total -= 360.0
+    total = 10.0 * round(total / 10.0)
+    if total == 0.0:
+        return "net turn 0 degrees"
+    if abs(total) == 180.0:
+        return "net turn 180 degrees (now facing the opposite way)"
+    return "net turn {0:.0f} degrees {1}".format(abs(total), "left" if total > 0 else "right")
+
+
+def render_identifier_log(prompt: Prompt, manifest: Dict[str, Any],
+                          memory: List[Dict[str, Any]], sighting: Any = None) -> str:
+    """p03's step and marker numbers, after a log the system writes and the goal
+    identifier's answer for this image.
+
+    The log has one line per earlier step with the move only. The goal appears
+    once, as the last step the identifier reported it, with how many moves and
+    how much turning have happened since. `sighting` is the identifier's report
+    for the current frame (schema.GOAL_REPORTS), or None when it gave none.
+    """
+    if memory:
+        lines = ["Log of your earlier steps (what happened, not a plan):"]
+        for entry in memory:
+            lines.append("Step {0}: {1}.".format(entry["step"], _move(entry)))
+        last = None
+        for i, entry in enumerate(memory):
+            if entry.get("goal") in ("ahead", "left", "right"):
+                last = i
+        if last is None:
+            lines.append("No goal sighting yet in this run.")
+        else:
+            seen = memory[last]
+            since = memory[last:]  # the move made at the sighting step counts too
+            lines.append(
+                "Last goal sighting: step {0}, {1} (relative to the way the drone faced then). "
+                "Since then: {2} {3}, {4}.".format(
+                    seen["step"], IDENTIFIER_WORDS[seen["goal"]],
+                    len(since), "move" if len(since) == 1 else "moves",
+                    _net_turn([_turn(e) for e in since])))
+        memory_block = "\n".join(lines)
+    else:
+        memory_block = "Log of your earlier steps: none yet, this is the first step."
+
+    if sighting == "not_visible":
+        sighting_line = "Goal identifier, this image: the goal is not visible."
+    elif sighting in IDENTIFIER_WORDS:
+        sighting_line = "Goal identifier, this image: the goal is {0}.".format(
+            IDENTIFIER_WORDS[sighting])
+    else:
+        sighting_line = "Goal identifier, this image: no answer this step."
+
+    actions: List[str] = []
+    for action in manifest.get("actions", []):
+        if action.get("turn_around"):
+            actions.append("  [{i}] turn around in place".format(i=action["index"]))
+        else:
+            actions.append("  [{i}]".format(i=action["index"]))
+
+    return prompt.user_template.format(
+        step=manifest.get("step", 0),
+        memory_block=memory_block,
+        sighting_line=sighting_line,
+        action_lines="\n".join(actions) if actions else "  (none)",
+    )
+
+
+# --- p07: Phase 2 R5, navigator fed by the goal identifier ---------------------
+# (eval/phase2/R5_goal_identifier/README.md)
+#
+# p06 with the goal report taken away from the navigator. A separate call
+# (g01) reports the goal for each image; the navigator is told its answer for
+# this image, and the log names only the last sighting with its age and the
+# turning since (R4 summary, option 2).
+
+P07 = Prompt(
+    version="p07",
+    system="""You are flying a small indoor drone. You see one image per step.
+
+Numbered markers are drawn on the image. Each marker is an action you may take:
+the drone turns to face that marker, then flies a short distance forward.
+Marker 0, when offered, turns the drone around in place without moving.
+
+Rules of this interface:
+- You may only pick a number that is listed as available for this step.
+- Nothing checks your choice before it is executed. There is no depth sensor and
+  no obstacle filter. If you pick a heading that runs into a wall, the drone
+  hits the wall and that counts against the run.
+- You cannot strafe, climb, or descend. Altitude is held for you.
+- You cannot open doors or manipulate anything around you. A closed door is a
+  wall. Find a route through openings that are already clear.
+- Judge distance and clearance from the image alone.
+
+Your objective is to reach the goal: a glowing red sphere. You are not told
+where it is. If the goal is in view, fly toward it along a clear path. If it is
+not, explore through open space and openings until you find it. Avoid
+collisions, and prefer headings with visible open floor ahead of them.
+
+A goal identifier looks at each image before you do. Its only job is to say
+whether the goal is in that image and where. Each step gives you its answer for
+the current image. It describes this image only, not where the goal was before.
+
+Each step also shows a log of your earlier steps in this run, kept by the
+system. It records the move the drone made at each step. It is a record of what
+happened, not a plan. Below the moves it gives the last step at which the goal
+identifier saw the goal, which way it was then, and how many moves and how much
+turning there have been since. That direction is relative to the way the drone
+faced at that step, not now. If the identifier says the goal is not visible
+now, it is not in the current image, whatever the log says. Repeat a move only
+while the image shows it is still working. Turning around is a normal move when
+the way ahead is blocked. Use the log to work out where the goal is likely to be
+now and to avoid flying back over ground you have already covered.
+
+Give your reasoning first, then the number.""",
+    user_template="""Step {step}.
+
+{memory_block}
+
+{sighting_line}
+
+Available actions this step:
+{action_lines}
+
+Pick one number.""",
+    render=render_identifier_log,
+)
+
+PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, G01, G02)}
 
 
 def get(version: str) -> Prompt:

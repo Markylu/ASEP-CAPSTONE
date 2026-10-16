@@ -18,6 +18,7 @@ latency — how the frozen-world mode is checked for latency independence.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import os
 import re
@@ -82,6 +83,48 @@ def _goal_last(body: Dict[str, Any]) -> bool:
     return 'then a line \\"GOAL:' in text
 
 
+def _is_identifier(body: Dict[str, Any]) -> bool:
+    """Whether this is a goal identifier request (agent a05 on): its system
+    prompt is g01's, whatever the rung."""
+    messages = body.get("messages") or []
+    system = messages[0].get("content") if messages else ""
+    return isinstance(system, str) and system.startswith(
+        "You check one image from the front camera")
+
+
+def _identifier_goal(body: Dict[str, Any]) -> str:
+    """A goal report fixed by the frame's bytes, so the same frame always gets
+    the same answer, and some frames get a sighting (which exercises the log's
+    sighting line). It says nothing about the image."""
+    text = json.dumps(body.get("messages", []))
+    digest = hashlib.sha256(text.encode("utf-8")).digest()[0]
+    return ["ahead", "left", "right", "not_visible", "not_visible"][digest % 5]
+
+
+def _identifier_reply(body: Dict[str, Any], rung: str) -> Dict[str, Any]:
+    reply = {"reason": "stub identifier: does not look at the image",
+             "goal": _identifier_goal(body)}
+    if rung == "tool_call":
+        message: Dict[str, Any] = {
+            "role": "assistant",
+            "tool_calls": [{"id": "call_stub", "type": "function",
+                            "function": {"name": "report_goal",
+                                         "arguments": json.dumps(reply)}}],
+        }
+    elif rung == "text":
+        message = {"role": "assistant",
+                   "content": "REASON: {0}\nGOAL: {1}".format(reply["reason"], reply["goal"])}
+    else:
+        message = {"role": "assistant", "content": json.dumps(reply)}
+    return {
+        "id": "chatcmpl-stub",
+        "object": "chat.completion",
+        "model": body.get("model", "fake") + "-stub",
+        "choices": [{"index": 0, "message": message, "finish_reason": "stop"}],
+        "usage": {"prompt_tokens": 800, "completion_tokens": 20, "total_tokens": 820},
+    }
+
+
 def _pick(body: Dict[str, Any], indices: List[int]) -> int:
     """Index 0 is turn-around, so the forward headings are everything else."""
     forward = [i for i in indices if i != 0]
@@ -108,6 +151,9 @@ async def completions(body: Dict[str, Any]):
     if rung not in SUPPORTS:
         return JSONResponse(
             {"error": {"message": "fake router does not support " + rung}}, status_code=400)
+
+    if _is_identifier(body):
+        return _identifier_reply(body, rung)
 
     indices = _indices_from(body)
     if not indices:

@@ -75,6 +75,8 @@ class DecideRequest(BaseModel):
     manifest: Dict[str, Any]
     frame_png_b64: str = Field(repr=False)
     frame_size: Optional[list] = None
+    # The same view without annotations, sent when /run/start asked for it.
+    clean_frame_png_b64: Optional[str] = Field(default=None, repr=False)
 
 
 class StepRequest(BaseModel):
@@ -130,7 +132,9 @@ def run_start(request: StartRequest):
     run = Run(request.run_id, run_dir)
     record = run.start(meta)
     log.info("run %s started -> %s", request.run_id, run.dir)
-    return {"ok": True, "run": record}
+    # Tells Godot to send the frame without annotations too (agent a06 on).
+    return {"ok": True, "run": record,
+            "clean_frame": agent.wants_clean_frame(agent.current().version)}
 
 
 @app.post("/decide")
@@ -140,8 +144,29 @@ async def decide(request: DecideRequest):
     # An agent with memory sees its own earlier decisions in this run (agent.py).
     memory = run.memory(request.step) if agent.current().features.get("memory") else None
 
+    # An agent with a goal identifier asks it about this frame first, with no
+    # log, and the navigator is given its answer (a05 on). It never fails the
+    # step: a failed identifier is a Sighting with goal None.
+    sighting = None
+    clean_path = None
+    if agent.current().features.get("goal_identifier"):
+        identifier_frame = request.frame_png_b64
+        if agent.wants_clean_frame(agent.current().version):
+            # Never fall back to the annotated frame: that is the agent a05
+            # was, and a run that silently mixed the two could not be cited.
+            if not request.clean_frame_png_b64:
+                message = "agent wants the clean frame and the request has none"
+                run.record_decision({"step": request.step, "frame": frame_path,
+                                     "manifest": request.manifest, "error": message})
+                log.error("step %d decision failed: %s", request.step, message)
+                return JSONResponse({"error": message}, status_code=200)
+            clean_path = run.save_clean_frame(request.step, request.clean_frame_png_b64)
+            identifier_frame = request.clean_frame_png_b64
+        sighting = await vlm.identify_goal(request.manifest, identifier_frame)
+
     try:
-        decision = await vlm.decide(request.manifest, request.frame_png_b64, memory)
+        decision = await vlm.decide(request.manifest, request.frame_png_b64, memory,
+                                    sighting.goal if sighting else None)
     except Exception as exc:
         message = "{0}: {1}".format(type(exc).__name__, exc)
         run.record_decision({
@@ -149,6 +174,7 @@ async def decide(request: DecideRequest):
             "frame": frame_path,
             "manifest": request.manifest,
             "error": message,
+            **({"goal_identifier": sighting.to_dict()} if sighting else {}),
         })
         log.error("step %d decision failed: %s", request.step, message)
         # 200 with an error body: the client treats this as a failed run, and a
@@ -166,6 +192,14 @@ async def decide(request: DecideRequest):
     })
     if memory is not None:
         record["memory_steps"] = len(memory)
+    if sighting is not None:
+        # `goal` is the identifier's report, so Run.memory(), agent_evidence.py,
+        # the labeller's goal facets and the probe read it where they always have.
+        record["goal"] = sighting.goal
+        record["goal_identifier"] = sighting.to_dict()
+        if clean_path:
+            record["clean_frame"] = clean_path
+        record["step_latency_ms"] = round(sighting.latency_ms + decision.latency_ms, 1)
     run.record_decision(record)
     timing = decision.timing.to_dict() if decision.timing else {}
     # net/gpu at a glance: a step that is slow because of the tunnel and one

@@ -40,6 +40,10 @@ var accepting: bool = true
 
 var _busy: bool = false
 var _run_opened: bool = true
+## Set from the decider's /run/start reply: its agent wants the frame without
+## annotations as well (a goal identifier, agent a06 on). Sent beside the
+## annotated frame, which stays the one the decision is made from.
+var send_clean_frame: bool = false
 ## Step reports still on the wire. The run must not be closed past them.
 var _steps_in_flight: int = 0
 
@@ -89,7 +93,8 @@ func start_run(extra: Dictionary = {}) -> void:
 	}
 	body.merge(extra, true)
 	_run_opened = false
-	await _post("/run/start", body, 30.0)
+	var reply := await _post("/run/start", body, 30.0)
+	send_clean_frame = bool(reply.get("clean_frame", false))
 	_run_opened = true
 
 
@@ -127,15 +132,22 @@ func _on_decision_requested(manifest: Dictionary) -> void:
 	while not _run_opened:
 		await get_tree().process_frame
 
+	# Clean first, inside the paused window, so both frames show the same pose.
+	var clean_png := PackedByteArray()
+	if send_clean_frame:
+		clean_png = _fit(await agent.capture_clean_frame()).save_png_to_buffer()
 	var frame := await _capture_current_frame()
 	var png := frame.save_png_to_buffer()
-	var response := await _post("/decide", {
+	var body := {
 		"run_id": run_id,
 		"step": manifest.get("step", agent.step_count),
 		"manifest": manifest,
 		"frame_png_b64": Marshalls.raw_to_base64(png),
 		"frame_size": [frame.get_width(), frame.get_height()],
-	}, request_timeout)
+	}
+	if send_clean_frame:
+		body["clean_frame_png_b64"] = Marshalls.raw_to_base64(clean_png)
+	var response := await _post("/decide", body, request_timeout)
 	_busy = false
 
 	if response.is_empty():
@@ -169,6 +181,12 @@ func _on_decision_requested(manifest: Dictionary) -> void:
 func _capture_current_frame() -> Image:
 	var img: Image = await agent.capture_decision_frame()
 	last_frame_size = Vector2i(img.get_width(), img.get_height())
+	return _fit(img)
+
+
+## Downscale to `frame_width` if the capture came out wider. Both frames go
+## through it, so the clean one always matches the annotated one in size.
+func _fit(img: Image) -> Image:
 	if frame_width > 0 and img.get_width() != frame_width:
 		var h := int(round(float(img.get_height()) * float(frame_width) / float(img.get_width())))
 		img.resize(frame_width, max(h, 1), Image.INTERPOLATE_LANCZOS)

@@ -31,6 +31,11 @@ enum DecisionSource {
 @export var decision_source: DecisionSource = DecisionSource.MANUAL
 ## Indices replayed in SCRIPTED mode.
 @export var scripted_indices: PackedInt32Array = PackedInt32Array()
+## SCRIPTED mode only: when set, every step first saves the frame without
+## annotations here as c<step>.png, with the tree paused, then executes. A
+## replay uses it to recover the clean view at each recorded pose
+## (eval/replay.py --save-clean-frames), which the goal probe needs.
+var clean_frame_dir: String = ""
 ## Show the selection panel. Annotations stay clickable either way.
 @export var show_panel: bool = true
 ## The target. Leave empty and the controller takes the first node in the
@@ -168,7 +173,10 @@ func propose() -> Array[PolarAction]:
 		DecisionSource.EXTERNAL:
 			decision_requested.emit(get_manifest())
 		DecisionSource.SCRIPTED:
-			_advance_scripted()
+			if clean_frame_dir != "":
+				_save_clean_then_advance()
+			else:
+				_advance_scripted()
 		_:
 			pass
 	return actions
@@ -379,12 +387,16 @@ func capture_decision_frame() -> Image:
 	return img
 
 
-## Frame with no annotations, for anything that must not see the arrows.
+## Frame with no annotations, for anything that must not see the arrows: the
+## goal identifier (agent a06 on) and the probe's clean frames. Waits two
+## frames, as `capture_decision_frame()` does, so a capture taken from inside
+## `_physics_process` shows this step's pose and nothing of the overlay.
 func capture_clean_frame() -> Image:
 	var was_visible := overlay.visible
 	var panel_visible := panel.visible
 	overlay.visible = false
 	panel.visible = false
+	await RenderingServer.frame_post_draw
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()
 	overlay.visible = was_visible
@@ -423,6 +435,22 @@ func _source_label() -> String:
 			return "awaiting server"
 		_:
 			return "scripted"
+
+
+## Saves this step's clean frame, then executes the scripted index. The tree is
+## paused for the capture, as a frozen-world run is paused for a decision, so
+## no simulated tick passes and the replay flies the recorded trajectory.
+func _save_clean_then_advance() -> void:
+	var tree := get_tree()
+	var was_paused := tree.paused
+	tree.paused = true
+	var img: Image = await capture_clean_frame()
+	var path := clean_frame_dir.path_join("c%06d.png" % step_count)
+	var err := img.save_png(path)
+	if err != OK:
+		push_error("could not save clean frame %s: %d" % [path, err])
+	tree.paused = was_paused
+	_advance_scripted()
 
 
 func _advance_scripted() -> void:

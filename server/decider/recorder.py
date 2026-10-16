@@ -123,6 +123,13 @@ class Run:
         (self.frames / name).write_bytes(base64.b64decode(frame_b64))
         return "frames/" + name
 
+    def save_clean_frame(self, step: int, frame_b64: str) -> str:
+        """The step's frame without annotations (agent a06 on), beside f<step>.png."""
+        self.ensure()
+        name = "c{0:06d}.png".format(step)
+        (self.frames / name).write_bytes(base64.b64decode(frame_b64))
+        return "frames/" + name
+
     def record_decision(self, record: Dict[str, Any]) -> None:
         self.ensure()
         record["t"] = _now()

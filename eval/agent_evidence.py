@@ -62,6 +62,23 @@ BEARING = re.compile(r"\bbearing\b")
 DISTANCE = re.compile(r"\d+(?:\.\d+)?\s*(?:m|meters?|metres?)\s+away")
 OBSTACLE = re.compile(r"\b(?:wall|door|obstacle|block|cube|dead end|barrier)")
 MEMORY = re.compile(r"\b(?:earlier|previous(?:ly)?|already|before|again|last time|step \d+)\b")
+#: A reason that places the goal in the drone's surroundings now ("the goal is
+#: still reported as ahead", "the goal is visible on the right"), per sentence.
+#: A sentence does not count if it negates, looks back or is conditional. Built
+#: for the R5 replay probe (eval/goal_probe.py) and checked on R4's reasons:
+#: it flags 1 / 439 out-of-view decisions whose reason and goal field both say
+#: not visible, 155 / 179 in-view decisions, and 155 / 781 out-of-view ones.
+GOAL_NOW = re.compile(
+    r"\b(?:goal|sphere)\b[^.;]{0,60}?\b(?:is|remains|appears|lies)\b"
+    r"(?:\s+(?:still|now|consistently|clearly))?"
+    r"(?:\s+(?:reported|located|positioned|seen))?(?:\s+as)?\s+"
+    r"(?:visible|ahead|in (?:the )?view|in front|directly ahead|straight ahead"
+    r"|to the (?:left|right)|on the (?:left|right))\b")
+GOAL_NOT_NOW = re.compile(
+    r"\b(?:not|no longer|n't|cannot|never|no|without"           # negated
+    r"|was|were|last|earlier|previous(?:ly)?|before|step \d+|had"  # looks back
+    r"|if|whether|check|until|once|unless|may|might|could|would)\b")  # conditional
+SENTENCE = re.compile(r"(?<=[.!?;])\s+")
 REVISIT_M = 1.0
 REVISIT_GAP = 5
 GOAL_REPORTS = ("ahead", "left", "right", "not_visible")
@@ -100,6 +117,12 @@ def nearest_forward(manifest: Dict[str, Any]) -> Tuple[Optional[int], int]:
     best = min(forward, key=lambda a: (abs(float(a["theta_deg"]) - float(bearing)),
                                        a["index"]))
     return best["index"], len(forward)
+
+
+def claims_goal(reason: str) -> bool:
+    """Whether a reason says the goal is in view or in a direction now (GOAL_NOW)."""
+    return any(GOAL_NOW.search(s) and not GOAL_NOT_NOW.search(s)
+               for s in SENTENCE.split(reason or ""))
 
 
 def true_goal(manifest: Dict[str, Any]) -> Optional[str]:

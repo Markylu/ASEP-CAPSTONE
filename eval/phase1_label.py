@@ -63,6 +63,12 @@ MISSED_MIN = 3          # goal in view but reported not_visible, decisions ...
 MISSED_SHARE = 0.5      # ... and at least this share of the in-view decisions
 CLOSE_RANGE_M = 3.0     # closest approach, metres, without reaching the goal
 
+#: Phase 2 secondary tag `spin_failure` (docs/phase2-test-plan.md §5), failed
+#: runs only: the agent turns around in place this many decisions in a row.
+#: No successful run in R1-R5 has a streak over 4; R5's failures run to 36.
+SPIN_TAG = "spin_failure"
+SPIN_STREAK_MIN = 5
+
 
 def acknowledges(reason: str) -> bool:
     """§9 auto pass: does this reason refer to the change?"""
@@ -150,6 +156,30 @@ def goal_identification(decisions: List[Dict[str, Any]], reached: bool) -> Dict[
             "facets": facets, "tag": GOAL_ID_TAG if facets else None}
 
 
+def spin(decisions: List[Dict[str, Any]], reached: bool) -> Dict[str, Any]:
+    """Evidence for the `spin_failure` tag (Phase 2 §5): the longest run of
+    consecutive turn-around picks, read from the chosen action's `turn_around`
+    flag in the manifest. Two turn-arounds cancel, so the drone has not moved."""
+    longest = current = turns = 0
+    start = longest_from = None
+    for d in decisions:
+        if d.get("index") is None:
+            continue
+        actions = (d.get("manifest") or {}).get("actions") or []
+        chosen = next((a for a in actions if a.get("index") == d["index"]), {})
+        if chosen.get("turn_around"):
+            turns += 1
+            if current == 0:
+                start = d.get("step")
+            current += 1
+            if current > longest:
+                longest, longest_from = current, start
+        else:
+            current = 0
+    return {"longest_streak": longest, "streak_from_step": longest_from, "turn_arounds": turns,
+            "tag": SPIN_TAG if not reached and longest >= SPIN_STREAK_MIN else None}
+
+
 def label_run(site: str, arm: str, run_dir: Path) -> Dict[str, Any]:
     metrics = read_json(run_dir / "metrics.json")
     steps = read_jsonl(run_dir / "steps.jsonl")
@@ -208,6 +238,7 @@ def label_run(site: str, arm: str, run_dir: Path) -> Dict[str, Any]:
         "final_goal_distance_m": metrics.get("final_goal_distance_m"),
         "end_reason": metrics.get("end_reason"),
         "goal_id": goal_identification(decisions, bool(metrics.get("goal_reached"))),
+        "spin": spin(decisions, bool(metrics.get("goal_reached"))),
     }}
 
 

@@ -77,7 +77,10 @@ failing runs take 60 steps), plus preflight and labelling.
    `python eval/goal_probe.py sample <earlier rounds> --out <round>/probe`, `run --agent` for the
    new agent and for a calibration agent whose failure in flight is known, and `report`. The probe
    sends recorded frames with ground truth to the model, one call per frame and no Godot, at about
-   5 min per agent. If the gate fails, the round does not fly: the README's Outcome records the
+   5 min per agent. An agent with a log is also replayed with the log in place (`sample-replay`,
+   `run-replay`): recorded decisions whose last sighting is 5–20 steps old, scored on whether the
+   reason still places the goal around the drone (R4's phantoms needed a log, which step-0 frames
+   lack). If the gate fails, the round does not fly: the README's Outcome records the
    probe, and the next idea is a new version. Commit `probe/` before flying.
 3. **Preflight** (P1 §7.2 step 1): clean tree; tunnel up; decider started with
    `python -m server.decider --profile remote --agent <aNN>`; `/health` reports the round's
@@ -166,6 +169,18 @@ three facets:
   where a tag first appears records when that failure mode was recognised. R3's missed goals
   (R3 summary) would have met the "missed goal" facet.
 
+**Added secondary tag: `spin_failure`.** In the `tags` column like the tag above. It applies to a
+failed run in which the agent picks turn-around in place on **≥ 5 consecutive decisions**: two
+turn-arounds cancel, so the drone stands still while the run's steps run out.
+
+- `eval/phase1_label.py` reads the chosen action's `turn_around` flag from each manifest and writes
+  the longest streak, where it starts, the total number of turn-arounds and the suggested tag to
+  `auto_labels.json` (`spin`). The reviewer confirms it like any other tag.
+- The threshold sits above every successful run in R1–R5 (longest streak 4, R5 s03 `final`).
+- Added in R5, whose failures turned around in place in streaks of 7–36 (operator, 2026-10-16).
+  R1–R4 keep their labels and tags as reviewed. By the rule, 9 of R3's 18 failures and 6 of R4's 13
+  would have met it.
+
 ## 6. Final round
 
 The agent chosen from the screening rounds is frozen and flown under the full Phase 1 design
@@ -203,6 +218,9 @@ Git: same committed and ignored files as P1 §14.
 
 | Date | Change |
 |---|---|
+| 2026-10-16 | Secondary tag `spin_failure` (§5): a failed run with ≥ 5 consecutive turn-around picks, computed by `eval/phase1_label.py`. Tags only; applies from R5. |
+| 2026-10-15 | Clean frames: an agent whose goal identifier reads the frame without annotations (`goal_identifier.frame: clean`, a06) gets it from Godot beside the annotated frame, saved as `frames/c<step>.png`. `eval/replay.py --save-clean-frames` recovers clean frames for recorded runs at their exact poses, and `goal_probe.py attach-clean` pairs them with probe frames. |
+| 2026-10-15 | Replay probe (§4 step 2): `eval/goal_probe.py sample-replay` / `run-replay` send recorded frames with the log the agent had, scored by `claims_goal()` (`eval/agent_evidence.py`). Gates are per round (`report --gate`). Agents may carry a goal identifier, a second call per step whose prompt sha is part of `agent_sha` (R5). |
 | 2026-10-14 | Secondary tag `failed_goal_identification` (§5): phantom goal, missed goal or lost at close range, computed by `eval/phase1_label.py`. Tags only; the rubric's terminal labels are unchanged. |
 | 2026-10-14 | Probe step (§4 step 2) and a Probe gate section in the write-up: `eval/goal_probe.py` checks offline, on recorded frames, whether an agent sees the goal before a round flies. R3 flew 0/18 on an agent that had stopped seeing it. |
 | 2026-10-08 | Round write-ups (§4.1): `README.md` per round before flying, `evidence.md` from `eval/agent_evidence.py`. Branches (§4.2): one branch and PR per round, stacked on the previous round, never merged; replaces "merge, never squash". |
