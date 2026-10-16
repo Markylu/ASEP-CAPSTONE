@@ -256,4 +256,4 @@ the next wording is a new prompt version, probed the same way.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Flown 2026-10-15/16 after the probe gate passed, 18/18 valid, **8/18 success** (`initial` 6/6, `final` + `dynamic` 2/12, `dynamic` 0/6); `a06` dropped. The hypothesis held for perception (identifier 114/114 in view, 1.4% out-of-view reports, no phantom facet) and failed for success: after a change the drone turns around in place (70% of `dynamic` decisions, streaks up to 36). See [summary.md](summary.md).
