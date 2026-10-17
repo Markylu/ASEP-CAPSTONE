@@ -1,8 +1,8 @@
 # R6: Ground-truth pose in the memory log
 
-**Agent:** `a07` (`8062799be32e`) or `a08` (`e8c66be05bd3`), whichever passes the probe gate ·
-**Prompt:** `p08` (`e6bdfd04534d`) or `p09` (`7642a3e1056d`) · **Identifier prompt:** `g02`
-(`bf175c973dfb`) · **Status:** pre-registered, not flown
+**Agent:** `a08` (`e8c66be05bd3`) · **Prompt:** `p09` (`7642a3e1056d`) · **Identifier prompt:**
+`g02` (`bf175c973dfb`) · **Status:** probed, `a08` chosen, not flown. `a07` (`8062799be32e`,
+`p08` `e6bdfd04534d`) was the other candidate.
 
 Written before the probe and before flying. Spec: `docs/phase2-test-plan.md`.
 
@@ -189,6 +189,26 @@ Reported but not gated:
 
 `python eval/goal_probe.py report eval/phase2/R6_pose_log/probe --gate R6 --calibration a06
 --candidate a07,a08`.
+
+**Result: passed, `a08` flies** ([probe/probe.md](probe/probe.md)). Thresholds unchanged.
+
+| | `a06` (calibration) | `a07` | `a08` |
+|---|---|---|---|
+| turn-around, `spin` | 34 / 40 (85%) | 17 / 40 (42%) | **6 / 40 (15%)** |
+| turn-around, `moving` (not gated) | 0 / 20 | 2 / 20 | 2 / 20 |
+| turn-around, `visible` | 0 / 20 | 0 / 20 | 0 / 20 |
+| goal-placement replay, places the goal now, out of view | – | 1 / 40 | 0 / 40 |
+
+- Both candidates pass. `a08` is 27 points below `a07`, beyond the 5-point tie margin.
+- The calibration reproduces flight: `a06` turns around on 34 / 40 `spin` frames (33 / 40 in
+  flight).
+- `a08`'s `spin` reasons read the pose: 32 / 40 cite the position or the heading. For example,
+  "The drone is currently at position (2.7, −1.8) facing 29 degrees … move forward in a direction
+  that explores new territory" (s02c `dynamic`, step 56).
+- One heading slip: "facing 85 degrees, which is roughly northeast" (s01 `final`, step 49). In
+  this convention, 85° is about +y.
+- The first pass lost 192 `spin` rows to a tunnel drop (`ConnectError`). They were rerun after
+  the operator confirmed the tunnel. `replay()` now retries errored rows on resume.
 
 **Limit.** The replay is one step off-policy. It shows whether the record changes the pick at a
 spin state, not whether the drone escapes the loop over a whole run.

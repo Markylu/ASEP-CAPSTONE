@@ -64,11 +64,11 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # the identifier the unannotated frame. R5 README, "Change".
     "R5": {"folder": "R5_goal_identifier", "title": "Goal identifier on the clean frame, sighting age",
            "agent": "a06", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
-    # Two candidates are probed: a07 (pose log, sighting line kept) and a08 (pose
-    # log, no sighting line). Defined with a07, the tie-break; the probe's winner
-    # flies. R6 README, "Probe gate".
+    # Two candidates were probed: a07 (pose log, sighting line kept) and a08 (pose
+    # log, no sighting line). Defined with a07, the tie-break; a08 won the probe
+    # (spin turn-around 6/40 against 17/40) and flies. R6 README, "Probe gate".
     "R6": {"folder": "R6_pose_log", "title": "Ground-truth pose in the memory log",
-           "agent": "a07", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+           "agent": "a08", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
