@@ -400,7 +400,10 @@ async def replay(rows: List[Dict[str, Any]], out: Path) -> None:
     ident = agent.record()
     identifier = bool(agent.current().features.get("goal_identifier"))
     wants_clean = agent.wants_clean_frame(ident["agent_version"])
-    done = {r["sha"] for r in read_jsonl(out)} if out.is_file() else set()
+    # A transport error is not an answer: retried on resume, and the later row wins
+    # in scoring (answers are keyed by sha).
+    done = ({r["sha"] for r in read_jsonl(out) if not r.get("error")}
+            if out.is_file() else set())
     todo = [r for r in rows if r["sha"] not in done]
     print("{0}: {1} replay frames, {2} already done".format(
         ident["agent_version"], len(rows), len(done)))
