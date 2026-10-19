@@ -88,6 +88,19 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                          "goal_identifier": {"prompt": "g02", "frame": "clean"}},
           "a05 with the identifier shown the camera frame without annotations (g02). "
           "R5 probe: g01 took the pink '0 TURN AROUND' marker for the goal."),
+    Agent("a07", "p08", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "last_sighting"},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a06 with the drone's ground-truth position and heading after every move, and "
+          "how far it moved, in the log (p08). R5: the log recorded commands, not outcomes, "
+          "and the drone turned around in place for up to 36 steps (spin_failure)."),
+    Agent("a08", "p09", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "none"},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a07 without the last-sighting line (p09); the identifier's answer for the "
+          "current image stays. R5: the sighting line drove 'goal is behind, turn around'."),
 )}
 
 DEFAULT_AGENT = "a00"

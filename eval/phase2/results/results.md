@@ -14,36 +14,37 @@ Spec: `docs/phase2-test-plan.md`. One run per cell (seed 1), so each cell is a s
 | R3 | a03 | Memory log, code-written |
 | R4 | a04 | Memory log, goal reported last |
 | R5 | a06 | Goal identifier on the clean frame, sighting age |
+| R6 | a08 | Ground-truth pose in the memory log |
 
 ## Success by arm
 
-| Arm | R0 | R1 | R2 | R3 | R4 | R5 |
-|---|---|---|---|---|---|---|
-| initial | 5/6 | 5/6 | 1/6 | 0/6 | 2/6 | 6/6 |
-| final | 0/6 | 2/6 | 0/6 | 0/6 | 2/6 | 2/6 |
-| dynamic | 0/6 | 1/6 | 0/6 | 0/6 | 1/6 | 0/6 |
+| Arm | R0 | R1 | R2 | R3 | R4 | R5 | R6 |
+|---|---|---|---|---|---|---|---|
+| initial | 5/6 | 5/6 | 1/6 | 0/6 | 2/6 | 6/6 | 3/6 |
+| final | 0/6 | 2/6 | 0/6 | 0/6 | 2/6 | 2/6 | 2/6 |
+| dynamic | 0/6 | 1/6 | 0/6 | 0/6 | 1/6 | 0/6 | 0/6 |
 
 ## Every cell
 
 ✓ steps to goal, or ✗ and the §9 label (end reason if not yet labelled).
 
-| Site | Arm | R0 | R1 | R2 | R3 | R4 | R5 |
-|---|---|---|---|---|---|---|---|
-| s01 | initial | ✓ 14 | ✓ 14 | ✓ 14 | ✗ timeout | ✗ timeout | ✓ 14 |
-| s01 | final | ✗ replan_failure | ✗ timeout | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure |
-| s01 | dynamic | ✗ ignore_change | ✗ replan_failure | ✗ ignore_change | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure |
-| s02a | initial | ✓ 14 | ✓ 14 | ✗ collision | ✗ timeout | ✗ timeout | ✓ 14 |
-| s02a | final | ✗ replan_failure | ✗ timeout | ✗ replan_failure | ✗ replan_failure | ✓ 36 | ✗ replan_failure |
-| s02a | dynamic | ✗ ignore_change | ✓ 60 | ✗ ignore_change | ✗ timeout | ✗ replan_failure | ✗ replan_failure |
-| s02c | initial | ✓ 14 | ✓ 14 | ✗ collision | ✗ timeout | ✗ timeout | ✓ 14 |
-| s02c | final | ✗ replan_failure | ✓ 34 | ✗ collision | ✗ replan_failure | ✗ timeout | ✗ replan_failure |
-| s02c | dynamic | ✗ ignore_change | ✗ timeout | ✗ ignore_change | ✗ timeout | ✗ replan_failure | ✗ replan_failure |
-| s02va | initial | ✓ 19 | ✓ 55 | ✗ collision | ✗ timeout | ✓ 39 | ✓ 19 |
-| s02va | final | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✓ 28 | ✓ 35 |
-| s02va | dynamic | ✗ ignore_change | ✗ timeout | ✗ ignore_change | ✗ replan_failure | ✓ 40 | ✗ replan_failure |
-| s02vc | initial | ✓ 19 | ✓ 55 | ✗ collision | ✗ timeout | ✓ 37 | ✓ 19 |
-| s02vc | final | ✗ replan_failure | ✓ 24 | ✗ replan_failure | ✗ timeout | ✗ timeout | ✗ replan_failure |
-| s02vc | dynamic | ✗ ignore_change | ✗ timeout | ✗ ignore_change | ✗ timeout | ✗ timeout | ✗ replan_failure |
-| s03 | initial | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ timeout | ✗ replan_failure | ✓ 41 |
-| s03 | final | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✓ 54 |
-| s03 | dynamic | ✗ pre_change_failure | ✗ replan_failure | ✗ pre_change_failure | ✗ pre_change_failure | ✗ pre_change_failure | ✗ replan_failure |
+| Site | Arm | R0 | R1 | R2 | R3 | R4 | R5 | R6 |
+|---|---|---|---|---|---|---|---|---|
+| s01 | initial | ✓ 14 | ✓ 14 | ✓ 14 | ✗ timeout | ✗ timeout | ✓ 14 | ✓ 14 |
+| s01 | final | ✗ replan_failure | ✗ timeout | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure |
+| s01 | dynamic | ✗ ignore_change | ✗ replan_failure | ✗ ignore_change | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure |
+| s02a | initial | ✓ 14 | ✓ 14 | ✗ collision | ✗ timeout | ✗ timeout | ✓ 14 | ✓ 14 |
+| s02a | final | ✗ replan_failure | ✗ timeout | ✗ replan_failure | ✗ replan_failure | ✓ 36 | ✗ replan_failure | ✓ 18 |
+| s02a | dynamic | ✗ ignore_change | ✓ 60 | ✗ ignore_change | ✗ timeout | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure |
+| s02c | initial | ✓ 14 | ✓ 14 | ✗ collision | ✗ timeout | ✗ timeout | ✓ 14 | ✓ 14 |
+| s02c | final | ✗ replan_failure | ✓ 34 | ✗ collision | ✗ replan_failure | ✗ timeout | ✗ replan_failure | ✗ replan_failure |
+| s02c | dynamic | ✗ ignore_change | ✗ timeout | ✗ ignore_change | ✗ timeout | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure |
+| s02va | initial | ✓ 19 | ✓ 55 | ✗ collision | ✗ timeout | ✓ 39 | ✓ 19 | ✗ replan_failure |
+| s02va | final | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✓ 28 | ✓ 35 | ✗ replan_failure |
+| s02va | dynamic | ✗ ignore_change | ✗ timeout | ✗ ignore_change | ✗ replan_failure | ✓ 40 | ✗ replan_failure | ✗ timeout |
+| s02vc | initial | ✓ 19 | ✓ 55 | ✗ collision | ✗ timeout | ✓ 37 | ✓ 19 | ✗ replan_failure |
+| s02vc | final | ✗ replan_failure | ✓ 24 | ✗ replan_failure | ✗ timeout | ✗ timeout | ✗ replan_failure | ✓ 54 |
+| s02vc | dynamic | ✗ ignore_change | ✗ timeout | ✗ ignore_change | ✗ timeout | ✗ timeout | ✗ replan_failure | ✗ replan_failure |
+| s03 | initial | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ timeout | ✗ replan_failure | ✓ 41 | ✗ replan_failure |
+| s03 | final | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✓ 54 | ✗ replan_failure |
+| s03 | dynamic | ✗ pre_change_failure | ✗ replan_failure | ✗ pre_change_failure | ✗ pre_change_failure | ✗ pre_change_failure | ✗ replan_failure | ✗ pre_change_failure |

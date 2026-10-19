@@ -4,88 +4,106 @@ R2,s01,initial,1,p2_R2_s01_initial_seed1_a01,True,success,"Claude review, confir
 R3,s01,initial,1,p2_R3_s01_initial_seed1_a01,False,timeout,Claude review,60,0,5.753,max_steps,1616.8,2080.6,53998a3
 R4,s01,initial,1,p2_R4_s01_initial_seed1_a01,False,timeout,"Claude review, confirmed by operator",60,11,12.523,max_steps,1602.7,2696.4,60118e8
 R5,s01,initial,1,p2_R5_s01_initial_seed1_a01,True,success,"Claude review, confirmed by operator",14,0,0.645,goal_reached,1235.2,1708.9,d883714
+R6,s01,initial,1,p2_R6_s01_initial_seed1_a01,True,success,"Claude review, pending operator confirmation",14,0,0.645,goal_reached,1378.1,1779.3,3e874ce
 R1,s01,final,1,p2_R1_s01_final_seed1_a01,False,timeout,Claude review,60,0,20.151,max_steps,1528.3,1704.2,32ef803
 R2,s01,final,1,p2_R2_s01_final_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,51,17.002,max_steps,1474.2,1650.2,dd20d3b
 R3,s01,final,1,p2_R3_s01_final_seed1_a01,False,replan_failure,Claude review,60,1,16.947,max_steps,1621.7,1820.5,53998a3
 R4,s01,final,1,p2_R4_s01_final_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,0,18.448,max_steps,1627.2,2462.8,60118e8
 R5,s01,final,1,p2_R5_s01_final_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,0,18.57,max_steps,1658.2,2049.7,d883714
+R6,s01,final,1,p2_R6_s01_final_seed1_a02,False,replan_failure,"Claude review, pending operator confirmation",60,13,27.369,max_steps,2020.3,3625.7,3e874ce
 R1,s01,dynamic,1,p2_R1_s01_dynamic_seed1_a01,False,replan_failure,Claude review,60,3,14.278,max_steps,1499.4,1774.0,32ef803
 R2,s01,dynamic,1,p2_R2_s01_dynamic_seed1_a01,False,ignore_change,"Claude review, confirmed by operator",60,55,14.226,max_steps,1679.9,1956.3,dd20d3b
 R3,s01,dynamic,1,p2_R3_s01_dynamic_seed1_a01,False,replan_failure,Claude review,60,5,35.558,max_steps,1674.8,2145.3,53998a3
 R4,s01,dynamic,1,p2_R4_s01_dynamic_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,28,32.077,max_steps,1495.1,1957.4,60118e8
 R5,s01,dynamic,1,p2_R5_s01_dynamic_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,0,15.525,max_steps,1732.8,2223.8,d883714
+R6,s01,dynamic,1,p2_R6_s01_dynamic_seed1_a01,False,replan_failure,"Claude review, pending operator confirmation",60,9,31.736,max_steps,2003.7,3428.8,3e874ce
 R1,s02a,initial,1,p2_R1_s02a_initial_seed1_a01,True,success,Claude review,14,0,0.445,goal_reached,1127.2,1259.8,32ef803
 R2,s02a,initial,1,p2_R2_s02a_initial_seed1_a01,False,collision,"Claude review, confirmed by operator",60,39,12.18,max_steps,1312.7,1544.5,dd20d3b
 R3,s02a,initial,1,p2_R3_s02a_initial_seed1_a01,False,timeout,Claude review,60,0,6.57,max_steps,1557.5,1965.6,53998a3
 R4,s02a,initial,1,p2_R4_s02a_initial_seed1_a01,False,timeout,"Claude review, confirmed by operator",60,0,24.825,max_steps,1572.7,2367.9,60118e8
 R5,s02a,initial,1,p2_R5_s02a_initial_seed1_a01,True,success,"Claude review, confirmed by operator",14,0,0.645,goal_reached,1220.0,3904.5,d883714
+R6,s02a,initial,1,p2_R6_s02a_initial_seed1_a01,True,success,"Claude review, pending operator confirmation",14,0,0.645,goal_reached,1323.5,1436.5,3e874ce
 R1,s02a,final,1,p2_R1_s02a_final_seed1_a01,False,timeout,Claude review,60,2,16.242,max_steps,1425.0,1736.5,32ef803
 R2,s02a,final,1,p2_R2_s02a_final_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,0,20.649,max_steps,2175.0,2413.2,dd20d3b
 R3,s02a,final,1,p2_R3_s02a_final_seed1_a01,False,replan_failure,Claude review,60,2,15.345,max_steps,1586.0,2184.5,53998a3
 R4,s02a,final,1,p2_R4_s02a_final_seed1_a01,True,success,"Claude review, confirmed by operator",36,8,0.043,goal_reached,1556.9,1980.8,60118e8
 R5,s02a,final,1,p2_R5_s02a_final_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,3,17.168,max_steps,1568.8,2055.0,d883714
+R6,s02a,final,1,p2_R6_s02a_final_seed1_a01,True,success,"Claude review, pending operator confirmation",18,0,0.101,goal_reached,1658.0,2147.0,3e874ce
 R1,s02a,dynamic,1,p2_R1_s02a_dynamic_seed1_a01,True,success,Claude review,60,1,0.422,goal_reached,1399.1,1837.0,32ef803
 R2,s02a,dynamic,1,p2_R2_s02a_dynamic_seed1_a01,False,ignore_change,"Claude review, confirmed by operator",60,54,12.483,max_steps,1397.1,1531.2,dd20d3b
 R3,s02a,dynamic,1,p2_R3_s02a_dynamic_seed1_a02,False,timeout,Claude review,60,1,16.262,max_steps,1593.0,1899.1,53998a3
 R4,s02a,dynamic,1,p2_R4_s02a_dynamic_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,0,24.22,max_steps,1604.8,2105.2,60118e8
 R5,s02a,dynamic,1,p2_R5_s02a_dynamic_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,0,16.172,max_steps,1750.1,2223.0,d883714
+R6,s02a,dynamic,1,p2_R6_s02a_dynamic_seed1_a01,False,replan_failure,"Claude review, pending operator confirmation",60,8,27.887,max_steps,1878.0,3156.7,3e874ce
 R1,s02c,initial,1,p2_R1_s02c_initial_seed1_a01,True,success,Claude review,14,0,0.445,goal_reached,1197.8,1287.3,32ef803
 R2,s02c,initial,1,p2_R2_s02c_initial_seed1_a01,False,collision,"Claude review, confirmed by operator",60,39,12.18,max_steps,1107.2,1317.4,dd20d3b
 R3,s02c,initial,1,p2_R3_s02c_initial_seed1_a01,False,timeout,Claude review,60,0,6.57,max_steps,1565.4,1915.5,53998a3
 R4,s02c,initial,1,p2_R4_s02c_initial_seed1_a01,False,timeout,"Claude review, confirmed by operator",60,4,19.044,max_steps,1516.2,2199.0,60118e8
 R5,s02c,initial,1,p2_R5_s02c_initial_seed1_a01,True,success,"Claude review, confirmed by operator",14,0,0.645,goal_reached,1293.2,3949.0,d883714
+R6,s02c,initial,1,p2_R6_s02c_initial_seed1_a01,True,success,"Claude review, pending operator confirmation",14,0,0.645,goal_reached,1305.1,1482.7,3e874ce
 R1,s02c,final,1,p2_R1_s02c_final_seed1_a01,True,success,Claude review,34,0,0.781,goal_reached,1311.1,1736.2,32ef803
 R2,s02c,final,1,p2_R2_s02c_final_seed1_a01,False,collision,"Claude review, confirmed by operator",60,37,16.69,max_steps,1416.8,1541.6,dd20d3b
 R3,s02c,final,1,p2_R3_s02c_final_seed1_a01,False,replan_failure,Claude review,60,1,35.689,max_steps,1598.2,2205.8,53998a3
 R4,s02c,final,1,p2_R4_s02c_final_seed1_a01,False,timeout,"Claude review, confirmed by operator",60,1,5.27,max_steps,1566.6,1871.3,60118e8
 R5,s02c,final,1,p2_R5_s02c_final_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,23,17.167,max_steps,1727.4,2231.9,d883714
+R6,s02c,final,1,p2_R6_s02c_final_seed1_a01,False,replan_failure,"Claude review, pending operator confirmation",60,7,36.933,max_steps,1865.2,2415.6,3e874ce
 R1,s02c,dynamic,1,p2_R1_s02c_dynamic_seed1_a01,False,timeout,Claude review,60,1,9.098,max_steps,1339.9,1760.7,32ef803
 R2,s02c,dynamic,1,p2_R2_s02c_dynamic_seed1_a01,False,ignore_change,"Claude review, confirmed by operator",60,54,12.483,max_steps,1392.2,1533.8,dd20d3b
 R3,s02c,dynamic,1,p2_R3_s02c_dynamic_seed1_a01,False,timeout,Claude review,60,1,13.626,max_steps,1559.7,1941.6,53998a3
 R4,s02c,dynamic,1,p2_R4_s02c_dynamic_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,7,14.687,max_steps,1682.2,2741.8,60118e8
 R5,s02c,dynamic,1,p2_R5_s02c_dynamic_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,0,13.46,max_steps,1726.9,2102.0,d883714
+R6,s02c,dynamic,1,p2_R6_s02c_dynamic_seed1_a01,False,replan_failure,"Claude review, pending operator confirmation",60,7,20.378,max_steps,1878.6,2473.0,3e874ce
 R1,s02va,initial,1,p2_R1_s02va_initial_seed1_a01,True,success,Claude review,55,0,0.181,goal_reached,1265.9,1470.9,32ef803
 R2,s02va,initial,1,p2_R2_s02va_initial_seed1_a01,False,collision,"Claude review, confirmed by operator",60,35,12.226,max_steps,1507.0,1794.9,dd20d3b
 R3,s02va,initial,1,p2_R3_s02va_initial_seed1_a01,False,timeout,Claude review,60,2,7.717,max_steps,1496.5,1877.5,53998a3
 R4,s02va,initial,1,p2_R4_s02va_initial_seed1_a01,True,success,"Claude review, confirmed by operator",39,3,0.892,goal_reached,1490.7,1915.5,60118e8
 R5,s02va,initial,1,p2_R5_s02va_initial_seed1_a01,True,success,"Claude review, confirmed by operator",19,0,0.282,goal_reached,1395.5,2473.8,d883714
+R6,s02va,initial,1,p2_R6_s02va_initial_seed1_a01,False,replan_failure,"Claude review, pending operator confirmation",60,2,34.285,max_steps,1882.1,3352.7,3e874ce
 R1,s02va,final,1,p2_R1_s02va_final_seed1_a01,False,replan_failure,Claude review,60,0,29.407,max_steps,1502.9,1766.5,32ef803
 R2,s02va,final,1,p2_R2_s02va_final_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,0,28.642,max_steps,1403.8,1564.4,dd20d3b
 R3,s02va,final,1,p2_R3_s02va_final_seed1_a01,False,replan_failure,Claude review,60,7,32.581,max_steps,1599.3,1828.7,53998a3
 R4,s02va,final,1,p2_R4_s02va_final_seed1_a01,True,success,"Claude review, confirmed by operator",28,0,0.348,goal_reached,1500.9,1682.2,60118e8
 R5,s02va,final,1,p2_R5_s02va_final_seed1_a01,True,success,"Claude review, confirmed by operator",35,0,0.878,goal_reached,1565.3,2074.3,d883714
+R6,s02va,final,1,p2_R6_s02va_final_seed1_a01,False,replan_failure,"Claude review, pending operator confirmation",60,2,15.706,max_steps,1884.5,2424.5,3e874ce
 R1,s02va,dynamic,1,p2_R1_s02va_dynamic_seed1_a01,False,timeout,Claude review,60,0,26.372,max_steps,1386.8,1680.3,32ef803
 R2,s02va,dynamic,1,p2_R2_s02va_dynamic_seed1_a01,False,ignore_change,"Claude review, confirmed by operator",60,49,12.491,max_steps,1562.5,1740.2,dd20d3b
 R3,s02va,dynamic,1,p2_R3_s02va_dynamic_seed1_a01,False,replan_failure,Claude review,60,4,18.435,max_steps,1600.1,1908.7,53998a3
 R4,s02va,dynamic,1,p2_R4_s02va_dynamic_seed1_a01,True,success,"Claude review, confirmed by operator",40,4,0.139,goal_reached,1538.4,1954.8,60118e8
 R5,s02va,dynamic,1,p2_R5_s02va_dynamic_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,2,14.688,max_steps,1757.8,2250.0,d883714
+R6,s02va,dynamic,1,p2_R6_s02va_dynamic_seed1_a01,False,timeout,"Claude review, pending operator confirmation",60,16,16.158,max_steps,1882.6,2429.3,3e874ce
 R1,s02vc,initial,1,p2_R1_s02vc_initial_seed1_a01,True,success,Claude review,55,0,0.181,goal_reached,1299.5,1580.2,32ef803
 R2,s02vc,initial,1,p2_R2_s02vc_initial_seed1_a01,False,collision,"Claude review, confirmed by operator",60,35,12.226,max_steps,1714.0,1969.6,dd20d3b
 R3,s02vc,initial,1,p2_R3_s02vc_initial_seed1_a01,False,timeout,Claude review,60,2,7.717,max_steps,1562.5,1911.7,53998a3
 R4,s02vc,initial,1,p2_R4_s02vc_initial_seed1_a01,True,success,"Claude review, confirmed by operator",37,0,0.282,goal_reached,1448.0,1782.6,60118e8
 R5,s02vc,initial,1,p2_R5_s02vc_initial_seed1_a01,True,success,"Claude review, confirmed by operator",19,0,0.282,goal_reached,1406.6,2153.3,d883714
+R6,s02vc,initial,1,p2_R6_s02vc_initial_seed1_a01,False,replan_failure,"Claude review, pending operator confirmation",60,2,34.285,max_steps,1833.5,3267.2,3e874ce
 R1,s02vc,final,1,p2_R1_s02vc_final_seed1_a01,True,success,Claude review,24,0,0.483,goal_reached,1335.2,1724.0,32ef803
 R2,s02vc,final,1,p2_R2_s02vc_final_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,48,14.37,max_steps,1770.3,2899.6,dd20d3b
 R3,s02vc,final,1,p2_R3_s02vc_final_seed1_a01,False,timeout,Claude review,60,9,16.095,max_steps,1653.5,2111.7,53998a3
 R4,s02vc,final,1,p2_R4_s02vc_final_seed1_a01,False,timeout,"Claude review, confirmed by operator",60,11,11.577,max_steps,1592.2,2184.9,60118e8
 R5,s02vc,final,1,p2_R5_s02vc_final_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,7,16.927,max_steps,1589.2,2050.7,d883714
+R6,s02vc,final,1,p2_R6_s02vc_final_seed1_a01,True,success,"Claude review, pending operator confirmation",54,17,0.487,goal_reached,1819.7,2463.7,3e874ce
 R1,s02vc,dynamic,1,p2_R1_s02vc_dynamic_seed1_a01,False,timeout,Claude review,60,6,33.169,max_steps,1413.8,1959.8,32ef803
 R2,s02vc,dynamic,1,p2_R2_s02vc_dynamic_seed1_a01,False,ignore_change,"Claude review, confirmed by operator",60,49,12.491,max_steps,1385.3,1500.9,dd20d3b
 R3,s02vc,dynamic,1,p2_R3_s02vc_dynamic_seed1_a01,False,timeout,Claude review,60,0,19.669,max_steps,1653.2,2104.2,53998a3
 R4,s02vc,dynamic,1,p2_R4_s02vc_dynamic_seed1_a01,False,timeout,"Claude review, confirmed by operator",60,22,16.158,max_steps,1556.5,1854.3,60118e8
 R5,s02vc,dynamic,1,p2_R5_s02vc_dynamic_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,0,17.376,max_steps,1841.7,2160.9,d883714
+R6,s02vc,dynamic,1,p2_R6_s02vc_dynamic_seed1_a01,False,replan_failure,"Claude review, pending operator confirmation",60,12,16.743,max_steps,2105.6,3505.4,3e874ce
 R1,s03,initial,1,p2_R1_s03_initial_seed1_a01,False,replan_failure,Claude review,60,0,34.775,max_steps,1446.3,1791.8,32ef803
 R2,s03,initial,1,p2_R2_s03_initial_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,17,24.743,max_steps,2186.9,2551.8,dd20d3b
 R3,s03,initial,1,p2_R3_s03_initial_seed1_a01,False,timeout,Claude review,60,0,2.547,max_steps,1515.2,1962.5,53998a3
 R4,s03,initial,1,p2_R4_s03_initial_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,0,30.551,max_steps,1569.0,2070.1,60118e8
 R5,s03,initial,1,p2_R5_s03_initial_seed1_a01,True,success,"Claude review, confirmed by operator",41,1,0.661,goal_reached,1573.2,2142.9,d883714
+R6,s03,initial,1,p2_R6_s03_initial_seed1_a01,False,replan_failure,"Claude review, pending operator confirmation",60,16,35.873,max_steps,1884.5,3394.8,3e874ce
 R1,s03,final,1,p2_R1_s03_final_seed1_a01,False,replan_failure,Claude review,60,2,30.538,max_steps,1428.6,1667.8,32ef803
 R2,s03,final,1,p2_R2_s03_final_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,17,24.743,max_steps,2235.4,3064.5,dd20d3b
 R3,s03,final,1,p2_R3_s03_final_seed1_a01,False,replan_failure,Claude review,60,4,22.383,max_steps,1550.3,1847.5,53998a3
 R4,s03,final,1,p2_R4_s03_final_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,2,33.174,max_steps,1571.8,1978.3,60118e8
 R5,s03,final,1,p2_R5_s03_final_seed1_a01,True,success,"Claude review, confirmed by operator",54,1,0.693,goal_reached,1573.2,2109.5,d883714
+R6,s03,final,1,p2_R6_s03_final_seed1_a01,False,replan_failure,"Claude review, pending operator confirmation",60,16,35.873,max_steps,1863.3,3369.7,3e874ce
 R1,s03,dynamic,1,p2_R1_s03_dynamic_seed1_a01,False,replan_failure,Claude review,60,16,20.402,max_steps,1472.8,2314.6,32ef803
 R2,s03,dynamic,1,p2_R2_s03_dynamic_seed1_a01,False,pre_change_failure,"Claude review, confirmed by operator",60,17,24.743,max_steps,2148.2,2592.0,dd20d3b
 R3,s03,dynamic,1,p2_R3_s03_dynamic_seed1_a01,False,pre_change_failure,Claude review,60,2,31.307,max_steps,1593.1,1917.5,53998a3
 R4,s03,dynamic,1,p2_R4_s03_dynamic_seed1_a01,False,pre_change_failure,"Claude review, confirmed by operator",60,0,30.551,max_steps,1542.0,2033.1,60118e8
 R5,s03,dynamic,1,p2_R5_s03_dynamic_seed1_a01,False,replan_failure,"Claude review, confirmed by operator",60,1,15.723,max_steps,1585.2,2070.2,d883714
+R6,s03,dynamic,1,p2_R6_s03_dynamic_seed1_a01,False,pre_change_failure,"Claude review, pending operator confirmation",60,16,35.873,max_steps,1999.7,3507.1,3e874ce
