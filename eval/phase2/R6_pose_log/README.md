@@ -1,7 +1,7 @@
 # R6: Ground-truth pose in the memory log
 
 **Agent:** `a08` (`e8c66be05bd3`) · **Prompt:** `p09` (`7642a3e1056d`) · **Identifier prompt:**
-`g02` (`bf175c973dfb`) · **Status:** probed, `a08` chosen, not flown. `a07` (`8062799be32e`,
+`g02` (`bf175c973dfb`) · **Status:** flown, `a08` dropped. `a07` (`8062799be32e`,
 `p08` `e6bdfd04534d`) was the other candidate.
 
 Written before the probe and before flying. Spec: `docs/phase2-test-plan.md`.
@@ -221,4 +221,4 @@ spin state, not whether the drone escapes the loop over a whole run.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Flown 2026-10-17/19 after the probe chose `a08`, 18/18 valid, **5/18 success** (`initial` 3/6, `final` + `dynamic` 2/12, `dynamic` 0/6); `a08` dropped. The hypothesis held for the loop (two turn-arounds in a row 0% `final`, 2% `dynamic`; `spin_failure` 1 of 13) and failed for success: the model quotes its position without comparing it (143 collisions), does arithmetic on the heading (3 turn-arounds with the goal in view), and without the sighting line loses a goal it has seen. See [summary.md](summary.md).
