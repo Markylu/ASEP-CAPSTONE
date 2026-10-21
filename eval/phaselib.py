@@ -537,11 +537,12 @@ class Phase:
                         else "no RUN ENDED line (exit {0})".format(code)))
         return code
 
-    def replay(self, run_dir: Path, decider_url: str, godot: str) -> Dict[str, Any]:
+    def replay(self, run_dir: Path, decider_url: str, godot: str,
+               headless: bool = False) -> Dict[str, Any]:
         verdict_path = run_dir / "replay.json"
         subprocess.run([sys.executable, str(REPLAY_CLI), str(run_dir),
                         "--decider-url", decider_url, "--godot", godot,
-                        "--json", str(verdict_path)],
+                        "--json", str(verdict_path)] + (["--headless"] if headless else []),
                        capture_output=True, text=True, timeout=self.lock["wall_clock_s"])
         return read_json(verdict_path) or {"ok": False, "error": "replay wrote no verdict"}
 
@@ -557,6 +558,13 @@ class Phase:
 
         if metrics.get("end_reason") not in VALID_END_REASONS:
             reasons.append("end reason {0}".format(str(metrics.get("end_reason"))[:80]))
+        # run.json holds the size asked for; the decider logs the size captured. They
+        # differed under Xvfb (768x432), and only the second is what the model saw.
+        captured = {tuple(d.get("frame_size") or ())
+                    for d in read_jsonl(run_dir / "decisions.jsonl") if d.get("frame_size")}
+        if captured - {tuple(self.lock["frame_size"])}:
+            reasons.append("captured frame size {0}, want {1}".format(
+                sorted(captured), self.lock["frame_size"]))
         if any("error" in d for d in read_jsonl(run_dir / "decisions.jsonl")):
             reasons.append("decision_error in decisions.jsonl")
         rungs = metrics.get("rungs_used") or {}
@@ -662,7 +670,8 @@ class Phase:
                     self.retire(unit, site, arm, seed, "a{0:02d}_interrupted".format(attempt))
                 self.fly(site, arm, seed, row["run_id"], run_dir, args.decider_url, args.godot)
                 if read_json(run_dir / "run.json") and read_jsonl(run_dir / "decisions.jsonl"):
-                    verdict = self.replay(run_dir, args.decider_url, args.godot)
+                    verdict = self.replay(run_dir, args.decider_url, args.godot,
+                                         headless=args.headless_replay)
                     print("    replay {0}".format("ok" if verdict.get("ok") else "FAILED"))
                 reasons = self.validate(unit, site, arm, seed, run_dir, phase["git_sha"])
                 row["end_reason"] = read_json(run_dir / "metrics.json").get("end_reason", "")
@@ -774,6 +783,8 @@ class Phase:
                 p.add_argument("--decider-url", default="http://127.0.0.1:8000")
                 p.add_argument("--godot", default=shutil.which("godot") or "godot")
                 p.add_argument("--max-attempts", type=int, default=3)
+                p.add_argument("--headless-replay", action="store_true",
+                               help="replay without a window (a display-less host)")
         if extra:
             extra(sub)
         args = parser.parse_args()

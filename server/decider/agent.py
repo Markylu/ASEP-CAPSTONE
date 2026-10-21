@@ -101,6 +101,23 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                          "goal_identifier": {"prompt": "g02", "frame": "clean"}},
           "a07 without the last-sighting line (p09); the identifier's answer for the "
           "current image stays. R5: the sighting line drove 'goal is behind, turn around'."),
+    Agent("a09", "p10", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "last_sighting",
+                                    "pose_compare": True},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a07 with the log comparing each move to the drone's earlier positions "
+          "(blocked, stopped short, back at step N) (p10). R6: "
+          "143 collisions, 65% of reasons after a blocked move claimed progress. "
+          "Probed, not flown: it turned around on 13/25 lost-goal frames (a08: 4/25)."),
+    Agent("a10", "p11", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "none",
+                                    "pose_compare": True},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a08 (no sighting line) with the log comparing each move to the drone's earlier "
+          "positions (blocked, stopped short, back at step N) (p11). The a09 probe: the "
+          "sighting line brings back the turn-around loop on lost-goal frames."),
 )}
 
 DEFAULT_AGENT = "a00"

@@ -146,6 +146,10 @@ def main() -> int:
     parser.add_argument("--godot", default=shutil.which("godot") or "godot")
     parser.add_argument("--tolerance", type=float, default=1e-3, help="metres, and radians for yaw")
     parser.add_argument("--timeout", type=float, default=300.0)
+    parser.add_argument("--headless", action="store_true",
+                        help="no window. A replay is SCRIPTED: it never captures a frame, and "
+                             "line of sight and collisions are physics queries, so the pose "
+                             "stream is the same as a windowed replay's (drift 0.0 measured).")
     parser.add_argument("--speed", type=float, default=1.0,
                         help="turn/move speed multiplier, for watching at a human pace. "
                              "Measured drift at 0.25x is 2.4e-5 m, well inside --tolerance, "
@@ -178,8 +182,8 @@ def main() -> int:
 
     print("replaying {0} on {1}: {2} steps, indices {3}".format(
         run_id, meta.get("scene") or "project main_scene", len(indices), indices))
-    command = [
-        args.godot, "--path", str(GODOT_PROJECT)] + scene_args(meta) + [
+    command = [args.godot] + (["--headless"] if args.headless else []) + [
+        "--path", str(GODOT_PROJECT)] + scene_args(meta) + [
         "--",
         "--run-id=" + replay_id,
         "--decider-url=" + args.decider_url,
