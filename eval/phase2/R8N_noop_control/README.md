@@ -49,6 +49,12 @@ change is the floor a one-paragraph change has to beat before it is credited.
   from `a10`'s on the recorded frame are the ones that diverge at step 0 in flight, allowing for
   the server's 2-in-80 noise.
 
+**Probe, before flight** ([R8 probe](../R8_heading_word/probe/probe_r8.md)): the server repeated
+`a10` exactly (80/80 spin picks, 18/18 step-0 picks), so there is no sampling noise to allow
+for. `a12`'s step-0 pick differs from `a10`'s in **s02c, s02va and s02vc `final`**. Those three
+cells are predicted to diverge from R7 at step 0 in flight, and no other cell is. On spin frames
+`a12` agrees with `a10` on 45 of 80 picks.
+
 ## Manipulation check
 
 - `/health` reports prompt sha `5aca3d233965` before flight; the sentence is in every decision's

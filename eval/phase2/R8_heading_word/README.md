@@ -125,6 +125,33 @@ second `a10` spin pass to re-measure temperature-0 noise on the server (R7: 2 of
 
 If the gate fails, R8 does not fly; R8N still flies alone as the noise-floor round.
 
+**Result: gate passed.** [probe/probe_r8.md](probe/probe_r8.md), run 2026-10-22 on sctsvr6.
+
+| Agent | spin turn-around | `lost` turn-around | `offcentre` turn-around | step 0, same pick as `a10` | spin, same pick as `a10` |
+|---|---|---|---|---|---|
+| a10 | 5/40 | 3/25 | 3/25 | 18/18 | 80/80 (rerun) |
+| **a11** | **8/40** (limit 10) | **5/25** (limit 6) | **1/25** (limit 3) | 12/18 | 44/80 |
+| a12 (no-op) | 7/40 | 4/25 | 1/25 | 15/18 | 45/80 |
+
+0 errors on every frame; the server's `a11` and `a12` shas matched the locks.
+
+What the probe says before flight:
+- **The server is deterministic.** A second `a10` spin pass gave the same pick on 80 of 80 frames,
+  and `a10` repeated its recorded R7 step-0 pick in 18 of 18 cells. The 2-in-80 noise of R7's
+  probe is not there now. Differences between agents are the prompt, not sampling.
+- **A content-free sentence moves picks as much as the heading change.** On the spin frames `a12`
+  agrees with `a10` on 45 of 80 picks, `a11` on 44. At step 0, `a12` changes 3 cells (s02c,
+  s02va, s02vc `final`), `a11` 6 (s02a, s02c, s02vc `final`; s03 all arms, one shared frame).
+  This is the noise floor R8N is flown to measure, seen offline.
+- **Off-centre turn-arounds fell from 3 to 1 for both `a11` and `a12`.** So the probe does not
+  credit the drop to the heading. `a11` no longer turns around on R7 s02vc `initial` step 12
+  (it picks the right-hand marker); `a12` still does. `a11` adds one on R7 s02vc `dynamic`
+  step 14: "facing west… the goal is to the right… must turn to face east".
+- **The compass word brings its own frame error.** `a11` maps image-relative "right" onto the map
+  with the word, and sometimes wrongly ("facing south, so 'to the right' means east", R6 s02va
+  `dynamic` step 23; it is west, though the pick was right). The arithmetic is gone, but the
+  translation the Evidence section left unaddressed now shows up in words.
+
 ## Host
 
 sctsvr6 (headless Linux, Xvfb, Mesa lavapipe, Docker), as R7 and R7C. R8 and R8N fly at one SHA,
