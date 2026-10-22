@@ -805,8 +805,146 @@ Give your reasoning first, then the number.""",
     render=render_pose_log_no_sighting,
 )
 
+# --- p10: Phase 2 R7, the pose log with comparison lines ----------------------
+# (eval/phase2/R7_comparison_lines/README.md)
+#
+# p08 plus one change: the code states what each move did against the drone's
+# own earlier positions, "did not move (blocked)", "stopped short (blocked)",
+# "back where you were after step N". R6: the log quoted positions and the model
+# never compared them (143 collisions, 65% of reasons after a blocked move still
+# claimed progress). Position and heading stay as in p08; the sighting line stays.
+
+#: A normal move covers about 1.7 m (R6 pose records: 655 of 876 steps).
+BLOCKED_BELOW_M = 0.3
+SHORT_BELOW_M = 1.5
+REVISIT_WITHIN_M = 0.5
+
+
+def _compare(i: int, memory: List[Dict[str, Any]], before: Any, after: Any,
+             ends: List[Any]) -> str:
+    """The comparison the model did not make itself, for the move at memory[i].
+
+    `ends[j]` is where move j ended (None if unknown); index -1 is not used, the
+    start is handled by the caller."""
+    entry = memory[i]
+    notes: List[str] = []
+    moved = None if before is None else math.hypot(after[0] - before[0], after[1] - before[1])
+    if entry.get("turn_around"):
+        if moved is not None and moved < BLOCKED_BELOW_M:
+            notes.append("turned in place")
+    elif moved is not None:
+        if moved < BLOCKED_BELOW_M:
+            notes.append("did not move (blocked)")
+        elif moved < SHORT_BELOW_M:
+            notes.append("stopped short (blocked)")
+    if moved is not None and moved >= SHORT_BELOW_M:
+        # Not the step just before: a move that ended where it started is
+        # already "did not move".
+        for j in range(i - 2, -1, -1):
+            e = ends[j]
+            if e is not None and math.hypot(after[0] - e[0], after[1] - e[1]) < REVISIT_WITHIN_M:
+                notes.append("back where you were after step {0}".format(memory[j]["step"]))
+                break
+    return " ".join("{0}.".format(n[0].upper() + n[1:]) for n in notes)
+
+
+def _compare_log(manifest: Dict[str, Any], memory: List[Dict[str, Any]],
+                 with_sighting: bool = True) -> str:
+    now = _where(manifest.get("pose"))
+    if not memory:
+        lines = ["Log of your earlier steps: none yet, this is the first step."]
+    else:
+        lines = ["Log of your earlier steps (what happened, not a plan):"]
+        start = _where(memory[0].get("pose"))
+        if start is not None:
+            lines.append("Start: at {0}.".format(_at(start)))
+        ends: List[Any] = []
+        for i, entry in enumerate(memory):
+            before = _where(entry.get("pose"))
+            after = _where(entry["pose_after"]) if entry.get("pose_after") else now
+            ends.append(after)
+            if after is None:
+                lines.append("Step {0}: {1}. Position not recorded.".format(
+                    entry["step"], _move(entry)))
+                continue
+            moved = ("" if before is None else ", moved {0:.1f} m".format(
+                math.hypot(after[0] - before[0], after[1] - before[1])))
+            note = _compare(i, memory, before, after, ends)
+            lines.append("Step {0}: {1}. Ended at {2}{3}.{4}".format(
+                entry["step"], _move(entry), _at(after), moved, " " + note if note else ""))
+        last = None
+        for i, entry in enumerate(memory):
+            if with_sighting and entry.get("goal") in ("ahead", "left", "right"):
+                last = i
+        if with_sighting and last is None:
+            lines.append("No goal sighting yet in this run.")
+        elif with_sighting:
+            seen = memory[last]
+            since = memory[last:]
+            lines.append(
+                "Last goal sighting: step {0}, {1} (relative to the way the drone faced then). "
+                "Since then: {2} {3}, {4}.".format(
+                    seen["step"], IDENTIFIER_WORDS[seen["goal"]],
+                    len(since), "move" if len(since) == 1 else "moves",
+                    _net_turn([_turn(e) for e in since])))
+    if now is not None:
+        lines.append("Position now: {0}.".format(_at(now)))
+    return "\n".join(lines)
+
+
+def render_pose_compare(prompt: Prompt, manifest: Dict[str, Any],
+                        memory: List[Dict[str, Any]], sighting: Any = None,
+                        with_sighting: bool = True) -> str:
+    actions: List[str] = []
+    for action in manifest.get("actions", []):
+        if action.get("turn_around"):
+            actions.append("  [{i}] turn around in place".format(i=action["index"]))
+        else:
+            actions.append("  [{i}]".format(i=action["index"]))
+    return prompt.user_template.format(
+        step=manifest.get("step", 0),
+        memory_block=_compare_log(manifest, memory, with_sighting),
+        sighting_line=_sighting_line(sighting),
+        action_lines="\n".join(actions) if actions else "  (none)",
+    )
+
+
+_COMPARE_PARAGRAPH = _POSE_PARAGRAPH + """
+The system also compares each move with where the drone has been. "Did not move
+(blocked)" and "stopped short (blocked)" mean a wall stopped the move, so that
+heading does not work from there. "Back where you were after step N" means the
+drone is at a place it already visited. A move that is blocked or goes back to an
+earlier place is not progress."""
+
+P10 = Prompt(
+    version="p10",
+    system=P08.system.replace(_POSE_PARAGRAPH, _COMPARE_PARAGRAPH),
+    user_template=P07.user_template,
+    render=render_pose_compare,
+)
+
+def render_pose_compare_no_sighting(prompt: Prompt, manifest: Dict[str, Any],
+                                    memory: List[Dict[str, Any]], sighting: Any = None) -> str:
+    return render_pose_compare(prompt, manifest, memory, sighting, with_sighting=False)
+
+
+# --- p11: Phase 2 R7, p09 with comparison lines ---------------------------------
+# (eval/phase2/R7_comparison_lines/README.md)
+#
+# p09 (the pose log without the sighting line) plus p10's comparison lines. The
+# a09 probe (p10, sighting line kept) turned around on 13/25 `lost` frames against
+# a08's 4/25: the sighting line brings the "goal is behind" argument back. The
+# identifier's answer for the current image stays.
+
+P11 = Prompt(
+    version="p11",
+    system=P09.system.replace(_POSE_PARAGRAPH, _COMPARE_PARAGRAPH),
+    user_template=P07.user_template,
+    render=render_pose_compare_no_sighting,
+)
+
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
-                                                      G01, G02)}
+                                                      P10, P11, G01, G02)}
 
 
 def get(version: str) -> Prompt:

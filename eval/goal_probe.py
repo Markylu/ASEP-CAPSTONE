@@ -112,6 +112,15 @@ SPIN_GROUPS = ("spin", "moving", "visible")
 SPIN_PER_GROUP = {"spin": 40, "moving": 20, "visible": 20}
 SPIN_MOVED_M = 1.0
 
+#: R7 set: frames where a09 and a07 differ from a08 in R6's failures. `lost`: a true
+#: sighting 1-5 steps back, the goal now out of view. `offcentre`: the goal in
+#: view to the left or right, 9-15 m away. Both need the clean twin recorded in
+#: flight (R5 on).
+R7_GROUPS = ("lost", "offcentre")
+R7_PER_GROUP = 25
+LOST_AGE = (1, 5)
+OFFCENTRE_M = (9.0, 15.0)
+
 
 def band_of(distance: float) -> str:
     return next(name for name, lo, hi in BANDS if lo <= distance < hi)
@@ -558,6 +567,115 @@ def score_spin(rows: Dict[str, Dict[str, Any]],
     return out
 
 
+def cmd_sample_r7(args: argparse.Namespace) -> int:
+    """The R7 set (r7_set.jsonl): see R7_GROUPS. Rows are shaped like spin rows, so
+    replay() runs them; the log keeps the goal reports recorded in flight."""
+    from server.decider.recorder import Run
+    pools: Dict[str, Dict[str, Dict[str, Any]]] = {g: {} for g in R7_GROUPS}
+    for unit in args.rounds:
+        for run in run_dirs(unit):
+            run_id = "/".join(run.parts[-3:])
+            decisions = [d for d in read_jsonl(run / "decisions.jsonl")
+                         if not d.get("error") and d.get("index") is not None]
+            truths = {int(d["step"]): true_goal(d.get("manifest") or {}) for d in decisions}
+            for d in decisions:
+                step, truth = int(d["step"]), truths[int(d["step"])]
+                if truth is None or not d.get("frame") or not d.get("clean_frame"):
+                    continue
+                distance = float((d["manifest"].get("goal") or {}).get("distance", -1.0))
+                group, age = None, None
+                if truth == "not_visible":
+                    seen = [n for n, t in truths.items()
+                            if n < step and t in ("ahead", "left", "right")]
+                    if seen and LOST_AGE[0] <= step - max(seen) <= LOST_AGE[1]:
+                        group, age = R7_GROUPS[0], step - max(seen)
+                elif truth in ("left", "right") and OFFCENTRE_M[0] <= distance <= OFFCENTRE_M[1]:
+                    group = R7_GROUPS[1]
+                if group is None:
+                    continue
+                memory = Run("r7:{0}:{1}".format(unit.name, run_id), run).memory(step)
+                png, clean = run / d["frame"], run / d["clean_frame"]
+                if not png.is_file() or not clean.is_file():
+                    continue
+                sha = hashlib.sha256(png.read_bytes()).hexdigest()[:16]
+                acts = d["manifest"].get("actions") or []
+                pools[group].setdefault(sha, {
+                    "sha": sha, "frame": rel(png), "manifest": d["manifest"], "truth": truth,
+                    "group": group, "age": age, "distance": round(distance, 2),
+                    "clean_frame": rel(clean),
+                    "clean_sha": hashlib.sha256(clean.read_bytes()).hexdigest()[:16],
+                    "source": {"round": unit.name, "run": run_id, "step": step,
+                               "index": d["index"], "goal": d.get("goal"),
+                               "turn_around": any(a.get("index") == d["index"]
+                                                  and a.get("turn_around") for a in acts)},
+                    "memory": memory,
+                    "truth_log": {str(e["step"]): e.get("goal") for e in memory}})
+    rng = random.Random(SEED)
+    rows: List[Dict[str, Any]] = []
+    for group in R7_GROUPS:
+        pool = sorted(pools[group].values(), key=lambda r: r["sha"])
+        rows += rng.sample(pool, min(len(pool), R7_PER_GROUP))
+    out = args.out / "r7_set.jsonl"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in rows))
+    print("{0} R7 frames -> {1}".format(len(rows), rel(out)))
+    for group in R7_GROUPS:
+        pool = list(pools[group].values())
+        chosen = [r for r in rows if r["group"] == group]
+        print("  {0}: {1} of {2}; turned around in flight: {3} of the pool, {4} of the "
+              "chosen".format(group, len(chosen), len(pool),
+                              frac(sum(r["source"]["turn_around"] for r in pool), len(pool)),
+                              frac(sum(r["source"]["turn_around"] for r in chosen), len(chosen))))
+    (args.out / "r7_frames.txt").write_text("".join(
+        "{0}\n{1}\n".format(r["frame"], r["clean_frame"]) for r in rows))
+    return 0
+
+
+def cmd_run_r7(args: argparse.Namespace) -> int:
+    os.environ["VLM_PROFILE"] = args.profile
+    os.environ["VLM_AGENT"] = args.agent
+    from server.decider import agent
+    if not agent.get(args.agent).features.get("memory"):
+        print("agent {0} keeps no log; nothing to replay".format(args.agent))
+        return 1
+    rows = read_jsonl(args.out / "r7_set.jsonl")
+    if args.limit:
+        rows = rows[:args.limit]
+    asyncio.run(replay(rows, args.out / "r7_{0}.jsonl".format(args.agent)))
+    return 0
+
+
+def cmd_report_r7(args: argparse.Namespace) -> int:
+    """Per agent and group: answered, turned around (any turn-around pick), reason
+    places the goal around the drone, same pick as in flight."""
+    rows = {r["sha"]: r for r in read_jsonl(args.dir / "r7_set.jsonl")}
+    lines = ["# R7 probe: lost and off-centre frames", "",
+             "| agent | group | answered | errors | turn-around | goal claimed around | same pick |",
+             "|---|---|---|---|---|---|---|"]
+    for version in args.agents.split(","):
+        answers = {a["sha"]: a for a in read_jsonl(args.dir / "r7_{0}.jsonl".format(version))
+                   if not a.get("error")} if (args.dir / "r7_{0}.jsonl".format(version)).is_file() else {}
+        for group in R7_GROUPS:
+            n = turn = claim = same = 0
+            members = [r for r in rows.values() if r["group"] == group]
+            for row in members:
+                a = answers.get(row["sha"])
+                if a is None or a.get("index") is None:
+                    continue
+                acts = row["manifest"].get("actions") or []
+                n += 1
+                turn += any(x.get("index") == a["index"] and x.get("turn_around") for x in acts)
+                claim += bool(a.get("claim"))
+                same += a["index"] == row["source"]["index"]
+            lines.append("| {0} | {1} | {2} / {3} | {4} | {5} | {6} | {7} |".format(
+                version, group, n, len(members), len(members) - n,
+                frac(turn, n), frac(claim, n), frac(same, n)))
+    out = args.dir / "probe_r7.md"
+    out.write_text("\n".join(lines) + "\n")
+    print("\n".join(lines))
+    return 0
+
+
 def cmd_run_replay(args: argparse.Namespace) -> int:
     os.environ["VLM_PROFILE"] = args.profile
     os.environ["VLM_AGENT"] = args.agent
@@ -905,6 +1023,17 @@ def main() -> int:
     rs.add_argument("--out", type=Path, required=True)
     rs.add_argument("--profile", choices=("remote", "local"), default="remote")
     rs.add_argument("--limit", type=int, default=0, help="first N frames only (smoke test)")
+    s7 = sub.add_parser("sample-r7", help="build r7_set.jsonl (lost and off-centre frames)")
+    s7.add_argument("rounds", nargs="+", type=Path)
+    s7.add_argument("--out", type=Path, required=True)
+    r7 = sub.add_parser("run-r7", help="replay every r7_set.jsonl frame with its log")
+    r7.add_argument("--agent", required=True)
+    r7.add_argument("--out", type=Path, required=True)
+    r7.add_argument("--profile", choices=("remote", "local"), default="remote")
+    r7.add_argument("--limit", type=int, default=0, help="first N frames only (smoke test)")
+    p7 = sub.add_parser("report-r7", help="score r7_aNN.jsonl and write probe_r7.md")
+    p7.add_argument("dir", type=Path)
+    p7.add_argument("--agents", required=True, help="comma-separated, e.g. a07,a09")
     g = sub.add_parser("report", help="score every probe_aNN.jsonl and write probe.md")
     g.add_argument("dir", type=Path)
     g.add_argument("--calibration", default="a03")
@@ -916,6 +1045,7 @@ def main() -> int:
     return {"sample": cmd_sample, "run": cmd_run, "sample-replay": cmd_sample_replay,
             "run-replay": cmd_run_replay, "attach-clean": cmd_attach_clean,
             "sample-spin": cmd_sample_spin, "run-spin": cmd_run_spin,
+            "sample-r7": cmd_sample_r7, "run-r7": cmd_run_r7, "report-r7": cmd_report_r7,
             "report": cmd_report}[args.cmd](args)
 
 

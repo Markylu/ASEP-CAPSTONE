@@ -69,6 +69,15 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # (spin turn-around 6/40 against 17/40) and flies. R6 README, "Probe gate".
     "R6": {"folder": "R6_pose_log", "title": "Ground-truth pose in the memory log",
            "agent": "a08", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # a10 is a08 (no sighting line) plus comparison lines in the log. a09 (a07 plus
+    # the same lines) was probed first and did not fly. R7 README, "Change".
+    "R7": {"folder": "R7_comparison_lines", "title": "Comparison lines in the log",
+           "agent": "a10", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R7C: a08 (R6's agent) flown on sctsvr6 under lavapipe, the host R7 flies on, so R7
+    # against R6 can be read without the renderer change. Not a round of its own: no
+    # change, no prediction. R7 README, "Host".
+    "R7C": {"folder": "R7C_a08_control", "title": "a08 control on the R7 host",
+            "agent": "a08", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
