@@ -779,6 +779,31 @@ def cmd_report_step0(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_report_spin(args: argparse.Namespace) -> int:
+    """score_spin() for every spin_<label>.jsonl named in --agents, and how many
+    picks each shares with the first (a rerun of the same agent measures the
+    server's temperature-0 noise). Writes spin.md."""
+    rows = {r["sha"]: r for r in read_jsonl(args.dir / "spin_set.jsonl")}
+    labels = args.agents.split(",")
+    answers = {v: {a["sha"]: a for a in read_jsonl(args.dir / "spin_{0}.jsonl".format(v))
+                   if not a.get("error")} for v in labels}
+    lines = ["# R8 probe: spin replay", "",
+             "| agent | " + " | ".join("{0}: turn-around".format(g) for g in SPIN_GROUPS)
+             + " | answered | same pick as {0} |".format(labels[0]),
+             "|---|" + "---|" * (len(SPIN_GROUPS) + 2)]
+    for v in labels:
+        s = score_spin(rows, answers[v])
+        both = [sha for sha in answers[v] if sha in answers[labels[0]]]
+        same = sum(answers[v][sha].get("index") == answers[labels[0]][sha].get("index") for sha in both)
+        lines.append("| {0} | {1} | {2} / {3} | {4} / {5} |".format(
+            v, " | ".join("{0}/{1}".format(s[g][1], s[g][0]) for g in SPIN_GROUPS),
+            sum(s[g][0] for g in SPIN_GROUPS), len(rows), same, len(both)))
+    out = args.dir / "spin.md"
+    out.write_text("\n".join(lines) + "\n")
+    print("\n".join(lines))
+    return 0
+
+
 def cmd_run_replay(args: argparse.Namespace) -> int:
     os.environ["VLM_PROFILE"] = args.profile
     os.environ["VLM_AGENT"] = args.agent
@@ -1148,6 +1173,9 @@ def main() -> int:
     p0 = sub.add_parser("report-step0", help="compare step-0 picks and write step0.md")
     p0.add_argument("dir", type=Path)
     p0.add_argument("--agents", required=True, help="comma-separated; the first is the reference")
+    ps = sub.add_parser("report-spin", help="score spin_<label>.jsonl files and write spin.md")
+    ps.add_argument("dir", type=Path)
+    ps.add_argument("--agents", required=True, help="comma-separated labels; the first is the reference")
     g = sub.add_parser("report", help="score every probe_aNN.jsonl and write probe.md")
     g.add_argument("dir", type=Path)
     g.add_argument("--calibration", default="a03")
@@ -1161,7 +1189,7 @@ def main() -> int:
             "sample-spin": cmd_sample_spin, "run-spin": cmd_run_spin,
             "sample-r7": cmd_sample_r7, "run-r7": cmd_run_r7, "report-r7": cmd_report_r7,
             "sample-step0": cmd_sample_step0, "run-step0": cmd_run_step0,
-            "report-step0": cmd_report_step0,
+            "report-step0": cmd_report_step0, "report-spin": cmd_report_spin,
             "report": cmd_report}[args.cmd](args)
 
 
