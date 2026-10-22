@@ -1,6 +1,6 @@
 # R7C: a08 control on the R7 host
 
-**Agent:** `a08` (`e8c66be05bd3`) · **Prompt:** `p09` (`7642a3e1056d`) · **Status:** pre-registered, not flown
+**Agent:** `a08` (`e8c66be05bd3`) · **Prompt:** `p09` (`7642a3e1056d`) · **Status:** flown (18/18 valid)
 
 Written before flying. Spec: `docs/phase2-test-plan.md`.
 
@@ -49,4 +49,5 @@ R6 and agent `a08`, unchanged.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the host changed `a08`'s result, and a link to [summary.md](summary.md).
+The host, or noise, changed `a08`'s result: 8/18 against R6's 5/18 on the Mac, with 100 collisions
+against 143. One seed cannot separate the two. [summary.md](summary.md).

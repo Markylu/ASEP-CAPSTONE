@@ -3,10 +3,10 @@
   "title": "a08 control on the R7 host",
   "citable": false,
   "agent_version": "a08",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "468d5ef",
+  "started": "2026-10-21T17:27:43+00:00",
+  "finished": "2026-10-21T18:25:23+00:00",
+  "operator": "Markylu",
+  "notes": "a08 flown unchanged on sctsvr6 (lavapipe) as a control for R7, in one sitting in tmux (58 minutes). 18/18 valid."
 }

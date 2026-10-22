@@ -89,6 +89,31 @@ GOAL_NOT_NOW = re.compile(
     r"|was|were|last|earlier|previous(?:ly)?|before|step \d+|had"  # looks back
     r"|if|whether|check|until|once|unless|may|might|could|would)\b")  # conditional
 SENTENCE = re.compile(r"(?<=[.!?;])\s+")
+#: After a blocked forward move (R7): the drone moved less than half a step. The same
+#: rule as R6's reasoning analysis, which reproduced its 123 blocked moves.
+BLOCKED_M = 0.85
+#: A sentence that says the drone is making progress, and one that says it did not
+#: move. Built for R7 and calibrated on R6's recorded reasons: 84 of 123 progress
+#: claims (the R6 analysis, with a hand-built classifier, reported 80) and 36 notes
+#: (reported 38); R5: 24 of 36 and 4 (reported 20 and 7). Compare rounds with this
+#: classifier, not with those figures.
+PROGRESS = re.compile(
+    r"\b(?:(?:has|have|had)\s+been|is|are|was|were|continues?\s+to|keeps?|kept)\s+"
+    r"(?:consistently\s+|steadily\s+|successfully\s+|slowly\s+|also\s+)?"
+    r"(?:moving|flying|advancing|progressing|heading|making)\b"
+    r"|\bprogress(?:ing|ed)\b|\bmoving\s+(?:forward|steadily|straight|along|through|in|toward"
+    r"|towards|ahead)\b"
+    r"|\b(?:flying|flew|moved|advanced|advancing|continu(?:e|es|ing))\s+(?:straight|forward|ahead"
+    r"|along|toward|towards|to\s+move|to\s+fly)\b|\bsuccessfully\s+(?:moved|flew|advanced)\b")
+NOT_PROGRESS = re.compile(r"\b(?:not|no|n't|never|without|unable|cannot|can't|fail(?:ed|s)? to)\b")
+NOTES_STUCK = re.compile(
+    r"\b(?:did\s+not|didn't|has\s+not|hasn't|have\s+not|haven't|no\s+longer|never)\s+"
+    r"(?:actually\s+|successfully\s+|really\s+|yet\s+)?"
+    r"(?:move|moved|moving|advance|advanced|advancing|progress|change[d]?)\b"
+    r"|\bmoved\s+0\.0\b|\b0\.0\s*m\b|\bstuck\b|\bstationary\b"
+    r"|\bsame\s+(?:spot|position|place|location)\b|\bnot\s+(?:been\s+)?(?:making|made)\s+progress")
+#: Prompts that carry the comparison lines (p10, p11): shown after a blocked move?
+COMPARE_PROMPTS = ("p10", "p11")
 REVISIT_M = 1.0
 REVISIT_GAP = 5
 GOAL_REPORTS = ("ahead", "left", "right", "not_visible")
@@ -99,6 +124,10 @@ COLUMNS = [("bearing", "reason cites bearing", "n"), ("distance", "reason cites 
            ("turn", "turn-around pick", "n"), ("turn2", "two turn-arounds in a row", "pairs"),
            ("memory", "reason cites memory", "n"), ("position", "reason cites position", "n"),
            ("pose", "pose in manifest", "n"),
+           ("blocked_after", "blocked forward move before", "n"),
+           ("claim_after", "claims progress after a blocked move", "blocked_after"),
+           ("note_after", "notes no movement after a blocked move", "blocked_after"),
+           ("delivered", "comparison line shown after a blocked move", "blocked_after"),
            ("revisit", "revisit", "n"), ("same_pick", "same pick", "pairs"),
            ("copied", "copied reason", "pairs"), ("visible", "goal visible", "n"),
            ("goal_ok", "goal report agrees", "reports"),
@@ -129,6 +158,38 @@ def nearest_forward(manifest: Dict[str, Any]) -> Tuple[Optional[int], int]:
     best = min(forward, key=lambda a: (abs(float(a["theta_deg"]) - float(bearing)),
                                        a["index"]))
     return best["index"], len(forward)
+
+
+def claims_progress(reason: str) -> bool:
+    """Whether a reason says the drone is making progress (PROGRESS), per sentence."""
+    return any(PROGRESS.search(s) and not NOT_PROGRESS.search(s)
+               for s in SENTENCE.split(reason or ""))
+
+
+def notes_no_movement(reason: str) -> bool:
+    return any(NOTES_STUCK.search(s) for s in SENTENCE.split(reason or ""))
+
+
+def blocked_forward(prev: Dict[str, Any], d: Dict[str, Any]) -> bool:
+    """The move chosen at `prev` was a flight that moved < BLOCKED_M by `d`'s step."""
+    a = ((prev.get("manifest") or {}).get("pose") or {}).get("position")
+    b = ((d.get("manifest") or {}).get("pose") or {}).get("position")
+    if not a or not b:
+        return False
+    chosen = any(x.get("index") == prev.get("index") and x.get("turn_around")
+                 for x in (prev.get("manifest") or {}).get("actions", []))
+    return not chosen and math.dist(a, b) < BLOCKED_M
+
+
+def comparison_shown(run: Path, version: str, d: Dict[str, Any]) -> bool:
+    """Re-render this decision's prompt from the recorded log and look for the line."""
+    if str(REPO_ROOT) not in sys.path:
+        sys.path.insert(0, str(REPO_ROOT))
+    from server.decider import prompt as prompts
+    from server.decider.recorder import Run
+    p = prompts.get(version)
+    memory = Run("evidence:{0}".format(run.name), run).memory(int(d["step"]))
+    return "(blocked)" in p.render(p, d.get("manifest") or {}, memory, "not_visible")
 
 
 def claims_goal(reason: str) -> bool:
@@ -169,6 +230,8 @@ def tally(units: List[Path]) -> Tuple[Dict[Tuple[str, str], Dict[str, int]], Dic
             seen: List[List[float]] = []
             previous: Optional[Dict[str, Any]] = None
             was_turn = False
+            prev_valid: Optional[Dict[str, Any]] = None
+            version = info.get("prompt_version")
             for d in read_jsonl(run / "decisions.jsonl"):
                 reason = (d.get("reason") or "").lower()
                 manifest = d.get("manifest") or {}
@@ -206,6 +269,14 @@ def tally(units: List[Path]) -> Tuple[Dict[Tuple[str, str], Dict[str, int]], Dic
                 c["turn2"] += turned and was_turn
                 was_turn = turned
                 c["position"] += bool(POSITION.search(reason))
+                if not (d.get("error") or d.get("index") is None):
+                    if prev_valid is not None and blocked_forward(prev_valid, d):
+                        c["blocked_after"] += 1
+                        c["claim_after"] += claims_progress(reason)
+                        c["note_after"] += notes_no_movement(reason)
+                        if version in COMPARE_PROMPTS:
+                            c["delivered"] += comparison_shown(run, version, d)
+                    prev_valid = d
                 c["pose"] += here is not None and (manifest.get("pose") or {}).get("yaw") is not None
     return cells, meta
 

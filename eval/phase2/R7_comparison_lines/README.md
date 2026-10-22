@@ -1,7 +1,7 @@
 # R7: Comparison lines in the log
 
 **Agent:** `a10` (`b5b7bcd218cc`) · **Prompt:** `p11` (`55414df4bc89`) · **Identifier prompt:**
-`g02` · **Status:** pre-registered, `a10` probe gate passed, not flown. `a09` (`67d052bc6c3a`, `p10`
+`g02` · **Status:** flown (18/18 valid), `a10` not dropped. `a09` was probed and set aside. `a09` (`67d052bc6c3a`, `p10`
 `3d203bf87060`) was probed first and set aside (see Probe history).
 
 Written before the `a10` probe and before flying; the probe result is added below. Spec: `docs/phase2-test-plan.md`. The agent and
@@ -79,11 +79,33 @@ Per arm, 6 sites, seed 1. R0 is Phase 1's seed-1 baseline; R6 is `a08`.
 
 ## Manipulation check
 
-`eval/agent_evidence.py` needs new measures before the round is labelled. They are not written yet.
-- Comparison lines delivered: share of steps after a blocked move whose prompt carries
-  "Did not move" or "Stopped short".
-- Reasons after a blocked move that claim progress (the R6 65% measure, same classifier).
-- Two turn-arounds in a row, and reasons that cite position (carried over from R6).
+Written into `eval/agent_evidence.py` after the round was pre-registered and before it was
+labelled: four new columns, plus the R6 ones. Generated tables:
+[R7](manipulation_check.md), [R7C](../R7C_a08_control/manipulation_check.md).
+- **Comparison line shown after a blocked move:** the decision's prompt is re-rendered from the
+  recorded log, and the text must contain "(blocked)". For `p10` and `p11` only.
+- **Blocked forward move:** the move chosen at the previous step was a flight and the drone
+  moved < 0.85 m (half a step). The same rule as R6's reasoning analysis; it reproduces R6's 123
+  blocked moves and R5's 36.
+- **Reason claims progress after a blocked move**, and **reason notes no movement:** sentence
+  regexes, calibrated on R6 and R5. They give 84 of 123 claims (R6's hand-built classifier
+  reported 80) and 36 notes (reported 38). Compare rounds with this classifier, not with R6's
+  published figures.
+- Two turn-arounds in a row, and reasons that cite position, carried over from R6.
+
+Result, pooled over the 18 runs of each round:
+
+| | R6 `a08`, Mac | R7C `a08`, server | R7 `a10`, server |
+|---|---|---|---|
+| decisions | 894 | 867 | 858 |
+| blocked forward moves | 123 | 91 | 40 |
+| comparison line shown | 0 | 0 | 40 of 40 |
+| reason claims progress after one | 84 (68%) | 56 (62%) | 8 (20%) |
+| reason notes no movement after one | 36 (29%) | 16 (18%) | 19 (48%) |
+| two turn-arounds in a row | 8 of 876 | 3 of 849 | 10 of 840 |
+
+The change took effect: the line reached the model after every blocked move, and progress claims
+after a blocked move fell from 62% (same agent, same host) to 20%.
 
 ## Drop criterion
 
@@ -152,4 +174,8 @@ R6 and agent `a08` (`p09` + `g02`), the agent R6 flew. Branch cut from `phase2/r
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+The mechanism held, the success counts say nothing about it. After a blocked move `a10` repeats
+the pick 8% of the time (R7C 33%) and claims progress 20% of the time (R7C 62%); collisions fell
+to 60 (R7C 100, R6 143); no spin came back. Success is 6/18 (R7C 8/18) and `final` fell 3/6 to
+0/6, but five of the six changed cells diverge from R7C at step 0 or 4, before any line is shown.
+Drop criterion: 0 of 4 met. [summary.md](summary.md), [reasoning_analysis.md](reasoning_analysis.md).
