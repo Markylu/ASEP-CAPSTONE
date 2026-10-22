@@ -22,7 +22,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from . import agent, config, vlm
+from . import agent, config, orchestrator, vlm
 from .recorder import Run, resolve_run_dir
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(message)s")
@@ -141,6 +141,9 @@ def run_start(request: StartRequest):
 async def decide(request: DecideRequest):
     run = Run(request.run_id)
     frame_path = run.save_frame(request.step, request.frame_png_b64)
+    # An orchestrated agent (a13 on) runs its own pipeline: orchestrator.py.
+    if agent.current().features.get("orchestrator"):
+        return await orchestrator.decide(request, run, frame_path)
     # An agent with memory sees its own earlier decisions in this run (agent.py).
     memory = run.memory(request.step) if agent.current().features.get("memory") else None
 

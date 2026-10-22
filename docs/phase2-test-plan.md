@@ -20,7 +20,9 @@ what is kept between steps. It never changes the model or its weights (proposal)
 is a success rate of at least 50% on every layout.
 
 Each round tests one change. The operator chooses the change; this spec only says how a change
-is identified, flown and compared.
+is identified, flown and compared. A bundle round (R9 on) changes several things at once by the
+operator's decision; its README names every part, its result is credited to the bundle and not
+to any part, and it flies beside a control on the same host (§8, 2026-10-22).
 
 ## 2. What is fixed and what varies
 
@@ -218,6 +220,7 @@ Git: same committed and ignored files as P1 §14.
 
 | Date | Change |
 |---|---|
+| 2026-10-22 | Bundle round (R9, operator's decision): several changes in one agent, credited to the bundle, flown beside a control on the same host; an ablation round follows if it wins. Orchestrated agents (`a13` on, `server/decider/orchestrator.py`): one step is several calls of the frozen model with one job each (perceiver, strategist, navigator, and a critic's one retry), and every subagent prompt and the spatial memory's wording and parameters are part of `agent_sha`. Spatial memory (`server/decider/spatial.py`) is built only from the drone's pose and what the perceiver reads off the clean frame, never from site geometry, depth, the `collided` flag or goal ground truth, and is rebuilt from `decisions.jsonl` each step. Probe: `eval/r9_probe.py` (perceiver against ground truth, trap replay through the real step). Checks: `eval/spatial_replay.py` (memory against the R7 comparison lines, manipulation-check counts, top-down maps). |
 | 2026-10-22 | Control rounds (R7C, R8N): a round with no change of its own, flown at the same SHA and on the same host as the round it controls, and listed in `ROUNDS` beside it. R7C re-flies the previous agent on a new host; R8N flies a no-op prompt edit (`a12`) to measure how far wording alone moves a round. A round flown with a no-op control states an attribution rule in its README before flying. `eval/agent_evidence.py` gains heading columns (degrees, compass word, heading arithmetic, turn-around with the goal in view). |
 | 2026-10-16 | Secondary tag `spin_failure` (§5): a failed run with ≥ 5 consecutive turn-around picks, computed by `eval/phase1_label.py`. Tags only; applies from R5. |
 | 2026-10-15 | Clean frames: an agent whose goal identifier reads the frame without annotations (`goal_identifier.frame: clean`, a06) gets it from Godot beside the annotated frame, saved as `frames/c<step>.png`. `eval/replay.py --save-clean-frames` recovers clean frames for recorded runs at their exact poses, and `goal_probe.py attach-clean` pairs them with probe frames. |

@@ -85,6 +85,13 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # against it. R8 README, "Attribution rule".
     "R8N": {"folder": "R8N_noop_control", "title": "No-op prompt edit (noise floor)",
             "agent": "a12", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R9: the bundle round (operator, 2026-10-22). a13 is several calls with one job
+    # each plus a code-kept map (server/decider/orchestrator.py, spatial.py). More than
+    # one change, by decision: success is credited to the bundle, not its parts. Its
+    # control R9C (the agent R8 carries forward, on the same host) is added when R8 is
+    # read. R9 README, "Change".
+    "R9": {"folder": "R9_hail_mary", "title": "Orchestrated agent with a spatial memory",
+           "agent": "a13", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

@@ -782,3 +782,135 @@ async def identify_goal(manifest: Dict[str, Any], frame_b64: str) -> Sighting:
         raw=result["raw"],
         timing=won["timing"],
     )
+
+
+# --- R9: one structured call per subagent (a13) ----------------------------------
+
+@dataclass
+class SubCall:
+    """One subagent's reply for one step: the parsed object, or an error. Shaped
+    like Sighting so a decision record reads the same for every subagent."""
+    name: str
+    result: Optional[Dict[str, Any]]
+    rung: Optional[str] = None
+    latency_ms: float = 0.0
+    model: Optional[str] = None
+    prompt_tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
+    attempts: List[Dict[str, Any]] = field(default_factory=list)
+    raw: str = ""
+    timing: Optional[Timing] = None
+    error: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        out = {
+            "result": self.result,
+            "rung": self.rung,
+            "latency_ms": round(self.latency_ms, 1),
+            "model": self.model,
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "attempts": self.attempts,
+            "raw": self.raw,
+            "timing": self.timing.to_dict() if self.timing else None,
+        }
+        if self.error is not None:
+            out["error"] = self.error
+        return out
+
+
+def _structured_messages(system: str, text: str, image_b64: Optional[str],
+                         hint: str = "",
+                         follow_up: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
+    if hint:
+        text = text + "\n\n" + hint
+    content: Any = text
+    if image_b64 is not None:
+        content = [{"type": "text", "text": text},
+                   {"type": "image_url", "image_url": {"url": "data:image/png;base64," + image_b64}}]
+    messages = [{"role": "system", "content": system}, {"role": "user", "content": content}]
+    return messages + list(follow_up or [])
+
+
+def _structured_body(rung: str, name: str, json_schema: Dict[str, Any], system: str,
+                     text: str, image_b64: Optional[str], max_tokens: int,
+                     follow_up: Optional[List[Dict[str, Any]]]) -> Dict[str, Any]:
+    body: Dict[str, Any] = {"model": config.VLM_MODEL, "max_tokens": max_tokens,
+                            "temperature": config.TEMPERATURE}
+    if rung == "json_schema":
+        body["messages"] = _structured_messages(system, text, image_b64, follow_up=follow_up)
+        body["response_format"] = {"type": "json_schema", "json_schema": {
+            "name": name, "strict": True, "schema": json_schema}}
+    elif rung == "json_object":
+        hint = "Reply with JSON only, matching this schema exactly:\n" + json.dumps(json_schema)
+        body["messages"] = _structured_messages(system, text, image_b64, hint, follow_up)
+        body["response_format"] = {"type": "json_object"}
+    elif rung == "tool_call":
+        body["messages"] = _structured_messages(system, text, image_b64, follow_up=follow_up)
+        body["tools"] = [{"type": "function", "function": {
+            "name": name, "description": "Give your answer.", "parameters": json_schema}}]
+        body["tool_choice"] = "required"
+    else:
+        hint = ("Reply with one JSON object only, no other text, matching this schema:\n"
+                + json.dumps(json_schema))
+        body["messages"] = _structured_messages(system, text, image_b64, hint, follow_up)
+    return body
+
+
+def _structured_extract(rung: str, payload: Dict[str, Any],
+                        validate: Callable[[Dict[str, Any]], Dict[str, Any]]) -> Dict[str, Any]:
+    message = payload["choices"][0].get("message", {})
+    if rung == "tool_call":
+        calls = message.get("tool_calls") or []
+        if not calls:
+            raise VLMError("no tool call in response")
+        raw = calls[0]["function"]["arguments"]
+        parsed = json.loads(raw)
+    else:
+        raw = message.get("content") or ""
+        fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.S)
+        if fenced:
+            parsed = json.loads(fenced.group(1))
+        elif rung == "text":
+            match = re.search(r"\{.*\}", raw, re.S)
+            if not match:
+                raise VLMError("no JSON object in response")
+            parsed = json.loads(match.group(0))
+        else:
+            parsed = json.loads(raw)
+    if not isinstance(parsed, dict):
+        raise VLMError("reply is not a JSON object")
+    return {"parsed": validate(parsed), "raw": raw}
+
+
+async def call_structured(name: str, system: str, text: str, image_b64: Optional[str],
+                          json_schema: Dict[str, Any],
+                          validate: Callable[[Dict[str, Any]], Dict[str, Any]],
+                          max_tokens: int,
+                          follow_up: Optional[List[Dict[str, Any]]] = None) -> SubCall:
+    """One subagent call on the shared ladder. `validate` returns the cleaned
+    reply or raises VLMError (a failed rung). Never raises for a model failure:
+    returns SubCall(result=None, error=...) and the orchestrator decides what
+    a missing answer means. `follow_up` appends turns after the first user
+    message (the critic's retry)."""
+    try:
+        won = await _ladder(
+            lambda rung: _structured_body(rung, name, json_schema, system, text, image_b64,
+                                          max_tokens, follow_up),
+            lambda rung, payload: _structured_extract(rung, payload, validate),
+            max_tokens)
+    except VLMError as exc:
+        return SubCall(name=name, result=None, error=str(exc)[:1000])
+    usage = won["payload"].get("usage") or {}
+    return SubCall(
+        name=name,
+        result=won["result"]["parsed"],
+        rung=won["rung"],
+        latency_ms=won["latency_ms"],
+        model=won["payload"].get("model", config.VLM_MODEL),
+        prompt_tokens=usage.get("prompt_tokens"),
+        completion_tokens=usage.get("completion_tokens"),
+        attempts=won["attempts"],
+        raw=won["result"]["raw"],
+        timing=won["timing"],
+    )

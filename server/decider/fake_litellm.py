@@ -125,6 +125,58 @@ def _identifier_reply(body: Dict[str, Any], rung: str) -> Dict[str, Any]:
     }
 
 
+# --- R9 subagents (a13): perceiver and strategist, recognised by their schema ---
+
+_SUBAGENTS = ("perceiver", "strategist")
+
+
+def _schema_of(body: Dict[str, Any]) -> Any:
+    """(name, schema) the request asks for, on any rung, or (None, None)."""
+    fmt = body.get("response_format") or {}
+    if fmt.get("json_schema"):
+        return fmt["json_schema"].get("name"), fmt["json_schema"].get("schema")
+    for tool in body.get("tools") or []:
+        return tool["function"]["name"], tool["function"]["parameters"]
+    text = json.dumps(body.get("messages", []))
+    for name, key in (("perceiver", "far_left"), ("strategist", "backtrack")):
+        if '\\"{0}\\"'.format(key) in text and "schema" in text:
+            return name, None
+    return None, None
+
+
+def _digest(body: Dict[str, Any]) -> int:
+    return hashlib.sha256(json.dumps(body.get("messages", [])).encode("utf-8")).digest()[0]
+
+
+def _subagent_reply(body: Dict[str, Any], name: str, rung: str) -> Dict[str, Any]:
+    """A valid reply fixed by the request's bytes. Says nothing about the image."""
+    d = _digest(body)
+    if name == "perceiver":
+        strips = ["far_left", "left", "centre", "right", "far_right"]
+        goal = (strips + ["not_visible"] * 4)[d % 9]
+        reply: Dict[str, Any] = {"reason": "stub perceiver: does not look at the image",
+                                 "goal": goal,
+                                 "goal_range": "none" if goal == "not_visible" else "mid"}
+        for k, strip in enumerate(strips):
+            reply[strip] = {"floor": ["open_far", "open_near", "blocked_near"][(d + k) % 3],
+                            "doorway": (d + k) % 7 == 0}
+    else:
+        _, schema = _schema_of(body)
+        ids = list(((schema or {}).get("properties") or {}).get("target", {}).get("enum")
+                   or ["explore"])
+        reply = {"reason": "stub strategist", "mode": "explore", "target": ids[d % len(ids)]}
+    if rung == "tool_call":
+        message: Dict[str, Any] = {"role": "assistant", "tool_calls": [{
+            "id": "call_stub", "type": "function",
+            "function": {"name": name, "arguments": json.dumps(reply)}}]}
+    else:
+        message = {"role": "assistant", "content": json.dumps(reply)}
+    return {"id": "chatcmpl-stub", "object": "chat.completion",
+            "model": body.get("model", "fake") + "-stub",
+            "choices": [{"index": 0, "message": message, "finish_reason": "stop"}],
+            "usage": {"prompt_tokens": 700, "completion_tokens": 60, "total_tokens": 760}}
+
+
 def _pick(body: Dict[str, Any], indices: List[int]) -> int:
     """Index 0 is turn-around, so the forward headings are everything else."""
     forward = [i for i in indices if i != 0]
@@ -152,6 +204,9 @@ async def completions(body: Dict[str, Any]):
         return JSONResponse(
             {"error": {"message": "fake router does not support " + rung}}, status_code=400)
 
+    name, _ = _schema_of(body)
+    if name in _SUBAGENTS:
+        return _subagent_reply(body, name, rung)
     if _is_identifier(body):
         return _identifier_reply(body, rung)
 
@@ -177,11 +232,13 @@ async def completions(body: Dict[str, Any]):
                              "arguments": json.dumps(reply)},
             }],
         }
-    elif rung == "text":
+    elif rung == "text" and "JSON object only" not in json.dumps(body.get("messages", [])):
         message = {"role": "assistant",
                    "content": "\n".join("{0}: {1}".format(k.upper(), v)
                                         for k, v in reply.items())}
     else:
+        # json_schema, json_object, and the orchestrated agent's text rung
+        # (vlm.call_structured asks for one JSON object).
         message = {"role": "assistant",
                    "content": json.dumps(reply)}
 

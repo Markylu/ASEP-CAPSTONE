@@ -25,7 +25,7 @@ import hashlib
 import json
 import os
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from . import prompt as prompts
 
@@ -53,7 +53,21 @@ class Agent:
         # there is one, so every earlier agent keeps its sha.
         if self.identifier_prompt is not None:
             blob += "\x00" + self.identifier_prompt.sha()
+        # An orchestrated agent (a13 on) is also its subagents' wording and the
+        # spatial memory's parameters and notes. Appended only for such an agent,
+        # so every earlier agent keeps its sha.
+        for sub in self.subagent_prompts:
+            blob += "\x00" + sub.version + ":" + sub.sha()
+        if self.features.get("orchestrator"):
+            from . import spatial
+            blob += "\x00spatial:" + spatial.wording_sha()
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+    @property
+    def subagent_prompts(self) -> List[prompts.Prompt]:
+        """The perceiver's and strategist's prompts (a13 on), in that order."""
+        orch = self.features.get("orchestrator") or {}
+        return [prompts.get(orch[k]) for k in ("perceiver", "strategist") if orch.get(k)]
 
 
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
@@ -133,6 +147,16 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                          "goal_identifier": {"prompt": "g02", "frame": "clean"}},
           "No-op control: a10 plus one sentence that adds nothing (p13). R8N measures how "
           "far a content-free prompt edit moves a round (R7: 5 of 18 first picks moved)."),
+    Agent("a13", "p14", {"orchestrator": {"perceiver": "g03", "strategist": "q01",
+                                          "critic": "retry", "frame": "clean",
+                                          "spatial": "server/decider/spatial.py"}},
+          "R9 bundle: one step is several calls with one job each, and code keeps a map. "
+          "A perceiver (g03) reports goal strip, open floor and doorways on the clean frame; "
+          "code builds the map from pose and those reports; a strategist (q01) picks a "
+          "target from a list code builds; the navigator (p14) sees notes from the map "
+          "against each action and no coordinates or degrees; a critic asks once more "
+          "when the pick was blocked from here, is a third turn-around, or loops. "
+          "R1-R7: the model cannot compare positions or headings itself."),
 )}
 
 DEFAULT_AGENT = "a00"
@@ -147,7 +171,10 @@ def get(version: str) -> Agent:
 
 def wants_clean_frame(version: str) -> bool:
     """Whether the agent's goal identifier reads the frame without annotations."""
-    ident = get(version).features.get("goal_identifier") or {}
+    features = get(version).features
+    if (features.get("orchestrator") or {}).get("frame") == "clean":
+        return True
+    ident = features.get("goal_identifier") or {}
     return ident.get("frame") == "clean"
 
 
@@ -168,6 +195,12 @@ def describe(version: str) -> Dict[str, Any]:
     if agent.identifier_prompt is not None:
         out["identifier_prompt_version"] = agent.identifier_prompt.version
         out["identifier_prompt_sha"] = agent.identifier_prompt.sha()
+    for sub in agent.subagent_prompts:
+        out["subagent_prompts"] = out.get("subagent_prompts", {})
+        out["subagent_prompts"][sub.version] = sub.sha()
+    if agent.features.get("orchestrator"):
+        from . import spatial
+        out["spatial_sha"] = spatial.wording_sha()
     return out
 
 

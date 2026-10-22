@@ -139,3 +139,57 @@ def identifier_tool_spec() -> Dict[str, Any]:
             "parameters": identifier_schema(),
         },
     }
+
+
+# --- R9: the orchestrated agent (a13) -------------------------------------------
+# One schema per subagent. Every one puts `reason` first, the order that saw
+# the goal in R4. Fixed properties rather than arrays: strict decoding handles
+# them on every rung.
+
+#: The perceiver's five image strips, left to right (spatial.STRIPS).
+STRIPS = ["far_left", "left", "centre", "right", "far_right"]
+GOAL_RANGES = ["touching", "near", "mid", "far", "none"]
+FLOOR_CLASSES = ["open_far", "open_near", "blocked_near"]
+MODES = ["approach", "explore", "backtrack", "escape"]
+
+PERCEIVER_SCHEMA_NAME = "perceiver"
+STRATEGIST_SCHEMA_NAME = "strategist"
+
+
+def perceiver_schema() -> Dict[str, Any]:
+    lane = {
+        "type": "object",
+        "properties": {
+            "floor": {"type": "string", "enum": FLOOR_CLASSES,
+                      "description": "How far open floor runs straight ahead in this strip."},
+            "doorway": {"type": "boolean",
+                        "description": "Whether this strip shows an opening in a wall."},
+        },
+        "required": ["floor", "doorway"],
+        "additionalProperties": False,
+    }
+    properties: Dict[str, Any] = {
+        "reason": {"type": "string",
+                   "description": "Walls, openings, obstacles and anything that could be "
+                                  "the goal in this image."},
+        "goal": {"type": "string", "enum": STRIPS + ["not_visible"],
+                 "description": "The strip the glowing red sphere is in."},
+        "goal_range": {"type": "string", "enum": GOAL_RANGES,
+                       "description": "How far away the goal looks; none if not visible."},
+    }
+    for strip in STRIPS:
+        properties[strip] = dict(lane, description="The {0} strip.".format(strip))
+    return {"type": "object", "properties": properties, "required": list(properties),
+            "additionalProperties": False}
+
+
+def strategist_schema(target_ids: List[str]) -> Dict[str, Any]:
+    properties = {
+        "reason": {"type": "string",
+                   "description": "What is known and why this target is the best way on."},
+        "mode": {"type": "string", "enum": MODES},
+        "target": {"type": "string", "enum": target_ids,
+                   "description": "One target id exactly as listed."},
+    }
+    return {"type": "object", "properties": properties, "required": list(properties),
+            "additionalProperties": False}
