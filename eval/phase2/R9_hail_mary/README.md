@@ -2,7 +2,7 @@
 
 **Agent:** `a13` (`3de550e110e7`) · **Navigator prompt:** `p14` (`31a9f28eaf94`) · **Perceiver:**
 `g03` (`3531e4d9ade9`) · **Strategist:** `q01` (`40fb0fbc3285`) · **Spatial memory:**
-`spatial.wording_sha()` `eceb875a68a3` · **Status:** draft, not probed, not flown
+`spatial.wording_sha()` `eceb875a68a3` · **Status:** pre-registered, probe passed, not flown
 
 Written before the probe and before flying. Spec: `docs/phase2-test-plan.md` (§1 and §8,
 2026-10-22: bundle rounds). The shas above are re-checked against `config.lock.json` before the
@@ -135,7 +135,12 @@ live model, before flying. R9 does not fly if any line fails.
 | false wall: completed move whose strip was called "wall close" | completed moves | ≤ 20% |
 | trap repeat: a13 picks the known-blocked heading again | trap set (255 steps, recorded 36%) | ≤ 25% |
 
-**Result:** not run.
+**Result: gate passed.** [probe/probe_r9.md](probe/probe_r9.md), run 2026-10-22 on the Mac at
+`8b6056f`. Goal strip within one 47/47, phantom 4/111 (3.6%), left/ahead/right 96.2% against
+g02's 96.2%, false wall 6/100, trap repeat 1/255 (0.4%; recorded agents 36.1%). Not gated: a13
+turns around on 71% of trap steps (on 177 of 181, every forward move was marked blocked or wall);
+the critic changed 2 of 40 picks; targets were not exercised (replayed maps have no perceiver
+history); perceiver mean 1.96 s, whole step 5.1 s.
 
 ## Shakedown
 
