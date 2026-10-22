@@ -78,6 +78,13 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # change, no prediction. R7 README, "Host".
     "R7C": {"folder": "R7C_a08_control", "title": "a08 control on the R7 host",
             "agent": "a08", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R8": {"folder": "R8_heading_word", "title": "Heading as a compass word",
+           "agent": "a11", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R8N: a12 is a10 plus one sentence with no content, flown beside R8 on the same
+    # host and SHA. R8N against R7 is the noise floor of a prompt edit; R8 is read
+    # against it. R8 README, "Attribution rule".
+    "R8N": {"folder": "R8N_noop_control", "title": "No-op prompt edit (noise floor)",
+            "agent": "a12", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

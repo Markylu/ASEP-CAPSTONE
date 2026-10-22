@@ -118,6 +118,21 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "a08 (no sighting line) with the log comparing each move to the drone's earlier "
           "positions (blocked, stopped short, back at step N) (p11). The a09 probe: the "
           "sighting line brings back the turn-around loop on lost-goal frames."),
+    Agent("a11", "p12", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "none",
+                                    "pose_compare": True},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a10 with heading as a compass word ('facing south-west') instead of degrees "
+          "(p12). R6 and R7: heading arithmetic in reasons, and turn-arounds on a goal in "
+          "view to the side."),
+    Agent("a12", "p13", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "none",
+                                    "pose_compare": True},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "No-op control: a10 plus one sentence that adds nothing (p13). R8N measures how "
+          "far a content-free prompt edit moves a round (R7: 5 of 18 first picks moved)."),
 )}
 
 DEFAULT_AGENT = "a00"

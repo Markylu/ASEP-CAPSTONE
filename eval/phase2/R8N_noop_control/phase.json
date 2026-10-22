@@ -1,0 +1,12 @@
+{
+  "round": "R8N",
+  "title": "No-op prompt edit (noise floor)",
+  "citable": false,
+  "agent_version": "a12",
+  "status": "planned",
+  "git_sha": null,
+  "started": null,
+  "finished": null,
+  "operator": null,
+  "notes": ""
+}
