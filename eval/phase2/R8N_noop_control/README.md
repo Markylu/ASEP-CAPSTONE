@@ -1,7 +1,7 @@
 # R8N: No-op prompt edit (noise floor)
 
 **Agent:** `a12` (`6d65de968c98`) · **Prompt:** `p13` (`5aca3d233965`) · **Identifier prompt:**
-`g02` (`bf175c973dfb`) · **Status:** pre-registered, not flown
+`g02` (`bf175c973dfb`) · **Status:** flown (18/18 valid)
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. A control, flown beside
 [R8](../R8_heading_word/README.md) on the same host at the same SHA. Its hypothesis is about the
@@ -76,4 +76,4 @@ R7 and agent `a10`. Same branch as R8 (`phase2/r8-heading-word`), cut from `4d82
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Held: the no-op sentence changed 6 of 18 outcomes against R7 (3 gained, 3 lost; 6/18 either way), with behaviour unchanged, and the probe predicted its three step-0 divergences exactly. [summary.md](summary.md).
