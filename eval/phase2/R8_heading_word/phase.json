@@ -3,10 +3,10 @@
   "title": "Heading as a compass word",
   "citable": false,
   "agent_version": "a11",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "4c67fc6",
+  "started": "2026-10-22T17:16:50+00:00",
+  "finished": "2026-10-22T18:15:33+00:00",
+  "operator": "Markylu",
+  "notes": "Flown on sctsvr6 (headless Linux, Docker, Mesa lavapipe) in tmux, right after R8N at the same SHA (59 minutes). 18/18 valid. a11 not dropped (1 of 4 drop conditions); by the pre-registered attribution rule no outcome change is credited to the heading (4 cells changed against R7, R8N changed 6)."
 }

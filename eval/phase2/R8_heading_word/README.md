@@ -1,7 +1,7 @@
 # R8: Heading as a compass word
 
 **Agent:** `a11` (`3859d0345560`) · **Prompt:** `p12` (`f24e2855bfbe`) · **Identifier prompt:**
-`g02` (`bf175c973dfb`) · **Status:** pre-registered, not flown
+`g02` (`bf175c973dfb`) · **Status:** flown (18/18 valid)
 
 Written before the probe and before flying. Spec: `docs/phase2-test-plan.md`. The shas above are
 re-checked against `config.lock.json` before the round flies. R8 flies beside **R8N**
@@ -164,4 +164,4 @@ tag `p2-r7`.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+The mechanism held, the success count did not move. Heading arithmetic 23 → 2, goal-in-view turn-arounds 3 → 0, s02vc `initial` ✓; success 6/18 as R7 and R8N. R8 changed 4 cells against R7, the no-op R8N changed 6, so by the attribution rule no outcome change is credited to the heading. Drop criterion: 1 of 4 met; carried forward. [summary.md](summary.md), [reasoning_analysis.md](reasoning_analysis.md).
