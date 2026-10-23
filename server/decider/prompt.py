@@ -849,7 +849,7 @@ def _compare(i: int, memory: List[Dict[str, Any]], before: Any, after: Any,
 
 
 def _compare_log(manifest: Dict[str, Any], memory: List[Dict[str, Any]],
-                 with_sighting: bool = True) -> str:
+                 with_sighting: bool = True, at: Callable[[Any], str] = _at) -> str:
     now = _where(manifest.get("pose"))
     if not memory:
         lines = ["Log of your earlier steps: none yet, this is the first step."]
@@ -857,7 +857,7 @@ def _compare_log(manifest: Dict[str, Any], memory: List[Dict[str, Any]],
         lines = ["Log of your earlier steps (what happened, not a plan):"]
         start = _where(memory[0].get("pose"))
         if start is not None:
-            lines.append("Start: at {0}.".format(_at(start)))
+            lines.append("Start: at {0}.".format(at(start)))
         ends: List[Any] = []
         for i, entry in enumerate(memory):
             before = _where(entry.get("pose"))
@@ -871,7 +871,7 @@ def _compare_log(manifest: Dict[str, Any], memory: List[Dict[str, Any]],
                 math.hypot(after[0] - before[0], after[1] - before[1])))
             note = _compare(i, memory, before, after, ends)
             lines.append("Step {0}: {1}. Ended at {2}{3}.{4}".format(
-                entry["step"], _move(entry), _at(after), moved, " " + note if note else ""))
+                entry["step"], _move(entry), at(after), moved, " " + note if note else ""))
         last = None
         for i, entry in enumerate(memory):
             if with_sighting and entry.get("goal") in ("ahead", "left", "right"):
@@ -888,13 +888,13 @@ def _compare_log(manifest: Dict[str, Any], memory: List[Dict[str, Any]],
                     len(since), "move" if len(since) == 1 else "moves",
                     _net_turn([_turn(e) for e in since])))
     if now is not None:
-        lines.append("Position now: {0}.".format(_at(now)))
+        lines.append("Position now: {0}.".format(at(now)))
     return "\n".join(lines)
 
 
 def render_pose_compare(prompt: Prompt, manifest: Dict[str, Any],
                         memory: List[Dict[str, Any]], sighting: Any = None,
-                        with_sighting: bool = True) -> str:
+                        with_sighting: bool = True, at: Callable[[Any], str] = _at) -> str:
     actions: List[str] = []
     for action in manifest.get("actions", []):
         if action.get("turn_around"):
@@ -903,7 +903,7 @@ def render_pose_compare(prompt: Prompt, manifest: Dict[str, Any],
             actions.append("  [{i}]".format(i=action["index"]))
     return prompt.user_template.format(
         step=manifest.get("step", 0),
-        memory_block=_compare_log(manifest, memory, with_sighting),
+        memory_block=_compare_log(manifest, memory, with_sighting, at),
         sighting_line=_sighting_line(sighting),
         action_lines="\n".join(actions) if actions else "  (none)",
     )
@@ -943,8 +943,74 @@ P11 = Prompt(
     render=render_pose_compare_no_sighting,
 )
 
+# --- p12: Phase 2 R8, heading as a compass word ----------------------------------
+# (eval/phase2/R8_heading_word/README.md)
+#
+# p11 with one change: the log gives the drone's heading as one of eight compass
+# words ("facing south-west") instead of degrees, and the pose paragraph states
+# the map's axes in those words. R7 and R6: the model added and subtracted
+# degrees in its reasons ("287 + 180", 11 reasons in R7) and turned around on a
+# goal it could see to the side (s02vc `initial`, step 12, in both rounds).
+
+#: Eight compass words, counter-clockwise from +x, as `_where()` measures heading.
+COMPASS = ("east", "north-east", "north", "north-west",
+           "west", "south-west", "south", "south-east")
+
+
+def _compass(heading: float) -> str:
+    """The nearest of the eight compass words: 45-degree bins centred on east (0),
+    north (90), west (180) and south (270), with x east and y north."""
+    return COMPASS[int(((float(heading) + 22.5) % 360.0) // 45.0)]
+
+
+def _at_word(where: Any) -> str:
+    return "({0:.1f}, {1:.1f}), facing {2}".format(where[0], where[1], _compass(where[2]))
+
+
+def render_pose_compare_word(prompt: Prompt, manifest: Dict[str, Any],
+                             memory: List[Dict[str, Any]], sighting: Any = None) -> str:
+    """p11's log with heading as a compass word."""
+    return render_pose_compare(prompt, manifest, memory, sighting,
+                               with_sighting=False, at=_at_word)
+
+
+_POSE_PARAGRAPH_WORD = _POSE_PARAGRAPH.replace(
+    """floor, from a fixed origin. Heading is the way the drone faces, in degrees
+counter-clockwise from the +x direction: turning left raises it, and turning
+around changes it by 180.""",
+    """floor, from a fixed origin: east is +x and north is +y. "Facing" is the
+compass direction the drone faces, to the nearest of eight: east, north-east,
+north, north-west, west, south-west, south, south-east. Turning left goes from
+east toward north, then west, then south; turning around gives the opposite
+direction.""")
+assert _POSE_PARAGRAPH_WORD != _POSE_PARAGRAPH
+
+P12 = Prompt(
+    version="p12",
+    system=P09.system.replace(_POSE_PARAGRAPH, _COMPARE_PARAGRAPH.replace(
+        _POSE_PARAGRAPH, _POSE_PARAGRAPH_WORD)),
+    user_template=P07.user_template,
+    render=render_pose_compare_word,
+)
+
+# --- p13: Phase 2 R8N, a no-op edit of p11 ------------------------------------------
+# (eval/phase2/R8N_noop_control/README.md)
+#
+# p11 plus one sentence that is true and adds nothing the log does not already
+# show. R7: one added paragraph moved 5 of 18 first picks before any comparison
+# line existed. R8N measures how far an edit with no content moves a round.
+
+NOOP_SENTENCE = "The log lists your steps in the order they happened, oldest first."
+
+P13 = Prompt(
+    version="p13",
+    system=P09.system.replace(_POSE_PARAGRAPH, _COMPARE_PARAGRAPH + "\n" + NOOP_SENTENCE),
+    user_template=P07.user_template,
+    render=render_pose_compare_no_sighting,
+)
+
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
-                                                      P10, P11, G01, G02)}
+                                                      P10, P11, P12, P13, G01, G02)}
 
 
 def get(version: str) -> Prompt:

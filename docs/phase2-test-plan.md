@@ -218,6 +218,7 @@ Git: same committed and ignored files as P1 §14.
 
 | Date | Change |
 |---|---|
+| 2026-10-22 | Control rounds (R7C, R8N): a round with no change of its own, flown at the same SHA and on the same host as the round it controls, and listed in `ROUNDS` beside it. R7C re-flies the previous agent on a new host; R8N flies a no-op prompt edit (`a12`) to measure how far wording alone moves a round. A round flown with a no-op control states an attribution rule in its README before flying. `eval/agent_evidence.py` gains heading columns (degrees, compass word, heading arithmetic, turn-around with the goal in view). |
 | 2026-10-16 | Secondary tag `spin_failure` (§5): a failed run with ≥ 5 consecutive turn-around picks, computed by `eval/phase1_label.py`. Tags only; applies from R5. |
 | 2026-10-15 | Clean frames: an agent whose goal identifier reads the frame without annotations (`goal_identifier.frame: clean`, a06) gets it from Godot beside the annotated frame, saved as `frames/c<step>.png`. `eval/replay.py --save-clean-frames` recovers clean frames for recorded runs at their exact poses, and `goal_probe.py attach-clean` pairs them with probe frames. |
 | 2026-10-15 | Replay probe (§4 step 2): `eval/goal_probe.py sample-replay` / `run-replay` send recorded frames with the log the agent had, scored by `claims_goal()` (`eval/agent_evidence.py`). Gates are per round (`report --gate`). Agents may carry a goal identifier, a second call per step whose prompt sha is part of `agent_sha` (R5). |

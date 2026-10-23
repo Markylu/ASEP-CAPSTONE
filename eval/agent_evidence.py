@@ -49,6 +49,11 @@ Columns, over every decision in the cell:
   sign of the bearing (positive is left). "–" for agents without the field.
 - goal seen when visible: of decisions with a `goal` field where the goal is
   visible, the share not reported as not_visible.
+- reason cites degrees / uses a compass word / heading arithmetic (R8): a number
+  of degrees, a compass word (north, south-west, ...), or two- or three-digit
+  numbers either side of a plus or minus ("287 + 180"). Raw regex hits.
+- turn-around with the goal in view: a turn-around pick while the goal is
+  visible (ground truth, as above), of decisions where it is visible.
 
 Deterministic: the same runs give the same file.
 """
@@ -112,8 +117,15 @@ NOTES_STUCK = re.compile(
     r"(?:move|moved|moving|advance|advanced|advancing|progress|change[d]?)\b"
     r"|\bmoved\s+0\.0\b|\b0\.0\s*m\b|\bstuck\b|\bstationary\b"
     r"|\bsame\s+(?:spot|position|place|location)\b|\bnot\s+(?:been\s+)?(?:making|made)\s+progress")
-#: Prompts that carry the comparison lines (p10, p11): shown after a blocked move?
-COMPARE_PROMPTS = ("p10", "p11")
+#: Prompts that carry the comparison lines (p10 on): shown after a blocked move?
+COMPARE_PROMPTS = ("p10", "p11", "p12", "p13")
+#: Heading in the reason (R8): a number of degrees, a compass word, and degree
+#: arithmetic ("287 + 180", "heading 221 - 45"), two- or three-digit numbers either
+#: side of a plus or minus. Coordinates do not match: their parts are split by a comma.
+#: Step ranges ("steps 22-26") are excluded. R7: 23 reasons, every hit read by eye.
+DEGREES = re.compile(r"\b\d{1,3}\s*(?:°|degrees?)")
+COMPASS_WORD = re.compile(r"\b(?:north|south)(?:[- ]?(?:east|west))?\b|\b(?:east|west)(?:ward)?\b")
+HEADING_ARITH = re.compile(r"(?<!steps )(?<!step )\b\d{2,3}(?:\s*(?:°|degrees?))?\s*[-+−]\s*\d{2,3}\b")
 REVISIT_M = 1.0
 REVISIT_GAP = 5
 GOAL_REPORTS = ("ahead", "left", "right", "not_visible")
@@ -128,6 +140,9 @@ COLUMNS = [("bearing", "reason cites bearing", "n"), ("distance", "reason cites 
            ("claim_after", "claims progress after a blocked move", "blocked_after"),
            ("note_after", "notes no movement after a blocked move", "blocked_after"),
            ("delivered", "comparison line shown after a blocked move", "blocked_after"),
+           ("degrees", "reason cites degrees", "n"), ("compass", "reason uses a compass word", "n"),
+           ("arith", "heading arithmetic", "n"),
+           ("turn_in_view", "turn-around with the goal in view", "visible"),
            ("revisit", "revisit", "n"), ("same_pick", "same pick", "pairs"),
            ("copied", "copied reason", "pairs"), ("visible", "goal visible", "n"),
            ("goal_ok", "goal report agrees", "reports"),
@@ -267,6 +282,10 @@ def tally(units: List[Path]) -> Tuple[Dict[Tuple[str, str], Dict[str, int]], Dic
                              for a in manifest.get("actions", []))
                 c["turn"] += turned
                 c["turn2"] += turned and was_turn
+                c["turn_in_view"] += turned and truth in ("ahead", "left", "right")
+                c["degrees"] += bool(DEGREES.search(reason))
+                c["compass"] += bool(COMPASS_WORD.search(reason))
+                c["arith"] += bool(HEADING_ARITH.search(reason))
                 was_turn = turned
                 c["position"] += bool(POSITION.search(reason))
                 if not (d.get("error") or d.get("index") is None):

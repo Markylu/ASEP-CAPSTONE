@@ -676,6 +676,134 @@ def cmd_report_r7(args: argparse.Namespace) -> int:
     return 0
 
 
+# --- step 0 (R8) ----------------------------------------------------------------
+
+def cmd_sample_step0(args: argparse.Namespace) -> int:
+    """step0_set.jsonl: the step-0 frame of every run in the rounds, with the clean
+    frame recorded in flight and an empty log. Cells that start from the same frame
+    (initial and dynamic share a start) are one row with several sources. Rows are
+    shaped like r7 rows, so replay() runs them. R8: how far a prompt edit moves the
+    first pick, before any log exists (R7 reasoning analysis, §3)."""
+    rows: Dict[str, Dict[str, Any]] = {}
+    for unit in args.rounds:
+        for run in run_dirs(unit):
+            run_id = "/".join(run.parts[-3:])
+            for d in read_jsonl(run / "decisions.jsonl"):
+                if int(d.get("step", -1)) != 0 or d.get("index") is None or d.get("error"):
+                    continue
+                if not d.get("frame") or not d.get("clean_frame"):
+                    continue
+                png, clean = run / d["frame"], run / d["clean_frame"]
+                if not png.is_file() or not clean.is_file():
+                    continue
+                acts = (d.get("manifest") or {}).get("actions") or []
+                source = {"round": unit.name, "run": run_id, "step": 0, "index": d["index"],
+                          "goal": d.get("goal"),
+                          "turn_around": any(a.get("index") == d["index"] and a.get("turn_around")
+                                             for a in acts)}
+                sha = hashlib.sha256(png.read_bytes()).hexdigest()[:16]
+                row = rows.setdefault(sha, {
+                    "sha": sha, "frame": rel(png), "manifest": d["manifest"],
+                    "truth": true_goal(d["manifest"]), "group": "step0",
+                    "clean_frame": rel(clean),
+                    "clean_sha": hashlib.sha256(clean.read_bytes()).hexdigest()[:16],
+                    "source": source, "sources": [], "memory": [], "truth_log": {}})
+                row["sources"].append(source)
+    out = args.out / "step0_set.jsonl"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    ordered = sorted(rows.values(), key=lambda r: r["sha"])
+    out.write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in ordered))
+    print("{0} step-0 frames ({1} cells) -> {2}".format(
+        len(ordered), sum(len(r["sources"]) for r in ordered), rel(out)))
+    return 0
+
+
+def cmd_run_step0(args: argparse.Namespace) -> int:
+    os.environ["VLM_PROFILE"] = args.profile
+    os.environ["VLM_AGENT"] = args.agent
+    rows = read_jsonl(args.out / "step0_set.jsonl")
+    if args.limit:
+        rows = rows[:args.limit]
+    asyncio.run(replay(rows, args.out / "step0_{0}.jsonl".format(args.agent)))
+    return 0
+
+
+def cmd_report_step0(args: argparse.Namespace) -> int:
+    """Per agent, over the cells of step0_set.jsonl: answered, same pick as the
+    reference agent (the first in --agents) on the same frame, same pick as
+    recorded in flight, turn-arounds; then every cell where a pick differs from
+    the reference."""
+    rows = read_jsonl(args.dir / "step0_set.jsonl")
+    versions = args.agents.split(",")
+    answers = {}
+    for v in versions:
+        path = args.dir / "step0_{0}.jsonl".format(v)
+        answers[v] = ({a["sha"]: a for a in read_jsonl(path) if not a.get("error")}
+                      if path.is_file() else {})
+    ref = versions[0]
+    cells = [(s, r) for r in rows for s in r["sources"]]
+    turn_idx = {r["sha"]: {a["index"] for a in r["manifest"].get("actions") or []
+                           if a.get("turn_around")} for r in rows}
+    lines = ["# R8 probe: step-0 picks", "",
+             "{0} frames, {1} cells (cells that share a start frame share a row). Reference: "
+             "`{2}`. Flight: the pick recorded at step 0 in the source round.".format(
+                 len(rows), len(cells), ref), "",
+             "| agent | answered | same pick as {0} | same pick as flight | turn-around |".format(ref),
+             "|---|---|---|---|---|"]
+    for v in versions:
+        n = same_ref = same_flight = turn = 0
+        for s, r in cells:
+            a = answers[v].get(r["sha"])
+            if a is None or a.get("index") is None:
+                continue
+            n += 1
+            b = answers[ref].get(r["sha"])
+            same_ref += b is not None and b.get("index") == a["index"]
+            same_flight += a["index"] == s["index"]
+            turn += a["index"] in turn_idx[r["sha"]]
+        lines.append("| {0} | {1} / {2} | {3} | {4} | {5} |".format(
+            v, n, len(cells), frac(same_ref, n), frac(same_flight, n), frac(turn, n)))
+    lines += ["", "Cells where a pick differs from `{0}` (pick, turn-around marked T):".format(ref), "",
+              "| cell | flight | " + " | ".join(versions) + " |",
+              "|---|---|" + "---|" * len(versions)]
+    def mark(r: Dict[str, Any], i: Any) -> str:
+        return "–" if i is None else "{0}{1}".format(i, " T" if i in turn_idx[r["sha"]] else "")
+    for s, r in sorted(cells, key=lambda c: c[0]["run"]):
+        picks = [(answers[v].get(r["sha"]) or {}).get("index") for v in versions]
+        if len(set(picks)) > 1:
+            lines.append("| {0} | {1} | {2} |".format(
+                s["run"], mark(r, s["index"]), " | ".join(mark(r, i) for i in picks)))
+    out = args.dir / "step0.md"
+    out.write_text("\n".join(lines) + "\n")
+    print("\n".join(lines))
+    return 0
+
+
+def cmd_report_spin(args: argparse.Namespace) -> int:
+    """score_spin() for every spin_<label>.jsonl named in --agents, and how many
+    picks each shares with the first (a rerun of the same agent measures the
+    server's temperature-0 noise). Writes spin.md."""
+    rows = {r["sha"]: r for r in read_jsonl(args.dir / "spin_set.jsonl")}
+    labels = args.agents.split(",")
+    answers = {v: {a["sha"]: a for a in read_jsonl(args.dir / "spin_{0}.jsonl".format(v))
+                   if not a.get("error")} for v in labels}
+    lines = ["# R8 probe: spin replay", "",
+             "| agent | " + " | ".join("{0}: turn-around".format(g) for g in SPIN_GROUPS)
+             + " | answered | same pick as {0} |".format(labels[0]),
+             "|---|" + "---|" * (len(SPIN_GROUPS) + 2)]
+    for v in labels:
+        s = score_spin(rows, answers[v])
+        both = [sha for sha in answers[v] if sha in answers[labels[0]]]
+        same = sum(answers[v][sha].get("index") == answers[labels[0]][sha].get("index") for sha in both)
+        lines.append("| {0} | {1} | {2} / {3} | {4} / {5} |".format(
+            v, " | ".join("{0}/{1}".format(s[g][1], s[g][0]) for g in SPIN_GROUPS),
+            sum(s[g][0] for g in SPIN_GROUPS), len(rows), same, len(both)))
+    out = args.dir / "spin.md"
+    out.write_text("\n".join(lines) + "\n")
+    print("\n".join(lines))
+    return 0
+
+
 def cmd_run_replay(args: argparse.Namespace) -> int:
     os.environ["VLM_PROFILE"] = args.profile
     os.environ["VLM_AGENT"] = args.agent
@@ -1034,6 +1162,20 @@ def main() -> int:
     p7 = sub.add_parser("report-r7", help="score r7_aNN.jsonl and write probe_r7.md")
     p7.add_argument("dir", type=Path)
     p7.add_argument("--agents", required=True, help="comma-separated, e.g. a07,a09")
+    s0 = sub.add_parser("sample-step0", help="build step0_set.jsonl (every run's step-0 frame)")
+    s0.add_argument("rounds", nargs="+", type=Path)
+    s0.add_argument("--out", type=Path, required=True)
+    r0 = sub.add_parser("run-step0", help="ask one agent about every step0_set.jsonl frame")
+    r0.add_argument("--agent", required=True)
+    r0.add_argument("--out", type=Path, required=True)
+    r0.add_argument("--profile", choices=("remote", "local"), default="remote")
+    r0.add_argument("--limit", type=int, default=0, help="first N frames only (smoke test)")
+    p0 = sub.add_parser("report-step0", help="compare step-0 picks and write step0.md")
+    p0.add_argument("dir", type=Path)
+    p0.add_argument("--agents", required=True, help="comma-separated; the first is the reference")
+    ps = sub.add_parser("report-spin", help="score spin_<label>.jsonl files and write spin.md")
+    ps.add_argument("dir", type=Path)
+    ps.add_argument("--agents", required=True, help="comma-separated labels; the first is the reference")
     g = sub.add_parser("report", help="score every probe_aNN.jsonl and write probe.md")
     g.add_argument("dir", type=Path)
     g.add_argument("--calibration", default="a03")
@@ -1046,6 +1188,8 @@ def main() -> int:
             "run-replay": cmd_run_replay, "attach-clean": cmd_attach_clean,
             "sample-spin": cmd_sample_spin, "run-spin": cmd_run_spin,
             "sample-r7": cmd_sample_r7, "run-r7": cmd_run_r7, "report-r7": cmd_report_r7,
+            "sample-step0": cmd_sample_step0, "run-step0": cmd_run_step0,
+            "report-step0": cmd_report_step0, "report-spin": cmd_report_spin,
             "report": cmd_report}[args.cmd](args)
 
 
