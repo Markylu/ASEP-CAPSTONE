@@ -1,7 +1,7 @@
 # R9C: a11 control on the R9 host
 
 **Agent:** `a11` (`3859d0345560`) · **Prompt:** `p12` (`f24e2855bfbe`) · **Identifier prompt:**
-`g02` (`bf175c973dfb`) · **Status:** pre-registered, not flown
+`g02` (`bf175c973dfb`) · **Status:** flown (18/18 valid)
 
 Written before flying. Spec: `docs/phase2-test-plan.md`.
 
@@ -42,4 +42,6 @@ None. Used only to read R9 against.
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-23 on sctsvr6 at `756345b`, right after R9, 18/18 valid. 6/18 (initial 5/6, final
+1/6, dynamic 0/6), the same as R8 in every cell; 16 of 18 pick sequences identical to R8.
+[summary.md](summary.md).

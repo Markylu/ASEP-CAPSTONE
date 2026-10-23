@@ -2,7 +2,7 @@
 
 **Agent:** `a13` (`3de550e110e7`) · **Navigator prompt:** `p14` (`31a9f28eaf94`) · **Perceiver:**
 `g03` (`3531e4d9ade9`) · **Strategist:** `q01` (`40fb0fbc3285`) · **Spatial memory:**
-`spatial.wording_sha()` `eceb875a68a3` · **Status:** pre-registered, probe passed, control fixed, not flown
+`spatial.wording_sha()` `eceb875a68a3` · **Status:** flown (18/18 valid), dropped
 
 Written before the probe and before flying. Spec: `docs/phase2-test-plan.md` (§1 and §8,
 2026-10-22: bundle rounds). The shas above are re-checked against `config.lock.json` before the
@@ -168,4 +168,7 @@ thresholds, reused in `spatial.py`), R8 (control on the same host, noise floor).
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-23 on sctsvr6 at `756345b`, 18/18 valid. 6/18 (initial 5/6, final 0/6, dynamic
+1/6), R9C 6/18; 2 of 18 outcomes changed against R9C, so no change is credited. **Dropped** (2 of 4:
+`final` + `dynamic` 1/12, `spin_failure` on 4 runs). Zero picks into a known-blocked heading,
+collisions 34. [summary.md](summary.md).
