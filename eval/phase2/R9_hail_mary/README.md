@@ -2,7 +2,7 @@
 
 **Agent:** `a13` (`3de550e110e7`) · **Navigator prompt:** `p14` (`31a9f28eaf94`) · **Perceiver:**
 `g03` (`3531e4d9ade9`) · **Strategist:** `q01` (`40fb0fbc3285`) · **Spatial memory:**
-`spatial.wording_sha()` `eceb875a68a3` · **Status:** pre-registered, probe passed, not flown
+`spatial.wording_sha()` `eceb875a68a3` · **Status:** pre-registered, probe passed, control fixed, not flown
 
 Written before the probe and before flying. Spec: `docs/phase2-test-plan.md` (§1 and §8,
 2026-10-22: bundle rounds). The shas above are re-checked against `config.lock.json` before the
@@ -84,7 +84,8 @@ rises.
 | Measure | Prediction |
 |---|---|
 | `initial` | ≥ 5/6 |
-| `final` + `dynamic` | ≥ 5/12, and above R9C by more than R8N's measured noise floor |
+| `final` + `dynamic` | ≥ 5/12, and above R9C |
+| cells changed against R9C | more than 6 of 18 (R8N's noise floor), with more gained than lost |
 | s03 (any arm) | ≥ 1/3 |
 | collisions | below R7's 60 |
 | `spin_failure` runs | 0 |
@@ -93,15 +94,22 @@ rises.
 
 ## Attribution rule
 
-R9 is read against R9C only. A difference of 2 runs or fewer, or within R8N's noise floor
-against R7, is not a result. If R9 wins, an ablation round follows before the final: `a13` with
-the map and notes but without strategist and critic, so the parts can be told apart. Whatever
-R9 shows is credited to the bundle.
+R9 is read against R9C only. R8N set the noise floor on this host: a content-free prompt edit
+changed **6 of 18** outcomes against R7 (R8 summary). A success change is credited to the bundle
+only if R9 changes **more than 6 of 18** outcomes against R9C **and** gains more cells than it
+loses. Below that, the mechanism measures (blocked repeats, turn-arounds, targets) are the result
+and the success count is not. If R9 is credited, an ablation round follows before the final:
+`a13` with the map and notes but without strategist and critic, so the parts can be told apart.
+Whatever R9 shows is credited to the bundle, not to any part.
 
 ## Control
 
-**R9C** flies the agent R8 carries forward (`a11` if R8 keeps it, otherwise `a10`) on the same
-host at the same SHA. Fixed when R8 is read, before R9's probe; added to `ROUNDS` then.
+**R9C flies `a11`** (`3859d0345560`, heading as a compass word), the agent R8 carried forward
+(not dropped, 1 of 4 conditions), on sctsvr6 at R9's SHA, right after R9. Fixed on 2026-10-23
+when R8 was read, which was after R9's probe; the probe does not involve the control. R8 flew
+`a11` on the same host at `4c67fc6`, and the server is deterministic (R8 probe: `a10` rerun
+80/80), so R9C against R8 also checks that this branch's decider changes left `a11` untouched.
+[R9C README](../R9C_a11_control/README.md).
 
 ## Manipulation check
 
