@@ -35,7 +35,7 @@ remote profile, temperature 0.
 - Shakedown before the round: one unscored `dynamic` run per site, all records complete, no run
   over 317 s (runs kept on sctsvr6 in `~/r9_shakedown/`, not part of the round).
 - Probe: gate passed ([probe/probe_r9.md](probe/probe_r9.md)).
-- Labels reviewed by Claude on 2026-10-23; **operator confirmation pending**.
+- Labels reviewed by Claude on 2026-10-23 and confirmed by the operator on 2026-10-24.
 - Pre-registration: [README.md](README.md). Manipulation check:
   [manipulation_check.md](manipulation_check.md).
 

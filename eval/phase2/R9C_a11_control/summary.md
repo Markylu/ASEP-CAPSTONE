@@ -11,7 +11,7 @@ control R9 is read against, not a round of its own.
 - Host: sctsvr6 (headless Linux, Xvfb, Mesa lavapipe, Docker), as R8.
 - Flown at `756345b` on 2026-10-23, 17:36–18:35 UTC, in tmux, right after R9 at the same SHA.
   **18 / 18 valid.**
-- Labels reviewed by Claude on 2026-10-23; **operator confirmation pending**.
+- Labels reviewed by Claude on 2026-10-23 and confirmed by the operator on 2026-10-24.
 - Pre-registration: [README.md](README.md).
 
 ## Predictions
