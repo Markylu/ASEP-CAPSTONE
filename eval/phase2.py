@@ -95,6 +95,15 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # round of its own. R9 README, "Control".
     "R9C": {"folder": "R9C_a11_control", "title": "a11 control on the R9 host",
             "agent": "a11", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R10: a bundle on a13 (operator, 2026-10-24): the strategist is given the goal's
+    # true position, no turn-around right after a turn-around while a move ahead is
+    # open, no critic. Credited to the bundle. Its control is R10C below. R10 README.
+    "R10": {"folder": "R10_goal_planner", "title": "Goal known to the planner, no double turn",
+            "agent": "a14", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R10C: a13 (R9's agent) flown on the R10 host at the R10 SHA. Not a round of its
+    # own. R10 README, "Control".
+    "R10C": {"folder": "R10C_a13_control", "title": "a13 control on the R10 host",
+             "agent": "a13", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

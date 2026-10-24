@@ -14,6 +14,10 @@ What the memory may be built from (operator, 2026-10-22):
 Not from site.json, depth, raycasts, the sim's `collided` flag, or the goal's
 ground truth. The manifest's `goal` block is never read here.
 
+a14 (R10, operator, 2026-10-24) gives the planner the goal's true position. The
+orchestrator reads it and passes it in as `goal_at`; the memory itself is built
+as before, and nothing here reads the manifest's `goal` block.
+
 The memory is rebuilt from decisions.jsonl on every step, never carried in the
 process, the same way recorder.Run.memory() works. A run directory therefore
 replays to exactly the memory the model was shown (eval/spatial_replay.py).
@@ -103,6 +107,45 @@ WORDS: Dict[str, Any] = {
 def wording_sha() -> str:
     """Identity of this module's parameters and wording, for agent.sha()."""
     blob = json.dumps({"params": PARAMS, "words": WORDS}, sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+
+#: Why the strategist is asked, as a13 words it. Two keys share a sentence
+#: there; a14 words them apart (WORDS_A14). Not in WORDS: a13's sha never
+#: covered these sentences, and must not change.
+TRIGGERS_A13: Dict[str, str] = {
+    "start": "the run is starting",
+    "blocked": "your last move was blocked",
+    "goal_in_view": "the goal just came into view",
+    "goal_out_of_view": "the goal has been out of view for three steps",
+    "new_doorway": "a new doorway is in view",
+    "target_reached": "your target was reached or is no longer open",
+    "target_closed": "your target was reached or is no longer open",
+    "loop": "you keep coming back to the same ground",
+    "regular": "it is time for a regular check",
+}
+
+#: Every sentence a14 adds (R10). Kept apart from WORDS so a13's wording_sha()
+#: stays as flown; agent.sha() appends wording_sha_a14() only for an agent that
+#: uses it. R9: the strategist read "your target ... is no longer open" as "the
+#: goal is blocked", so a14 words those two triggers apart.
+WORDS_A14: Dict[str, Any] = {
+    "goal_label": "the goal (its position is known)",
+    "goal_known": "The goal's position is known: {where}. It does not move.",
+    "goal_in_image": "The goal is in the current image ({strip}, {range}).",
+    "goal_not_in_image": "The goal is not in the current image.",
+    "plan_goal": "head for the goal ({mode}).",
+    "triggers": dict(TRIGGERS_A13, **{
+        "target_reached": "the drone has reached the target you chose",
+        "target_closed": "the doorway you chose is closed or already passed",
+    }),
+    "turn_rule": "the last pick was a turn-around and a move ahead is open",
+}
+
+
+def wording_sha_a14() -> str:
+    """Identity of a14's added wording, for agent.sha()."""
+    blob = json.dumps({"words_a14": WORDS_A14}, sort_keys=True)
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
@@ -492,13 +535,18 @@ def where_words(here: Pose, p: Point) -> str:
     return "about {0:.0f} m, {1}".format(d, rel)
 
 
-def targets(mem: SpatialMemory, here: Pose, step: int) -> List[Target]:
+def targets(mem: SpatialMemory, here: Pose, step: int,
+            goal_at: Optional[Point] = None) -> List[Target]:
     """The strategist's menu, built by code: the goal belief, doorways not yet
     passed or closed, unexplored edges, and the last place that still had an
-    untried open way."""
+    untried open way. With `goal_at` (a14), the goal is listed at its true
+    position on every step instead."""
     out: List[Target] = []
     belief = mem.goal_belief()
-    if belief is not None:
+    if goal_at is not None:
+        out.append(Target("goal", "goal", goal_at[0], goal_at[1],
+                          WORDS_A14["goal_label"], step))
+    elif belief is not None:
         out.append(Target("goal", "goal", belief[0], belief[1],
                           "the goal (last seen at step {0})".format(belief[2]), step))
     for o in mem.openings:
@@ -532,22 +580,33 @@ def _backtrack_point(mem: SpatialMemory, here: Pose) -> Optional[Tuple[int, Poin
     return None
 
 
-def target_still_valid(mem: SpatialMemory, target: Optional[Target], here: Point) -> bool:
+def target_still_valid(mem: SpatialMemory, target: Optional[Target], here: Point,
+                       goal_at: Optional[Point] = None) -> bool:
     """False once a target is reached, or a doorway target is closed or passed.
-    A goal or doorway target follows its latest estimate."""
+    A goal or doorway target follows its latest estimate (a14: the goal's true
+    position)."""
+    return target_state(mem, target, here, goal_at) == "open"
+
+
+def target_state(mem: SpatialMemory, target: Optional[Target], here: Point,
+                 goal_at: Optional[Point] = None) -> str:
+    """'open', 'reached' or 'closed' (a doorway closed or passed, or no target)."""
     if target is None:
-        return False
+        return "closed"
     if target.kind == "opening":
         label = target.id.split("_", 1)[1]
         o = next((o for o in mem.openings if o.label == label), None)
         if o is None or o.closed or o.passed:
-            return False
+            return "closed"
         target.x, target.y = o.x, o.y
     if target.kind == "goal":
-        belief = mem.goal_belief()
-        if belief is not None:
-            target.x, target.y = belief[0], belief[1]
-    return dist(here, (target.x, target.y)) >= TARGET_REACHED_M
+        if goal_at is not None:
+            target.x, target.y = goal_at
+        else:
+            belief = mem.goal_belief()
+            if belief is not None:
+                target.x, target.y = belief[0], belief[1]
+    return "open" if dist(here, (target.x, target.y)) >= TARGET_REACHED_M else "reached"
 
 
 # --- projection onto the actions -----------------------------------------------
@@ -659,13 +718,25 @@ def critique(mem: SpatialMemory, manifest: Dict[str, Any], tags: Dict[int, List[
 
 def situation(mem: SpatialMemory, manifest: Dict[str, Any],
               perception: Optional[Dict[str, Any]], current: Optional[Target],
-              menu: List[Target], trigger: str) -> str:
-    """What the strategist is told, in words: no coordinates, no degrees."""
+              menu: List[Target], trigger: str,
+              goal_at: Optional[Point] = None) -> str:
+    """What the strategist is told, in words: no coordinates, no degrees.
+    With `goal_at` (a14), where the goal is, from its true position."""
     here = pose_xyh(manifest.get("pose"))
     step = int(manifest.get("step", 0))
     lines = ["Step {0}. You are asked now because {1}.".format(step, trigger)]
     goal = (perception or {}).get("goal")
-    if goal in STRIPS:
+    if goal_at is not None:
+        if goal in STRIPS:
+            lines.append(WORDS_A14["goal_in_image"].format(
+                strip=goal.replace("_", " "),
+                range=WORDS["range"].get((perception or {}).get("goal_range"),
+                                         "distance unknown")))
+        else:
+            lines.append(WORDS_A14["goal_not_in_image"])
+        if here is not None:
+            lines.append(WORDS_A14["goal_known"].format(where=where_words(here, goal_at)))
+    elif goal in STRIPS:
         lines.append("The goal is in the current image ({0}, {1}).".format(
             goal.replace("_", " "),
             WORDS["range"].get((perception or {}).get("goal_range"), "distance unknown")))
@@ -698,26 +769,64 @@ def situation(mem: SpatialMemory, manifest: Dict[str, Any],
 def trigger(mem: SpatialMemory, manifest: Dict[str, Any],
             perception: Optional[Dict[str, Any]], current: Optional[Target],
             last_called: Optional[int], last_perception: Optional[Dict[str, Any]],
-            every: int = 8) -> Optional[str]:
-    """Why the strategist should be asked this step, or None to keep the target."""
+            every: int = 8, goal_at: Optional[Point] = None,
+            words: Optional[Dict[str, str]] = None) -> Optional[str]:
+    """Why the strategist should be asked this step, or None to keep the target.
+    Worded from `words` (a13: TRIGGERS_A13; a14: WORDS_A14["triggers"])."""
+    key = trigger_key(mem, manifest, perception, current, last_called, last_perception,
+                      every, goal_at)
+    return None if key is None else (words or TRIGGERS_A13)[key]
+
+
+def trigger_key(mem: SpatialMemory, manifest: Dict[str, Any],
+                perception: Optional[Dict[str, Any]], current: Optional[Target],
+                last_called: Optional[int], last_perception: Optional[Dict[str, Any]],
+                every: int = 8, goal_at: Optional[Point] = None) -> Optional[str]:
+    """The key in TRIGGERS_A13 of why the strategist should be asked, or None."""
     step = int(manifest.get("step", 0))
     here = pose_xyh(manifest.get("pose"))
     goal_now = (perception or {}).get("goal") in STRIPS
     if last_called is None:
-        return "the run is starting"
+        return "start"
     if mem.blocks and mem.blocks[-1].step == step - 1 and mem.blocks[-1].kind == "blocked":
-        return "your last move was blocked"
+        return "blocked"
     if goal_now and (last_perception or {}).get("goal") not in STRIPS:
-        return "the goal just came into view"
+        return "goal_in_view"
     if mem.goal_rays and not goal_now and mem.goal_rays[-1].step == step - 3:
-        return "the goal has been out of view for three steps"
+        return "goal_out_of_view"
     if any(o.step == step and o.seen == 1 for o in mem.openings):
-        return "a new doorway is in view"
-    if current is not None and here is not None and not target_still_valid(
-            mem, current, here[:2]):
-        return "your target was reached or is no longer open"
+        return "new_doorway"
+    if current is not None and here is not None:
+        state = target_state(mem, current, here[:2], goal_at)
+        if state != "open":
+            return "target_" + state
     if mem.loop_score() >= 0.5 and step - last_called >= 3:
-        return "you keep coming back to the same ground"
+        return "loop"
     if step - last_called >= every:
-        return "it is time for a regular check"
+        return "regular"
     return None
+
+
+# --- turn rule (a14) -------------------------------------------------------------
+
+#: The notes that say a forward move is not open.
+_NOT_OPEN = (WORDS["blocked"].split(" (")[0], WORDS["short"].split(" (")[0],
+             WORDS["wall_seen"])
+
+
+def hide_turn_around(mem: SpatialMemory, manifest: Dict[str, Any],
+                     tags: Dict[int, List[str]]) -> List[int]:
+    """The turn-around indices to leave off this step (a14, operator 2026-10-24):
+    the previous decision was a turn-around and some forward action carries no
+    blocked, stopped-short or wall note. R9: every spin_failure alternated
+    turn-arounds while moves ahead were open."""
+    step = int(manifest.get("step", 0))
+    previous = [s for s, _, _, _ in mem.trail if s < step]
+    if not previous or not mem.turn_arounds or mem.turn_arounds[-1] != max(previous):
+        return []
+    actions = manifest.get("actions") or []
+    turn = [int(a["index"]) for a in actions if a.get("turn_around")]
+    forward_open = any(
+        not any(w.startswith(_NOT_OPEN) for w in tags.get(int(a["index"]), []))
+        for a in actions if not a.get("turn_around"))
+    return turn if forward_open else []

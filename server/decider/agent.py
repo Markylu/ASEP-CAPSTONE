@@ -61,7 +61,16 @@ class Agent:
         if self.features.get("orchestrator"):
             from . import spatial
             blob += "\x00spatial:" + spatial.wording_sha()
+            # a14's added wording (R10). Appended only for an agent that uses it,
+            # so a13 keeps its sha.
+            if self.uses_a14_wording:
+                blob += "\x00spatial_a14:" + spatial.wording_sha_a14()
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+    @property
+    def uses_a14_wording(self) -> bool:
+        orch = self.features.get("orchestrator") or {}
+        return bool(orch.get("goal_truth") or orch.get("turn_rule"))
 
     @property
     def subagent_prompts(self) -> List[prompts.Prompt]:
@@ -157,6 +166,16 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "against each action and no coordinates or degrees; a critic asks once more "
           "when the pick was blocked from here, is a third turn-around, or loops. "
           "R1-R7: the model cannot compare positions or headings itself."),
+    Agent("a14", "p14", {"orchestrator": {"perceiver": "g03", "strategist": "q02",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "spatial": "server/decider/spatial.py"}},
+          "R10 bundle on a13: the strategist (q02) is told the goal's true position, which "
+          "no other part sees (the navigator only gets 'toward your target'); turn-around "
+          "is not offered right after a turn-around while a move ahead is open; no critic. "
+          "R9: four spins of alternating turn-arounds with the way ahead open, the critic "
+          "changed 0 of 19 picks, and q01 chose the goal on 18 of 200 calls out of view."),
 )}
 
 DEFAULT_AGENT = "a00"
@@ -201,6 +220,8 @@ def describe(version: str) -> Dict[str, Any]:
     if agent.features.get("orchestrator"):
         from . import spatial
         out["spatial_sha"] = spatial.wording_sha()
+        if agent.uses_a14_wording:
+            out["spatial_a14_sha"] = spatial.wording_sha_a14()
     return out
 
 

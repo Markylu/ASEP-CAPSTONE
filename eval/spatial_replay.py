@@ -137,8 +137,46 @@ def _strip_ok(r: Dict[str, Any]) -> Optional[bool]:
     return abs(spatial.STRIPS.index(got) - truth) <= 1
 
 
+def _picked_turn_around(r: Dict[str, Any]) -> bool:
+    actions = (r.get("manifest") or {}).get("actions") or []
+    return any(a.get("index") == r.get("index") and a.get("turn_around") for a in actions)
+
+
+#: A strategist's target is goal-ward when its point is at least this much
+#: nearer the true goal than the drone is. With no margin, q01's answers in R9
+#: already scored 60% (most of the map is nearer a far goal); with 3 m, 35%.
+GOALWARD_M = 3.0
+
+
+def goal_gain(here: spatial.Point, target: spatial.Point, goal: spatial.Point) -> float:
+    """How much nearer the goal the target is than the drone, in metres."""
+    return spatial.dist(here, goal) - spatial.dist(target, goal)
+
+
+def goalward(r: Dict[str, Any]) -> Optional[bool]:
+    """Evaluation only: whether a strategist call chose a target at least
+    GOALWARD_M nearer the true goal than the drone is. The goal entry counts by
+    where it was placed (a13: the estimate; a14: the true position), and
+    "explore" is never goal-ward. None for a call with no answer."""
+    plan = r.get("strategist") or {}
+    chosen = (plan.get("result") or {}).get("target")
+    if chosen is None:
+        return None
+    goal = true_goal([r])
+    here = spatial.pose_xyh((r.get("manifest") or {}).get("pose"))
+    t = next((m for m in plan.get("menu") or [] if m.get("id") == chosen), None)
+    if goal is None or here is None or t is None:
+        return False
+    return goal_gain(here[:2], (t["x"], t["y"]), goal) >= GOALWARD_M
+
+
+def _goalward(rows: List[Dict[str, Any]]) -> str:
+    calls = [g for g in (goalward(r) for r in rows if r.get("strategist")) if g is not None]
+    return "{0}/{1}".format(sum(calls), len(calls))
+
+
 def manip_run(run: Path) -> Dict[str, Any]:
-    """R9 manipulation-check counts for one a13 run."""
+    """R9 manipulation-check counts for one a13 run (R10: and a14)."""
     from collections import Counter
     rows = load(run)
     decided = [r for r in rows if r.get("index") is not None]
@@ -171,6 +209,13 @@ def manip_run(run: Path) -> Dict[str, Any]:
         "goal_strip_ok": "{0}/{1}".format(sum(in_view), len(in_view)),
         "phantom": "{0}/{1}".format(phantom, len(out_view)),
         "goal_belief_err_m": final.get("goal_belief_err_m"),
+        # R10 (a14): the turn rule, and what the strategist steered by.
+        "turn_hidden": sum(1 for r in decided if r.get("hidden")),
+        "turn_arounds": sum(1 for r in decided if _picked_turn_around(r)),
+        "no_target": sum(1 for r in decided if not r.get("target")),
+        "target_kinds": dict(Counter((r.get("target") or {}).get("kind", "none")
+                                     for r in decided)),
+        "strategist_goalward": _goalward(rows),
         "revisit_rate": round(revisits / len(rows), 2) if rows else None,
         "step_latency_ms_mean": round(sum(r.get("step_latency_ms") or 0 for r in rows)
                                       / len(rows), 1) if rows else None,

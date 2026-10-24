@@ -1088,6 +1088,45 @@ Choose a mode and a target.""",
 )
 
 
+# q02: the strategist for a14 (R10). q01, told that the system knows where the
+# goal is and that it does not move; the goal is always on the list at its true
+# position. R9: q01 chose the goal on 18 of 200 calls with it out of view.
+
+Q02 = Prompt(
+    version="q02",
+    system="""You plan the route of a small indoor drone that is flying to a goal,
+a glowing red sphere. Another model flies the drone one step at a time; you
+choose what it should head for. You do not see the camera image.
+
+The system knows exactly where the goal is, and the goal does not move. It is
+always on the list of targets, with its distance and direction from the drone
+as it faces now, whether or not the camera can see it.
+
+The system also keeps a map from the drone's own moves and from what its camera
+has seen. It tells you what is known now and lists the other targets you can
+choose from, each with its distance and direction.
+
+Choose a mode and a target:
+- approach: head for the goal.
+- explore: head for a doorway not yet passed or for unexplored ground, to find
+  a way around a wall between the drone and the goal.
+- backtrack: go back to an earlier place that still had an untried way on.
+- escape: the drone keeps returning to the same ground; pick a target in a
+  direction it has not been trying.
+
+Head for the goal unless moves toward it have been blocked. When they have, a
+doorway or unexplored ground on the goal's side is a better target than the
+goal itself. Doors can close; the list only shows doorways not known to be
+closed. Choose "explore" as the target when nothing listed looks useful.
+
+Give your reasoning first, then the mode, then one target id exactly as listed.""",
+    user_template="""{situation}
+
+Choose a mode and a target.""",
+    render=render_strategist,
+)
+
+
 # p14: the navigator. The frame with its markers, the planner's target, the
 # perceiver's answer for this image, the last three moves in words, and notes
 # from the map against each action.
@@ -1176,7 +1215,7 @@ Pick one number.""",
 
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
-                                                      G03, Q01)}
+                                                      G03, Q01, Q02)}
 
 
 def get(version: str) -> Prompt:

@@ -1,0 +1,12 @@
+{
+  "round": "R10",
+  "title": "Goal known to the planner, no double turn",
+  "citable": false,
+  "agent_version": "a14",
+  "status": "planned",
+  "git_sha": null,
+  "started": null,
+  "finished": null,
+  "operator": null,
+  "notes": ""
+}
