@@ -1009,8 +1009,174 @@ P13 = Prompt(
     render=render_pose_compare_no_sighting,
 )
 
+# --- R9: the orchestrated agent (a13), three calls with one job each ------------
+# (eval/phase2/R9_hail_mary/README.md)
+#
+# Code keeps a map of the run (server/decider/spatial.py) and does every spatial
+# comparison. The perceiver (g03) reads the clean frame, the strategist (q01)
+# picks a target from a list code builds, and the navigator (p14) picks an
+# action whose notes say what the map knows about it. No model call is shown a
+# coordinate or a heading in degrees: R6 and R7 show the model quoting numbers
+# without comparing them and turning away from a goal it could see.
+
+# g03: g02's job, plus how much open floor each strip of the image shows and
+# where the doorways are. Same isolation as g02: the clean frame, no log, no
+# step number. The goal is reported by strip, not left/ahead/right, so code can
+# turn it into a direction on the map.
+
+G03 = Prompt(
+    version="g03",
+    system="""You check one image from the front camera of a small indoor drone.
+Judge this image alone.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+1. The goal is a glowing red sphere. Say which strip it is in, or not_visible.
+   If you can see it, say how far away it looks: touching (it is large in the
+   image, under 2 m away), near (2 to 6 m), mid (6 to 15 m), far (over 15 m).
+   If it is not visible, its distance is none.
+2. For each strip, look along the floor straight ahead in that strip and say
+   how far the open floor runs before a wall or obstacle:
+   open_far if it runs well into the distance (more than about 5 m),
+   open_near if a wall or obstacle stands a few metres away (about 2 to 5 m),
+   blocked_near if a wall or obstacle is right in front (under about 2 m).
+   Also say whether that strip shows a doorway: an opening in a wall the drone
+   could fly through.
+
+First describe what you see: walls, openings, obstacles, and anything that
+could be the goal. Then give the report.""",
+    user_template="Report on this image.",
+    render=render_identifier_question,
+)
+
+
+# q01: chooses what the drone heads for. It gets no image and no numbers but
+# distances: a description code writes from the map, and a list of targets.
+
+def render_strategist(prompt: Prompt, situation: str) -> str:
+    return prompt.user_template.format(situation=situation)
+
+
+Q01 = Prompt(
+    version="q01",
+    system="""You plan the route of a small indoor drone that is looking for a goal,
+a glowing red sphere. Another model flies the drone one step at a time; you
+choose what it should head for. You do not see the camera image.
+
+The system keeps a map from the drone's own moves and from what its camera has
+seen. It tells you what is known now and lists the targets you can choose from,
+each with its distance and direction from the drone as it faces now.
+
+Choose a mode and a target:
+- approach: head for the goal.
+- explore: head for a doorway not yet passed or for unexplored ground.
+- backtrack: go back to an earlier place that still had an untried way on.
+- escape: the drone keeps returning to the same ground; pick a target in a
+  direction it has not been trying.
+
+The goal is often behind a wall. If moves toward it have been blocked, a
+doorway or unexplored ground is a better target than the goal itself. Doors
+can close; the list only shows doorways not known to be closed. Choose
+"explore" as the target when nothing listed looks useful.
+
+Give your reasoning first, then the mode, then one target id exactly as listed.""",
+    user_template="""{situation}
+
+Choose a mode and a target.""",
+    render=render_strategist,
+)
+
+
+# p14: the navigator. The frame with its markers, the planner's target, the
+# perceiver's answer for this image, the last three moves in words, and notes
+# from the map against each action.
+
+FAN_WORDS = {43.5: "sharp left", 21.75: "slight left", 0.0: "straight",
+             -21.75: "slight right", -43.5: "sharp right"}
+
+
+def _fan_word(theta_deg: Any) -> str:
+    theta = float(theta_deg or 0.0)
+    return FAN_WORDS[min(FAN_WORDS, key=lambda t: abs(t - theta))]
+
+
+def render_orchestrated(prompt: Prompt, manifest: Dict[str, Any],
+                        tags: Dict[int, List[str]], plan_line: str,
+                        perceiver_line: str, recent_moves: str) -> str:
+    actions: List[str] = []
+    for action in manifest.get("actions", []):
+        i = int(action["index"])
+        what = ("turn around in place" if action.get("turn_around")
+                else _fan_word(action.get("theta_deg")))
+        notes = tags.get(i) or []
+        actions.append("  [{0}] {1}{2}".format(i, what, ": " + "; ".join(notes) if notes else ""))
+    return prompt.user_template.format(
+        step=manifest.get("step", 0),
+        plan_line=plan_line,
+        perceiver_line=perceiver_line,
+        recent_moves=recent_moves,
+        action_lines="\n".join(actions) if actions else "  (none)",
+    )
+
+
+P14 = Prompt(
+    version="p14",
+    system="""You are flying a small indoor drone. You see one image per step.
+
+Numbered markers are drawn on the image. Each marker is an action you may take:
+the drone turns to face that marker, then flies a short distance forward.
+Marker 0, when offered, turns the drone around in place without moving.
+
+Rules of this interface:
+- You may only pick a number that is listed as available for this step.
+- If you pick a heading that runs into a wall, the drone hits the wall and that
+  counts against the run.
+- You cannot strafe, climb, or descend. Altitude is held for you.
+- You cannot open doors or manipulate anything around you. A closed door is a
+  wall. Find a route through openings that are already clear.
+
+Your objective is to reach the goal: a glowing red sphere. If the goal is in
+view and the way to it is clear, fly toward it. If it is not, explore through
+open space and openings until you find it.
+
+Helpers work with you. A perceiver looks at each image before you and says
+where the goal is in it. A planner sets a target from a map the system keeps of
+where the drone has been and what its camera has seen. Next to each action the
+system writes what that map says about it:
+- "blocked here before" or "stopped short here before": that move was tried
+  from this spot and a wall stopped it.
+- "wall close (seen now)" or "doorway (seen now)": what the perceiver sees that
+  way in this image.
+- "goal this way (seen now, ...)" and "goal about one move ahead": the goal is
+  in this image, that way.
+- "toward your target": the move that heads most directly for the planner's
+  target.
+- "new ground" or "been there N times": whether the drone has already been
+  where the move ends.
+These notes are measured by the system; trust them over your own guesses about
+where you have been. The image is your guide to what is in front of you now.
+Prefer the move toward your target when the image shows it is open, avoid moves
+that were blocked before, and prefer new ground over ground you have covered.
+Turning around is a normal move when every way ahead is blocked.
+
+Give your reasoning first, then the number.""",
+    user_template="""Step {step}.
+
+Planner: {plan_line}
+Perceiver, this image: {perceiver_line}
+Your last moves: {recent_moves}
+
+Available actions this step:
+{action_lines}
+
+Pick one number.""",
+    render=render_orchestrated,
+)
+
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
-                                                      P10, P11, P12, P13, G01, G02)}
+                                                      P10, P11, P12, P13, P14, G01, G02,
+                                                      G03, Q01)}
 
 
 def get(version: str) -> Prompt:
