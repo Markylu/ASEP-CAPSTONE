@@ -8,6 +8,11 @@ one job, and code that does the spatial work between them.
     navigator  (p14, annotated frame)    the action
     critic     (spatial.critique)        one retry when the map disagrees
 
+a14 (R10) changes three things by feature flag: the strategist (q02) is given
+the goal's true position (`goal_truth: planner`), a turn-around right after a
+turn-around is not offered while a move ahead is open (`turn_rule`), and the
+critic is off.
+
 Every call is the frozen model at temperature 0 on the shared ladder
 (vlm.call_structured). A failed perceiver or strategist never fails the step:
 the navigator goes on with what there is. A failed navigator fails the step,
@@ -98,10 +103,22 @@ def perceiver_line(perception: Optional[Dict[str, Any]]) -> str:
 
 
 def plan_line(target: Optional[spatial.Target], mode: Optional[str],
-              here: Optional[spatial.Pose]) -> str:
+              here: Optional[spatial.Pose], goal_known: bool = False) -> str:
     if target is None or here is None:
         return "no fixed target; explore where the image shows open floor."
+    if goal_known and target.kind == "goal":
+        # a14: the goal's true position stays with the planner; the navigator
+        # gets no distance or direction for it, only "toward your target".
+        return spatial.WORDS_A14["plan_goal"].format(mode=mode or "approach")
     return "head for {0} ({1}).".format(target.words(here), mode or "explore")
+
+
+def goal_at(manifest: Dict[str, Any]) -> Optional[spatial.Point]:
+    """The goal's true position on the map (a14's planner only): x, minus z."""
+    position = (manifest.get("goal") or {}).get("position")
+    if not position:
+        return None
+    return float(position[0]), -float(position[2])
 
 
 def recent_moves(records: List[Dict[str, Any]], manifest: Dict[str, Any], n: int = 3) -> str:
@@ -192,18 +209,22 @@ async def decide(request: Any, run: Run, frame_path: str):
     mem = spatial.rebuild(records, manifest, perception)
     here = spatial.pose_xyh(manifest.get("pose"))
 
-    # 3. Strategist, only when something has changed.
+    # 3. Strategist, only when something has changed. a14: it alone is given
+    # where the goal truly is.
+    goal = goal_at(manifest) if features.get("goal_truth") == "planner" else None
+    words = spatial.WORDS_A14["triggers"] if goal is not None else None
     target, mode, last_called, last_perception = previous(records, step)
-    why = spatial.trigger(mem, manifest, perception, target, last_called, last_perception)
+    why = spatial.trigger(mem, manifest, perception, target, last_called, last_perception,
+                          goal_at=goal, words=words)
     if target is not None and here is not None and not spatial.target_still_valid(
-            mem, target, here[:2]):
+            mem, target, here[:2], goal):
         target = None
     if why is not None and here is not None:
-        menu = spatial.targets(mem, here, step)
+        menu = spatial.targets(mem, here, step, goal)
         ids = [t.id for t in menu] + [EXPLORE]
         strategist_prompt = prompts.get(features["strategist"])
         text = strategist_prompt.render(strategist_prompt, spatial.situation(
-            mem, manifest, perception, target, menu, why))
+            mem, manifest, perception, target, menu, why, goal))
         plan = await vlm.call_structured(
             schema.STRATEGIST_SCHEMA_NAME, strategist_prompt.system, text, None,
             schema.strategist_schema(ids), _strategy(ids), STRATEGIST_MAX_TOKENS)
@@ -220,14 +241,23 @@ async def decide(request: Any, run: Run, frame_path: str):
     tags = spatial.project(mem, manifest, perception, target)
     record["tags"] = {str(k): v for k, v in tags.items()}
 
-    # 5. Navigator.
-    indices = schema.visible_indices(manifest)
+    # 5. Navigator. a14: a turn-around right after a turn-around is not offered
+    # while a move ahead is open (operator, 2026-10-24). It is left off the list
+    # and the schema; the frame still shows its marker.
+    offered = manifest
+    if features.get("turn_rule") == "no_repeat_when_open":
+        hidden = spatial.hide_turn_around(mem, manifest, tags)
+        if hidden:
+            record["hidden"] = {"indices": hidden, "why": spatial.WORDS_A14["turn_rule"]}
+            offered = dict(manifest, actions=[a for a in manifest.get("actions") or []
+                                              if int(a["index"]) not in hidden])
+    indices = schema.visible_indices(offered)
     if not indices:
         return _error(run, record, "manifest offers no actions")
     navigator_prompt = agent.current().prompt
-    text = navigator_prompt.render(navigator_prompt, manifest, tags,
-                                   plan_line(target, mode, here), perceiver_line(perception),
-                                   recent_moves(records, manifest))
+    text = navigator_prompt.render(navigator_prompt, offered, tags,
+                                   plan_line(target, mode, here, goal is not None),
+                                   perceiver_line(perception), recent_moves(records, manifest))
     record["navigator_text"] = text
     action_schema = schema.action_schema(indices)
     nav = await vlm.call_structured(
