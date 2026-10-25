@@ -9,8 +9,11 @@ Strategist part run 2026-10-24 on the Mac against `Qwen3-VL-30B-A3B` (remote pro
     VLM_PROFILE=remote VLM_AGENT=a14 python eval/r10_probe.py run-strategist strat_set.jsonl --out strat_a14.jsonl
     python eval/r10_probe.py report strat_a14.jsonl turn_a14.jsonl
 
-**Result: the strategist lines pass, two of them by about a point. The turn line is pending**
-(it needs R9's frames, on sctsvr6). R10 does not fly until it is run.
+Turn part run 2026-10-25 on sctsvr6 in Docker (`~/r10_probe.sh`, scratch clone `~/r10_scratch`
+at `0af47a9`, R9's frames read from `~/asep-r9`), same model on 127.0.0.1:8004. Set:
+`turn_set.jsonl`; results `turn_a14.jsonl`; log `r10_turn_probe.log`.
+
+**Result: gate passed on every line.** The strategist lines pass, two of them by about a point.
 
 ## Gate
 
@@ -19,7 +22,7 @@ Strategist part run 2026-10-24 on the Mac against `Qwen3-VL-30B-A3B` (remote pro
 | strategist goal-ward: target ≥ 3 m nearer the true goal than the drone | ≥ 55% | **56.1%** (180/321) |
 | … against `q01`'s recorded answers on the same calls (113/321, 35.2%) | at least 20 points higher | **+20.9 points** |
 | `q02` chooses "explore" | ≤ 20% | **9.0%** (29/321) |
-| navigator picks an open move with [0] not offered (25 R9 steps) | ≥ 80% | **pending** |
+| navigator picks an open move with [0] not offered (25 R9 steps) | ≥ 80% | **96%** (24/25) |
 
 ## Not gated, read before flying
 
@@ -39,13 +42,16 @@ Strategist part run 2026-10-24 on the Mac against `Qwen3-VL-30B-A3B` (remote pro
   situations, not how an a14 run unfolds. Where a14's trigger rule would not have asked, the
   recorded trigger is used (a13's sentence mapped to a14's wording).
 
-## Turn rule (pending)
+## Turn rule
 
-On sctsvr6, with R9's runs and frames:
-
-    VLM_PROFILE=remote VLM_AGENT=a14 python eval/r10_probe.py sample-turn <R9 runs with frames> --out turn_set.jsonl
+    VLM_PROFILE=remote VLM_AGENT=a14 python eval/r10_probe.py sample-turn /r9/eval/phase2/R9_hail_mary/runs --out turn_set.jsonl
     VLM_PROFILE=remote VLM_AGENT=a14 python eval/r10_probe.py run-turn turn_set.jsonl --out turn_a14.jsonl
     python eval/r10_probe.py report strat_a14.jsonl turn_a14.jsonl
 
-The offline set (no frames) finds the same 25 steps: R9 turned around while a14 would not have
-offered [0].
+- The 25 steps where R9 turned around and a14 would not offer [0]; the same 25 the offline set
+  finds without frames.
+- Picks: [1] 11, [3] 10, [2] 3, [5] 1. One pick carried a wall note: s03 `final` step 24, [1]
+  "wall close (seen now)".
+- Every one of the four R9 spins has a step in the set (s01 `final` 7, s02va `final` 4, s02vc
+  `dynamic` 14, s03 `dynamic` 18), so in replay each breaks at its first back-to-back turn.
+- Mean navigator latency 2.0 s.
