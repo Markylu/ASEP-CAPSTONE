@@ -134,6 +134,11 @@ frames, on sctsvr6.
     VLM_AGENT=a14 python eval/r10_probe.py run-turn turn_set.jsonl --out turn_a14.jsonl
     python eval/r10_probe.py report strat_a14.jsonl turn_a14.jsonl
 
+**Result: gate passed.** [probe/probe_r10.md](probe/probe_r10.md): strategist goal-ward 56.1%
+(q01 35.2%, +20.9 points), explore 9.0% (2026-10-24, Mac, at `b98fe7a`); [0] not offered, pick
+open 24/25 (2026-10-25, sctsvr6, at `0af47a9`). The two goal-ward lines clear by about 3 calls
+each.
+
 ## Shakedown
 
 One unscored `dynamic` run per site on the flight host before the round: every decision record
