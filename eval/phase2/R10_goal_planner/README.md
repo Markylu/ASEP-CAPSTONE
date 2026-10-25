@@ -2,8 +2,8 @@
 
 **Agent:** `a14` (`63ad006476b6`) · **Navigator prompt:** `p14` (`31a9f28eaf94`, as `a13`) ·
 **Perceiver:** `g03` (`3531e4d9ade9`) · **Strategist:** `q02` (`f3a866c9d927`) · **Spatial
-memory:** `eceb875a68a3` (as `a13`) + a14 wording `0075a8a0e5c0` · **Status:** pre-registered,
-not flown
+memory:** `eceb875a68a3` (as `a13`) + a14 wording `0075a8a0e5c0` · **Status:** flown (18/18
+valid), not dropped, not credited
 
 Written before the probe and before flying. Spec: `docs/phase2-test-plan.md` (§8, 2026-10-24).
 The shas above are re-checked against `config.lock.json` before the round flies. R10 flies beside
@@ -157,5 +157,7 @@ bearing).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to
-[summary.md](summary.md).
+Flown 2026-10-25 on sctsvr6 at `76f8a05`, 18/18 valid. 11/18 (initial 5/6, final 3/6, dynamic
+3/6), R10C 7/18; `final` + `dynamic` 6/12, the most of any round. 6 of 18 outcomes changed
+against R10C (5 gained, 1 lost), not more than the floor of 6, so no change is credited. **Not
+dropped** (0 of 4). No `spin_failure`, collisions 36 (R10C 57). [summary.md](summary.md).

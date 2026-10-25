@@ -2,7 +2,7 @@
 
 **Agent:** `a13` (`3de550e110e7`) · **Navigator prompt:** `p14` (`31a9f28eaf94`) · **Perceiver:**
 `g03` (`3531e4d9ade9`) · **Strategist:** `q01` (`40fb0fbc3285`) · **Spatial memory:**
-`eceb875a68a3` · **Status:** pre-registered, not flown
+`eceb875a68a3` · **Status:** flown (18/18 valid)
 
 Written before flying. Spec: `docs/phase2-test-plan.md`.
 
@@ -45,4 +45,7 @@ None. Used only to read R10 against.
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-25 on sctsvr6 at `76f8a05`, right after R10, 18/18 valid. 7/18 (initial 5/6, final
+1/6, dynamic 1/6), against R9's 6/18 with the same agent: 3 outcomes differ (2 gained, 1 lost) and
+11 of 18 pick sequences differ. The prediction missed on `final` (1/6, not 0/6).
+[summary.md](summary.md).

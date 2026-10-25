@@ -3,10 +3,10 @@
   "title": "Goal known to the planner, no double turn",
   "citable": false,
   "agent_version": "a14",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "76f8a05",
+  "started": "2026-10-25T02:15:06+00:00",
+  "finished": "2026-10-25T03:21:26+00:00",
+  "operator": "Markylu",
+  "notes": "Flown on sctsvr6 (headless Linux, Docker, Mesa lavapipe) in tmux after an unscored shakedown, then R10C at the same SHA (66 minutes). 18/18 valid. 11/18 (initial 5/6, final 3/6, dynamic 3/6); R10C 7/18. a14 not dropped (0 of 4 drop conditions); 6 of 18 outcomes changed against R10C (5 gained, 1 lost), not more than R8N's floor of 6, so by the pre-registered rule no change is credited."
 }

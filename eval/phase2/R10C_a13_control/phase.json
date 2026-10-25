@@ -3,10 +3,10 @@
   "title": "a13 control on the R10 host",
   "citable": false,
   "agent_version": "a13",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "76f8a05",
+  "started": "2026-10-25T03:21:29+00:00",
+  "finished": "2026-10-25T04:44:54+00:00",
+  "operator": "Markylu",
+  "notes": "a13 control flown on sctsvr6 at R10's SHA right after R10 (83 minutes). 18/18 valid. 7/18 (initial 5/6, final 1/6, dynamic 1/6); R9 6/18 with the same agent: 3 outcomes and 11 of 18 pick sequences differ (run-to-run variation, code unchanged)."
 }
