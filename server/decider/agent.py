@@ -200,6 +200,19 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "doorway is listed from its second sighting and dropped after 10 steps unseen. "
           "R10: q02 chose the goal on 70 of 229 calls, 36 of 37 repeat collisions had no "
           "note, 'toward' sat on a walled move 36 times."),
+    Agent("a16", "p14", {"orchestrator": {"perceiver": "g03", "strategist": "q03",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_default_llm_detour",
+                                          "memory": "a16",
+                                          "spatial": "server/decider/spatial.py"}},
+          "R11 bundle on a14, after a15's probe failed: a15 with memory a16. A block "
+          "warns only its own heading after a move that did not get going, and the next "
+          "fan action out after one that stopped short; q03's unexplored ground is "
+          "offered at the edge's point nearest the goal. a15's probe: a 45-degree block "
+          "window noted every forward move on 28 of R10's steps and the navigator took "
+          "the blocked one; 52 of 88 detour menus held nothing 3 m nearer the goal."),
 )}
 
 DEFAULT_AGENT = "a00"
@@ -248,6 +261,8 @@ def describe(version: str) -> Dict[str, Any]:
             out["spatial_a14_sha"] = spatial.wording_sha_a14()
         if agent.spatial_config.name == "a15":
             out["spatial_a15_sha"] = spatial.wording_sha_a15()
+        if agent.spatial_config.name == "a16":
+            out["spatial_a16_sha"] = spatial.wording_sha_a16()
     return out
 
 

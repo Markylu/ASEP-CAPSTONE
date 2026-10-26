@@ -201,6 +201,34 @@ def wording_sha_a15() -> str:
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
+#: a16's parameters (R11, after a15's probe failed): a15's, with the block
+#: window by kind and the detour menu's unexplored ground on the goal's side.
+#: a15's probe (eval/phase2/R11_goal_default/probe/probe_a15.md): at 45 degrees
+#: one block straight ahead noted all five forward moves (28 of R10's steps), and
+#: the navigator then took the very move that was blocked; 52 of 88 detour menus
+#: held nothing 3 m nearer the goal, because each unexplored edge was offered at
+#: its centre.
+PARAMS_A16: Dict[str, Any] = dict(
+    {k: v for k, v in PARAMS_A15.items() if k != "block_within_deg"},
+    # After a move that did not get going (under BLOCKED_BELOW_M) only the same
+    # heading is warned: the next fan action out stopped short 2 of 11 times in
+    # R9, R10C and R10. After a move that stopped short, the next one out is
+    # warned too (11 of 20).
+    block_within_deg_blocked=15.0,
+    block_within_deg_short=25.0,
+    # Unexplored ground is offered at the point of each edge nearest the goal,
+    # nearest-to-goal edges first: 85 of the 88 menus then hold a detour 3 m
+    # nearer the goal (at the centre, 36).
+    frontier="goal_side",
+)
+
+
+def wording_sha_a16() -> str:
+    """Identity of a16's parameters and added wording (a15's), for agent.sha()."""
+    blob = json.dumps({"params_a16": PARAMS_A16, "words_a15": WORDS_A15}, sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+
 @dataclass(frozen=True)
 class SpatialConfig:
     """One agent's memory: which wording it is shown and which a15 behaviours
@@ -215,6 +243,11 @@ class SpatialConfig:
     toward_within_deg: float = TOWARD_WITHIN_DEG
     doorway_min_seen: int = 1
     doorway_ttl_steps: Optional[int] = None
+    #: a16: the window after a move that did not get going; None uses
+    #: block_within_deg for both kinds.
+    block_within_deg_blocked: Optional[float] = None
+    #: "size" (largest edges, at their centres) or "goal_side" (a16).
+    frontier: str = "size"
 
     def sha_segments(self) -> List[str]:
         out = ["spatial:" + wording_sha()]
@@ -222,6 +255,8 @@ class SpatialConfig:
             out.append("spatial_a14:" + wording_sha_a14())
         if self.name == "a15":
             out.append("spatial_a15:" + wording_sha_a15())
+        if self.name == "a16":
+            out.append("spatial_a16:" + wording_sha_a16())
         return out
 
 
@@ -233,12 +268,22 @@ A15 = SpatialConfig("a15", WORDS_A14["triggers"], a14_words=True,
                     toward="open", toward_within_deg=PARAMS_A15["toward_open_within_deg"],
                     doorway_min_seen=PARAMS_A15["doorway_min_seen"],
                     doorway_ttl_steps=PARAMS_A15["doorway_ttl_steps"])
+A16 = SpatialConfig("a16", WORDS_A14["triggers"], a14_words=True,
+                    block_end_pose=PARAMS_A16["block_end_pose"],
+                    block_within_deg=PARAMS_A16["block_within_deg_short"],
+                    block_within_deg_blocked=PARAMS_A16["block_within_deg_blocked"],
+                    toward="open", toward_within_deg=PARAMS_A16["toward_open_within_deg"],
+                    doorway_min_seen=PARAMS_A16["doorway_min_seen"],
+                    doorway_ttl_steps=PARAMS_A16["doorway_ttl_steps"],
+                    frontier=PARAMS_A16["frontier"])
 
 
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
     """The memory an orchestrated agent's features name (agent.py)."""
     if orchestrator.get("memory") == "a15":
         return A15
+    if orchestrator.get("memory") == "a16":
+        return A16
     if orchestrator.get("goal_truth") or orchestrator.get("turn_rule"):
         return A14
     return A13
@@ -479,8 +524,11 @@ class SpatialMemory:
         """The latest blocked or short move from about here, about this way."""
         hit = None
         for b in self.blocks:
+            within = self.cfg.block_within_deg
+            if self.cfg.block_within_deg_blocked is not None and b.kind == "blocked":
+                within = self.cfg.block_within_deg_blocked
             if (dist(here, (b.x, b.y)) < BLOCK_NEAR_M
-                    and abs(wrap(b.heading - heading)) < self.cfg.block_within_deg):
+                    and abs(wrap(b.heading - heading)) < within):
                 if hit is None or b.step > hit.step:
                     hit = b
         return hit
@@ -535,8 +583,11 @@ class SpatialMemory:
         p = ahead((last.x, last.y), last.heading, GOAL_RANGE_M.get(last.range, 10.0))
         return p[0], p[1], last.step
 
-    def frontiers(self, here: Point, limit: int = 3) -> List[Point]:
-        """Centres of seen-free, unvisited ground that borders unknown ground."""
+    def frontiers(self, here: Point, limit: int = 3,
+                  goal: Optional[Point] = None) -> List[Point]:
+        """Centres of seen-free, unvisited ground that borders unknown ground,
+        largest first. a16 (cfg.frontier "goal_side", with `goal`): each edge's
+        cell nearest the goal instead, nearest the goal first."""
         edge = set()
         for c in self.free:
             if c in self.visits or c in self.wall:
@@ -564,6 +615,15 @@ class SpatialMemory:
                             todo.append(n)
             if len(group) >= 3:
                 clusters.append(group)
+        if self.cfg.frontier == "goal_side" and goal is not None:
+            near = []
+            for g in clusters:
+                p = min((((c[0] + 0.5) * CELL_M, (c[1] + 0.5) * CELL_M) for c in g),
+                        key=lambda q: dist(q, goal))
+                if dist(here, p) > 2.0:
+                    near.append(p)
+            near.sort(key=lambda q: (dist(q, goal), dist(here, q)))
+            return near[:limit]
         points = []
         for g in clusters:
             px = sum((c[0] + 0.5) * CELL_M for c in g) / len(g)
@@ -673,7 +733,7 @@ def targets(mem: SpatialMemory, here: Pose, step: int,
     for o in mem.listed_openings(step):
         out.append(Target("doorway_" + o.label, "opening", o.x, o.y,
                           "doorway {0} (seen at step {1})".format(o.label, o.step), step))
-    for k, p in enumerate(mem.frontiers(here[:2])):
+    for k, p in enumerate(mem.frontiers(here[:2], goal=goal_at)):
         out.append(Target("unexplored_{0}".format(k + 1), "frontier", p[0], p[1],
                           "unexplored ground", step))
     back = _backtrack_point(mem, here)

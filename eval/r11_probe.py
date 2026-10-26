@@ -1,4 +1,4 @@
-"""R11 probe for a15, offline, on recorded runs (eval/phase2/R11_goal_default/README.md).
+"""R11 probe for a15 and a16 (the agent VLM_AGENT names, a15 by default), on recorded runs (eval/phase2/R11_goal_default/README.md).
 
 Code-only lines, no model (`offline`):
 1. Block memory: the near-repeat collisions of R9, R10C and R10 (a stopped-short
@@ -75,10 +75,22 @@ def _read(path: str) -> List[Dict[str, Any]]:
     return [json.loads(l) for l in Path(path).read_text().splitlines() if l.strip()]
 
 
+def _agent() -> str:
+    return os.environ.get("VLM_AGENT", "a15").strip() or "a15"
+
+
+def _cfg() -> spatial.SpatialConfig:
+    from server.decider import agent
+    cfg = agent.get(_agent()).spatial_config
+    assert cfg is not None and cfg.name in ("a15", "a16"), _agent()
+    return cfg
+
+
 def _a15(rows: List[Dict[str, Any]], k: int) -> spatial.SpatialMemory:
+    """The probed agent's memory (a15 or a16) as of decision k."""
     r = rows[k]
     return spatial.rebuild(rows[:k], r["manifest"], (r.get("perceiver") or {}).get("result"),
-                           spatial.A15)
+                           _cfg())
 
 
 def _moved(rows: List[Dict[str, Any]], k: int) -> Optional[float]:
@@ -220,7 +232,7 @@ def smoke_run(run: Path, work: Path) -> Dict[str, Any]:
 
 
 def cmd_smoke(args: argparse.Namespace) -> int:
-    os.environ["VLM_AGENT"] = "a15"
+    os.environ["VLM_AGENT"] = _agent()
     total: Counter = Counter()
     asked: Counter = Counter()
     back: Counter = Counter()
@@ -376,13 +388,14 @@ def cmd_offline(args: argparse.Namespace) -> int:
     noted = sum(r["noted"] for r in repeats)
     r10 = r10_lines(args.r10)
     share = r10["planner_kept"] / r10["steps"] if r10["steps"] else 0.0
+    print("agent {0}".format(_agent()))
     lines = [
-        _row("near-repeat collisions noted by a15's memory", "{0}/{1}".format(noted, len(repeats)),
+        _row("near-repeat collisions noted by the agent's memory", "{0}/{1}".format(noted, len(repeats)),
              noted >= GATE["block_noted_min"], ">= {0}".format(GATE["block_noted_min"])),
-        _row("R10 steps where a15's planner keeps the goal", "{0}/{1} ({2:.0%})".format(
+        _row("R10 steps where the planner keeps the goal", "{0}/{1} ({2:.0%})".format(
             r10["planner_kept"], r10["steps"], share), share >= GATE["planner_goal_min"],
             ">= {0:.0%}".format(GATE["planner_goal_min"])),
-        _row("'toward' on a not-open action, a15 tags on R10", str(r10["toward_not_open"]),
+        _row("'toward' on a not-open action, the agent's tags on R10", str(r10["toward_not_open"]),
              r10["toward_not_open"] <= GATE["toward_not_open_max"],
              "<= {0}".format(GATE["toward_not_open_max"])),
         _row("R10 navigator lines wording the goal's position", str(r10["leaks"]),
