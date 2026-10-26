@@ -3,8 +3,8 @@
 **Agent:** `a15` (`a17e9cadddc3`) · **Navigator prompt:** `p14` (`31a9f28eaf94`, as `a14`) ·
 **Perceiver:** `g03` (as `a14`) · **Strategist:** `q03` (new, detour only) · **Spatial memory:**
 `spatial.A15` (`spatial_a15` `90c695665a26`; `spatial` `eceb875a68a3` and `spatial_a14`
-`0075a8a0e5c0` as `a14`) · **Status:** **built; offline probe lines passed; live probe lines not
-run; not flown**
+`0075a8a0e5c0` as `a14`) · **Status:** **built; probe gate failed on the live lines
+([probe/probe_a15.md](probe/probe_a15.md)); not flown**
 
 Draft written 2026-10-25 from [evidence.md](evidence.md), before any R11 code; `a15` built
 2026-10-26. Nothing here is pre-registered until the operator confirms the design; the shas are
@@ -131,8 +131,8 @@ From `python eval/spatial_replay.py manip` and `audit` on R11 and R11C:
 | route planner keeps the goal | R10's 755 steps, `a15`'s planner on R10's records (code only) | goal kept on ≥ 50% | 432/755 (57%), passed |
 | no "toward" on a not-open action | R10's 755 steps re-tagged with `a15`'s memory (code only) | 0 | 0, passed |
 | no goal truth in navigator text | R10's navigator texts, `views.goal_leaks` (code only) | 0 | 0, passed |
-| navigator with the wall-aware note | R10's steps where "toward" shared an action with a not-open note and some forward move was open (14), re-tagged as `a15` tags them, R10's annotated frame, `p14`, live model (frames on sctsvr6) | pick carries no not-open note on ≥ 80% | not run |
-| `q03` detours | R10's steps where `a15`'s planner would hand over (88: walled 40, blocked 34, stall 14), worded as `a15` words them, live model, text only | target ≥ 3 m nearer the goal on ≥ 60%; explore ≤ 10% | not run |
+| navigator with the wall-aware note | R10's steps where "toward" shared an action with a not-open note and some forward move was open (14), re-tagged as `a15` tags them, R10's annotated frame, `p14`, live model (frames on sctsvr6) | pick carries no not-open note on ≥ 80% | 9/14 (64%), **failed** |
+| `q03` detours | R10's steps where `a15`'s planner would hand over (88: walled 40, blocked 34, stall 14), worded as `a15` words them, live model, text only | target ≥ 3 m nearer the goal on ≥ 60%; explore ≤ 10% | 40%, explore 32%, **failed** |
 
 The planner line counts a step as kept when the way toward the goal is open on `a15`'s map and the
 drone gained at least 0.5 m over the last 6 steps; `a15` itself only stalls once the goal has
