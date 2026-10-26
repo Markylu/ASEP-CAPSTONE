@@ -3,8 +3,9 @@
 **Agent:** `a15` (`a17e9cadddc3`) · **Navigator prompt:** `p14` (`31a9f28eaf94`, as `a14`) ·
 **Perceiver:** `g03` (as `a14`) · **Strategist:** `q03` (new, detour only) · **Spatial memory:**
 `spatial.A15` (`spatial_a15` `90c695665a26`; `spatial` `eceb875a68a3` and `spatial_a14`
-`0075a8a0e5c0` as `a14`) · **Status:** **built; probe gate failed on the live lines
-([probe/probe_a15.md](probe/probe_a15.md)); not flown**
+`0075a8a0e5c0` as `a14`) · **Status:** **`a15` built, probe gate failed
+([probe/probe_a15.md](probe/probe_a15.md)); `a16` (`6d614e3c4450`) built, probe gate failed on two
+lines ([probe/probe_a16.md](probe/probe_a16.md)); not flown**
 
 Draft written 2026-10-25 from [evidence.md](evidence.md), before any R11 code; `a15` built
 2026-10-26. Nothing here is pre-registered until the operator confirms the design; the shas are
