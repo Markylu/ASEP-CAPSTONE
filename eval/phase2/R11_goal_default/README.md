@@ -1,12 +1,14 @@
 # R11: Goal by default, detours on demand (bundle round)
 
-**Agent:** `a15` (not yet built) · **Navigator prompt:** `p14` (as `a14`) · **Perceiver:** `g03`
-(as `a14`) · **Strategist:** `q03` (new, detour only) · **Spatial memory:** new `SpatialConfig`
-for `a15`; `a13`/`a14` keep theirs · **Status:** **draft design, not built, not probed, not flown**
+**Agent:** `a15` (`a17e9cadddc3`) · **Navigator prompt:** `p14` (`31a9f28eaf94`, as `a14`) ·
+**Perceiver:** `g03` (as `a14`) · **Strategist:** `q03` (new, detour only) · **Spatial memory:**
+`spatial.A15` (`spatial_a15` `90c695665a26`; `spatial` `eceb875a68a3` and `spatial_a14`
+`0075a8a0e5c0` as `a14`) · **Status:** **built; offline probe lines passed; live probe lines not
+run; not flown**
 
-Draft written 2026-10-25 from [evidence.md](evidence.md), before any R11 code. Nothing here is
-pre-registered until the operator confirms the design; the shas are filled in when `a15` exists
-and are re-checked against `config.lock.json` before the round flies. R11 flies beside a control,
+Draft written 2026-10-25 from [evidence.md](evidence.md), before any R11 code; `a15` built
+2026-10-26. Nothing here is pre-registered until the operator confirms the design; the shas are
+re-checked against `config.lock.json` before the round flies. R11 flies beside a control,
 **R11C** (`a14` unchanged), on the same host at the same SHA.
 
 ## Goal truth (operator, 2026-10-26)
@@ -23,19 +25,31 @@ or direction, and the perceiver gets the clean frame alone (evidence §3, O2 and
 
 | Part | `a14` (R10) | `a15` |
 |---|---|---|
-| Who sets the target | `q02` on nine triggers (30% of steps) | **route planner** (code, truth): the goal is the standing target unless the move toward it carries a wall, blocked or stopped-short note, or a move toward it was blocked in the last 3 steps; then **`q03`** chooses a detour |
-| Progress monitor | none (critic off) | code, truth: no gain in goal distance over 6 steps → ask `q03` |
+| Who sets the target | `q02` on nine triggers (30% of steps) | **route planner** (code, truth, `server/decider/planner.py`): the goal is the standing target unless every forward action within 55° of it carries a wall, blocked or stopped-short note ("walled"), or a move within 55° of it was blocked within 2 m in the last 3 steps ("blocked"); a goal behind counts as open. Then **`q03`** chooses a detour, which stands until reached or closed, 12 steps, or the goal in view with the way open; "explore" stands 3 steps |
+| Progress monitor | none (critic off) | code, truth: the goal has stood for 6 steps and the drone is not 0.5 m nearer it than 6 steps ago ("stall") → ask `q03` |
 | Strategist text | goal visibility line; "within 2 m of this spot" line; targets in distance and direction | **`q03`**: asked only for a detour; both lines dropped; each target also worded with how much nearer the goal it lies ("about 4 m nearer the goal than you") |
 | Doorways | enter the menu and the trigger on one sighting; struck when passed or seen closed | **doorway gate**: enter on the second sighting; leave after 10 steps without one |
-| Block memory | stored at the move's start pose; matched within 0.85 m and 15° | also stored where the move ended; matched on the landing cell; the adjacent fan actions get the note too |
+| Block memory | stored at the move's start pose; matched within 0.85 m and 15° | also stored where a stopped-short move ended (not a blocked one: it did not move); matched within 0.85 m and **45°**, so the next two fan actions out (21.75° and 43.5°) get the note too |
 | "toward your target" | on the action nearest the target's bearing, walls or not | **wall-aware**: never on an action with a wall, blocked or stopped-short note; the next open action within ~55° instead, or none |
 | Navigator | `p14` | `p14` unchanged; it sees only the notes change |
 | Turn rule | [0] not offered after a turn-around while a move ahead is open | unchanged (kept so R11 does not confound it; the unhidden variant is a later ablation) |
 | Critic | off | off |
 
-Code structure (evidence §4) is built with `a15`: stages, role views with an allowlist,
-`SpatialConfig`, `TargetPolicy`, ordered note rules. It ships only if every R9, R10 and R10C
-decision re-renders byte for byte and `a13`/`a14` keep their shas.
+Code structure (evidence §4) is built with `a15`: `orchestrator.decide` is a pipeline of stages
+(`perceive`, `build_map`, `strategize` or `route`, `project`, `turn_rule`, `navigate`, `critic`)
+picked by the agent's `target_policy` (`llm_strategist` for `a13`/`a14`,
+`goal_default_llm_detour` for `a15`); every model call goes through a role view
+(`server/decider/views.py`) that refuses a navigator or perceiver text wording the goal's
+position; `spatial.SpatialConfig` carries each agent's memory (`A13`, `A14`, `A15`).
+Checked 2026-10-26: `python eval/spatial_replay.py rerender` on R9 (871 decisions), R10C (899)
+and R10 (755) gives output byte-identical to the code before the refactor, and all 15 rounds'
+`config.lock.json` agent fields match `agent.describe`.
+
+**Changed from the draft while building:** the block match is 45°, not "the landing cell and the
+adjacent fan action". At 25° the probe's first line failed (24 of 37); the misses were picks two
+fan actions (43.5°) off the block. Over R9, R10C and R10's 2179 forward picks (111 stopped short),
+`a15`'s memory at 25° notes 24 stopped-short picks and 19 that flew; at 45°, 32 and 28. The
+note is wrong about half the time either way, against a 5% base rate.
 
 ## Evidence
 
@@ -68,7 +82,7 @@ more of its steps closing on the goal, and `final` + `dynamic` rises above R11C.
 | cells changed against R11C | | more than the floor (below), more gained than lost |
 | steps with the goal as standing target | 232/755 (31%) | ≥ 50% |
 | steps standing on unexplored ground, backtrack or none | 352 (47%) | ≤ 25% |
-| strategist calls | 229 (30% of steps) | ≤ 15% of steps |
+| strategist calls | 229 (30% of steps) | ≤ 15% of steps (smoke run on R10's manifests: 43, 6%) |
 | "toward your target" on an action with a wall, blocked or stopped-short note | 36 | 0 |
 | near-repeat collisions with no blocked or stopped-short note | 9 of 9 | ≤ 2 |
 | collisions | 36 | at most R11C's |
@@ -107,20 +121,39 @@ From `python eval/spatial_replay.py manip` and `audit` on R11 and R11C:
 - any run invalid on the wall clock (900 s);
 - `spin_failure` on 2 or more runs.
 
-## Probe gate (draft)
+## Probe gate
 
-`eval/r11_probe.py` (to be written), on R10's recorded runs, before flying. R11 does not fly if any
-line fails.
+`eval/r11_probe.py`, on R10's recorded runs, before flying. R11 does not fly if any line fails.
 
-| Check | Set | Threshold |
-|---|---|---|
-| block memory warns about near-repeat collisions | R9, R10C, R10's 37 near-repeat collisions, rebuilt with `a15`'s memory (code only) | note on ≥ 30 |
-| route planner keeps the goal | R10's 755 steps, `a15`'s planner on R10's records (code only) | goal standing on ≥ 50% |
-| navigator with the wall-aware note | R10's steps where "toward" shared an action with a not-open note and some forward move was open, re-tagged as `a15` tags them, R10's annotated frame, `p14`, live model (frames on sctsvr6) | pick carries no not-open note on ≥ 80% |
-| `q03` detours | R10's strategist calls where `a15` would hand over, rebuilt as `a15` words them, live model, text only | target ≥ 3 m nearer the goal on ≥ 60%; explore ≤ 10% |
+| Check | Set | Threshold | Result |
+|---|---|---|---|
+| block memory warns about near-repeat collisions | R9, R10C, R10's 37 near-repeat collisions, rebuilt with `a15`'s memory (code only) | note on ≥ 30 | 32/37, passed |
+| route planner keeps the goal | R10's 755 steps, `a15`'s planner on R10's records (code only) | goal kept on ≥ 50% | 432/755 (57%), passed |
+| no "toward" on a not-open action | R10's 755 steps re-tagged with `a15`'s memory (code only) | 0 | 0, passed |
+| no goal truth in navigator text | R10's navigator texts, `views.goal_leaks` (code only) | 0 | 0, passed |
+| navigator with the wall-aware note | R10's steps where "toward" shared an action with a not-open note and some forward move was open (14), re-tagged as `a15` tags them, R10's annotated frame, `p14`, live model (frames on sctsvr6) | pick carries no not-open note on ≥ 80% | not run |
+| `q03` detours | R10's steps where `a15`'s planner would hand over (88: walled 40, blocked 34, stall 14), worded as `a15` words them, live model, text only | target ≥ 3 m nearer the goal on ≥ 60%; explore ≤ 10% | not run |
 
-The strategist and navigator sets keep R10's history, so they test how `a15`'s parts choose in
-R10's situations, not how an `a15` run unfolds (as R10's probe).
+The planner line counts a step as kept when the way toward the goal is open on `a15`'s map and the
+drone gained at least 0.5 m over the last 6 steps; `a15` itself only stalls once the goal has
+stood 6 steps, so this undercounts. The strategist and navigator sets keep R10's history, so they
+test how `a15`'s parts choose in R10's situations, not how an `a15` run unfolds (as R10's probe).
+
+Not gated: `smoke` runs `a15`'s real step (`orchestrator.decide`) over R10's 755 manifests with
+stub replies. 2026-10-26: 0 failed steps, 0 leaks, 0 "toward" on a not-open action; goal standing
+on 429 steps; `q03` asked 43 times (walled 19, stall 16, blocked 8); detours handed back on 38
+(closed 13, too long 12, reached 7, goal in view 6); [0] hidden on 65.
+
+```
+python eval/r11_probe.py offline --r9 eval/phase2/R9_hail_mary/runs \
+    --r10c eval/phase2/R10C_a13_control/runs --r10 eval/phase2/R10_goal_planner/runs
+python eval/r11_probe.py smoke eval/phase2/R10_goal_planner/runs
+python eval/r11_probe.py sample-detour eval/phase2/R10_goal_planner/runs --out detour_set.jsonl
+python eval/r11_probe.py sample-toward <R10 runs with frames> --out toward_set.jsonl
+VLM_AGENT=a15 python eval/r11_probe.py run-detour detour_set.jsonl --out detour_a15.jsonl
+VLM_AGENT=a15 python eval/r11_probe.py run-toward toward_set.jsonl --out toward_a15.jsonl
+python eval/r11_probe.py report detour_a15.jsonl toward_a15.jsonl
+```
 
 ## Shakedown
 

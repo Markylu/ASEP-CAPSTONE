@@ -58,19 +58,27 @@ class Agent:
         # so every earlier agent keeps its sha.
         for sub in self.subagent_prompts:
             blob += "\x00" + sub.version + ":" + sub.sha()
-        if self.features.get("orchestrator"):
-            from . import spatial
-            blob += "\x00spatial:" + spatial.wording_sha()
-            # a14's added wording (R10). Appended only for an agent that uses it,
-            # so a13 keeps its sha.
-            if self.uses_a14_wording:
-                blob += "\x00spatial_a14:" + spatial.wording_sha_a14()
+        # The memory's parameters and wording (spatial.SpatialConfig): a13's,
+        # then a14's added wording (R10), then a15's (R11), each appended only
+        # for an agent that uses it, so every earlier agent keeps its sha.
+        if self.spatial_config is not None:
+            for segment in self.spatial_config.sha_segments():
+                blob += "\x00" + segment
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
     @property
+    def spatial_config(self):
+        """The orchestrated agent's spatial.SpatialConfig, or None."""
+        orch = self.features.get("orchestrator")
+        if not orch:
+            return None
+        from . import spatial
+        return spatial.config_for(orch)
+
+    @property
     def uses_a14_wording(self) -> bool:
-        orch = self.features.get("orchestrator") or {}
-        return bool(orch.get("goal_truth") or orch.get("turn_rule"))
+        cfg = self.spatial_config
+        return bool(cfg is not None and cfg.a14_words)
 
     @property
     def subagent_prompts(self) -> List[prompts.Prompt]:
@@ -176,6 +184,22 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "is not offered right after a turn-around while a move ahead is open; no critic. "
           "R9: four spins of alternating turn-arounds with the way ahead open, the critic "
           "changed 0 of 19 picks, and q01 chose the goal on 18 of 200 calls out of view."),
+    Agent("a15", "p14", {"orchestrator": {"perceiver": "g03", "strategist": "q03",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_default_llm_detour",
+                                          "memory": "a15",
+                                          "spatial": "server/decider/spatial.py"}},
+          "R11 bundle on a14: code keeps the goal as the standing target (planner.py) and "
+          "asks a detour strategist (q03) only when the way toward it is walled, a move "
+          "toward it was blocked, or six steps brought it no nearer; q03 sees each detour "
+          "with how much nearer the goal it lies, and not whether the goal is in the image. "
+          "Memory a15: a stopped-short move is also recorded where it ended and warns the "
+          "next fan action out; 'toward your target' never on a walled or blocked move; a "
+          "doorway is listed from its second sighting and dropped after 10 steps unseen. "
+          "R10: q02 chose the goal on 70 of 229 calls, 36 of 37 repeat collisions had no "
+          "note, 'toward' sat on a walled move 36 times."),
 )}
 
 DEFAULT_AGENT = "a00"
@@ -217,11 +241,13 @@ def describe(version: str) -> Dict[str, Any]:
     for sub in agent.subagent_prompts:
         out["subagent_prompts"] = out.get("subagent_prompts", {})
         out["subagent_prompts"][sub.version] = sub.sha()
-    if agent.features.get("orchestrator"):
+    if agent.spatial_config is not None:
         from . import spatial
         out["spatial_sha"] = spatial.wording_sha()
         if agent.uses_a14_wording:
             out["spatial_a14_sha"] = spatial.wording_sha_a14()
+        if agent.spatial_config.name == "a15":
+            out["spatial_a15_sha"] = spatial.wording_sha_a15()
     return out
 
 

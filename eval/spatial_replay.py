@@ -447,6 +447,158 @@ def cmd_audit(args: argparse.Namespace) -> int:
     return 0
 
 
+# --- rerender: every recorded decision through today's orchestrator ----------------
+
+#: Fields a re-rendered record may differ in: when it was written, and a sum of
+#: latencies the original took before rounding them.
+RERENDER_SKIP = ("t", "step_latency_ms")
+
+
+class _Replayed:
+    """A recorded subagent reply, shaped like vlm.SubCall for the orchestrator."""
+
+    def __init__(self, d: Dict[str, Any]) -> None:
+        self._d = d
+        self.result = d.get("result")
+        self.rung = d.get("rung")
+        self.latency_ms = float(d.get("latency_ms") or 0.0)
+        self.model = d.get("model")
+        self.prompt_tokens = d.get("prompt_tokens")
+        self.completion_tokens = d.get("completion_tokens")
+        self.attempts = d.get("attempts") or []
+        self.raw = d.get("raw") or ""
+        self.error = d.get("error")
+        timing = d.get("timing")
+        self.timing = None if timing is None else type("T", (), {"to_dict": lambda _s: timing})()
+
+    def to_dict(self) -> Dict[str, Any]:
+        return dict(self._d)
+
+
+_NAV_FIELDS = ("rung", "latency_ms", "model", "prompt_tokens", "completion_tokens", "attempts",
+               "raw", "timing")
+
+
+def _recorded_reply(rec: Dict[str, Any], name: str, follow_up: Any) -> Dict[str, Any]:
+    from server.decider import schema
+    if name == schema.PERCEIVER_SCHEMA_NAME:
+        got = rec.get("perceiver")
+    elif name == schema.STRATEGIST_SCHEMA_NAME:
+        got = rec.get("strategist")
+        if got is not None:
+            got = {k: v for k, v in got.items() if k not in ("trigger", "text", "menu")}
+    elif follow_up:
+        got = (rec.get("critic") or {}).get("retry")
+    elif rec.get("critic"):
+        got = rec["critic"]["first"]
+    elif "navigator" in rec:
+        got = rec["navigator"]
+    elif rec.get("index") is not None:
+        got = {"result": {"index": rec["index"], "reason": rec["reason"]},
+               **{k: rec.get(k) for k in _NAV_FIELDS}}
+    else:
+        got = None
+    if got is None:
+        raise LookupError("step {0}: the code asks for a {1} call the record does not have"
+                          .format(rec.get("step"), name))
+    return got
+
+
+def _words(rec: Dict[str, Any]) -> str:
+    """Everything a model was shown or chose by, without the map's float
+    coordinates (Linux and macOS libm can differ in the last digit, which moves
+    a rounded centroid by 0.01 m but never a word)."""
+    plan = rec.get("strategist") or {}
+    return json.dumps([rec.get("navigator_text"), rec.get("tags"), rec.get("hidden"),
+                       rec.get("index"), rec.get("mode"), (rec.get("target") or {}).get("id"),
+                       plan.get("trigger"), plan.get("text"),
+                       [m.get("id") for m in plan.get("menu") or []],
+                       (rec.get("critic") or {}).get("note")])
+
+
+def rerender_run(run: Path, work: Path) -> Dict[str, Any]:
+    """Feed each recorded decision back through orchestrator.decide with the
+    recorded model replies, and compare the record it writes with the original,
+    field by field and in order."""
+    import asyncio
+    import os
+    import types
+    from server.decider import orchestrator, recorder, vlm
+
+    lines = [line for line in (run / "decisions.jsonl").read_text().splitlines() if line.strip()]
+    originals = [json.loads(line) for line in lines]
+    out: Dict[str, Any] = {"run": label(run), "decisions": len(originals), "differ": [],
+                           "words_differ": [], "records": []}
+    replaying: Dict[str, Any] = {}
+
+    async def fake_call(name, system, text, image_b64, json_schema, validate, max_tokens,
+                        follow_up=None):
+        return _Replayed(_recorded_reply(replaying["rec"], name, follow_up))
+
+    real_call = vlm.call_structured
+    vlm.call_structured = fake_call
+    try:
+        target = work / run.parts[-3] / run.parts[-2] / run.parts[-1]
+        target.mkdir(parents=True, exist_ok=True)
+        r = recorder.Run("rerender-" + "-".join(run.parts[-3:]), target)
+        r.ensure()
+        for k, rec in enumerate(originals):
+            if "step" not in rec or not rec.get("agent_version"):
+                continue
+            os.environ["VLM_AGENT"] = rec["agent_version"]
+            r.decisions.write_text("".join(line + "\n" for line in lines[:k]))
+            replaying["rec"] = rec
+            request = types.SimpleNamespace(
+                manifest=rec["manifest"], step=rec["step"], frame_size=rec.get("frame_size"),
+                frame_png_b64="AA==",
+                clean_frame_png_b64="AA==" if rec.get("clean_frame") else None)
+            try:
+                asyncio.run(orchestrator.decide(request, r, rec.get("frame")))
+                new = recorder._read_jsonl(r.decisions)[-1]
+            except LookupError as exc:
+                out["differ"].append({"step": rec["step"], "why": str(exc)})
+                continue
+            a = {f: v for f, v in rec.items() if f not in RERENDER_SKIP}
+            b = {f: v for f, v in new.items() if f not in RERENDER_SKIP}
+            out["records"].append(b)
+            if _words(a) != _words(b):
+                out["words_differ"].append(rec["step"])
+            if json.dumps(a) != json.dumps(b):
+                keys = [f for f in list(a) + [f for f in b if f not in a]
+                        if json.dumps(a.get(f)) != json.dumps(b.get(f))]
+                out["differ"].append({"step": rec["step"],
+                                      "fields": keys or ["(field order)"]})
+    finally:
+        vlm.call_structured = real_call
+    return out
+
+
+def cmd_rerender(args: argparse.Namespace) -> int:
+    """Exit 1 if any decision's words differ from the record. `--out` writes the
+    re-rendered records, so two versions of the code can be compared byte for
+    byte on one machine."""
+    import tempfile
+    bad = words = total = 0
+    dump = open(args.out, "w") if args.out else None
+    with tempfile.TemporaryDirectory() as tmp:
+        for run in runs_under(Path(args.root).resolve()):
+            row = rerender_run(run, Path(tmp))
+            total += row["decisions"]
+            bad += len(row["differ"])
+            words += len(row["words_differ"])
+            if dump is not None:
+                for rec in row["records"]:
+                    dump.write(json.dumps({"run": row["run"], **rec}) + "\n")
+            if row["differ"] or args.verbose:
+                print(json.dumps(dict({k: v for k, v in row.items() if k != "records"},
+                                      differ=row["differ"][:5])))
+    if dump is not None:
+        dump.close()
+    print("decisions re-rendered: {0}; differing in any field: {1}; in words: {2}".format(
+        total, bad, words))
+    return 1 if words else 0
+
+
 def cmd_draw(args: argparse.Namespace) -> int:
     import matplotlib
     matplotlib.use("Agg")
@@ -515,13 +667,18 @@ def main() -> int:
     a = sub.add_parser("audit", help="R11 evidence: notes offered against picked, repeat "
                        "collisions, goal estimate, strategist choices, for a round under ROOT")
     a.add_argument("root")
+    rr = sub.add_parser("rerender", help="feed every orchestrated decision under ROOT back "
+                        "through orchestrator.decide with its recorded replies; must match")
+    rr.add_argument("root")
+    rr.add_argument("--verbose", action="store_true")
+    rr.add_argument("--out", help="write every re-rendered record here (jsonl)")
     d = sub.add_parser("draw", help="draw one run's memory as a top-down map")
     d.add_argument("run")
     d.add_argument("--out", required=True)
     d.add_argument("--step", type=int)
     args = parser.parse_args()
     return {"check": cmd_check, "manip": cmd_manip, "audit": cmd_audit,
-            "draw": cmd_draw}[args.cmd](args)
+            "rerender": cmd_rerender, "draw": cmd_draw}[args.cmd](args)
 
 
 if __name__ == "__main__":

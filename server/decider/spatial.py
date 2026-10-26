@@ -149,6 +149,101 @@ def wording_sha_a14() -> str:
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
+#: a15's parameters (R11): the memory's changes and the route planner's
+#: (server/decider/planner.py). Kept apart from PARAMS so a13 and a14 keep
+#: their shas. R10: the collision after a collision was never warned about,
+#: "toward your target" sat on walled moves, doorways churned the strategist.
+PARAMS_A15: Dict[str, Any] = {
+    # Block memory: a stopped-short move is also recorded where it ended, and a
+    # block matches a heading within this much, so the next two fan actions out
+    # (21.75 and 43.5 degrees off) are warned too. R9, R10C, R10: of 2179 forward
+    # picks, 111 stopped short; at 25 degrees a15 notes 24 of them (and 19 that
+    # flew), at 45 degrees 32 (and 28).
+    "block_end_pose": True,
+    "block_within_deg": 45.0,
+    # "toward your target" goes on the open action nearest the target within
+    # this many degrees, never on one with a wall, blocked or stopped-short note.
+    "toward_open_within_deg": 55.0,
+    # Doorway gate: on the menu from the second sighting, off it after this many
+    # steps without one.
+    "doorway_min_seen": 2,
+    "doorway_ttl_steps": 10,
+    # Route planner.
+    "goal_way_within_deg": 55.0,
+    "recent_block_steps": 3,
+    "recent_block_near_m": 2.0,
+    "stall_steps": 6,
+    "stall_gain_m": 0.5,
+    "detour_max_steps": 12,
+    "explore_hold_steps": 3,
+    "same_distance_m": 1.5,
+}
+
+#: Every sentence a15 adds (R11): why the detour strategist (q03) is asked, and
+#: how far nearer the goal each detour lies. Its own table, so a14's wording sha
+#: stays as flown.
+WORDS_A15: Dict[str, Any] = {
+    "asked": {
+        "walled": "the way toward the goal is walled",
+        "blocked": "a move toward the goal was blocked",
+        "stall": "the drone has not got nearer the goal for six steps",
+    },
+    "nearer": "about {d:.0f} m nearer the goal than you are",
+    "farther": "about {d:.0f} m farther from the goal than you are",
+    "same": "about as far from the goal as you are",
+    "menu": "Detours you can choose from:",
+}
+
+
+def wording_sha_a15() -> str:
+    """Identity of a15's parameters and added wording, for agent.sha()."""
+    blob = json.dumps({"params_a15": PARAMS_A15, "words_a15": WORDS_A15}, sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+
+@dataclass(frozen=True)
+class SpatialConfig:
+    """One agent's memory: which wording it is shown and which a15 behaviours
+    it has. `sha_segments()` is what agent.sha() appends for it, and must stay
+    exactly what a13 and a14 were hashed with."""
+    name: str
+    triggers: Dict[str, str]
+    a14_words: bool = False
+    block_end_pose: bool = False
+    block_within_deg: float = BLOCK_WITHIN_DEG
+    toward: str = "bearing"
+    toward_within_deg: float = TOWARD_WITHIN_DEG
+    doorway_min_seen: int = 1
+    doorway_ttl_steps: Optional[int] = None
+
+    def sha_segments(self) -> List[str]:
+        out = ["spatial:" + wording_sha()]
+        if self.a14_words:
+            out.append("spatial_a14:" + wording_sha_a14())
+        if self.name == "a15":
+            out.append("spatial_a15:" + wording_sha_a15())
+        return out
+
+
+A13 = SpatialConfig("a13", TRIGGERS_A13)
+A14 = SpatialConfig("a14", WORDS_A14["triggers"], a14_words=True)
+A15 = SpatialConfig("a15", WORDS_A14["triggers"], a14_words=True,
+                    block_end_pose=PARAMS_A15["block_end_pose"],
+                    block_within_deg=PARAMS_A15["block_within_deg"],
+                    toward="open", toward_within_deg=PARAMS_A15["toward_open_within_deg"],
+                    doorway_min_seen=PARAMS_A15["doorway_min_seen"],
+                    doorway_ttl_steps=PARAMS_A15["doorway_ttl_steps"])
+
+
+def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
+    """The memory an orchestrated agent's features name (agent.py)."""
+    if orchestrator.get("memory") == "a15":
+        return A15
+    if orchestrator.get("goal_truth") or orchestrator.get("turn_rule"):
+        return A14
+    return A13
+
+
 # --- geometry ------------------------------------------------------------------
 
 Point = Tuple[float, float]
@@ -240,6 +335,7 @@ class Opening:
     passed: bool = False
     closed: bool = False
     label: str = ""
+    last_seen: int = -1
 
 
 @dataclass
@@ -279,6 +375,7 @@ class SpatialMemory:
     openings: List[Opening] = field(default_factory=list)
     trail: List[Tuple[int, float, float, float]] = field(default_factory=list)
     turn_arounds: List[int] = field(default_factory=list)
+    cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
 
@@ -306,6 +403,10 @@ class SpatialMemory:
         if moved < SHORT_BELOW_M:
             self.blocks.append(Block(before[0], before[1],
                                      action_heading(action, before[2]), step, moved))
+            # a15: also where it stopped, the spot the next decision is made from.
+            if self.cfg.block_end_pose and moved >= BLOCKED_BELOW_M:
+                self.blocks.append(Block(after[0], after[1],
+                                         action_heading(action, before[2]), step, moved))
 
     def observe(self, step: int, where: Pose, perception: Optional[Dict[str, Any]]) -> None:
         """Fold one perceiver report taken at `where` into the map. Seen floor is
@@ -348,9 +449,11 @@ class SpatialMemory:
                 o.x, o.y = (o.x * n + p[0]) / (n + 1), (o.y * n + p[1]) / (n + 1)
                 o.seen += 1
                 o.closed = False
+                o.last_seen = step
                 return
         self.openings.append(Opening(p[0], p[1], step,
-                                     label="ABCDEFGHJKLMNPQRSTUVWXYZ"[len(self.openings) % 24]))
+                                     label="ABCDEFGHJKLMNPQRSTUVWXYZ"[len(self.openings) % 24],
+                                     last_seen=step))
 
     def _close_openings(self, step: int, here: Point, heading: float, reach: float) -> None:
         """An opening is closed when a later look straight at it sees the floor
@@ -377,10 +480,23 @@ class SpatialMemory:
         hit = None
         for b in self.blocks:
             if (dist(here, (b.x, b.y)) < BLOCK_NEAR_M
-                    and abs(wrap(b.heading - heading)) < BLOCK_WITHIN_DEG):
+                    and abs(wrap(b.heading - heading)) < self.cfg.block_within_deg):
                 if hit is None or b.step > hit.step:
                     hit = b
         return hit
+
+    def listed_openings(self, step: int) -> List[Opening]:
+        """Doorways the strategist may be offered: not passed or closed; for a15
+        also seen twice and seen within the last few steps (doorway gate)."""
+        out = []
+        for o in self.openings:
+            if o.passed or o.closed or o.seen < self.cfg.doorway_min_seen:
+                continue
+            ttl = self.cfg.doorway_ttl_steps
+            if ttl is not None and step - o.last_seen > ttl:
+                continue
+            out.append(o)
+        return out
 
     def visits_at(self, p: Point) -> List[int]:
         return list(self.visits.get(cell(p), []))
@@ -477,22 +593,27 @@ class SpatialMemory:
             "goal_rays": len(self.goal_rays),
             "goal_belief": None if belief is None else [round(belief[0], 2),
                                                         round(belief[1], 2), belief[2]],
-            "openings": [{"label": o.label, "x": round(o.x, 2), "y": round(o.y, 2),
-                          "step": o.step, "seen": o.seen, "passed": o.passed,
-                          "closed": o.closed} for o in self.openings],
+            "openings": [dict({"label": o.label, "x": round(o.x, 2), "y": round(o.y, 2),
+                               "step": o.step, "seen": o.seen, "passed": o.passed,
+                               "closed": o.closed},
+                              **({"last_seen": o.last_seen}
+                                 if self.cfg.doorway_ttl_steps is not None else {}))
+                         for o in self.openings],
             "loop_score": round(self.loop_score(), 2),
         }
 
 
 def rebuild(records: Iterable[Dict[str, Any]], manifest: Dict[str, Any],
-            perception_now: Optional[Dict[str, Any]] = None) -> SpatialMemory:
+            perception_now: Optional[Dict[str, Any]] = None,
+            cfg: SpatialConfig = A13) -> SpatialMemory:
     """The memory as of this decision, from the run's earlier decision records.
 
     Each record contributes the pose it was decided at, its perceiver report
     and, against the next record's pose (or the current manifest's), what its
     move did. A failed decision still gives a pose. `perception_now` is the
-    perceiver's report for the current frame, folded in last."""
-    mem = SpatialMemory()
+    perceiver's report for the current frame, folded in last. `cfg` is the
+    agent's memory (a13 and a14 share one)."""
+    mem = SpatialMemory(cfg=cfg)
     step_now = int(manifest.get("step", 0))
     rows = sorted((r for r in records if "step" in r and r["step"] < step_now),
                   key=lambda r: r["step"])
@@ -549,9 +670,7 @@ def targets(mem: SpatialMemory, here: Pose, step: int,
     elif belief is not None:
         out.append(Target("goal", "goal", belief[0], belief[1],
                           "the goal (last seen at step {0})".format(belief[2]), step))
-    for o in mem.openings:
-        if o.passed or o.closed:
-            continue
+    for o in mem.listed_openings(step):
         out.append(Target("doorway_" + o.label, "opening", o.x, o.y,
                           "doorway {0} (seen at step {1})".format(o.label, o.step), step))
     for k, p in enumerate(mem.frontiers(here[:2])):
@@ -595,8 +714,9 @@ def target_state(mem: SpatialMemory, target: Optional[Target], here: Point,
         return "closed"
     if target.kind == "opening":
         label = target.id.split("_", 1)[1]
-        o = next((o for o in mem.openings if o.label == label), None)
-        if o is None or o.closed or o.passed:
+        step = mem.trail[-1][0] if mem.trail else 0
+        o = next((o for o in mem.listed_openings(step) if o.label == label), None)
+        if o is None:
             return "closed"
         target.x, target.y = o.x, o.y
     if target.kind == "goal":
@@ -614,6 +734,16 @@ def target_state(mem: SpatialMemory, target: Optional[Target], here: Point,
 def strip_for(theta_deg: float) -> str:
     """The image strip an action's heading falls in."""
     return min(STRIPS, key=lambda s: abs(strip_offset(s) - theta_deg))
+
+
+def not_open(mem: SpatialMemory, here: Pose, action: Dict[str, Any],
+              lanes: Dict[Any, Dict[str, Any]]) -> bool:
+    """Whether project() will note this forward action blocked, stopped short or
+    walled: the same tests, in the same order."""
+    if mem.block_for(here[:2], action_heading(action, here[2])) is not None:
+        return True
+    lane = lanes.get(strip_for(float(action.get("theta_deg") or 0.0))) or {}
+    return lane.get("floor") == "blocked_near"
 
 
 def project(mem: SpatialMemory, manifest: Dict[str, Any],
@@ -634,9 +764,14 @@ def project(mem: SpatialMemory, manifest: Dict[str, Any],
     if target is not None:
         want = bearing(here[:2], (target.x, target.y))
         flying = [a for a in actions if not a.get("turn_around")]
+        if mem.cfg.toward == "open":
+            # a15: only an action the map does not call blocked, stopped short
+            # or walled may be "toward your target" (R10: 36 walled picks).
+            flying = [a for a in flying if not not_open(mem, here, a, lanes)]
         best = min(flying, key=lambda a: abs(wrap(action_heading(a, here[2]) - want)),
                    default=None)
-        if best is not None and abs(wrap(action_heading(best, here[2]) - want)) <= TOWARD_WITHIN_DEG:
+        if (best is not None and abs(wrap(action_heading(best, here[2]) - want))
+                <= mem.cfg.toward_within_deg):
             toward = int(best["index"])
         elif abs(wrap(want - here[2])) > 90.0:
             toward = next((int(a["index"]) for a in actions if a.get("turn_around")), None)
@@ -794,7 +929,7 @@ def trigger_key(mem: SpatialMemory, manifest: Dict[str, Any],
         return "goal_in_view"
     if mem.goal_rays and not goal_now and mem.goal_rays[-1].step == step - 3:
         return "goal_out_of_view"
-    if any(o.step == step and o.seen == 1 for o in mem.openings):
+    if any(o.last_seen == step and o.seen == mem.cfg.doorway_min_seen for o in mem.openings):
         return "new_doorway"
     if current is not None and here is not None:
         state = target_state(mem, current, here[:2], goal_at)
