@@ -1,15 +1,17 @@
 # R11: Goal by default, detours on demand (bundle round)
 
-**Agent:** `a15` (`a17e9cadddc3`) · **Navigator prompt:** `p14` (`31a9f28eaf94`, as `a14`) ·
+**Agent:** `a16` (`6d614e3c4450`) · **Navigator prompt:** `p14` (`31a9f28eaf94`, as `a14`) ·
 **Perceiver:** `g03` (as `a14`) · **Strategist:** `q03` (new, detour only) · **Spatial memory:**
-`spatial.A15` (`spatial_a15` `90c695665a26`; `spatial` `eceb875a68a3` and `spatial_a14`
-`0075a8a0e5c0` as `a14`) · **Status:** **`a15` built, probe gate failed
-([probe/probe_a15.md](probe/probe_a15.md)); `a16` (`6d614e3c4450`) built, probe gate failed on two
-lines ([probe/probe_a16.md](probe/probe_a16.md)); not flown**
+`spatial.A16` (`spatial_a16` `1af123e381c0`; `spatial` `eceb875a68a3` and `spatial_a14`
+`0075a8a0e5c0` as `a14`) · **Status:** **pre-registered 2026-10-27; probe gate passed for `a16`
+under the re-set gate ([probe/probe_a16.md](probe/probe_a16.md)); not yet flown.** `a15`
+(`a17e9cadddc3`) was built first and failed its probe ([probe/probe_a15.md](probe/probe_a15.md));
+it is not flown.
 
 Draft written 2026-10-25 from [evidence.md](evidence.md), before any R11 code; `a15` built
-2026-10-26. Nothing here is pre-registered until the operator confirms the design; the shas are
-re-checked against `config.lock.json` before the round flies. R11 flies beside a control,
+2026-10-26, `a16` 2026-10-27. The operator confirmed the design, with `a16` and the gate change
+below, on 2026-10-27; from then this README is R11's pre-registration. The shas are re-checked
+against `config.lock.json` before the round flies. R11 flies beside a control,
 **R11C** (`a14` unchanged), on the same host at the same SHA.
 
 ## Goal truth (operator, 2026-10-26)
@@ -24,13 +26,15 @@ or direction, and the perceiver gets the clean frame alone (evidence §3, O2 and
 
 **A bundle on `a14`.** Credited to the bundle, not to any part.
 
-| Part | `a14` (R10) | `a15` |
+`a16` is `a15` with two changes (marked **a16**); `a15` alone was not flown.
+
+| Part | `a14` (R10) | `a16` |
 |---|---|---|
 | Who sets the target | `q02` on nine triggers (30% of steps) | **route planner** (code, truth, `server/decider/planner.py`): the goal is the standing target unless every forward action within 55° of it carries a wall, blocked or stopped-short note ("walled"), or a move within 55° of it was blocked within 2 m in the last 3 steps ("blocked"); a goal behind counts as open. Then **`q03`** chooses a detour, which stands until reached or closed, 12 steps, or the goal in view with the way open; "explore" stands 3 steps |
 | Progress monitor | none (critic off) | code, truth: the goal has stood for 6 steps and the drone is not 0.5 m nearer it than 6 steps ago ("stall") → ask `q03` |
-| Strategist text | goal visibility line; "within 2 m of this spot" line; targets in distance and direction | **`q03`**: asked only for a detour; both lines dropped; each target also worded with how much nearer the goal it lies ("about 4 m nearer the goal than you") |
+| Strategist text | goal visibility line; "within 2 m of this spot" line; targets in distance and direction | **`q03`**: asked only for a detour; both lines dropped; each target also worded with how much nearer the goal it lies ("about 4 m nearer the goal than you"); **a16:** unexplored ground offered at the point of each edge nearest the goal, nearest first (a15: at the edge's centre, largest first) |
 | Doorways | enter the menu and the trigger on one sighting; struck when passed or seen closed | **doorway gate**: enter on the second sighting; leave after 10 steps without one |
-| Block memory | stored at the move's start pose; matched within 0.85 m and 15° | also stored where a stopped-short move ended (not a blocked one: it did not move); matched within 0.85 m and **45°**, so the next two fan actions out (21.75° and 43.5°) get the note too |
+| Block memory | stored at the move's start pose; matched within 0.85 m and 15° | also stored where a stopped-short move ended (not a blocked one: it did not move); matched within 0.85 m and, **a16**, 15° after a move that did not get going (under 0.3 m) or 25° after one that stopped short, so the next fan action out (21.75°) is warned after a stopped-short move (a15: 45° for both) |
 | "toward your target" | on the action nearest the target's bearing, walls or not | **wall-aware**: never on an action with a wall, blocked or stopped-short note; the next open action within ~55° instead, or none |
 | Navigator | `p14` | `p14` unchanged; it sees only the notes change |
 | Turn rule | [0] not offered after a turn-around while a move ahead is open | unchanged (kept so R11 does not confound it; the unhidden variant is a later ablation) |
@@ -51,6 +55,13 @@ adjacent fan action". At 25° the probe's first line failed (24 of 37); the miss
 fan actions (43.5°) off the block. Over R9, R10C and R10's 2179 forward picks (111 stopped short),
 `a15`'s memory at 25° notes 24 stopped-short picks and 19 that flew; at 45°, 32 and 28. The
 note is wrong about half the time either way, against a 5% base rate.
+
+**Changed again for `a16`, after `a15`'s probe** ([probe/probe_a15.md](probe/probe_a15.md)): at
+45° one block straight ahead noted all five forward moves on 28 of R10's steps, and the navigator
+then took the move that had been blocked; and 52 of 88 detour menus held nothing 3 m nearer the
+goal because unexplored ground was offered at the edge's centre. After a full block the next fan
+move out stopped short 2 of 11 times, after a stopped-short move 11 of 20. `a16`'s block note:
+22 of 33 noted picks stopped short (`a15` 32 of 60), never on every forward move.
 
 ## Evidence
 
@@ -83,9 +94,10 @@ more of its steps closing on the goal, and `final` + `dynamic` rises above R11C.
 | cells changed against R11C | | more than the floor (below), more gained than lost |
 | steps with the goal as standing target | 232/755 (31%) | ≥ 50% |
 | steps standing on unexplored ground, backtrack or none | 352 (47%) | ≤ 25% |
-| strategist calls | 229 (30% of steps) | ≤ 15% of steps (smoke run on R10's manifests: 43, 6%) |
+| strategist calls | 229 (30% of steps) | ≤ 15% of steps (smoke run on R10's manifests: 40, 5%) |
 | "toward your target" on an action with a wall, blocked or stopped-short note | 36 | 0 |
-| near-repeat collisions with no blocked or stopped-short note | 9 of 9 | ≤ 2 |
+| picked forward moves with a blocked or stopped-short note that stopped short | (a14's notes) | ≥ 65% (replaces "near-repeats with no note ≤ 2", gate change below) |
+| steps with a blocked or stopped-short note on every forward move | | 0 |
 | collisions | 36 | at most R11C's |
 | `spin_failure` runs | 0 | 0 |
 
@@ -126,14 +138,32 @@ From `python eval/spatial_replay.py manip` and `audit` on R11 and R11C:
 
 `eval/r11_probe.py`, on R10's recorded runs, before flying. R11 does not fly if any line fails.
 
-| Check | Set | Threshold | Result |
-|---|---|---|---|
-| block memory warns about near-repeat collisions | R9, R10C, R10's 37 near-repeat collisions, rebuilt with `a15`'s memory (code only) | note on ≥ 30 | 32/37, passed |
-| route planner keeps the goal | R10's 755 steps, `a15`'s planner on R10's records (code only) | goal kept on ≥ 50% | 432/755 (57%), passed |
-| no "toward" on a not-open action | R10's 755 steps re-tagged with `a15`'s memory (code only) | 0 | 0, passed |
-| no goal truth in navigator text | R10's navigator texts, `views.goal_leaks` (code only) | 0 | 0, passed |
-| navigator with the wall-aware note | R10's steps where "toward" shared an action with a not-open note and some forward move was open (14), re-tagged as `a15` tags them, R10's annotated frame, `p14`, live model (frames on sctsvr6) | pick carries no not-open note on ≥ 80% | 9/14 (64%), **failed** |
-| `q03` detours | R10's steps where `a15`'s planner would hand over (88: walled 40, blocked 34, stall 14), worded as `a15` words them, live model, text only | target ≥ 3 m nearer the goal on ≥ 60%; explore ≤ 10% | 40%, explore 32%, **failed** |
+### Gate change (operator, 2026-10-27)
+
+Pre-registered before flying, after both `a15` and `a16` had been probed on the gate below; the
+results it was changed after are in [probe/probe_a15.md](probe/probe_a15.md) and
+[probe/probe_a16.md](probe/probe_a16.md).
+- **The near-repeat line is replaced.** "Note on ≥ 30 of the 37 near-repeat collisions" cannot
+  pass without a note on every forward move where the drone faces a wall (28 such steps for
+  `a15`), which is what failed `a15`'s navigator line. In its place: of the picked forward moves
+  in R9, R10C and R10 whose action carries the agent's blocked or stopped-short note, **≥ 65%
+  stopped short** (base rate 5%), and **no R10 step with that note on every forward move**. The
+  near-repeat count is still reported, not gated.
+- **The navigator line stays at 80%** but is scored without the steps where one action reads both
+  "goal about one move ahead" and "wall close" (the perceiver contradicts itself); those are
+  reported apart. In this set they are s02a `dynamic` and `initial` step 3, where R10 took that
+  move and flew 1.7 m.
+
+| Check | Set | Threshold | `a15` | `a16` |
+|---|---|---|---|---|
+| block note precision | R9, R10C, R10's forward picks, the agent's memory (code only) | ≥ 65% stopped short | 32/60 (53%), failed | 22/33 (67%), passed |
+| no block-note saturation | R10's 755 steps (code only) | 0 steps with the note on every forward move | 28, failed | 0, passed |
+| (was) near-repeats noted | R9, R10C, R10's 37 | (≥ 30, not gated since 2026-10-27) | 32 | 22 |
+| route planner keeps the goal | R10's 755 steps, the agent's planner on R10's records (code only) | goal kept on ≥ 50% | 432/755 (57%), passed | 434/755 (57%), passed |
+| no "toward" on a not-open action | R10's 755 steps re-tagged with the agent's memory (code only) | 0 | 0, passed | 0, passed |
+| no goal truth in navigator text | R10's navigator texts, `views.goal_leaks` (code only) | 0 | 0, passed | 0, passed |
+| navigator with the wall-aware note | R10's steps where "toward" shared an action with a not-open note and some forward move was open (14), re-tagged as `a15` tags them, R10's annotated frame, `p14`, live model (frames on sctsvr6) | pick carries no not-open note on ≥ 80%, contradicted steps apart | 9/12 (75%), failed (9/14 under the old scoring) | 11/12 (92%), passed (2 apart: both not open) |
+| `q03` detours | R10's steps where `a15`'s planner would hand over (88: walled 40, blocked 34, stall 14), worded as `a15` words them, live model, text only | target ≥ 3 m nearer the goal on ≥ 60%; explore ≤ 10% | 40%, explore 32%, failed | 95% (82/86), explore 1%, passed |
 
 The planner line counts a step as kept when the way toward the goal is open on `a15`'s map and the
 drone gained at least 0.5 m over the last 6 steps; `a15` itself only stalls once the goal has

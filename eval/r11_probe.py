@@ -56,8 +56,14 @@ from spatial_replay import (REPEAT_NEAR_M, REPEAT_WITHIN_DEG, GOALWARD_M, goal_g
                             label, load, memory_at, runs_under)
 
 #: The gate (README, "Probe gate"). A probe that misses any of these stops R11.
+#: Re-set for a16 (operator, 2026-10-27; README "Gate change"): the near-repeat
+#: line (a15 and a16 were probed on ">= 30 of 37 noted") is replaced by the
+#: block note's precision and no saturation, and the toward line is scored
+#: without the steps where one action reads both "goal about one move ahead"
+#: and "wall close", which are reported apart.
 GATE = {
-    "block_noted_min": 30,        # of the 37 near-repeat collisions in R9, R10C, R10
+    "block_precision_min": 0.65,  # picked forward moves with a block note that stopped short
+    "block_saturated_max": 0,     # R10 steps where every forward move has a block note
     "planner_goal_min": 0.50,     # R10 steps where a15's planner keeps the goal
     "toward_not_open_max": 0,     # a15 tags: "toward" on a walled or blocked action
     "leaks_max": 0,               # navigator texts wording the goal's true position
@@ -137,6 +143,42 @@ def near_repeats(roots: List[str]) -> List[Dict[str, Any]]:
                             "a15": notes,
                             "noted": any(n.startswith(BLOCK_NOTES) for n in notes)})
     return out
+
+
+def block_precision(roots: List[str], r10: str) -> Dict[str, int]:
+    """Every forward pick under the roots whose action carries the agent's
+    blocked or stopped-short note, and how many of those stopped short; and the
+    steps of R10 where every forward action carries one (saturation)."""
+    noted = short = saturated = 0
+    for root in roots:
+        for run in runs_under(Path(root).resolve()):
+            rows = load(run)
+            for k, r in enumerate(rows):
+                here = spatial.pose_xyh(r["manifest"].get("pose"))
+                if here is None or r.get("index") is None:
+                    continue
+                mem = _a15(rows, k)
+                forward = [a for a in r["manifest"].get("actions") or []
+                           if not a.get("turn_around")]
+                if root == r10 and forward and all(
+                        mem.block_for(here[:2], spatial.action_heading(a, here[2])) is not None
+                        for a in forward):
+                    saturated += 1
+                chosen = _chosen(r)
+                moved = _moved(rows, k)
+                if chosen is None or chosen.get("turn_around") or moved is None:
+                    continue
+                if mem.block_for(here[:2], spatial.action_heading(chosen, here[2])) is not None:
+                    noted += 1
+                    short += moved < spatial.SHORT_BELOW_M
+    return {"noted": noted, "short": short, "saturated": saturated}
+
+
+def contradicted(r: Dict[str, Any]) -> bool:
+    """A toward step where one action reads both "goal about one move ahead" and
+    "wall close": scored apart (gate change, 2026-10-27)."""
+    return any(spatial.WORDS["goal_one_move"] in v and spatial.WORDS["wall_seen"] in v
+               for v in r["tags"].values())
 
 
 # --- 2-4. planner, toward, leaks on R10 -------------------------------------------
@@ -386,12 +428,18 @@ def _row(name: str, value: str, ok: bool, threshold: str) -> str:
 def cmd_offline(args: argparse.Namespace) -> int:
     repeats = near_repeats([args.r9, args.r10c, args.r10])
     noted = sum(r["noted"] for r in repeats)
+    prec = block_precision([args.r9, args.r10c, args.r10], args.r10)
+    p = prec["short"] / prec["noted"] if prec["noted"] else 0.0
     r10 = r10_lines(args.r10)
     share = r10["planner_kept"] / r10["steps"] if r10["steps"] else 0.0
     print("agent {0}".format(_agent()))
     lines = [
-        _row("near-repeat collisions noted by the agent's memory", "{0}/{1}".format(noted, len(repeats)),
-             noted >= GATE["block_noted_min"], ">= {0}".format(GATE["block_noted_min"])),
+        _row("block note on a picked forward move, stopped short", "{0}/{1} ({2:.0%})".format(
+            prec["short"], prec["noted"], p), p >= GATE["block_precision_min"],
+            ">= {0:.0%}".format(GATE["block_precision_min"])),
+        _row("R10 steps with a block note on every forward move", str(prec["saturated"]),
+             prec["saturated"] <= GATE["block_saturated_max"],
+             "<= {0}".format(GATE["block_saturated_max"])),
         _row("R10 steps where the planner keeps the goal", "{0}/{1} ({2:.0%})".format(
             r10["planner_kept"], r10["steps"], share), share >= GATE["planner_goal_min"],
             ">= {0:.0%}".format(GATE["planner_goal_min"])),
@@ -402,7 +450,9 @@ def cmd_offline(args: argparse.Namespace) -> int:
              r10["leaks"] <= GATE["leaks_max"], "<= {0}".format(GATE["leaks_max"])),
     ]
     print("| Check | Value | Threshold | Pass |\n|---|---|---|---|\n" + "\n".join(lines))
-    print("\nplanner on R10's steps: {0}".format(r10["ways"]))
+    print("\nnear-repeat collisions noted (not gated since 2026-10-27): {0}/{1}".format(
+        noted, len(repeats)))
+    print("planner on R10's steps: {0}".format(r10["ways"]))
     print("steps whose 'toward' note moved under a15: {0}".format(r10["toward_moved"]))
     print("near-repeats still un-noted: " + ("; ".join(
         "{0} {1} [{2}] {3}".format(r["run"], r["step"], r["pick"], r["a15"])
@@ -414,7 +464,9 @@ def cmd_offline(args: argparse.Namespace) -> int:
 
 def cmd_report(args: argparse.Namespace) -> int:
     detour = [r for r in _read(args.detour) if r.get("answer")]
-    toward = [r for r in _read(args.toward) if r.get("answer")]
+    answered = [r for r in _read(args.toward) if r.get("answer")]
+    toward = [r for r in answered if not contradicted(r)]
+    apart = [r for r in answered if contradicted(r)]
 
     def goalward(r: Dict[str, Any]) -> bool:
         t = next((m for m in r["menu"] if m["id"] == r["answer"]["target"]), None)
@@ -434,11 +486,16 @@ def cmd_report(args: argparse.Namespace) -> int:
              gw >= GATE["detour_goalward_min"], ">= {0:.0%}".format(GATE["detour_goalward_min"])),
         _row("q03 chooses explore", "{0:.0%}".format(ex), ex <= GATE["detour_explore_max"],
              "<= {0:.0%}".format(GATE["detour_explore_max"])),
-        _row("p14 pick open with a15's notes", "{0:.0%}".format(op),
+        _row("p14 pick open with the agent's notes", "{0}/{1} ({2:.0%})".format(
+            sum(opened(r) for r in toward), len(toward), op),
              op >= GATE["toward_open_min"], ">= {0:.0%}".format(GATE["toward_open_min"])),
     ]
     print("| Check | Value | Threshold | Pass |\n|---|---|---|---|\n" + "\n".join(lines))
-    print("\ndetour calls answered {0}; toward steps answered {1}".format(len(detour), len(toward)))
+    print("\ndetour calls answered {0}; toward steps answered {1}".format(len(detour), len(answered)))
+    print("toward steps scored apart (goal one move ahead and wall close on one action): " + (
+        "; ".join("{0} {1}: pick {2} {3}, R10 pick {4}".format(
+            r["run"], r["step"], r["answer"].get("index"),
+            "open" if opened(r) else "not open", r["r10_pick"]) for r in apart) or "none"))
     ok = all("**no**" not in l for l in lines)
     print("\nLIVE LINES {0}".format("PASSED" if ok else "FAILED"))
     return 0 if ok else 1
