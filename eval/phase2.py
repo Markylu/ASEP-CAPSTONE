@@ -104,6 +104,17 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # own. R10 README, "Control".
     "R10C": {"folder": "R10C_a13_control", "title": "a13 control on the R10 host",
              "agent": "a13", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R11: a bundle on a14 (operator, 2026-10-26/27): the goal is the standing target by
+    # default (route planner, goal truth in code only), q03 asked only for detours on a
+    # goal-side menu, a progress monitor, a doorway gate, block memory at the end pose
+    # with a window by kind, wall-aware "toward". Agent a16 (a15 failed its probe).
+    # Credited to the bundle. Its control is R11C. R11 README.
+    "R11": {"folder": "R11_goal_default", "title": "Goal by default, detours on demand",
+            "agent": "a16", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R11C: a14 (R10's agent) flown on the R11 host at the R11 SHA; also a14's
+    # run-to-run floor against R10. Not a round of its own. R11 README, "Control".
+    "R11C": {"folder": "R11C_a14_control", "title": "a14 control on the R11 host",
+             "agent": "a14", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

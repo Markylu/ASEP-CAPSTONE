@@ -15,7 +15,7 @@ own.
 
 ## Evidence
 
-R11 (`a15`) is a bundle on `a14`, read against a control on the same host at the same SHA. With
+R11 (`a16`) is a bundle on `a14`, read against a control on the same host at the same SHA. With
 `a14` as the control, R11 against R11C measures the bundle and nothing else.
 
 R10C showed that re-flying an unchanged multi-call agent moves outcomes: `a13` repeated R9 in 7 of
