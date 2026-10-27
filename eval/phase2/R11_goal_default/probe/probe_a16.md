@@ -6,9 +6,13 @@ detour line on the Mac, toward line on sctsvr6 in Docker (`~/r11_probe.sh` with
 `VLM_AGENT=a16`, scratch clone `~/r11_scratch`; a15's outputs there moved to
 `~/r11_a15_probe_out`).
 
-**Result: gate failed on two lines. R11 does not fly with `a16` under the gate as written.** The
-detour lines now pass by a wide margin; the near-repeat line fails by design (below) and the
-navigator line by one pick.
+**Result: gate failed on two lines under the gate as first written; passed on every line under the
+gate re-set by the operator on 2026-10-27** (README, "Gate change"): the near-repeat line replaced
+by block-note precision ≥ 65% (a16: 22/33, 67%) and no saturation (0 R10 steps), and the navigator
+line scored without the two steps where one action reads "goal about one move ahead" and "wall
+close" (a16: 11/12, 92%; the two apart, s02a `dynamic` and `initial` 3, both not open). Scores
+under the new gate: `offline_a16.txt`, `report_a16.txt` (a15: `offline_a15.txt`, fails both new
+block lines). Below is the record as first scored.
 
 ## What a16 changes from a15
 
