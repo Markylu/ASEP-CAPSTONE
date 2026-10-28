@@ -4,7 +4,8 @@
 **Perceiver:** `g04` (`c6e7a2734f0c`, new) · **Strategist:** `q04` (`f8fdf4b5946c`, new) ·
 **Spatial memory:** `spatial.A17` (`spatial` `eceb875a68a3`, `spatial_a14` `0075a8a0e5c0`,
 `spatial_a17` `63ccdaa218d9`) · **Stage machine:** `planner_a17` `6eb22517c3e0` ·
-**Status:** draft, not flown; offline probe passed, the live line is pending. This README becomes
+**Status:** draft, not flown; offline probe passed, live line 7 failed 2026-10-28 (sctsvr6), so
+R12 does not fly on this `g04`. This README becomes
 R12's pre-registration when the operator confirms it.
 
 Draft written 2026-10-28 from R11's [failure analysis](../R11_goal_default/failure_analysis.md)
@@ -168,7 +169,7 @@ From the decision records and `eval/r12_probe.py`, on R12 and R12C. Truth is use
 | 4 | Reachable targets | R11's 38 `q03` situations | top search target inside a wall or not truly reachable ≤ 5 of 38 | 3 of 38 (R11's frontier 37 of 38), **pass** |
 | 5 | Sightings checked | stage machine open-loop on R11 and R11C, `q04` stubbed | false sightings that a later look faced: ≥ 80% disproved; genuine sightings disproved with the goal in line of sight ≤ 5% | 39 of 46 (85%); 12 of 285 (4.2%), **pass** |
 | 6 | No goal truth | `a17`'s real step (`smoke`) over R11's 706 manifests, stub replies, with and without the goal block | 0 decisions differ, 0 failed steps | 0, 0, **pass** |
-| 7 | `g04` reads (live, sctsvr6) | R11 frames scored against geometry | searched cells in line of sight ≥ 90%; `blocked_near` read as open < 15% | **pending** (the operator's tunnel) |
+| 7 | `g04` reads (live, sctsvr6) | R11 frames scored against geometry | searched cells in line of sight ≥ 90%; `blocked_near` read as open < 15% | 64.1%; 53.2% (g03 on the same steps: 82.6%; 32.7%), **FAIL**: g04 reads 69% of strips `open_very_far` and uses `open_near` on 1%. `a18`/`g05` (floor end placed in the image): 86.8%; 16.2%, **FAIL** (a perceiver with true distances: 94.6%; 0%) |
 
 [probe/offline.txt](probe/offline.txt), [probe/smoke.txt](probe/smoke.txt).
 
@@ -197,6 +198,31 @@ From the decision records and `eval/r12_probe.py`, on R12 and R12C. Truth is use
 - **g03 reaches shortened** against R11's geometry (Change above).
 - **Search targets are offered one cell short on their path.** At the edge cell itself, 10 of 38
   lay inside a wall slab.
+
+### Line 7, perceiver changes (2026-10-28, live on sctsvr6)
+
+Line 7 on R11's 706 frames, scored by `eval/r12_probe.py score-g04` against `geo.py`:
+
+| Perceiver | Agent | In line of sight | Walls < 1 m read open | Cells searched |
+|---|---|---|---|---|
+| g03 (recorded) | | 82.6% | 32.7% | 12748 |
+| g04 (metres, far split) | `a17` `3001a0c0a0fb` | 64.1% | 53.2% | 57209 |
+| g05 (floor end in the image) | `a18` `39e2bad86238` | 86.8% | 16.2% | 9052 |
+| g05, map one class nearer | `a19` `0da467a5c3ca` | 90.0% | 6.8% | 5765 |
+| true distances (ceiling) | | 94.6% | 0% | 12345 |
+
+- `g05` (`133ed83db46b`): the camera is level at 1.75 m with an 87° view, so no floor at a strip's
+  bottom means an obstacle under 1.84 m, and a floor line at fraction v of the half-height below
+  the centre lies 1.84 / v m away. `g05` asks `no_floor` / `bottom` / `lower` / `middle`; the
+  agent's `floor_map` turns that into a floor class.
+- `a19`'s map (`no_floor`, `bottom` → `blocked_near`; `lower` → `open_near`; `middle` →
+  `open_far`) was chosen on R11's answers, so its R11 row does not count. **Pre-registered
+  before it is run: line 7 for `a19` is scored on R11C's 18 runs (frames not used to choose the
+  map), thresholds unchanged (≥ 90%; < 15%).** R12 flies `a19` only if that passes, then the
+  shakedown.
+- Known cost: `bottom` read on long views (653 of R11's strips over 8 m) now writes a wall
+  0.75 m out until a later look clears it, so search covers less per look. The shakedown watches
+  for `exhausted` menus.
 
 ```
 python3 eval/phase2/R12_staged_search/analysis/d_detect.py

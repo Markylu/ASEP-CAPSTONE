@@ -254,6 +254,22 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "below the middle) instead of metres; code maps that to a reach. The camera is "
           "level at 1.75 m, so no floor in a strip means an obstacle under 1.84 m. g04 read "
           "69% of R11's strips open_very_far, 53% of walls under 1 m among them."),
+    Agent("a19", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_search",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "blocked_near",
+                                                        "lower": "open_near",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R12 after a18's live probe failed narrowly (86.8% of searched cells in sight, "
+          "16.2% of walls under 1 m read open): a18 with each g05 floor end mapped one "
+          "class nearer, so a misread wall cuts the cone short instead of running it "
+          "through. On a18's R11 answers this map gave 90.0% and 6.8% with a third fewer "
+          "cells searched; fitted there, so it is gated on R11C's frames."),
 )}
 
 DEFAULT_AGENT = "a00"
