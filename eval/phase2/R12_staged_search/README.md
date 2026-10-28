@@ -1,0 +1,231 @@
+# R12: Staged search with a coverage map, no goal truth (bundle round)
+
+**Agent:** `a17` (`3001a0c0a0fb`) · **Navigator prompt:** `p14` (`31a9f28eaf94`, as `a13`–`a16`) ·
+**Perceiver:** `g04` (`c6e7a2734f0c`, new) · **Strategist:** `q04` (`f8fdf4b5946c`, new) ·
+**Spatial memory:** `spatial.A17` (`spatial` `eceb875a68a3`, `spatial_a14` `0075a8a0e5c0`,
+`spatial_a17` `63ccdaa218d9`) · **Stage machine:** `planner_a17` `6eb22517c3e0` ·
+**Status:** draft, not flown; offline probe passed, the live line is pending. This README becomes
+R12's pre-registration when the operator confirms it.
+
+Draft written 2026-10-28 from R11's [failure analysis](../R11_goal_default/failure_analysis.md)
+and the operator's direction the same day. The shas are re-checked against `config.lock.json`
+before the round flies. R12 flies beside a control, **R12C** (`a13` unchanged), on the same host at
+the same SHA. Spec: `docs/phase2-test-plan.md`.
+
+## Goal truth dropped (operator, 2026-10-28)
+
+**No part of `a17` sees the goal's true position.** This reverses the 2026-10-26 decision
+(planner-side code may read it), which R10 and R11 flew under.
+
+- `orchestrator.decide` removes the manifest's `goal` block before any stage runs
+  (`goal_truth: none`).
+- The decision record still carries the full manifest, for evaluation only.
+- The planner works from the agent's own sightings: the perceiver's goal strip on the clean frame.
+
+The search is therefore a real search, and R12 is not comparable with R10 or R11 on outcomes. Its
+control is the last agent that flew without goal truth, `a13` (Control below).
+
+## Change
+
+**A bundle on `a13`'s pipeline**, credited to the bundle, not to any part. It carries R11's
+lessons, which `a14`–`a16` were built on.
+
+| Part | `a13` (R9, R10C) | `a17` |
+|---|---|---|
+| **Who sets the target** | `q01` on nine triggers | **Stage machine** (code, `planner.staged`). In **explore** (the start), the target is a search target chosen by `q04`. In **goal**, entered on one goal sighting, the target is where the goal was seen (`goal_belief`; one sighting gives a bearing, steered 10 m along it). Back to explore when a look disproves the sighting (below). In goal, a walled or blocked way asks `q04` for a detour (a16's rule, on the belief instead of the truth). |
+| **Coverage map** | free floor, 6 m rays down each strip's centre | **Each look's cone is searched.** 3 rays per strip, out to where the floor ends, cut at a stop wall. Ground under the cone with no goal reported in that strip is *searched*: it is never a target, but it can still be flown through. Floor that ends at a wall or a closed door writes a wall. |
+| **Evaluator** | critic: one retry on a blocked, spin or loop pick | **Code, per step, recorded as `evaluator`**: `new_seen` (cells newly searched), `view_revisit` (share of the cone already searched, "seen this view before"), `target_gain_m`, `stopped_short`, `goal_sighted`. 4 unproductive steps in a row (`new_seen` < 3 and gain < 0.5 m) blacklist the target. If no unsearched ground is reachable ("exhausted"), only doorways and a way back are offered. No navigator retry, and no critic. |
+| **Sighting check** | none | A belief is disproved when a look's cone covers it, or when a look faces it down an open strip with no known wall on the line, and no goal is reported in either case. One such look is enough: the rays are dropped and the stage is explore. |
+| **Search targets** | frontier centres, largest first | **Reachable only.** Edges of unsearched ground that a path over known floor reaches, keeping one cell from walls. Each is offered one cell short on its path, ranked by edge cells ÷ (path + 2 m). Doorways are listed only if a path reaches them. |
+| **Walls** | a visit or a newer look erases a wall | A move under 1.5 m writes a **stop wall** one cell ahead of where it stopped. No look erases it. |
+| **Doorways** | passed within 1.5 m | passed only when a move runs through them (within 0.6 m); closed when `g04` says closed; a15's gate (second sighting, 10-step lifetime) kept |
+| **Perceiver** | `g03` | **`g04`**: `open_far` splits into `wall_far` (a wall or door ends the floor at about 4–8 m) and `open_very_far` (no wall within about 8 m); doorway open, closed or none; "a surface with no floor line across it is blocked_near" |
+| **Strategist** | `q01` | **`q04`**: places worded by unsearched ground and path length over known floor, never by nearness to the goal; "every place listed can be reached"; backtrack for dead ends |
+| **Notes** | a13's | a16's wall-aware "toward", plus three changes. When nothing in the fan is within 55°, "toward" goes on the sharpest open move on the target's side. [0] is never hidden while it carries "toward". A move facing only searched ground reads "searched already this way" instead of "new ground". |
+| Navigator | `p14` | `p14` unchanged; it sees only the notes and the plan line change |
+| Turn rule | none | `a14`'s (no turn-around right after one while a move ahead is open), except as above |
+
+Ranges, by floor class:
+
+| Floor class | Reach | Note |
+|---|---|---|
+| `blocked_near` | 0.5 m | g03's 1.0 m: wall within 1 m on 378 of 606 R11 lane reads |
+| `open_near` | 2.0 m | |
+| `open_far` (g03, replay only) | 4.0 m | was 6 m |
+| `wall_far` | 6.0 m | |
+| `open_very_far` | 10.0 m | |
+
+`eval/r12_probe.py` gives the R11-geometry counts behind each.
+
+## Evidence
+
+From R11's [failure analysis](../R11_goal_default/failure_analysis.md) and
+[analysis/d_detect.py](analysis/d_detect.py) ([probe/d_detect.txt](probe/d_detect.txt)).
+
+- **R11 lost to its map, not its model.**
+  - 34 of 37 detour targets lay behind or inside a wall, and only 1 of 33 detours was reached.
+  - 37 of 58 collisions came on those detours.
+  - With a perfect perceiver, the top goal-side frontier would still be unreachable in 37 of 38
+    calls.
+  - The causes: collisions never wrote walls, newer looks erased walls, open floor ran a fixed 6 m,
+    and no target was checked for a path.
+- **g03 sees the goal whenever it is in line of sight, at any range.** Over R9–R11 it reported the
+  goal 612 of 612 times in view, in every distance band out past 30 m. It reported a goal out of
+  view on 123 of 3290 frames (3.7%). So a look that faces the goal with nothing in the way shows
+  it: ground a look covers without the goal is empty, and only walls end the cone.
+- **Its range class says nothing.** "near" covered 40 of 40 sightings at 30+ m, so a single
+  sighting is a bearing.
+- **False sightings drove R11's failures.** 10 of R11's 14 goal-in-view hand-backs were
+  hallucinated, 7 of them in failed runs.
+- **The navigator ignored a target behind it.** "toward" sat on [0], hidden or ignored, on 185
+  steps, which flew +158 m away from the goal.
+- **Doorways were struck as passed without being crossed.** The true door was listed at only 4 of
+  the 14 calls where it was in memory.
+- **A critic that only asks again does not change picks.** R9's critic changed 0 of 19.
+
+## Hypothesis
+
+With the goal unknown, an agent that searches only ground it has not yet looked over, goes only
+where a known path leads, and drops sightings a later look disproves, finds and reaches the goal
+more often than `a13`, which searches with the same model, perceiver map and navigator but no
+coverage, stages or reachability. `final` + `dynamic` rises above R12C.
+
+## Predictions
+
+| Measure | R10C (`a13`) | Prediction (R12 against R12C) |
+|---|---|---|
+| `initial` | 5/6 | ≥ 5/6 |
+| `final` + `dynamic` | 2/12 | above R12C |
+| cells changed against R12C | | more than the floor (below), more gained than lost |
+| collisions | 57 | below R12C |
+| top search target inside a wall or not truly reachable (geometry, evaluation only) | | ≤ 10% of `q04` calls |
+| steps whose look was ≥ 90% already searched (`view_revisit`) | | below R12C's, with R12C's records replayed through `a17`'s memory |
+| `q04` calls | | ≤ 15% of steps (smoke on R11's manifests: 9%) |
+| false sightings disproved within 3 steps, of those a later look faced (truth, evaluation only) | | ≥ 80% |
+| "toward your target" on an action with a not-open note | | 0 |
+| `spin_failure` runs | | 0 |
+
+## Attribution rule
+
+As R11. R12 is read against R12C.
+
+- A success change is credited to the bundle only if R12 changes **more than F of 18** outcomes
+  against R12C **and** gains more cells than it loses.
+- F = max(6, the number of outcomes R12C changes against R10C).
+- R12C against R10C is reported as `a13`'s run-to-run floor. It was 3 of 18 for R10C against R9.
+
+## Control
+
+**R12C flies `a13`** (`3de550e110e7`), unchanged, on the R12 host at R12's SHA, right after R12.
+[R12C README](../R12C_a13_control/README.md).
+
+- `a13` is the last agent with no goal truth. R10C flew it at 7/18: `initial` 5/6, `final` 1/6,
+  `dynamic` 1/6.
+- `a14` and `a16` read the goal's true position in code, so they are not a fair control.
+- R11 (`a16`, 11/18) is reported beside R12 as the truth-informed reference. It does not enter the
+  attribution rule.
+
+## Manipulation check
+
+From the decision records and `eval/r12_probe.py`, on R12 and R12C. Truth is used only to score.
+
+- **Stages:** stage per step; entries to goal; returns to explore by kind (disproved, reached
+  empty).
+- **Evaluator:** `new_seen` and `view_revisit` distributions; blacklist events; exhausted menus.
+- **`q04` calls:** count by trigger, and the picks by kind (frontier, doorway, backtrack, explore).
+- **Sightings:** genuine and false, scored against line of sight and bearing, and how many of each
+  were disproved.
+- **Search targets:** the top target inside a wall or not reachable on the site geometry.
+- **Coverage:** share of searched cells truly in line of sight (on `g04`'s reads); runs with goal
+  ground searched before the goal was first reported.
+- **No truth:** every record carries `stage` and `evaluator`; the `smoke` line repeated on R12's
+  records (decisions with and without the goal block identical).
+- **Notes and the turn rule:**
+  - "toward" on a not-open action must be 0;
+  - `hidden` must never fall on a turn-around tagged "toward".
+- **Also:** collisions, revisit rate and mean step latency.
+
+## Drop criterion
+
+`a17` is dropped if two or more hold (as R11):
+- `final` + `dynamic` below 3/12;
+- `initial` below 4/6;
+- any run invalid on the wall clock (900 s);
+- `spin_failure` on 2 or more runs.
+
+## Probe gate
+
+`eval/r12_probe.py`. R12 does not fly if any line fails.
+- **Offline lines** run on recorded runs (R10, R11C, R11) through `a17`'s code, with g03's recorded
+  reports. They are scored against R11's 2D site model, `analysis/geo.py`, where s03's exit doors
+  are taken as open.
+- **Line 7** needs the model.
+
+| # | Check | Set | Threshold | Result (2026-10-28) |
+|---|---|---|---|---|
+| 1 | Old agents unchanged | `spatial_replay.py rerender` on R10, R11C, R11; shas of `a13`, `a14`, `a16` | diffs as before the change, 0 in words; shas as locked | 7 / 6 / 0, the same as HEAD (strategist replay), 0 in words; `3de550e110e7`, `63ad006476b6`, `6d614e3c4450`, **pass** |
+| 3 | No false "empty" | R10, R11C, R11, `a17` memory | goal ground searched before the goal was first reported in ≤ 2 runs per round | 0 / 0 / 0, **pass** |
+| 4 | Reachable targets | R11's 38 `q03` situations | top search target inside a wall or not truly reachable ≤ 5 of 38 | 3 of 38 (R11's frontier 37 of 38), **pass** |
+| 5 | Sightings checked | stage machine open-loop on R11 and R11C, `q04` stubbed | false sightings that a later look faced: ≥ 80% disproved; genuine sightings disproved with the goal in line of sight ≤ 5% | 39 of 46 (85%); 12 of 285 (4.2%), **pass** |
+| 6 | No goal truth | `a17`'s real step (`smoke`) over R11's 706 manifests, stub replies, with and without the goal block | 0 decisions differ, 0 failed steps | 0, 0, **pass** |
+| 7 | `g04` reads (live, sctsvr6) | R11 frames scored against geometry | searched cells in line of sight ≥ 90%; `blocked_near` read as open < 15% | **pending** (the operator's tunnel) |
+
+[probe/offline.txt](probe/offline.txt), [probe/smoke.txt](probe/smoke.txt).
+
+### Changed while building, before pre-registration (2026-10-28)
+
+- **Line 3 is split.** On g03 the in-sight share is 87%, 88% and 83% (R10, R11C, R11), because
+  g03 reads walls within 1 m as `open_far` a third of the time. `g04` is built to fix that, so the
+  ≥ 90% line is gated live on `g04` (line 7). The false-"empty" count stays offline.
+- **Line 5 is scored as follows.**
+  - A sighting is genuine with line of sight and the goal ≤ 60° off-axis (its glow reaches past the
+    frame's 43.5°).
+  - The false-sighting share counts only the sightings a later look faced within 3 steps. The
+    replay follows R11's recorded path, so it cannot turn the drone toward `a17`'s belief.
+  - A genuine sighting counts as lost only while the goal is still in line of sight. 25 more were
+    dropped after the goal went out of sight, mostly door B closing at step 4 in `dynamic`, which
+    g03 reads as open floor.
+- **The disproof rule gained "faces it down an open strip".** With the cone alone, 3 of 52 false
+  sightings were disproved: a single sighting's point lies 10 m out, past g03's 4 m cone.
+  `miss_looks` = 1, with this trade-off:
+
+  | `miss_looks` | False sightings disproved | Genuine lost in sight |
+  |---|---|---|
+  | 1 | 39 of 46 | 12 of 285 |
+  | 2 | 28 of 46 | 9 of 285 |
+
+- **g03 reaches shortened** against R11's geometry (Change above).
+- **Search targets are offered one cell short on their path.** At the edge cell itself, 10 of 38
+  lay inside a wall slab.
+
+```
+python3 eval/phase2/R12_staged_search/analysis/d_detect.py
+python3 eval/r12_probe.py offline
+python3 eval/r12_probe.py smoke eval/phase2/R11_goal_default/runs
+```
+
+## Shakedown
+
+One unscored `dynamic` run per site on the flight host:
+- every record carries `perceiver` (g04 classes), `stage`, `evaluator`, `tags` and, where it
+  applies, `hidden` and `q04`'s call;
+- the decision manifest's goal block reaches no stage (the `smoke` check on the shakedown records);
+- `/health` reports `a17`'s sha;
+- no run passes 700 s.
+
+## Host
+
+sctsvr6 headless (Docker, Mesa lavapipe), as R7–R11, with R12C there too. The tunnel is the
+operator's.
+
+## Builds on
+
+- R11: map fixes from its failure analysis, wall-aware "toward", the role-view leak check.
+- R10: the turn rule.
+- R9: perceiver, map, notes, strategist, navigator; the critic that changed no picks.
+- R10C: re-fly noise of a multi-call agent.
+- R2: a model's own history makes it repeat itself.
+
+## Outcome
+
+Not flown.
