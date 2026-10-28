@@ -19,6 +19,14 @@ ground truth to score the goal belief. The agent never does.
 - for runs with perceiver reports (a13 on), goal-belief error in metres at the
   last step, how many picks carried "blocked here before", and how often the
   critic and the strategist were called.
+
+`audit` (R11 evidence) reports, for every run under ROOT together: how often
+each note was offered and picked against chance, "toward your target" on an
+action the map calls not open, stopped-short moves near an earlier block that
+carried no note, the goal estimate's error, goal distance gained per step by
+standing target, and what the strategist was asked and chose.
+
+    python eval/spatial_replay.py audit eval/phase2/R10_goal_planner/runs
 """
 from __future__ import annotations
 
@@ -228,6 +236,369 @@ def cmd_manip(args: argparse.Namespace) -> int:
     return 0
 
 
+# --- audit (R11 evidence): how the memory's notes and the planner were used ------
+
+#: Each note the projector can write, as the family it is counted under.
+NOTE_FAMILIES = (
+    ("goal about one move ahead", "goal_one_move"),
+    ("goal this way", "goal_seen"),
+    ("toward your target", "toward_target"),
+    ("doorway (seen now)", "doorway_seen"),
+    ("new ground", "new_ground"),
+    ("been there", "visited"),
+    ("behind you is ground you have covered", "behind_visited"),
+    ("behind you is new ground", "behind_new"),
+    ("wall close", "wall_seen"),
+    ("blocked here before", "blocked"),
+    ("stopped short here before", "short"),
+)
+#: Notes that say a forward move is not open (spatial._NOT_OPEN).
+NOT_OPEN = ("wall_seen", "blocked", "short")
+#: A stopped-short move "repeats" an earlier block within this distance and angle.
+REPEAT_NEAR_M = 2.0
+REPEAT_WITHIN_DEG = 45.0
+
+
+def note_family(note: str) -> str:
+    return next((fam for prefix, fam in NOTE_FAMILIES if note.startswith(prefix)), "other")
+
+
+def _median(xs: List[float]) -> Optional[float]:
+    xs = sorted(xs)
+    if not xs:
+        return None
+    n = len(xs)
+    return round((xs[n // 2] if n % 2 else (xs[n // 2 - 1] + xs[n // 2]) / 2.0), 2)
+
+
+def _mean(xs: List[float]) -> Optional[float]:
+    return round(sum(xs) / len(xs), 2) if xs else None
+
+
+def audit_run(run: Path, acc: Dict[str, Any]) -> None:
+    """Fold one run into the round's audit counters. Evaluation only: reads the
+    manifest's goal ground truth."""
+    import re
+    rows = load(run)
+    truth = true_goal(rows)
+    poses = [spatial.pose_xyh((r.get("manifest") or {}).get("pose")) for r in rows]
+    prev_target = None
+    for k, r in enumerate(rows):
+        here = poses[k]
+        nxt = poses[k + 1] if k + 1 < len(rows) else None
+        decided = r.get("index") is not None
+        actions = {int(a["index"]): a for a in (r.get("manifest") or {}).get("actions") or []}
+        hidden = set((r.get("hidden") or {}).get("indices") or [])
+        offered = [i for i in actions if i not in hidden]
+        tags = {int(i): v for i, v in (r.get("tags") or {}).items()}
+        chosen = actions.get(int(r["index"])) if decided else None
+        moved = (spatial.dist(here[:2], nxt[:2]) if chosen is not None and here and nxt
+                 and not chosen.get("turn_around") else None)
+        stopped = moved is not None and moved < spatial.SHORT_BELOW_M
+
+        # 1. Notes offered against notes picked; expected picks at chance.
+        if decided and offered:
+            for i in offered:
+                for fam in {note_family(n) for n in tags.get(i, [])}:
+                    n = acc["notes"].setdefault(fam, {"offered": 0, "picked": 0, "chance": 0.0,
+                                                      "picked_stopped_short": 0})
+                    n["offered"] += 1
+                    n["chance"] += 1.0 / len(offered)
+                    if i == r["index"]:
+                        n["picked"] += 1
+                        n["picked_stopped_short"] += stopped
+            # 2. "toward your target" on an action the map also calls not open.
+            for i in offered:
+                fams = {note_family(n) for n in tags.get(i, [])}
+                if "toward_target" not in fams:
+                    continue
+                kind = "turn_around" if actions[i].get("turn_around") else "forward"
+                acc["toward"][kind + "_offered"] += 1
+                acc["toward"][kind + "_picked"] += i == r["index"]
+                if fams & set(NOT_OPEN):
+                    acc["toward"]["with_not_open"] += 1
+                    acc["toward"]["with_not_open_picked"] += i == r["index"]
+                    acc["toward"]["with_not_open_picked_stopped_short"] += (
+                        i == r["index"] and stopped)
+
+        # 3. Stopped-short moves near an earlier block, and whether a note said so.
+        if stopped and chosen is not None and here is not None:
+            mem = memory_at(rows, k)
+            heading = spatial.action_heading(chosen, here[2])
+            acc["repeat"]["stopped_short"] += 1
+            near = [b for b in mem.blocks if b.step < r["step"]
+                    and spatial.dist(here[:2], (b.x, b.y)) < REPEAT_NEAR_M
+                    and abs(spatial.wrap(b.heading - heading)) < REPEAT_WITHIN_DEG]
+            if near:
+                acc["repeat"]["near_earlier_block"] += 1
+                fams = {note_family(n) for n in tags.get(r["index"], [])}
+                if not fams & {"blocked", "short"}:
+                    acc["repeat"]["near_earlier_block_no_note"] += 1
+
+        # 4. The goal estimate (agents without the truth) against the truth, and
+        # the perceiver's bearing and range when the goal is in view.
+        belief = (r.get("spatial") or {}).get("goal_belief")
+        if belief and truth and here is not None and r.get("agent_version") == "a13":
+            err = spatial.dist(truth, (belief[0], belief[1]))
+            acc["belief_err"].append(err)
+            acc["belief_ratio"].append(err / max(spatial.dist(here[:2], truth), 0.1))
+        goal = (r.get("manifest") or {}).get("goal") or {}
+        seen = (r.get("perceiver") or {}).get("result") or {}
+        if seen.get("goal") in spatial.STRIPS and goal.get("line_of_sight") and here:
+            b = float(goal.get("bearing_deg", 0.0))
+            if abs(b) <= spatial.FOV_DEG / 2.0:
+                acc["bearing_err"].append(abs(spatial.strip_offset(seen["goal"]) - b))
+                acc["range_said"].setdefault(seen.get("goal_range") or "mid", []).append(
+                    round(float(goal.get("distance") or 0.0), 1))
+
+        # 5. Goal distance gained per step, by the target standing at that step.
+        kind = (r.get("target") or {}).get("kind", "none")
+        if decided and truth and here is not None and nxt is not None:
+            acc["gain"].setdefault(kind, []).append(
+                spatial.dist(here[:2], truth) - spatial.dist(nxt[:2], truth))
+        if decided:
+            acc["steps"] += 1
+            acc["standing"][kind] = acc["standing"].get(kind, 0) + 1
+            ls = (r.get("spatial") or {}).get("loop_score")
+            acc["loop_hot"] += bool(ls is not None and ls >= 0.5)
+            if r.get("navigator_text"):
+                acc["nav_chars"].append(len(r["navigator_text"]))
+            tid = (r.get("target") or {}).get("id")
+            acc["target_changes"] += bool(k > 0 and tid != prev_target)
+            prev_target = tid
+
+        # 6. The strategist: what it was asked with, what it chose, menu staleness.
+        plan = r.get("strategist")
+        if plan:
+            st = acc["strategist"]
+            st["calls"] += 1
+            acc["triggers"][plan.get("trigger")] = acc["triggers"].get(plan.get("trigger"), 0) + 1
+            text = plan.get("text") or ""
+            acc["strat_chars"].append(len(text))
+            st["text_goal_not_in_image"] += "The goal is not in the current image" in text
+            st["text_within_2m"] += "within 2 m of this spot" in text
+            for m in plan.get("menu") or []:
+                got = re.search(r"seen at step (\d+)", m.get("label", ""))
+                if m.get("kind") == "opening" and got:
+                    acc["doorway_age"].append(r["step"] - int(got.group(1)))
+            res = plan.get("result")
+            if res:
+                st["answered"] += 1
+                t = res["target"]
+                chosen_kind = next((m.get("kind") for m in plan.get("menu") or []
+                                    if m.get("id") == t), "explore")
+                acc["chosen"][chosen_kind] = acc["chosen"].get(chosen_kind, 0) + 1
+                goal_listed = any(m.get("id") == "goal" for m in plan.get("menu") or [])
+                st["goal_listed"] += goal_listed
+                if goal_listed and t != "goal" and re.search(
+                        r"wall|block|obstruct|not (currently )?visible", res.get("reason", ""),
+                        re.I):
+                    st["not_goal_reason_wall_or_unseen"] += 1
+
+
+def cmd_audit(args: argparse.Namespace) -> int:
+    from collections import Counter
+    acc: Dict[str, Any] = {
+        "steps": 0, "notes": {}, "loop_hot": 0, "target_changes": 0, "standing": {},
+        "toward": Counter(), "repeat": Counter(), "belief_err": [], "belief_ratio": [],
+        "bearing_err": [], "range_said": {}, "gain": {}, "nav_chars": [], "strat_chars": [],
+        "strategist": Counter(), "triggers": {}, "chosen": {}, "doorway_age": [],
+    }
+    runs = runs_under(Path(args.root).resolve())
+    for run in runs:
+        audit_run(run, acc)
+    ages = acc["doorway_age"]
+    out = {
+        "runs": len(runs),
+        "decided_steps": acc["steps"],
+        "notes": {fam: dict(n, chance=round(n["chance"], 1),
+                            lift=round(n["picked"] / n["chance"], 2) if n["chance"] else None)
+                  for fam, n in sorted(acc["notes"].items())},
+        "toward": dict(sorted(acc["toward"].items())),
+        "repeat_collisions": dict(sorted(acc["repeat"].items())),
+        "loop_score_ge_0_5_steps": acc["loop_hot"],
+        "goal_belief_err_m": {"n": len(acc["belief_err"]), "median": _median(acc["belief_err"]),
+                              "mean": _mean(acc["belief_err"]),
+                              "within_2m": sum(e < 2.0 for e in acc["belief_err"]),
+                              "within_4m": sum(e < 4.0 for e in acc["belief_err"]),
+                              "median_over_true_distance": _median(acc["belief_ratio"])},
+        "perceiver_bearing_err_deg": {"n": len(acc["bearing_err"]),
+                                      "median": _median(acc["bearing_err"])},
+        "perceiver_range_vs_true_m": {
+            cls: {"n": len(ds), "median": _median(ds), "min": min(ds), "max": max(ds),
+                  "range_m_assumed": spatial.GOAL_RANGE_M.get(cls)}
+            for cls, ds in sorted(acc["range_said"].items())},
+        "goal_gain_per_step_m_by_standing_target": {
+            kind: {"n": len(g), "mean": _mean(g)} for kind, g in sorted(acc["gain"].items())},
+        "standing_target_steps": dict(sorted(acc["standing"].items())),
+        "target_changes": acc["target_changes"],
+        "strategist": dict(sorted(acc["strategist"].items())),
+        "strategist_triggers": dict(sorted(acc["triggers"].items(), key=lambda t: (-t[1], t[0]))),
+        "strategist_chosen_kind": dict(sorted(acc["chosen"].items())),
+        "menu_doorway_age_steps": {"n": len(ages), "median": _median(ages),
+                                   "over_10": sum(a > 10 for a in ages),
+                                   "max": max(ages) if ages else None},
+        "navigator_text_chars": {"mean": _mean(acc["nav_chars"]),
+                                 "max": max(acc["nav_chars"]) if acc["nav_chars"] else None},
+        "strategist_text_chars": {"mean": _mean(acc["strat_chars"]),
+                                  "max": max(acc["strat_chars"]) if acc["strat_chars"] else None},
+    }
+    print(json.dumps(out, indent=1))
+    return 0
+
+
+# --- rerender: every recorded decision through today's orchestrator ----------------
+
+#: Fields a re-rendered record may differ in: when it was written, and a sum of
+#: latencies the original took before rounding them.
+RERENDER_SKIP = ("t", "step_latency_ms")
+
+
+class _Replayed:
+    """A recorded subagent reply, shaped like vlm.SubCall for the orchestrator."""
+
+    def __init__(self, d: Dict[str, Any]) -> None:
+        self._d = d
+        self.result = d.get("result")
+        self.rung = d.get("rung")
+        self.latency_ms = float(d.get("latency_ms") or 0.0)
+        self.model = d.get("model")
+        self.prompt_tokens = d.get("prompt_tokens")
+        self.completion_tokens = d.get("completion_tokens")
+        self.attempts = d.get("attempts") or []
+        self.raw = d.get("raw") or ""
+        self.error = d.get("error")
+        timing = d.get("timing")
+        self.timing = None if timing is None else type("T", (), {"to_dict": lambda _s: timing})()
+
+    def to_dict(self) -> Dict[str, Any]:
+        return dict(self._d)
+
+
+_NAV_FIELDS = ("rung", "latency_ms", "model", "prompt_tokens", "completion_tokens", "attempts",
+               "raw", "timing")
+
+
+def _recorded_reply(rec: Dict[str, Any], name: str, follow_up: Any) -> Dict[str, Any]:
+    from server.decider import schema
+    if name == schema.PERCEIVER_SCHEMA_NAME:
+        got = rec.get("perceiver")
+    elif name == schema.STRATEGIST_SCHEMA_NAME:
+        got = rec.get("strategist")
+        if got is not None:
+            got = {k: v for k, v in got.items() if k not in ("trigger", "text", "menu")}
+    elif follow_up:
+        got = (rec.get("critic") or {}).get("retry")
+    elif rec.get("critic"):
+        got = rec["critic"]["first"]
+    elif "navigator" in rec:
+        got = rec["navigator"]
+    elif rec.get("index") is not None:
+        got = {"result": {"index": rec["index"], "reason": rec["reason"]},
+               **{k: rec.get(k) for k in _NAV_FIELDS}}
+    else:
+        got = None
+    if got is None:
+        raise LookupError("step {0}: the code asks for a {1} call the record does not have"
+                          .format(rec.get("step"), name))
+    return got
+
+
+def _words(rec: Dict[str, Any]) -> str:
+    """Everything a model was shown or chose by, without the map's float
+    coordinates (Linux and macOS libm can differ in the last digit, which moves
+    a rounded centroid by 0.01 m but never a word)."""
+    plan = rec.get("strategist") or {}
+    return json.dumps([rec.get("navigator_text"), rec.get("tags"), rec.get("hidden"),
+                       rec.get("index"), rec.get("mode"), (rec.get("target") or {}).get("id"),
+                       plan.get("trigger"), plan.get("text"),
+                       [m.get("id") for m in plan.get("menu") or []],
+                       (rec.get("critic") or {}).get("note")])
+
+
+def rerender_run(run: Path, work: Path) -> Dict[str, Any]:
+    """Feed each recorded decision back through orchestrator.decide with the
+    recorded model replies, and compare the record it writes with the original,
+    field by field and in order."""
+    import asyncio
+    import os
+    import types
+    from server.decider import orchestrator, recorder, vlm
+
+    lines = [line for line in (run / "decisions.jsonl").read_text().splitlines() if line.strip()]
+    originals = [json.loads(line) for line in lines]
+    out: Dict[str, Any] = {"run": label(run), "decisions": len(originals), "differ": [],
+                           "words_differ": [], "records": []}
+    replaying: Dict[str, Any] = {}
+
+    async def fake_call(name, system, text, image_b64, json_schema, validate, max_tokens,
+                        follow_up=None):
+        return _Replayed(_recorded_reply(replaying["rec"], name, follow_up))
+
+    real_call = vlm.call_structured
+    vlm.call_structured = fake_call
+    try:
+        target = work / run.parts[-3] / run.parts[-2] / run.parts[-1]
+        target.mkdir(parents=True, exist_ok=True)
+        r = recorder.Run("rerender-" + "-".join(run.parts[-3:]), target)
+        r.ensure()
+        for k, rec in enumerate(originals):
+            if "step" not in rec or not rec.get("agent_version"):
+                continue
+            os.environ["VLM_AGENT"] = rec["agent_version"]
+            r.decisions.write_text("".join(line + "\n" for line in lines[:k]))
+            replaying["rec"] = rec
+            request = types.SimpleNamespace(
+                manifest=rec["manifest"], step=rec["step"], frame_size=rec.get("frame_size"),
+                frame_png_b64="AA==",
+                clean_frame_png_b64="AA==" if rec.get("clean_frame") else None)
+            try:
+                asyncio.run(orchestrator.decide(request, r, rec.get("frame")))
+                new = recorder._read_jsonl(r.decisions)[-1]
+            except LookupError as exc:
+                out["differ"].append({"step": rec["step"], "why": str(exc)})
+                continue
+            a = {f: v for f, v in rec.items() if f not in RERENDER_SKIP}
+            b = {f: v for f, v in new.items() if f not in RERENDER_SKIP}
+            out["records"].append(b)
+            if _words(a) != _words(b):
+                out["words_differ"].append(rec["step"])
+            if json.dumps(a) != json.dumps(b):
+                keys = [f for f in list(a) + [f for f in b if f not in a]
+                        if json.dumps(a.get(f)) != json.dumps(b.get(f))]
+                out["differ"].append({"step": rec["step"],
+                                      "fields": keys or ["(field order)"]})
+    finally:
+        vlm.call_structured = real_call
+    return out
+
+
+def cmd_rerender(args: argparse.Namespace) -> int:
+    """Exit 1 if any decision's words differ from the record. `--out` writes the
+    re-rendered records, so two versions of the code can be compared byte for
+    byte on one machine."""
+    import tempfile
+    bad = words = total = 0
+    dump = open(args.out, "w") if args.out else None
+    with tempfile.TemporaryDirectory() as tmp:
+        for run in runs_under(Path(args.root).resolve()):
+            row = rerender_run(run, Path(tmp))
+            total += row["decisions"]
+            bad += len(row["differ"])
+            words += len(row["words_differ"])
+            if dump is not None:
+                for rec in row["records"]:
+                    dump.write(json.dumps({"run": row["run"], **rec}) + "\n")
+            if row["differ"] or args.verbose:
+                print(json.dumps(dict({k: v for k, v in row.items() if k != "records"},
+                                      differ=row["differ"][:5])))
+    if dump is not None:
+        dump.close()
+    print("decisions re-rendered: {0}; differing in any field: {1}; in words: {2}".format(
+        total, bad, words))
+    return 1 if words else 0
+
+
 def cmd_draw(args: argparse.Namespace) -> int:
     import matplotlib
     matplotlib.use("Agg")
@@ -293,12 +664,21 @@ def main() -> int:
     c.add_argument("root")
     m = sub.add_parser("manip", help="R9 manipulation-check counts for every a13 run under ROOT")
     m.add_argument("root")
+    a = sub.add_parser("audit", help="R11 evidence: notes offered against picked, repeat "
+                       "collisions, goal estimate, strategist choices, for a round under ROOT")
+    a.add_argument("root")
+    rr = sub.add_parser("rerender", help="feed every orchestrated decision under ROOT back "
+                        "through orchestrator.decide with its recorded replies; must match")
+    rr.add_argument("root")
+    rr.add_argument("--verbose", action="store_true")
+    rr.add_argument("--out", help="write every re-rendered record here (jsonl)")
     d = sub.add_parser("draw", help="draw one run's memory as a top-down map")
     d.add_argument("run")
     d.add_argument("--out", required=True)
     d.add_argument("--step", type=int)
     args = parser.parse_args()
-    return {"check": cmd_check, "manip": cmd_manip, "draw": cmd_draw}[args.cmd](args)
+    return {"check": cmd_check, "manip": cmd_manip, "audit": cmd_audit,
+            "rerender": cmd_rerender, "draw": cmd_draw}[args.cmd](args)
 
 
 if __name__ == "__main__":

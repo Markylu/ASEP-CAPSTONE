@@ -1,0 +1,15 @@
+agent a16
+| Check | Value | Threshold | Pass |
+|---|---|---|---|
+| block note on a picked forward move, stopped short | 22/33 (67%) | >= 65% | yes |
+| R10 steps with a block note on every forward move | 0 | <= 0 | yes |
+| R10 steps where the planner keeps the goal | 434/755 (57%) | >= 50% | yes |
+| 'toward' on a not-open action, the agent's tags on R10 | 0 | <= 0 | yes |
+| R10 navigator lines wording the goal's position | 0 | <= 0 | yes |
+
+near-repeat collisions noted (not gated since 2026-10-27): 22/37
+planner on R10's steps: {'open': 434, 'blocked': 34, 'stall': 249, 'walled': 38}
+steps whose 'toward' note moved under a15: 73
+near-repeats still un-noted: s02c/initial/seed1 27 [5] ['wall close (seen now)']; s02va/dynamic/seed1 17 [5] ['toward your target', 'new ground']; s02va/final/seed1 49 [1] ['doorway (seen now)', 'new ground']; s02a/final/seed1 42 [1] ['wall close (seen now)']; s02a/initial/seed1 27 [5] ['wall close (seen now)']; s02c/dynamic/seed1 19 [1] ['new ground']; s02c/dynamic/seed1 21 [3] ['new ground']; s02c/final/seed1 44 [1] ['doorway (seen now)', 'new ground']; s02va/final/seed1 49 [1] ['doorway (seen now)', 'new ground']; s03/final/seed1 26 [1] ['new ground']; s03/initial/seed1 34 [5] ['toward your target', 'been there 1 time (last step 19)']; s02vc/final/seed1 51 [5] ['wall close (seen now)']; s03/dynamic/seed1 26 [5] ['toward your target', 'new ground']; s03/final/seed1 15 [4] ['wall close (seen now)']; s03/initial/seed1 26 [5] ['toward your target', 'new ground']
+
+OFFLINE LINES PASSED

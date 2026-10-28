@@ -1,0 +1,9 @@
+| Check | Value | Threshold | Pass |
+|---|---|---|---|
+| q03 detour >= 3 m nearer the goal | 40% | >= 60% | **no** |
+| q03 chooses explore | 32% | <= 10% | **no** |
+| p14 pick open with a15's notes | 64% | >= 80% | **no** |
+
+detour calls answered 88; toward steps answered 14
+
+LIVE LINES FAILED

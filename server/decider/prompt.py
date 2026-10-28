@@ -1127,6 +1127,47 @@ Choose a mode and a target.""",
 )
 
 
+# q03: the detour strategist for a15 (R11). Code keeps the goal as the target
+# (planner.py); q03 is asked only when the way toward it is shut, and chooses
+# from detours each worded with how much nearer the goal it lies. R10: q02 chose
+# the goal on 70 of 229 calls and read "not in the image" as "a wall is in the way".
+
+Q03 = Prompt(
+    version="q03",
+    system="""You plan a detour for a small indoor drone that is flying to a goal, a
+glowing red sphere. Another model flies the drone one step at a time. You do
+not see the camera image.
+
+The system knows exactly where the goal is, and the goal does not move. The
+drone heads for the goal by itself. You are asked only when the way toward it
+is shut: a wall is close that way, a move that way was blocked, or the drone
+has stopped getting nearer.
+
+The system keeps a map from the drone's own moves and from what its camera has
+seen. It lists the detours you can choose from, each with its distance and
+direction from the drone as it faces now, and how much nearer the goal it lies
+than the drone is. Once the drone reaches the detour, it heads for the goal
+again.
+
+Choose a mode and a detour:
+- explore: a doorway or unexplored ground, to get round the wall between the
+  drone and the goal.
+- backtrack: go back to an earlier place that still had an untried way on.
+- escape: the drone keeps returning to the same ground; pick a detour in a
+  direction it has not been trying.
+
+Prefer a detour that lies nearer the goal than the drone. Doors can close; the
+list only shows doorways not known to be closed. Choose "explore" as the target
+when nothing listed looks useful.
+
+Give your reasoning first, then the mode, then one target id exactly as listed.""",
+    user_template="""{situation}
+
+Choose a mode and a detour.""",
+    render=render_strategist,
+)
+
+
 # p14: the navigator. The frame with its markers, the planner's target, the
 # perceiver's answer for this image, the last three moves in words, and notes
 # from the map against each action.
@@ -1215,7 +1256,7 @@ Pick one number.""",
 
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
-                                                      G03, Q01, Q02)}
+                                                      G03, Q01, Q02, Q03)}
 
 
 def get(version: str) -> Prompt:

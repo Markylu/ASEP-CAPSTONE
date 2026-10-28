@@ -1,17 +1,27 @@
 """One step of the orchestrated agent (a13 on): several model calls, each with
 one job, and code that does the spatial work between them.
 
+A step is a list of stages (`pipeline()`), each reading what the ones before it
+left on the Step and writing its part of the decision record:
+
     perceiver  (g03, clean frame)        where the goal is, open floor, doorways
     mapper     (spatial.rebuild)         the run's map, rebuilt from decisions.jsonl
-    strategist (q01, text, on a trigger) a target from a list code builds
+    strategist (q01/q02, text, trigger)  a target from a list code builds (a13, a14)
+      or route (planner.py + q03)        the goal unless its way is shut, then a detour (a15)
     projector  (spatial.project)         notes against each action
+    turn_rule  (spatial.hide_turn_around) a14 on
     navigator  (p14, annotated frame)    the action
-    critic     (spatial.critique)        one retry when the map disagrees
+    critic     (spatial.critique)        one retry when the map disagrees (a13)
+
+Every model stage is shown a views.View, and views.check() refuses one that
+shows its role more than it may see. The memory's parameters and wording are
+the agent's spatial.SpatialConfig.
 
 a14 (R10) changes three things by feature flag: the strategist (q02) is given
 the goal's true position (`goal_truth: planner`), a turn-around right after a
 turn-around is not offered while a move ahead is open (`turn_rule`), and the
-critic is off.
+critic is off. a15 (R11) sets the target by code (`target_policy:
+goal_default_llm_detour`) and has a15's memory (`memory: a15`).
 
 Every call is the frozen model at temperature 0 on the shared ladder
 (vlm.call_structured). A failed perceiver or strategist never fails the step:
@@ -25,11 +35,12 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import Any, Callable, Dict, List, Optional
+from dataclasses import dataclass, field
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastapi.responses import JSONResponse
 
-from . import agent, config, prompt as prompts, schema, spatial, vlm
+from . import agent, config, planner, prompt as prompts, schema, spatial, views, vlm
 from .recorder import Run, _read_jsonl
 
 log = logging.getLogger("decider")
@@ -180,9 +191,236 @@ def _error(run: Run, record: Dict[str, Any], message: str):
     return JSONResponse({"error": message}, status_code=200)
 
 
+# --- the step as stages ---------------------------------------------------------
+
+@dataclass
+class Step:
+    """What one decision knows as its stages build it. Each stage reads what
+    the stages before it left here and writes its part of `record`, in the
+    order a decision record has always had its fields."""
+    features: Dict[str, Any]
+    cfg: spatial.SpatialConfig
+    manifest: Dict[str, Any]
+    step: int
+    records: List[Dict[str, Any]]
+    record: Dict[str, Any]
+    frame_b64: str
+    clean_b64: str
+    latency: float = 0.0
+    perception: Optional[Dict[str, Any]] = None
+    mem: Optional[spatial.SpatialMemory] = None
+    here: Optional[spatial.Pose] = None
+    goal: Optional[spatial.Point] = None
+    target: Optional[spatial.Target] = None
+    mode: Optional[str] = None
+    tags: Dict[int, List[str]] = field(default_factory=dict)
+    offered: Dict[str, Any] = field(default_factory=dict)
+    nav_text: str = ""
+    nav: Any = None
+    final: Any = None
+    why_not: Optional[str] = None
+
+
+#: A stage returns None to go on, or an error message that fails the step.
+StageFn = Callable[[Step], Awaitable[Optional[str]]]
+
+
+@dataclass(frozen=True)
+class Stage:
+    """One part of a step. `model` names the subagent prompt a model stage
+    calls (None for code); `when` is when it runs."""
+    name: str
+    run: StageFn
+    model: Optional[str] = None
+    when: str = "every step"
+
+
+async def ask(s: Step, view: views.View, schema_name: str, json_schema: Dict[str, Any],
+              validate: Callable[[Dict[str, Any]], Dict[str, Any]], max_tokens: int,
+              follow_up: Optional[List[Dict[str, Any]]] = None):
+    """One model call from a view, after checking the view shows its role only
+    what it may see."""
+    views.check(view, s.manifest, s.goal is not None)
+    if follow_up is None:
+        reply = await vlm.call_structured(schema_name, view.system, view.text, view.image_b64,
+                                          json_schema, validate, max_tokens)
+    else:
+        reply = await vlm.call_structured(schema_name, view.system, view.text, view.image_b64,
+                                          json_schema, validate, max_tokens,
+                                          follow_up=follow_up)
+    s.latency += reply.latency_ms
+    return reply
+
+
+async def perceive(s: Step) -> Optional[str]:
+    """The clean frame and nothing else."""
+    p = prompts.get(s.features["perceiver"])
+    seen = await ask(s, views.perceiver(p, s.manifest, s.clean_b64),
+                     schema.PERCEIVER_SCHEMA_NAME, schema.perceiver_schema(), perception_from,
+                     PERCEIVER_MAX_TOKENS)
+    s.perception = seen.result
+    s.record["perceiver"] = seen.to_dict()
+    s.record["goal"] = LEGACY_GOAL[s.perception["goal"]] if s.perception else None
+    return None
+
+
+async def build_map(s: Step) -> Optional[str]:
+    s.mem = spatial.rebuild(s.records, s.manifest, s.perception, s.cfg)
+    s.here = spatial.pose_xyh(s.manifest.get("pose"))
+    # a14 on: the planner side alone is given where the goal truly is.
+    s.goal = goal_at(s.manifest) if s.features.get("goal_truth") == "planner" else None
+    return None
+
+
+def _set_target(s: Step) -> None:
+    s.record["target"] = s.target.to_dict() if s.target is not None else None
+    s.record["mode"] = s.mode
+
+
+async def strategize(s: Step) -> Optional[str]:
+    """a13, a14: the strategist chooses a target on a trigger, else the
+    standing target holds while it is still open."""
+    assert s.mem is not None
+    target, mode, last_called, last_perception = previous(s.records, s.step)
+    why = spatial.trigger(s.mem, s.manifest, s.perception, target, last_called, last_perception,
+                          goal_at=s.goal, words=s.cfg.triggers if s.goal is not None else None)
+    if target is not None and s.here is not None and not spatial.target_still_valid(
+            s.mem, target, s.here[:2], s.goal):
+        target = None
+    if why is not None and s.here is not None:
+        menu = spatial.targets(s.mem, s.here, s.step, s.goal)
+        ids = [t.id for t in menu] + [EXPLORE]
+        view = views.strategist(prompts.get(s.features["strategist"]), spatial.situation(
+            s.mem, s.manifest, s.perception, target, menu, why, s.goal))
+        plan = await ask(s, view, schema.STRATEGIST_SCHEMA_NAME, schema.strategist_schema(ids),
+                         _strategy(ids), STRATEGIST_MAX_TOKENS)
+        s.record["strategist"] = dict(plan.to_dict(), trigger=why, text=view.text,
+                                      menu=[t.to_dict() for t in menu])
+        if plan.result is not None:
+            mode = plan.result["mode"]
+            target = next((t for t in menu if t.id == plan.result["target"]), None)
+    s.target, s.mode = target, mode
+    _set_target(s)
+    return None
+
+
+async def route(s: Step) -> Optional[str]:
+    """a15: code keeps the goal as the target (planner.py) and asks the detour
+    strategist (q03) only when the way toward it is shut."""
+    assert s.mem is not None and s.goal is not None
+    standing, mode, last_called, _ = previous(s.records, s.step)
+    r = planner.route(s.mem, s.manifest, s.perception, s.records, standing, mode, last_called,
+                      s.goal)
+    s.record["planner"] = r.to_dict()
+    s.target, s.mode = r.target, r.mode
+    if r.ask is not None and s.here is not None:
+        menu = planner.detours(s.mem, s.here, s.step, s.goal)
+        ids = [t.id for t in menu] + [EXPLORE]
+        view = views.strategist(prompts.get(s.features["strategist"]),
+                                planner.detour_situation(s.mem, s.manifest, menu, r.ask, s.goal))
+        plan = await ask(s, view, schema.STRATEGIST_SCHEMA_NAME, schema.strategist_schema(ids),
+                         _strategy(ids), STRATEGIST_MAX_TOKENS)
+        s.record["strategist"] = dict(plan.to_dict(), trigger=spatial.WORDS_A15["asked"][r.ask],
+                                      text=view.text, menu=[t.to_dict() for t in menu])
+        # A failed call keeps the goal; "explore" is no target for a few steps.
+        if plan.result is not None:
+            s.mode = plan.result["mode"]
+            s.target = next((t for t in menu if t.id == plan.result["target"]), None)
+    _set_target(s)
+    return None
+
+
+async def project(s: Step) -> Optional[str]:
+    assert s.mem is not None
+    s.tags = spatial.project(s.mem, s.manifest, s.perception, s.target)
+    s.record["tags"] = {str(k): v for k, v in s.tags.items()}
+    s.offered = s.manifest
+    return None
+
+
+async def turn_rule(s: Step) -> Optional[str]:
+    """a14 on: a turn-around right after a turn-around is not offered while a
+    move ahead is open (operator, 2026-10-24). Left off the list and the schema;
+    the frame still shows its marker."""
+    assert s.mem is not None
+    hidden = spatial.hide_turn_around(s.mem, s.manifest, s.tags)
+    if hidden:
+        s.record["hidden"] = {"indices": hidden, "why": spatial.WORDS_A14["turn_rule"]}
+        s.offered = dict(s.manifest, actions=[a for a in s.manifest.get("actions") or []
+                                              if int(a["index"]) not in hidden])
+    return None
+
+
+async def navigate(s: Step) -> Optional[str]:
+    indices = schema.visible_indices(s.offered)
+    if not indices:
+        return "manifest offers no actions"
+    p = agent.current().prompt
+    view = views.navigator(p, s.offered, s.tags,
+                           plan_line(s.target, s.mode, s.here, s.goal is not None),
+                           perceiver_line(s.perception), recent_moves(s.records, s.manifest),
+                           s.frame_b64)
+    s.nav_text = view.text
+    s.record["navigator_text"] = view.text
+    s.nav = await ask(s, view, schema.SCHEMA_NAME, schema.action_schema(indices),
+                      _action(indices), config.MAX_TOKENS)
+    if s.nav.result is None:
+        s.record["navigator"] = s.nav.to_dict()
+        s.record["step_latency_ms"] = round(s.latency, 1)
+        return "VLMError: " + (s.nav.error or "navigator failed")
+    s.final = s.nav
+    return None
+
+
+async def critic(s: Step) -> Optional[str]:
+    """a13: ask once more when the map disagrees; the second answer stands."""
+    assert s.mem is not None
+    if s.features.get("critic") == "retry":
+        s.why_not = spatial.critique(s.mem, s.manifest, s.tags, s.nav.result["index"])
+    s.record["critic"] = None
+    if s.why_not is not None:
+        indices = schema.visible_indices(s.offered)
+        note = spatial.WORDS["critic_tail"].format(why=s.why_not, i=s.nav.result["index"])
+        p = agent.current().prompt
+        view = views.View("navigator", p.system, s.nav_text, s.frame_b64)
+        retry = await ask(s, view, schema.SCHEMA_NAME, schema.action_schema(indices),
+                          _action(indices), config.MAX_TOKENS,
+                          follow_up=[{"role": "assistant", "content": s.nav.raw},
+                                     {"role": "user", "content": note}])
+        s.record["critic"] = {"why": s.why_not, "note": note, "first": s.nav.to_dict(),
+                              "retry": retry.to_dict(),
+                              "changed": (retry.result is not None
+                                          and retry.result["index"] != s.nav.result["index"])}
+        if retry.result is not None:
+            s.final = retry
+    return None
+
+
+def pipeline(features: Dict[str, Any]) -> List[Stage]:
+    """The stages an orchestrated agent's features name, in order."""
+    policy = features.get("target_policy", "llm_strategist")
+    if policy == "llm_strategist":
+        planning = Stage("strategist", strategize, features.get("strategist"), "on a trigger")
+    elif policy == "goal_default_llm_detour":
+        planning = Stage("route", route, features.get("strategist"),
+                         "every step; q03 only when the way to the goal is shut")
+    else:
+        raise ValueError("unknown target_policy {0!r}".format(policy))
+    stages = [Stage("perceiver", perceive, features.get("perceiver")),
+              Stage("mapper", build_map),
+              planning,
+              Stage("projector", project)]
+    if features.get("turn_rule") == "no_repeat_when_open":
+        stages.append(Stage("turn_rule", turn_rule))
+    stages += [Stage("navigator", navigate, agent.current().prompt_version),
+               Stage("critic", critic, None, "when the map disagrees (a13)")]
+    return stages
+
+
 async def decide(request: Any, run: Run, frame_path: str):
     """The /decide body for an orchestrated agent. Writes the decision record."""
-    features = agent.current().features["orchestrator"]
+    current = agent.current()
+    features = current.features["orchestrator"]
     manifest = request.manifest
     step = int(request.step)
     record: Dict[str, Any] = {"step": step, "frame": frame_path, "manifest": manifest,
@@ -191,106 +429,18 @@ async def decide(request: Any, run: Run, frame_path: str):
     if not request.clean_frame_png_b64:
         return _error(run, record, "agent wants the clean frame and the request has none")
     record["clean_frame"] = run.save_clean_frame(step, request.clean_frame_png_b64)
-    records = _read_jsonl(run.decisions)
-    latency = 0.0
-
-    # 1. Perceiver: the clean frame and nothing else.
-    perceiver_prompt = prompts.get(features["perceiver"])
-    seen = await vlm.call_structured(
-        schema.PERCEIVER_SCHEMA_NAME, perceiver_prompt.system,
-        perceiver_prompt.render(perceiver_prompt, manifest), request.clean_frame_png_b64,
-        schema.perceiver_schema(), perception_from, PERCEIVER_MAX_TOKENS)
-    latency += seen.latency_ms
-    perception = seen.result
-    record["perceiver"] = seen.to_dict()
-    record["goal"] = LEGACY_GOAL[perception["goal"]] if perception else None
-
-    # 2. Mapper.
-    mem = spatial.rebuild(records, manifest, perception)
-    here = spatial.pose_xyh(manifest.get("pose"))
-
-    # 3. Strategist, only when something has changed. a14: it alone is given
-    # where the goal truly is.
-    goal = goal_at(manifest) if features.get("goal_truth") == "planner" else None
-    words = spatial.WORDS_A14["triggers"] if goal is not None else None
-    target, mode, last_called, last_perception = previous(records, step)
-    why = spatial.trigger(mem, manifest, perception, target, last_called, last_perception,
-                          goal_at=goal, words=words)
-    if target is not None and here is not None and not spatial.target_still_valid(
-            mem, target, here[:2], goal):
-        target = None
-    if why is not None and here is not None:
-        menu = spatial.targets(mem, here, step, goal)
-        ids = [t.id for t in menu] + [EXPLORE]
-        strategist_prompt = prompts.get(features["strategist"])
-        text = strategist_prompt.render(strategist_prompt, spatial.situation(
-            mem, manifest, perception, target, menu, why, goal))
-        plan = await vlm.call_structured(
-            schema.STRATEGIST_SCHEMA_NAME, strategist_prompt.system, text, None,
-            schema.strategist_schema(ids), _strategy(ids), STRATEGIST_MAX_TOKENS)
-        latency += plan.latency_ms
-        record["strategist"] = dict(plan.to_dict(), trigger=why, text=text,
-                                    menu=[t.to_dict() for t in menu])
-        if plan.result is not None:
-            mode = plan.result["mode"]
-            target = next((t for t in menu if t.id == plan.result["target"]), None)
-    record["target"] = target.to_dict() if target is not None else None
-    record["mode"] = mode
-
-    # 4. Projector.
-    tags = spatial.project(mem, manifest, perception, target)
-    record["tags"] = {str(k): v for k, v in tags.items()}
-
-    # 5. Navigator. a14: a turn-around right after a turn-around is not offered
-    # while a move ahead is open (operator, 2026-10-24). It is left off the list
-    # and the schema; the frame still shows its marker.
-    offered = manifest
-    if features.get("turn_rule") == "no_repeat_when_open":
-        hidden = spatial.hide_turn_around(mem, manifest, tags)
-        if hidden:
-            record["hidden"] = {"indices": hidden, "why": spatial.WORDS_A14["turn_rule"]}
-            offered = dict(manifest, actions=[a for a in manifest.get("actions") or []
-                                              if int(a["index"]) not in hidden])
-    indices = schema.visible_indices(offered)
-    if not indices:
-        return _error(run, record, "manifest offers no actions")
-    navigator_prompt = agent.current().prompt
-    text = navigator_prompt.render(navigator_prompt, offered, tags,
-                                   plan_line(target, mode, here, goal is not None),
-                                   perceiver_line(perception), recent_moves(records, manifest))
-    record["navigator_text"] = text
-    action_schema = schema.action_schema(indices)
-    nav = await vlm.call_structured(
-        schema.SCHEMA_NAME, navigator_prompt.system, text, request.frame_png_b64,
-        action_schema, _action(indices), config.MAX_TOKENS)
-    latency += nav.latency_ms
-    if nav.result is None:
-        record["navigator"] = nav.to_dict()
-        record["step_latency_ms"] = round(latency, 1)
-        return _error(run, record, "VLMError: " + (nav.error or "navigator failed"))
-
-    # 6. Critic: ask once more when the map disagrees; the second answer stands.
-    final = nav
-    why_not = None
-    if features.get("critic") == "retry":
-        why_not = spatial.critique(mem, manifest, tags, nav.result["index"])
-    record["critic"] = None
-    if why_not is not None:
-        note = spatial.WORDS["critic_tail"].format(why=why_not, i=nav.result["index"])
-        retry = await vlm.call_structured(
-            schema.SCHEMA_NAME, navigator_prompt.system, text, request.frame_png_b64,
-            action_schema, _action(indices), config.MAX_TOKENS,
-            follow_up=[{"role": "assistant", "content": nav.raw},
-                       {"role": "user", "content": note}])
-        latency += retry.latency_ms
-        record["critic"] = {"why": why_not, "note": note, "first": nav.to_dict(),
-                            "retry": retry.to_dict(),
-                            "changed": (retry.result is not None
-                                        and retry.result["index"] != nav.result["index"])}
-        if retry.result is not None:
-            final = retry
-    assert final.result is not None
-
+    s = Step(features=features, cfg=spatial.config_for(features), manifest=manifest, step=step,
+             records=_read_jsonl(run.decisions), record=record,
+             frame_b64=request.frame_png_b64, clean_b64=request.clean_frame_png_b64)
+    for stage in pipeline(features):
+        try:
+            failed = await stage.run(s)
+        except views.LeakError as exc:
+            failed = "{0}: {1}".format(stage.name, exc)
+        if failed is not None:
+            return _error(run, record, failed)
+    final = s.final
+    assert final is not None and final.result is not None and s.mem is not None
     record.update({
         "index": final.result["index"],
         "reason": final.result["reason"],
@@ -302,13 +452,13 @@ async def decide(request: Any, run: Run, frame_path: str):
         "attempts": final.attempts,
         "raw": final.raw,
         "timing": final.timing.to_dict() if final.timing else None,
-        "spatial": mem.snapshot(),
-        "step_latency_ms": round(latency, 1),
+        "spatial": s.mem.snapshot(),
+        "step_latency_ms": round(s.latency, 1),
     })
     run.record_decision(record)
     log.info("step %-3d -> [%d] %-6s %6.0fms  goal=%s target=%s%s  %s",
-             step, final.result["index"], final.rung, latency, record["goal"],
-             target.id if target else "-", " critic" if why_not else "",
+             step, final.result["index"], final.rung, s.latency, record["goal"],
+             s.target.id if s.target else "-", " critic" if s.why_not else "",
              final.result["reason"][:70].replace("\n", " "))
     return {"index": final.result["index"], "reason": final.result["reason"],
-            "rung": final.rung, "latency_ms": round(latency, 1)}
+            "rung": final.rung, "latency_ms": round(s.latency, 1)}
