@@ -1,0 +1,20 @@
+7. g04 reads: steps 721, no answer 0
+   searched cells in line of sight 7398/7950 = 93.1% (gate >= 90%)
+   strips truly blocked under 1.0 m read as not blocked_near 24/327 = 7.3% (gate < 15%)
+
+   true clear distance (m) x g04 floor class, strips
+              blocked_near     open_near      open_far      wall_far open_very_far
+         0-1           303            19             5             0             0
+         1-3           229            70            67             0             0
+         3-5           187            63           111             0             0
+         5-8           197            79           190             0             0
+        8-99           804           269          1012             0             0
+
+   true clear distance (m) x g05 floor end, strips
+                  no_floor        bottom         lower        middle
+         0-1           280            23            19             5
+         1-3           120           109            70            67
+         3-5            33           154            63           111
+         5-8            18           179            79           190
+        8-99           169           635           269          1012
+line 7: PASS

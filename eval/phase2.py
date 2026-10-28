@@ -121,7 +121,7 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # stop walls and doors passed only when crossed. Agent a17. Credited to the
     # bundle. Its control is R12C. R12 README.
     "R12": {"folder": "R12_staged_search", "title": "Staged search with a coverage map",
-            "agent": "a17", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+            "agent": "a19", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
     # R12C: a13 (the last agent with no goal truth) flown on the R12 host at the R12
     # SHA; also a13's run-to-run floor against R10C. R12 README, "Control".
     "R12C": {"folder": "R12C_a13_control", "title": "a13 control on the R12 host",

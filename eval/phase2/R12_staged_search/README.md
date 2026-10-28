@@ -1,12 +1,13 @@
 # R12: Staged search with a coverage map, no goal truth (bundle round)
 
-**Agent:** `a17` (`3001a0c0a0fb`) · **Navigator prompt:** `p14` (`31a9f28eaf94`, as `a13`–`a16`) ·
-**Perceiver:** `g04` (`c6e7a2734f0c`, new) · **Strategist:** `q04` (`f8fdf4b5946c`, new) ·
+**Agent:** `a19` (`0da467a5c3ca`; `a17` `3001a0c0a0fb` and `a18` `39e2bad86238` failed line 7) ·
+**Navigator prompt:** `p14` (`31a9f28eaf94`, as `a13`–`a16`) ·
+**Perceiver:** `g05` (`133ed83db46b`, new; floor map in "Line 7, perceiver changes") · **Strategist:** `q04` (`f8fdf4b5946c`, new) ·
 **Spatial memory:** `spatial.A17` (`spatial` `eceb875a68a3`, `spatial_a14` `0075a8a0e5c0`,
 `spatial_a17` `63ccdaa218d9`) · **Stage machine:** `planner_a17` `6eb22517c3e0` ·
-**Status:** draft, not flown; offline probe passed, live line 7 failed 2026-10-28 (sctsvr6), so
-R12 does not fly on this `g04`. This README becomes
-R12's pre-registration when the operator confirms it.
+**Status:** pre-registered 2026-10-28 (operator: "fly it on the server"), not yet flown. Offline
+probe passed; line 7 failed for `a17` (`g04`) and `a18`, passed for `a19` on R11C's held-out frames.
+Shakedown next. Below, `a17` names the bundle's code, which `a19` runs unchanged with `g05`.
 
 Draft written 2026-10-28 from R11's [failure analysis](../R11_goal_default/failure_analysis.md)
 and the operator's direction the same day. The shas are re-checked against `config.lock.json`
@@ -169,7 +170,7 @@ From the decision records and `eval/r12_probe.py`, on R12 and R12C. Truth is use
 | 4 | Reachable targets | R11's 38 `q03` situations | top search target inside a wall or not truly reachable ≤ 5 of 38 | 3 of 38 (R11's frontier 37 of 38), **pass** |
 | 5 | Sightings checked | stage machine open-loop on R11 and R11C, `q04` stubbed | false sightings that a later look faced: ≥ 80% disproved; genuine sightings disproved with the goal in line of sight ≤ 5% | 39 of 46 (85%); 12 of 285 (4.2%), **pass** |
 | 6 | No goal truth | `a17`'s real step (`smoke`) over R11's 706 manifests, stub replies, with and without the goal block | 0 decisions differ, 0 failed steps | 0, 0, **pass** |
-| 7 | `g04` reads (live, sctsvr6) | R11 frames scored against geometry | searched cells in line of sight ≥ 90%; `blocked_near` read as open < 15% | 64.1%; 53.2% (g03 on the same steps: 82.6%; 32.7%), **FAIL**: g04 reads 69% of strips `open_very_far` and uses `open_near` on 1%. `a18`/`g05` (floor end placed in the image): 86.8%; 16.2%, **FAIL** (a perceiver with true distances: 94.6%; 0%) |
+| 7 | `g04` reads (live, sctsvr6) | R11 frames scored against geometry | searched cells in line of sight ≥ 90%; `blocked_near` read as open < 15% | 64.1%; 53.2% (g03 on the same steps: 82.6%; 32.7%), **FAIL**: g04 reads 69% of strips `open_very_far` and uses `open_near` on 1%. `a18`/`g05` (floor end placed in the image): 86.8%; 16.2%, **FAIL** (a perceiver with true distances: 94.6%; 0%). `a19` on R11C (held out): **93.1%; 7.3%, pass** |
 
 [probe/offline.txt](probe/offline.txt), [probe/smoke.txt](probe/smoke.txt).
 
@@ -210,6 +211,9 @@ Line 7 on R11's 706 frames, scored by `eval/r12_probe.py score-g04` against `geo
 | g05 (floor end in the image) | `a18` `39e2bad86238` | 86.8% | 16.2% | 9052 |
 | g05, map one class nearer | `a19` `0da467a5c3ca` | 90.0% | 6.8% | 5765 |
 | true distances (ceiling) | | 94.6% | 0% | 12345 |
+| **g05, `a19`, R11C's 721 frames (held out, the gate)** | `a19` | **93.1%** | **7.3%** | 7950 |
+
+`a19` passes line 7 on R11C ([probe/live_a19_r11c.txt](probe/live_a19_r11c.txt)).
 
 - `g05` (`133ed83db46b`): the camera is level at 1.75 m with an 87° view, so no floor at a strip's
   bottom means an obstacle under 1.84 m, and a floor line at fraction v of the half-height below

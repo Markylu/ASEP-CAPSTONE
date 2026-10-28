@@ -42,12 +42,12 @@
     "s02vc_doors_visible_c": 1,
     "s03_fork_deadend": 2
   },
-  "agent_version": "a17",
-  "agent_sha": "3001a0c0a0fb",
+  "agent_version": "a19",
+  "agent_sha": "0da467a5c3ca",
   "prompt_version": "p14",
   "prompt_sha": "31a9f28eaf94",
   "subagent_prompts": {
-    "g04": "c6e7a2734f0c",
+    "g05": "133ed83db46b",
     "q04": "f8fdf4b5946c"
   },
   "spatial_sha": "eceb875a68a3",
