@@ -1339,9 +1339,52 @@ Pick one number.""",
     render=render_orchestrated,
 )
 
+
+# --- g05: Phase 2 R12, where the floor ends in the image -------------------------
+# g04 asked for metres and read 69% of strips open_very_far, walls under 1 m
+# among them (R12 line 7). The camera is level at 1.75 m with a 87-degree view,
+# so a floor line at fraction v of the half-height below the image centre is
+# 1.84 / v metres away, and a wall under 1.84 m hides the floor. g05 asks where
+# the floor ends in the image; code turns that into a reach (agent floor_map).
+
+G05 = Prompt(
+    version="g05",
+    system="""You check one image from the front camera of a small indoor drone.
+Judge this image alone.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+1. The goal is a glowing red sphere. Say which strip it is in, or not_visible.
+   If you can see it, say how far away it looks: touching (it is large in the
+   image, under 2 m away), near (2 to 6 m), mid (6 to 15 m), far (over 15 m).
+   If it is not visible, its distance is none.
+2. For each strip, find where its floor ends: the line where the floor meets a
+   wall, door or obstacle. The camera is level, so the nearer the obstacle, the
+   lower that line sits in the image, and an obstacle close in front hides the
+   floor completely. Say:
+   no_floor if no floor shows at the bottom of the strip: a wall, door, pillar
+   or plain surface fills it from the bottom up. A dark plain surface is a wall
+   close in front, not open space;
+   bottom if floor shows but ends within the bottom quarter of the image;
+   lower if the floor ends higher than that but well below the middle of the
+   image;
+   middle if the floor runs up to just below the middle of the image.
+   Judge by the floor you can see, its edges and lines, never by darkness.
+   Also say whether that strip shows a doorway: open if there is an opening in
+   a wall the drone could fly through, closed if a door fills the opening, or
+   none.
+
+First say, for each strip from left to right, what fills the bottom of the
+strip and where its floor ends. Then describe walls, openings, doors and
+anything that could be the goal. Then give the report.""",
+    user_template="Report on this image.",
+    render=render_identifier_question,
+)
+
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
-                                                      G03, Q01, Q02, Q03, G04, Q04)}
+                                                      G03, Q01, Q02, Q03, G04, Q04, G05)}
 
 
 def get(version: str) -> Prompt:

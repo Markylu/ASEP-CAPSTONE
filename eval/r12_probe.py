@@ -286,7 +286,7 @@ def cmd_smoke(args: argparse.Namespace) -> int:
     import os
     import tempfile
     from collections import Counter
-    os.environ["VLM_AGENT"] = "a17"
+    os.environ["VLM_AGENT"] = args.agent
     differ = errors = steps = asks = 0
     stages: Counter = Counter()
     events: Counter = Counter()
@@ -379,13 +379,16 @@ def _read_jsonl(path: Path) -> List[Dict[str, Any]]:
 
 
 def cmd_run_g04(args: argparse.Namespace) -> int:
-    """Ask g04 on each recorded step's clean frame, the manifest without its
-    goal block as a17 would send it. Appends to --out and skips steps done."""
+    """Ask --agent's perceiver (a17: g04, a18: g05) on each recorded step's
+    clean frame, the manifest without its goal block as decide() would send it.
+    Appends to --out and skips steps done."""
     import asyncio
     import base64
     import json
-    from server.decider import orchestrator, prompt as prompts, schema, views, vlm
-    p = prompts.get("g04")
+    from server.decider import agent, orchestrator, prompt as prompts, schema, views, vlm
+    features = agent.get(args.agent).features["orchestrator"]
+    p = prompts.get(features["perceiver"])
+    floor_map = features.get("floor_map")
     out = Path(args.out)
     done = {(j["run"], j["step"]) for j in _read_jsonl(out) if j.get("result")}
     items = [(run, r) for run in runs_under(Path(args.root).resolve()) for r in load(run)
@@ -399,7 +402,7 @@ def cmd_run_g04(args: argparse.Namespace) -> int:
             call = await vlm.call_structured(
                 schema.PERCEIVER_SCHEMA_NAME, view.system, view.text, view.image_b64,
                 schema.perceiver_schema(p.version),
-                lambda parsed: orchestrator.perception_from(parsed, p.version),
+                lambda parsed: orchestrator.perception_from(parsed, p.version, floor_map),
                 orchestrator.PERCEIVER_MAX_TOKENS)
             with out.open("a") as handle:
                 handle.write(json.dumps({"run": label(run), "step": r["step"],
@@ -439,6 +442,7 @@ def cmd_score_g04(args: argparse.Namespace) -> int:
     answers = {(j["run"], j["step"]): j.get("result") for j in _read_jsonl(Path(args.answers))}
     total = clear = steps = missing = blocked = read_open = 0
     confusion: Counter = Counter()
+    ends: Counter = Counter()
     for run in runs_under(Path(args.root).resolve()):
         site, arm = site_arm(run)
         rows = []
@@ -458,6 +462,8 @@ def cmd_score_g04(args: argparse.Namespace) -> int:
                                % 360.0)
                 bin_ = next(b for b in REACH_BINS if b[0] <= d < b[1])
                 confusion[(bin_, lane.get("floor"))] += 1
+                if lane.get("floor_end"):
+                    ends[(bin_, lane["floor_end"])] += 1
                 if d < BLOCKED_TRUE_M:
                     blocked += 1
                     read_open += lane.get("floor") != "blocked_near"
@@ -480,6 +486,14 @@ def cmd_score_g04(args: argparse.Namespace) -> int:
     for b in REACH_BINS:
         print("   {0:>9} ".format("{0:g}-{1:g}".format(*b)) +
               " ".join("{0:>13}".format(confusion[(b, c)]) for c in classes))
+    if ends:
+        from server.decider import schema
+        print("\n   true clear distance (m) x g05 floor end, strips")
+        print("   {0:>9} ".format("") + " ".join("{0:>13}".format(c)
+                                                  for c in schema.FLOOR_ENDS_G05))
+        for b in REACH_BINS:
+            print("   {0:>9} ".format("{0:g}-{1:g}".format(*b)) +
+                  " ".join("{0:>13}".format(ends[(b, c)]) for c in schema.FLOOR_ENDS_G05))
     print("line 7: " + ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 
@@ -491,11 +505,13 @@ def main() -> int:
     sub.add_parser("offline").set_defaults(fn=cmd_offline)
     smoke = sub.add_parser("smoke")
     smoke.add_argument("root", nargs="?", default=str(PHASE2 / "R11_goal_default/runs"))
+    smoke.add_argument("--agent", default="a17")
     smoke.set_defaults(fn=cmd_smoke)
     run = sub.add_parser("run-g04", help="line 7: ask g04 on recorded clean frames (live)")
     run.add_argument("root")
     run.add_argument("--out", required=True)
     run.add_argument("--concurrency", type=int, default=4)
+    run.add_argument("--agent", default="a17", help="whose perceiver and floor map (a17, a18)")
     run.set_defaults(fn=cmd_run_g04)
     score = sub.add_parser("score-g04", help="line 7: score g04's answers against geometry")
     score.add_argument("answers")

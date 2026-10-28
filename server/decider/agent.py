@@ -238,6 +238,22 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "whether a doorway is open. Memory a17: stop walls, reachable targets, doors "
           "passed only when crossed. R11: 34 of 37 detour targets lay behind or inside "
           "a wall; g03 sees the goal at any range in line of sight (612 of 612)."),
+    Agent("a18", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_search",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R12 after a17's live probe failed: a17 with perceiver g05, which says where "
+          "each strip's floor ends in the image (no floor, bottom quarter, lower, just "
+          "below the middle) instead of metres; code maps that to a reach. The camera is "
+          "level at 1.75 m, so no floor in a strip means an obstacle under 1.84 m. g04 read "
+          "69% of R11's strips open_very_far, 53% of walls under 1 m among them."),
 )}
 
 DEFAULT_AGENT = "a00"

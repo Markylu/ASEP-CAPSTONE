@@ -58,9 +58,12 @@ EXPLORE = "explore"
 
 # --- validators: the cleaned reply, or VLMError (a failed rung) ------------------
 
-def perception_from(parsed: Dict[str, Any], version: str = "g03") -> Dict[str, Any]:
-    """The perceiver's reply, checked. g03 gives a doorway as a bool; g04 as
-    "open", "closed" or "none", kept as "open"/"closed" or False."""
+def perception_from(parsed: Dict[str, Any], version: str = "g03",
+                    floor_map: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """The perceiver's reply, checked. g03 gives a doorway as a bool; g04 and
+    g05 as "open", "closed" or "none", kept as "open"/"closed" or False. g05
+    says where the floor ends in the image; `floor_map` (the agent's) turns
+    that into the floor class the map reads, the answer kept as floor_end."""
     goal = parsed.get("goal")
     if goal not in schema.STRIPS + ["not_visible"]:
         raise vlm.VLMError("perceiver gave no valid goal: {0!r}".format(goal))
@@ -70,11 +73,15 @@ def perception_from(parsed: Dict[str, Any], version: str = "g03") -> Dict[str, A
         if lane.get("floor") not in schema.floor_classes(version):
             raise vlm.VLMError("perceiver gave no valid floor for {0}".format(strip))
         door = lane.get("doorway")
-        if version == "g04":
+        if version in ("g04", "g05"):
             door = door if door in ("open", "closed") else False
         else:
             door = bool(door)
-        lanes.append({"strip": strip, "floor": lane["floor"], "doorway": door})
+        if version == "g05":
+            lanes.append({"strip": strip, "floor": (floor_map or {})[lane["floor"]],
+                          "floor_end": lane["floor"], "doorway": door})
+        else:
+            lanes.append({"strip": strip, "floor": lane["floor"], "doorway": door})
     goal_range = parsed.get("goal_range")
     if goal == "not_visible":
         goal_range = None
@@ -268,7 +275,8 @@ async def perceive(s: Step) -> Optional[str]:
     p = prompts.get(s.features["perceiver"])
     seen = await ask(s, views.perceiver(p, s.manifest, s.clean_b64),
                      schema.PERCEIVER_SCHEMA_NAME, schema.perceiver_schema(p.version),
-                     lambda parsed: perception_from(parsed, p.version),
+                     lambda parsed: perception_from(parsed, p.version,
+                                                    s.features.get("floor_map")),
                      PERCEIVER_MAX_TOKENS)
     s.perception = seen.result
     s.record["perceiver"] = seen.to_dict()
