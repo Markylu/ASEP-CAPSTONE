@@ -735,15 +735,18 @@ class SpatialMemory:
     def visits_at(self, p: Point) -> List[int]:
         return list(self.visits.get(cell(p), []))
 
-    def goal_belief(self, since: int = -1) -> Optional[Tuple[float, float, int]]:
+    def goal_belief(self, since: int = -1,
+                    until: Optional[int] = None) -> Optional[Tuple[float, float, int]]:
         """Where the goal probably is, from the perceiver's sightings: (x, y, step).
 
         The least-squares point nearest every ray, when the rays spread at least
         RAY_SPREAD_DEG and the point lies in front of each; otherwise the latest
         ray at its range class (a17: at single_ray_m, the range class being
         uninformative). `step` is the latest sighting it rests on. a17: only
-        rays from step `since` on, the planner dropping those a look disproved."""
-        rays = [r for r in self.goal_rays if r.step >= since]
+        rays from step `since` on, the planner dropping those a look disproved.
+        a20: only rays up to step `until`, the belief before a new sighting."""
+        rays = [r for r in self.goal_rays
+                if r.step >= since and (until is None or r.step <= until)]
         if not rays:
             return None
         last = rays[-1]

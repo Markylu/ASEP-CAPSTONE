@@ -122,6 +122,17 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # Read against R11; R12C (a13) dropped by the operator. R12 README.
     "R12": {"folder": "R12_staged_search", "title": "Staged search with a coverage map",
             "agent": "a19", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R13: a19 with a verify stage (operator, 2026-10-28): the first look without the
+    # goal sends the drone back to where it was seen from to look again; seen, the goal
+    # stage resumes (the old sighting dropped if the new one disagrees); not seen, the
+    # sighting is dropped and the search goes on. Agent a20, no goal truth. R13 README.
+    "R13": {"folder": "R13_verify", "title": "Lose sight, verify, then explore or pursue",
+            "agent": "a20", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R13G: a20 with the goal's true position in the strategist's text only (a21,
+    # q05), flown beside R13 at the same SHA. Not a control: the operator's second
+    # candidate. R13 README, "Two agents".
+    "R13G": {"folder": "R13G_verify_goal_words", "title": "R13 with goal truth in the search menu",
+             "agent": "a21", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

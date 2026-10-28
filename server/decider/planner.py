@@ -21,8 +21,9 @@ parameter is spatial.PARAMS_A15, hashed into a15's sha.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from . import spatial
 
@@ -372,45 +373,71 @@ def staged(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
         return Staged(st, target, out_mode, None, [], ev, events)
 
     if st.stage == "goal":
-        goal = belief_target(mem, st, step)
-        assert goal is not None
-        way = goal_way(mem, manifest, perception, (goal.x, goal.y))
-        if standing is not None and standing.kind != "goal":
-            # A detour stands until reached or closed, too long, or the goal
-            # in view with the way open.
-            state = spatial.target_state(mem, standing, here[:2])
-            if (state != "open" or (sighted and way == "open")
-                    or step - standing.step > STAGE_PARAMS["detour_max_steps"]):
-                target, out_mode = goal, "approach"
-                events.append("detour_" + ("done" if state != "open" else "ended"))
-            else:
-                target = standing
-        else:
-            target, out_mode = goal, "approach"
-            if way != "open":
-                ask = way
+        target, out_mode, ask = _goal_stage(mem, manifest, perception, st, standing, mode,
+                                            here, step, sighted, events)
     else:
-        if standing is not None:
-            # The evaluator scores the standing search target.
-            productive = (ev["new_seen"] >= STAGE_PARAMS["unproductive_new_cells"]
-                          or (ev["target_gain_m"] or 0.0) >= STAGE_PARAMS["unproductive_gain_m"])
-            st.unproductive = 0 if productive else st.unproductive + 1
-            state = spatial.target_state(mem, standing, here[:2])
-            if st.unproductive >= STAGE_PARAMS["unproductive_steps"]:
-                st.blacklist.append([standing.x, standing.y])
-                events.append("blacklisted")
-                ask = "unproductive"
-            elif state != "open":
-                ask = state
-        elif "lost" in events:
-            ask = "lost"
-        elif last_called is None:
-            ask = "start"
-        elif step - last_called >= STAGE_PARAMS["explore_hold_steps"]:
-            ask = "reached"
-        if ask is not None:
-            target, out_mode, st.unproductive = None, None, 0
+        target, out_mode, ask = _explore_stage(mem, st, ev, standing, mode, here, step,
+                                               last_called, events)
+    return _finish(mem, st, target, out_mode, ask, here, step, ev, events)
 
+
+def _goal_stage(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
+                perception: Optional[Dict[str, Any]], st: StageState,
+                standing: Optional[spatial.Target], mode: Optional[str],
+                here: spatial.Pose, step: int, sighted: bool, events: List[str]):
+    """a17's goal stage: head for the belief; a walled or blocked way asks for
+    a detour, which stands until reached or closed, too long, or the goal in
+    view with the way open. Returns (target, mode, ask)."""
+    goal = belief_target(mem, st, step)
+    assert goal is not None
+    way = goal_way(mem, manifest, perception, (goal.x, goal.y))
+    if standing is not None and standing.kind != "goal":
+        state = spatial.target_state(mem, standing, here[:2])
+        if (state != "open" or (sighted and way == "open")
+                or step - standing.step > STAGE_PARAMS["detour_max_steps"]):
+            events.append("detour_" + ("done" if state != "open" else "ended"))
+            return goal, "approach", None
+        return standing, mode, None
+    return goal, "approach", (way if way != "open" else None)
+
+
+def _explore_stage(mem: spatial.SpatialMemory, st: StageState, ev: Dict[str, Any],
+                   standing: Optional[spatial.Target], mode: Optional[str],
+                   here: spatial.Pose, step: int, last_called: Optional[int],
+                   events: List[str]):
+    """a17's explore stage: the evaluator scores the standing search target;
+    q04 is asked when it is unproductive, reached or closed, after the goal was
+    lost, at the start, or when "explore" has stood its hold. Returns
+    (target, mode, ask)."""
+    ask: Optional[str] = None
+    target, out_mode = standing, mode
+    if standing is not None:
+        productive = (ev["new_seen"] >= STAGE_PARAMS["unproductive_new_cells"]
+                      or (ev["target_gain_m"] or 0.0) >= STAGE_PARAMS["unproductive_gain_m"])
+        st.unproductive = 0 if productive else st.unproductive + 1
+        state = spatial.target_state(mem, standing, here[:2])
+        if st.unproductive >= STAGE_PARAMS["unproductive_steps"]:
+            st.blacklist.append([standing.x, standing.y])
+            events.append("blacklisted")
+            ask = "unproductive"
+        elif state != "open":
+            ask = state
+    elif "lost" in events:
+        ask = "lost"
+    elif last_called is None:
+        ask = "start"
+    elif step - last_called >= STAGE_PARAMS["explore_hold_steps"]:
+        ask = "reached"
+    if ask is not None:
+        target, out_mode, st.unproductive = None, None, 0
+    return target, out_mode, ask
+
+
+def _finish(mem: spatial.SpatialMemory, st: StageState, target: Optional[spatial.Target],
+            mode: Optional[str], ask: Optional[str], here: spatial.Pose, step: int,
+            ev: Dict[str, Any], events: List[str]) -> Staged:
+    """The menu when q04 is asked ("exhausted" when explore has no unsearched
+    ground to offer), and the target's distance for the next step's evaluator."""
     menu: List[spatial.Target] = []
     if ask is not None:
         menu = search_menu(mem, here, step, st.blacklist)
@@ -418,7 +445,7 @@ def staged(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
             ask = "exhausted"
     st.target_dist_m = (round(spatial.dist(here[:2], (target.x, target.y)), 2)
                         if target is not None else None)
-    return Staged(st, target, out_mode, ask, menu, ev, events)
+    return Staged(st, target, mode, ask, menu, ev, events)
 
 
 def search_situation(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
@@ -443,5 +470,221 @@ def search_situation(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     lines.append(w["menu"])
     for t in menu:
         lines.append("  {0}: {1}".format(t.id, t.words(here) if here is not None else t.label))
+    lines.append(w["explore"])
+    return "\n".join(lines)
+
+
+# --- a20 (R13): explore, goal, verify --------------------------------------------
+#
+# a17's stages with a third (operator, 2026-10-28). R12: in `dynamic` the goal
+# was reported at step 0 in 5 of 6 runs, then dropped by a cone or "faces it"
+# check, or chased to a point 10 m out, and not found again. In a20:
+# - goal: while the goal is reported on this look, head for the belief (a17).
+#   The first look without it goes to verify, unless a detour stands (the drone
+#   left the goal's view on purpose); a17's disproof rules are not used.
+# - verify: go back to where the goal was last seen from, face the way it was
+#   seen, and look again. Seen there or on the way: goal, and if the new
+#   sighting disagrees with the old belief, the old rays are dropped. Not seen
+#   on that check look, no path back, or too long: the sighting is dropped and
+#   the stage is explore.
+# a21 is a20 with the goal's true position in the strategist's text alone.
+
+#: a20's verify thresholds. Part of a20's sha (agent.py).
+STAGE_PARAMS_A20: Dict[str, Any] = {
+    "vantage_reached_m": spatial.TARGET_REACHED_M,
+    # The check look faces the seen bearing within the frame, as faces_unseen.
+    "check_within_deg": spatial.FOV_DEG / 2.0 - 4.0,
+    "look_point_m": 3.0,
+    "moved_off_ray_m": 2.0,
+    "moved_bearing_deg": 15.0,
+    "verify_max_steps": 8,
+}
+
+#: Why the strategist is asked after a verify, in words (beside ASKED_A17).
+ASKED_A20: Dict[str, str] = {
+    "verify_failed": "the drone went back to where it saw the goal and it was not there",
+    "verify_timeout": "the drone could not get back to where it saw the goal in time",
+    "verify_unreachable": "no known path leads back to where the goal was seen",
+}
+
+#: Every other sentence a20's strategist and navigator are shown.
+SITUATION_A20: Dict[str, str] = {
+    "vantage": "where you last saw the goal from (step {step})",
+    "look": "the way you last saw the goal (step {step})",
+}
+
+
+def verify_sha_blob() -> Dict[str, Any]:
+    return {"stage_params_a20": STAGE_PARAMS_A20, "asked_a20": ASKED_A20,
+            "situation_a20": SITUATION_A20}
+
+
+def asked(key: str) -> str:
+    return ASKED_A20.get(key) or ASKED_A17[key]
+
+
+@dataclass
+class VerifyState(StageState):
+    """a17's state, plus where the goal was last seen from (x, y, heading of
+    the sighting, step) and the step verify began."""
+    vantage: Optional[List[float]] = None
+    verify_since: int = -1
+
+    def to_dict(self) -> Dict[str, Any]:
+        d = super().to_dict()
+        d["vantage"] = [round(v, 2) for v in self.vantage] if self.vantage else None
+        d["verify_since"] = self.verify_since
+        return d
+
+    @classmethod
+    def from_dict(cls, d: Optional[Dict[str, Any]]) -> "VerifyState":
+        base = StageState.from_dict(d)
+        d = d or {}
+        return cls(base.stage, base.rays_since, base.miss, base.unproductive, base.blacklist,
+                   base.target_dist_m, list(d["vantage"]) if d.get("vantage") else None,
+                   int(d.get("verify_since", -1)))
+
+
+def _last_ray(mem: spatial.SpatialMemory, since: int):
+    rays = [r for r in mem.goal_rays if r.step >= since]
+    return rays[-1] if rays else None
+
+
+def _moved(old: Tuple[float, float, int], ray: Any, vantage: Optional[List[float]]) -> bool:
+    """Whether a new sighting disagrees with the belief it would join: the
+    believed point lies off the new ray, or the bearing from the same place
+    has turned."""
+    V = STAGE_PARAMS_A20
+    rel = spatial.wrap(spatial.bearing((ray.x, ray.y), old[:2]) - ray.heading)
+    off = spatial.dist((ray.x, ray.y), old[:2]) * math.sin(math.radians(abs(rel)))
+    if abs(rel) > 90.0 or off > V["moved_off_ray_m"]:
+        return True
+    return (vantage is not None
+            and spatial.dist((ray.x, ray.y), (vantage[0], vantage[1])) < V["vantage_reached_m"]
+            and abs(spatial.wrap(ray.heading - vantage[2])) > V["moved_bearing_deg"])
+
+
+def verify_target(st: VerifyState, here: spatial.Pose, step: int) -> spatial.Target:
+    """The vantage; once there, a point along the seen bearing, so "toward
+    your target" turns the drone to face it."""
+    vx, vy, vh, vs = st.vantage
+    if spatial.dist(here[:2], (vx, vy)) < STAGE_PARAMS_A20["vantage_reached_m"]:
+        p = spatial.ahead((vx, vy), vh, STAGE_PARAMS_A20["look_point_m"])
+        return spatial.Target("verify_look", "verify", p[0], p[1],
+                              SITUATION_A20["look"].format(step=int(vs)), step)
+    return spatial.Target("verify_vantage", "verify", vx, vy,
+                          SITUATION_A20["vantage"].format(step=int(vs)), step)
+
+
+def _to_explore(st: VerifyState, step: int, why: str, events: List[str]) -> None:
+    st.stage, st.rays_since, st.vantage, st.verify_since = "explore", step + 1, None, -1
+    events.extend([why, "lost"])
+
+
+def staged_verify(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
+                  perception: Optional[Dict[str, Any]], prev: VerifyState,
+                  standing: Optional[spatial.Target], mode: Optional[str],
+                  last_called: Optional[int]) -> Staged:
+    """a20's target for this step, and whether the strategist must be asked."""
+    V = STAGE_PARAMS_A20
+    step = int(manifest.get("step", 0))
+    here = spatial.pose_xyh(manifest.get("pose"))
+    st = VerifyState.from_dict(prev.to_dict())
+    events: List[str] = []
+    ev = evaluate(mem, here, perception, st, standing)
+    sighted = ev["goal_sighted"]
+    why: Optional[str] = None
+
+    if st.stage == "explore" and sighted:
+        st.stage, st.unproductive = "goal", 0
+        standing, mode = None, None
+        events.append("goal_sighted")
+    elif st.stage == "goal" and not sighted:
+        detour = (standing is not None and standing.kind not in ("goal", "verify")
+                  and here is not None
+                  and spatial.target_state(mem, standing, here[:2]) == "open"
+                  and step - standing.step <= STAGE_PARAMS["detour_max_steps"])
+        ray = _last_ray(mem, st.rays_since)
+        if ray is None:
+            _to_explore(st, step, "verify_unreachable", events)
+            why = "verify_unreachable"
+        elif not detour:
+            st.stage, st.verify_since = "verify", step
+            st.vantage = [ray.x, ray.y, ray.heading, ray.step]
+            standing, mode = None, None
+            events.append("goal_lost")
+    elif st.stage == "verify":
+        if sighted:
+            ray = _last_ray(mem, st.rays_since)
+            old = mem.goal_belief(since=st.rays_since, until=step - 1)
+            if old is None or _moved(old, ray, st.vantage):
+                st.rays_since = step
+                events.append("reacquired_moved")
+            else:
+                events.append("reacquired")
+            st.stage, st.vantage, st.verify_since = "goal", None, -1
+            standing, mode = None, None
+        elif here is not None:
+            vx, vy, vh = st.vantage[:3]
+            at = spatial.dist(here[:2], (vx, vy)) < V["vantage_reached_m"]
+            if (step > st.verify_since and at
+                    and abs(spatial.wrap(here[2] - vh)) <= V["check_within_deg"]):
+                why = "verify_failed"
+            elif step - st.verify_since > V["verify_max_steps"]:
+                why = "verify_timeout"
+            elif not at and mem.reachable((vx, vy), mem.reach(here[:2])) is None:
+                why = "verify_unreachable"
+            if why is not None:
+                _to_explore(st, step, why, events)
+    if "lost" in events:
+        standing, mode, last_called = None, None, None
+
+    if here is None:
+        return Staged(st, standing, mode, None, [], ev, events)
+    if st.stage == "goal":
+        target, out_mode, ask = _goal_stage(mem, manifest, perception, st, standing, mode,
+                                            here, step, sighted, events)
+    elif st.stage == "verify":
+        target, out_mode, ask = verify_target(st, here, step), "verify", None
+    else:
+        target, out_mode, ask = _explore_stage(mem, st, ev, standing, mode, here, step,
+                                               last_called, events)
+        if ask == "lost" and why is not None:
+            ask = why
+    return _finish(mem, st, target, out_mode, ask, here, step, ev, events)
+
+
+def search_situation_a20(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
+                         state: VerifyState, menu: List[spatial.Target], ask: str,
+                         goal: Optional[spatial.Point] = None) -> str:
+    """a20's strategist text: a17's (search_situation) with the verify reasons.
+    a21 (`goal`, the true position): also where the goal is, and each place
+    worded with how much nearer the goal it lies (a16's wording)."""
+    here = spatial.pose_xyh(manifest.get("pose"))
+    step = int(manifest.get("step", 0))
+    w = SITUATION_A17
+    lines = [w["asked"].format(step=step, why=asked(ask))]
+    if here is not None:
+        b = (mem.goal_belief(since=state.rays_since) if state.stage in ("goal", "verify")
+             else None)
+        if b is None:
+            lines.append(w["dropped"] if ask in ("lost",) + tuple(ASKED_A20) else w["unseen"])
+        else:
+            lines.append(w["seen"].format(step=b[2], where=spatial.where_words(here, b[:2])))
+        if goal is not None:
+            lines.append(spatial.WORDS_A14["goal_known"].format(
+                where=spatial.where_words(here, goal)))
+        blocked = sorted({spatial.relative_word(bl.heading - here[2]) for bl in mem.blocks
+                          if spatial.dist(here[:2], (bl.x, bl.y)) < spatial.BLOCK_NEAR_M})
+        if blocked:
+            lines.append(w["blocked"].format(dirs=", ".join(blocked)))
+    lines.append(w["menu"])
+    for t in menu:
+        if here is None:
+            lines.append("  {0}: {1}".format(t.id, t.label))
+        elif goal is not None:
+            lines.append("  {0}: {1}; {2}".format(t.id, t.words(here), gain_words(here, t, goal)))
+        else:
+            lines.append("  {0}: {1}".format(t.id, t.words(here)))
     lines.append(w["explore"])
     return "\n".join(lines)

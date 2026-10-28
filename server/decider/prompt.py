@@ -1253,6 +1253,24 @@ Choose a mode and a place.""",
 )
 
 
+# q05: a21's search strategist (R13G). q04 word for word, with one paragraph
+# more: the system also says where the goal truly is, and each place how much
+# nearer the goal it lies. Every place is still reachable over known floor
+# (R11's q03 picked the item worded nearest the goal on 35 of 38 calls, and
+# 34 of 37 of those lay behind or inside a wall; a17's menu has no such item).
+
+Q05 = Prompt(
+    version="q05",
+    system=Q04.system.replace(
+        "Every place listed can be reached over known floor.\n",
+        "Every place listed can be reached over known floor.\n\n"
+        "The system also tells you where the goal truly is, and for each place how\n"
+        "much nearer the goal it lies than the drone. The goal may be behind a wall:\n"
+        "a place nearer the goal is worth more only when it also leads somewhere new.\n"),
+    user_template=Q04.user_template,
+    render=render_strategist,
+)
+
 # p14: the navigator. The frame with its markers, the planner's target, the
 # perceiver's answer for this image, the last three moves in words, and notes
 # from the map against each action.
@@ -1384,7 +1402,8 @@ anything that could be the goal. Then give the report.""",
 
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
-                                                      G03, Q01, Q02, Q03, G04, Q04, G05)}
+                                                      G03, Q01, Q02, Q03, G04, Q04, G05,
+                                                      Q05)}
 
 
 def get(version: str) -> Prompt:

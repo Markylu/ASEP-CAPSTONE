@@ -231,6 +231,7 @@ class Step:
     goal: Optional[spatial.Point] = None
     target: Optional[spatial.Target] = None
     mode: Optional[str] = None
+    true_goal: Optional[spatial.Point] = None
     tags: Dict[int, List[str]] = field(default_factory=dict)
     offered: Dict[str, Any] = field(default_factory=dict)
     nav_text: str = ""
@@ -287,8 +288,11 @@ async def perceive(s: Step) -> Optional[str]:
 async def build_map(s: Step) -> Optional[str]:
     s.mem = spatial.rebuild(s.records, s.manifest, s.perception, s.cfg)
     s.here = spatial.pose_xyh(s.manifest.get("pose"))
-    # a14 on: the planner side alone is given where the goal truly is.
-    s.goal = goal_at(s.manifest) if s.features.get("goal_truth") == "planner" else None
+    # a14 on: the planner side alone is given where the goal truly is. a21:
+    # the strategist alone, from the manifest before its goal block was removed.
+    truth = s.features.get("goal_truth")
+    s.goal = (goal_at(s.manifest) if truth == "planner"
+              else s.true_goal if truth == "strategist" else None)
     return None
 
 
@@ -384,6 +388,38 @@ async def stage_plan(s: Step) -> Optional[str]:
     return None
 
 
+async def verify_plan(s: Step) -> Optional[str]:
+    """a20: a17's stages with verify (planner.staged_verify). a21: the
+    strategist's text also carries the goal's true position (s.goal)."""
+    assert s.mem is not None
+    standing, mode, last_called, _ = previous(s.records, s.step)
+    prev = next((r.get("stage") for r in sorted(
+        (r for r in s.records if "step" in r and r["step"] < s.step),
+        key=lambda r: r["step"], reverse=True) if r.get("stage")), None)
+    r = planner.staged_verify(s.mem, s.manifest, s.perception,
+                              planner.VerifyState.from_dict(prev), standing, mode, last_called)
+    s.target, s.mode = r.target, r.mode
+    if r.ask is not None and s.here is not None:
+        ids = [t.id for t in r.menu] + [EXPLORE]
+        view = views.strategist(prompts.get(s.features["strategist"]),
+                                planner.search_situation_a20(s.mem, s.manifest, r.state,
+                                                             r.menu, r.ask, s.goal))
+        plan = await ask(s, view, schema.STRATEGIST_SCHEMA_NAME, schema.strategist_schema(ids),
+                         _strategy(ids), STRATEGIST_MAX_TOKENS)
+        s.record["strategist"] = dict(plan.to_dict(), trigger=planner.asked(r.ask),
+                                      text=view.text, menu=[t.to_dict() for t in r.menu])
+        if plan.result is not None:
+            s.mode = plan.result["mode"]
+            s.target = next((t for t in r.menu if t.id == plan.result["target"]), None)
+            r.state.target_dist_m = (
+                round(spatial.dist(s.here[:2], (s.target.x, s.target.y)), 2)
+                if s.target is not None else None)
+    s.record["stage"] = r.state.to_dict()
+    s.record["evaluator"] = dict(r.evaluator, events=r.events, ask=r.ask)
+    _set_target(s)
+    return None
+
+
 async def project(s: Step) -> Optional[str]:
     assert s.mem is not None
     s.tags = spatial.project(s.mem, s.manifest, s.perception, s.target)
@@ -411,7 +447,8 @@ async def navigate(s: Step) -> Optional[str]:
         return "manifest offers no actions"
     p = agent.current().prompt
     view = views.navigator(p, s.offered, s.tags,
-                           plan_line(s.target, s.mode, s.here, s.goal is not None),
+                           plan_line(s.target, s.mode, s.here,
+                                     s.features.get("goal_truth") == "planner"),
                            perceiver_line(s.perception), recent_moves(s.records, s.manifest),
                            s.frame_b64)
     s.nav_text = view.text
@@ -461,6 +498,10 @@ def pipeline(features: Dict[str, Any]) -> List[Stage]:
     elif policy == "staged_search":
         planning = Stage("stages", stage_plan, features.get("strategist"),
                          "every step; q04 when a search target or a detour is needed")
+    elif policy == "staged_verify":
+        planning = Stage("stages", verify_plan, features.get("strategist"),
+                         "every step; the strategist when a search target or a detour "
+                         "is needed")
     else:
         raise ValueError("unknown target_policy {0!r}".format(policy))
     stages = [Stage("perceiver", perceive, features.get("perceiver")),
@@ -489,11 +530,14 @@ async def decide(request: Any, run: Run, frame_path: str):
     # a17 (R12, operator 2026-10-28): no goal truth anywhere in the agent. Its
     # stages see the manifest without the goal block; the record keeps it for
     # evaluation.
-    if features.get("goal_truth") == "none":
+    # a21 (R13G): the same, the goal's position kept apart for the strategist.
+    true_goal = goal_at(manifest)
+    if features.get("goal_truth") in ("none", "strategist"):
         manifest = without_goal(manifest)
     s = Step(features=features, cfg=spatial.config_for(features), manifest=manifest, step=step,
              records=_read_jsonl(run.decisions), record=record,
-             frame_b64=request.frame_png_b64, clean_b64=request.clean_frame_png_b64)
+             frame_b64=request.frame_png_b64, clean_b64=request.clean_frame_png_b64,
+             true_goal=true_goal)
     for stage in pipeline(features):
         try:
             failed = await stage.run(s)

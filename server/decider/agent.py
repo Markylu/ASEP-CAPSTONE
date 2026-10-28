@@ -68,11 +68,19 @@ class Agent:
         # only for the staged policy.
         if self.staged:
             blob += "\x00planner_a17:" + planner_a17_sha()
+        # a20's verify stage (planner.py), appended only for that policy.
+        if self.verifies:
+            blob += "\x00planner_a20:" + planner_a20_sha()
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
     @property
     def staged(self) -> bool:
-        return (self.features.get("orchestrator") or {}).get("target_policy") == "staged_search"
+        return (self.features.get("orchestrator") or {}).get("target_policy") in (
+            "staged_search", "staged_verify")
+
+    @property
+    def verifies(self) -> bool:
+        return (self.features.get("orchestrator") or {}).get("target_policy") == "staged_verify"
 
     @property
     def spatial_config(self):
@@ -270,6 +278,40 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "class nearer, so a misread wall cuts the cone short instead of running it "
           "through. On a18's R11 answers this map gave 90.0% and 6.8% with a third fewer "
           "cells searched; fitted there, so it is gated on R11C's frames."),
+    Agent("a20", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "blocked_near",
+                                                        "lower": "open_near",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R13 (operator, 2026-10-28): a19 with a third stage. The first look without "
+          "the goal, unless a detour stands, goes to verify: back to where it was last "
+          "seen from, facing the way it was seen, and look again. Seen: goal, the old "
+          "sighting dropped if the new one disagrees. Not seen there, no path back or 8 "
+          "steps: the sighting is dropped and the stage is explore. a17's cone and "
+          "'faces it' disproof rules are not used. R12: in dynamic the goal was reported "
+          "at step 0 in 5 of 6 runs, then dropped or chased to a point 10 m out."),
+    Agent("a21", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q05",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "strategist",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "blocked_near",
+                                                        "lower": "open_near",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R13G, flown beside R13: a20 with the goal's true position in the "
+          "strategist's text alone (q05): where the goal is, and each reachable place "
+          "worded with how much nearer it lies. The stages, map and navigator see no "
+          "goal truth. R11: the menu's goal-side items lay behind walls; a17's menu "
+          "offers reachable places only."),
 )}
 
 DEFAULT_AGENT = "a00"
@@ -324,6 +366,8 @@ def describe(version: str) -> Dict[str, Any]:
             out["spatial_a17_sha"] = spatial.wording_sha_a17()
     if agent.staged:
         out["planner_a17_sha"] = planner_a17_sha()
+    if agent.verifies:
+        out["planner_a20_sha"] = planner_a20_sha()
     return out
 
 
@@ -331,6 +375,13 @@ def planner_a17_sha() -> str:
     """Identity of a17's stage machine parameters and q04 trigger wording."""
     from . import planner
     blob = json.dumps(planner.stage_sha_blob(), sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+
+def planner_a20_sha() -> str:
+    """Identity of a20's verify stage parameters and wording."""
+    from . import planner
+    blob = json.dumps(planner.verify_sha_blob(), sort_keys=True)
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
