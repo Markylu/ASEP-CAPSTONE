@@ -12,9 +12,16 @@ exit doors are taken as open, the model not knowing which one closed):
    wall or not truly reachable from the drone (R11's goal-side frontier: 37/38).
 
 The perceiver is g03 as recorded, so open_far runs its old 6 m; g04's classes
-are checked live (line 7).
+are checked live (line 7):
+7. g04 asked on every recorded step's clean frame (`run-g04`, the model the VLM
+   profile names), then scored (`score-g04`): the share of searched cells truly
+   in line of sight with a17's memory rebuilt on g04's reports, and the share
+   of strips whose true clear distance is under 1 m that g04 reads as anything
+   but blocked_near.
 
     python eval/r12_probe.py offline
+    VLM_PROFILE=remote python eval/r12_probe.py run-g04 RUNS --out g04.jsonl
+    python eval/r12_probe.py score-g04 g04.jsonl RUNS
 
 Evaluation only: the probe reads the manifest's goal ground truth to score.
 """
@@ -40,7 +47,12 @@ COVERAGE_ROUNDS = ["R10_goal_planner", "R11C_a14_control", "R11_goal_default"]
 
 #: The gate (README, "Probe gate").
 GATE = {"coverage_los_min": 0.90, "goal_searched_runs_max": 2, "unreachable_max": 5,
-        "false_caught_min": 0.80, "true_lost_max": 0.05}
+        "false_caught_min": 0.80, "true_lost_max": 0.05, "blocked_read_open_max": 0.15}
+
+#: Line 7: a strip is truly blocked near when its centre ray meets a wall under this.
+BLOCKED_TRUE_M = 1.0
+#: Line 7: true clear-distance bins for g04's confusion table.
+REACH_BINS = [(0.0, 1.0), (1.0, 3.0), (3.0, 5.0), (5.0, 8.0), (8.0, 99.0)]
 
 
 def site_arm(run: Path) -> Tuple[str, str]:
@@ -57,8 +69,8 @@ def centre(c: Tuple[int, int]) -> spatial.Point:
     return ((c[0] + 0.5) * spatial.CELL_M, (c[1] + 0.5) * spatial.CELL_M)
 
 
-def coverage(run: Path) -> Dict[str, Any]:
-    rows = load(run)
+def coverage(run: Path, rows: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+    rows = rows if rows is not None else load(run)
     site, arm = site_arm(run)
     mem = memory_a17(rows, len(rows) - 1)
     pose = {s: (x, y) for s, x, y, _ in mem.trail}
@@ -357,6 +369,121 @@ def cmd_offline(_args: argparse.Namespace) -> int:
     return 0 if ok else 1
 
 
+# --- line 7, live: g04 on recorded clean frames ------------------------------------
+
+def _read_jsonl(path: Path) -> List[Dict[str, Any]]:
+    import json
+    if not path.is_file():
+        return []
+    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+
+
+def cmd_run_g04(args: argparse.Namespace) -> int:
+    """Ask g04 on each recorded step's clean frame, the manifest without its
+    goal block as a17 would send it. Appends to --out and skips steps done."""
+    import asyncio
+    import base64
+    import json
+    from server.decider import orchestrator, prompt as prompts, schema, views, vlm
+    p = prompts.get("g04")
+    out = Path(args.out)
+    done = {(j["run"], j["step"]) for j in _read_jsonl(out) if j.get("result")}
+    items = [(run, r) for run in runs_under(Path(args.root).resolve()) for r in load(run)
+             if r.get("clean_frame") and (label(run), r["step"]) not in done]
+    print("{0} steps to ask, {1} done".format(len(items), len(done)), flush=True)
+
+    async def one(sem: asyncio.Semaphore, n: int, run: Path, r: Dict[str, Any]) -> None:
+        async with sem:
+            b64 = base64.b64encode((run / r["clean_frame"]).read_bytes()).decode()
+            view = views.perceiver(p, orchestrator.without_goal(r["manifest"]), b64)
+            call = await vlm.call_structured(
+                schema.PERCEIVER_SCHEMA_NAME, view.system, view.text, view.image_b64,
+                schema.perceiver_schema(p.version),
+                lambda parsed: orchestrator.perception_from(parsed, p.version),
+                orchestrator.PERCEIVER_MAX_TOKENS)
+            with out.open("a") as handle:
+                handle.write(json.dumps({"run": label(run), "step": r["step"],
+                                         "prompt": p.version, "result": call.result,
+                                         "error": call.error,
+                                         "latency_ms": round(call.latency_ms, 1)}) + "\n")
+            print("{0}/{1} {2} step {3}: {4}".format(n + 1, len(items), label(run), r["step"],
+                                                      "ok" if call.result else call.error),
+                  flush=True)
+
+    async def go() -> None:
+        sem = asyncio.Semaphore(args.concurrency)
+        try:
+            await asyncio.gather(*(one(sem, n, run, r) for n, (run, r) in enumerate(items)))
+        finally:
+            await vlm.aclose()
+
+    asyncio.run(go())
+    return 0
+
+
+def true_reach(free: Callable[[float, float], bool], here: spatial.Point, heading: float,
+               cap: float = 15.0, res: float = 0.1) -> float:
+    """Evaluation only: how far a ray from `here` runs before the site model's wall."""
+    d = res
+    while d <= cap:
+        p = spatial.ahead(here, heading, d)
+        if not free(p[0], p[1]):
+            return d
+        d += res
+    return cap
+
+
+def cmd_score_g04(args: argparse.Namespace) -> int:
+    """Line 7, scored on g04's answers against R11's site model."""
+    from collections import Counter
+    answers = {(j["run"], j["step"]): j.get("result") for j in _read_jsonl(Path(args.answers))}
+    total = clear = steps = missing = blocked = read_open = 0
+    confusion: Counter = Counter()
+    for run in runs_under(Path(args.root).resolve()):
+        site, arm = site_arm(run)
+        rows = []
+        for r in load(run):
+            g04 = answers.get((label(run), r["step"]))
+            steps += 1
+            missing += g04 is None
+            rows.append(dict(r, perceiver={"result": g04}))
+            here = spatial.pose_xyh(r["manifest"].get("pose"))
+            if g04 is None or here is None:
+                continue
+            free = geo.world(site, arm, r["step"])
+            for lane in g04.get("lanes") or []:
+                if lane.get("strip") not in spatial.STRIPS:
+                    continue
+                d = true_reach(free, here[:2], (here[2] + spatial.strip_offset(lane["strip"]))
+                               % 360.0)
+                bin_ = next(b for b in REACH_BINS if b[0] <= d < b[1])
+                confusion[(bin_, lane.get("floor"))] += 1
+                if d < BLOCKED_TRUE_M:
+                    blocked += 1
+                    read_open += lane.get("floor") != "blocked_near"
+        cov = coverage(run, rows)
+        total += cov["cells"]
+        clear += cov["in_sight"]
+    share = clear / max(1, total)
+    open_share = read_open / max(1, blocked)
+    ok = (share >= GATE["coverage_los_min"] and open_share < GATE["blocked_read_open_max"]
+          and missing == 0)
+    print("7. g04 reads: steps {0}, no answer {1}".format(steps, missing))
+    print("   searched cells in line of sight {0}/{1} = {2:.1%} (gate >= {3:.0%})".format(
+        clear, total, share, GATE["coverage_los_min"]))
+    print("   strips truly blocked under {0} m read as not blocked_near {1}/{2} = {3:.1%} "
+          "(gate < {4:.0%})".format(BLOCKED_TRUE_M, read_open, blocked, open_share,
+                                    GATE["blocked_read_open_max"]))
+    classes = list(spatial.PARAMS_A17["floor_range_m"])
+    print("\n   true clear distance (m) x g04 floor class, strips")
+    print("   {0:>9} ".format("") + " ".join("{0:>13}".format(c) for c in classes))
+    for b in REACH_BINS:
+        print("   {0:>9} ".format("{0:g}-{1:g}".format(*b)) +
+              " ".join("{0:>13}".format(confusion[(b, c)]) for c in classes))
+    print("line 7: " + ("PASS" if ok else "FAIL"))
+    return 0 if ok else 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -365,6 +492,15 @@ def main() -> int:
     smoke = sub.add_parser("smoke")
     smoke.add_argument("root", nargs="?", default=str(PHASE2 / "R11_goal_default/runs"))
     smoke.set_defaults(fn=cmd_smoke)
+    run = sub.add_parser("run-g04", help="line 7: ask g04 on recorded clean frames (live)")
+    run.add_argument("root")
+    run.add_argument("--out", required=True)
+    run.add_argument("--concurrency", type=int, default=4)
+    run.set_defaults(fn=cmd_run_g04)
+    score = sub.add_parser("score-g04", help="line 7: score g04's answers against geometry")
+    score.add_argument("answers")
+    score.add_argument("root", nargs="?", default=str(PHASE2 / "R11_goal_default/runs"))
+    score.set_defaults(fn=cmd_score_g04)
     args = ap.parse_args()
     return args.fn(args)
 
