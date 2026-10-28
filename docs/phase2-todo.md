@@ -54,23 +54,24 @@ This is screening and is not citable. The final round flies the full Phase 1 pro
 - [x] Reuse `eval/phase1_label.py` rubric unchanged
 - [x] R0 baseline: Phase 1 seed-1 runs, all 3 arms (no new flying)
 - [x] Shakedown round `P2.0` with fake decider: 18/18 valid, agent fields recorded, replay exact
-- [ ] PR → `main`, merge, tag `p2-setup`
+- [x] PR → `main`, merge, tag `p2-setup`
 
 ## 2. Per round (repeat for R1, R2, …)
 
 - [ ] Open Issue from `round.md` template, assign to "Phase 2" milestone
-- [ ] Create branch `phase2/r<N>-<slug>`
-- [ ] Commit 1: implement change as a new agent version
+- [ ] Create branch `phase2/r<N>-<slug>` from the previous round's tip (R1: `main`) (spec §4.2)
+- [ ] Write round `README.md` (evidence with cited paths, hypothesis, predictions, manipulation check, drop criterion) + `evidence.md`
+- [ ] Commit 1: implement change as a new agent version + write-up
 - [ ] Preflight: clean tree, tunnel up, lock matches
 - [ ] Fly 18 runs (one SHA for the whole round)
 - [ ] All 18 valid per §10; rerun invalid ones only
 - [ ] Replay every run
 - [ ] Label: auto pre-label + manual review
-- [ ] Write `summary.md`
+- [ ] Write `summary.md` (hypothesis held?) + manipulation check + README Outcome line
 - [ ] Commit 2: runs + labels + summary
-- [ ] PR closes Issue; body has round table + delta vs best so far
-- [ ] Merge (even if the round didn't help)
-- [ ] Tag `p2-r<N>`
+- [ ] Push; open PR against the previous round's branch; body links write-up, round table + delta vs best so far
+- [ ] **Never merge** the PR; never rebase, force-push or delete the branch
+- [ ] Tag branch tip `p2-r<N>`; close Issue by hand with PR link
 - [ ] Decide whether the change carries into the next round
 
 ## 3. Final round
@@ -79,7 +80,7 @@ This is screening and is not citable. The final round flies the full Phase 1 pro
 - [ ] Fly full 90 runs under `eval/phase2/final/`
 - [ ] Validate, replay, label all runs
 - [ ] Results: §11 table + Phase 1 vs Phase 2 per cell
-- [ ] PR → `main`, merge, tag `phase2-complete`
+- [ ] Branch `phase2/final` from latest round tip; PR against it, never merged; tag `phase2-complete`
 
 ## Housekeeping
 

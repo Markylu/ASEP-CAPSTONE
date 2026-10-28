@@ -1,0 +1,12 @@
+{
+  "round": "R9C",
+  "title": "a11 control on the R9 host",
+  "citable": false,
+  "agent_version": "a11",
+  "status": "complete",
+  "git_sha": "756345b",
+  "started": "2026-10-23T17:36:34+00:00",
+  "finished": "2026-10-23T18:35:35+00:00",
+  "operator": "Markylu",
+  "notes": "Flown on sctsvr6 right after R9 at the same SHA (59 minutes). 18/18 valid. Same outcome as R8 in every cell; 16 of 18 pick sequences identical."
+}

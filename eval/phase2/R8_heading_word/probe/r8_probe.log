@@ -1,0 +1,555 @@
+=== Thu Oct 22 11:54:53 PM HKT 2026 sample
+50 R7 frames -> eval/phase2/R8_heading_word/probe/r7_set.jsonl
+  lost: 25 of 154; turned around in flight: 28/154 (18%) of the pool, 4/25 (16%) of the chosen
+  offcentre: 25 of 26; turned around in flight: 3/26 (12%) of the pool, 3/25 (12%) of the chosen
+=== Thu Oct 22 11:54:54 PM HKT 2026 a10
+a10: 9 replay frames, 0 already done
+  1/9 033f706ece60f2b5 step0 goal=not_visible claim=False
+  2/9 24fc4acd937d702e step0 goal=not_visible claim=False
+  3/9 2babea37aeab5c1b step0 goal=not_visible claim=False
+  4/9 3fd0f00760cb6946 step0 goal=not_visible claim=False
+  5/9 5b64c9aa3cf586c0 step0 goal=not_visible claim=False
+  6/9 848e9ac2f1687049 step0 goal=ahead claim=True
+  7/9 d154e5ed37e531f0 step0 goal=ahead claim=True
+  8/9 e57f2cb5f823dc01 step0 goal=not_visible claim=False
+  9/9 e7c48b90036d259d step0 goal=ahead claim=True
+a10: 50 replay frames, 0 already done
+  1/50 9ec141a039ed3b2d lost goal=not_visible claim=False
+  2/50 ac44b6a1d62375d6 lost goal=not_visible claim=False
+  3/50 1e74339e1065a669 lost goal=not_visible claim=False
+  4/50 6e52536a2eed0545 lost goal=not_visible claim=False
+  5/50 d82b209fdbf64c62 lost goal=not_visible claim=False
+  6/50 d0689a9c5967dcb6 lost goal=not_visible claim=False
+  7/50 a68d2016b7c44e54 lost goal=not_visible claim=False
+  8/50 829c41af8cd2655f lost goal=not_visible claim=False
+  9/50 c9aaaea9fe97be5c lost goal=not_visible claim=False
+  10/50 9419581d7142367b lost goal=not_visible claim=False
+  11/50 566101d80b04d1f5 lost goal=not_visible claim=False
+  12/50 d6fff60190419855 lost goal=not_visible claim=False
+  13/50 3c39ca4449341e02 lost goal=not_visible claim=False
+  14/50 787f07f76e54d513 lost goal=not_visible claim=False
+  15/50 ed561f519a7e1d15 lost goal=not_visible claim=False
+  16/50 2b1e3c5d9ba879d9 lost goal=not_visible claim=False
+  17/50 676ddd83d11e2578 lost goal=not_visible claim=False
+  18/50 e36f36425c2e468f lost goal=not_visible claim=False
+  19/50 407298b377b7bb4c lost goal=not_visible claim=False
+  20/50 8437f0385b3f449a lost goal=not_visible claim=False
+  21/50 2b7c57de4335e9e0 lost goal=not_visible claim=False
+  22/50 2642c081e03e2e17 lost goal=not_visible claim=False
+  23/50 882c9a0a23edf74f lost goal=not_visible claim=False
+  24/50 c85f6fbaf742b2a4 lost goal=not_visible claim=False
+  25/50 db14832bc63dc474 lost goal=not_visible claim=False
+  26/50 a98d8ad9bec9e4d6 offcentre goal=left claim=True
+  27/50 b619e5de8603d728 offcentre goal=left claim=True
+  28/50 a64f97d64ab9d48b offcentre goal=left claim=True
+  29/50 e2f041cf3129c734 offcentre goal=left claim=True
+  30/50 e88c98527f97baa6 offcentre goal=right claim=True
+  31/50 48c5735b0ab6dfa0 offcentre goal=left claim=True
+  32/50 d5bc1ea9bb75a46d offcentre goal=right claim=True
+  33/50 b7f0bfd01fdd95b9 offcentre goal=left claim=True
+  34/50 b69ac549b7edc752 offcentre goal=right claim=True
+  35/50 cf479e2f2b47c7c2 offcentre goal=right claim=True
+  36/50 779199017e764750 offcentre goal=left claim=True
+  37/50 02b16da4ed2cf789 offcentre goal=right claim=True
+  38/50 ae858d5c430839f9 offcentre goal=left claim=True
+  39/50 db76d1efa5b4c7b8 offcentre goal=right claim=True
+  40/50 f0529f32adf37b42 offcentre goal=ahead claim=True
+  41/50 120beb3244164c32 offcentre goal=right claim=True
+  42/50 ea0db314b3cee32f offcentre goal=right claim=True
+  43/50 fffed37fd1767c4d offcentre goal=right claim=True
+  44/50 62bfd0b3ae7d2b2d offcentre goal=left claim=True
+  45/50 7b8ccb5758d1b07e offcentre goal=ahead claim=True
+  46/50 33062fc2e15d8d44 offcentre goal=right claim=True
+  47/50 f255296af50c87cd offcentre goal=right claim=True
+  48/50 3e3119a2a70ba4ed offcentre goal=right claim=True
+  49/50 35482d43164d9834 offcentre goal=right claim=True
+  50/50 f399390703e7fff2 offcentre goal=right claim=True
+a10: 80 replay frames, 0 already done
+  1/80 afa2271cee26dae6 spin goal=not_visible claim=False
+  2/80 bd18fc4538ad74f4 spin goal=not_visible claim=False
+  3/80 1187f170d8944ae6 spin goal=not_visible claim=False
+  4/80 7461b8b13138c3b1 spin goal=not_visible claim=False
+  5/80 e46410f8ab7e0466 spin goal=not_visible claim=False
+  6/80 d68dd2d444336a97 spin goal=not_visible claim=False
+  7/80 b5b1ae3cf12b257d spin goal=not_visible claim=False
+  8/80 89fbb70294527290 spin goal=not_visible claim=False
+  9/80 d5299351366ad856 spin goal=not_visible claim=False
+  10/80 a7adeef99ea572ae spin goal=not_visible claim=False
+  11/80 63cc5c3f9f556a9f spin goal=not_visible claim=False
+  12/80 dfe784355b946a53 spin goal=not_visible claim=False
+  13/80 44ebbc8ef65bc843 spin goal=not_visible claim=False
+  14/80 7de289a0c650a663 spin goal=not_visible claim=False
+  15/80 2a22f6568f8f1961 spin goal=not_visible claim=False
+  16/80 7072626d6154dd00 spin goal=not_visible claim=False
+  17/80 ef31f006efee1ab8 spin goal=not_visible claim=False
+  18/80 4801f6ea89fee129 spin goal=not_visible claim=False
+  19/80 8cae6c2af25515ad spin goal=not_visible claim=False
+  20/80 2c077700a87f3c27 spin goal=not_visible claim=False
+  21/80 219fb9950a90727b spin goal=not_visible claim=False
+  22/80 9704e35aff52ce55 spin goal=not_visible claim=False
+  23/80 d0ce894ea2193ece spin goal=not_visible claim=False
+  24/80 2ccf9cd64ab993b2 spin goal=not_visible claim=False
+  25/80 a449cabc9fd76f59 spin goal=not_visible claim=False
+  26/80 c401a25f2feaca21 spin goal=not_visible claim=False
+  27/80 8e57986c462d72ed spin goal=not_visible claim=False
+  28/80 5e94d0d793a7267d spin goal=not_visible claim=False
+  29/80 fabfb36a95c32cf8 spin goal=not_visible claim=False
+  30/80 c5e7db9f228451fa spin goal=not_visible claim=False
+  31/80 e9a381b762162b53 spin goal=not_visible claim=False
+  32/80 75b8c85fcf79f961 spin goal=not_visible claim=False
+  33/80 188aeb7fd43aaca9 spin goal=not_visible claim=False
+  34/80 f762e3f2373c1a4a spin goal=not_visible claim=False
+  35/80 06d43dbc4cc7888a spin goal=not_visible claim=False
+  36/80 29ee959a2d37cfc3 spin goal=not_visible claim=False
+  37/80 b358643ed6e9e893 spin goal=not_visible claim=False
+  38/80 00b4abacc025d38d spin goal=not_visible claim=False
+  39/80 da40e046e22e128b spin goal=not_visible claim=False
+  40/80 972a75111783e317 spin goal=not_visible claim=False
+  41/80 68122557af1f2fce moving goal=not_visible claim=False
+  42/80 868289eac215f75d moving goal=not_visible claim=False
+  43/80 2344b2c8b82c91a0 moving goal=not_visible claim=False
+  44/80 4c4befe5b057a79d moving goal=not_visible claim=False
+  45/80 fc56d7af6d65a4bc moving goal=not_visible claim=False
+  46/80 5c67356f0bb6ba3f moving goal=not_visible claim=False
+  47/80 67c3b62ab01398d4 moving goal=not_visible claim=False
+  48/80 3f189ac20083b63e moving goal=not_visible claim=False
+  49/80 ed791027ef1783b8 moving goal=not_visible claim=False
+  50/80 bf6b2a14d73f89ed moving goal=not_visible claim=False
+  51/80 29670d10d428a042 moving goal=not_visible claim=False
+  52/80 262cf704a6e82628 moving goal=not_visible claim=False
+  53/80 8588f4ef2658dc61 moving goal=not_visible claim=False
+  54/80 dd611d6a1f8205a5 moving goal=not_visible claim=False
+  55/80 cbb1e39b080c4dd5 moving goal=not_visible claim=False
+  56/80 3166aa97af798d2a moving goal=not_visible claim=False
+  57/80 7a9b9329f6fdff60 moving goal=not_visible claim=False
+  58/80 f98f4df33e710afa moving goal=not_visible claim=False
+  59/80 74293ec782874808 moving goal=not_visible claim=False
+  60/80 361d0da83423b29c moving goal=not_visible claim=False
+  61/80 b590e2e1c1a5c2b9 visible goal=ahead claim=True
+  62/80 d5bc1ea9bb75a46d visible goal=right claim=True
+  63/80 f3e55e54336f102f visible goal=ahead claim=True
+  64/80 99e413364006e78f visible goal=ahead claim=True
+  65/80 3c60ce61ea86de78 visible goal=ahead claim=True
+  66/80 c6741a5bf3666a6d visible goal=ahead claim=True
+  67/80 a662792d4995eec7 visible goal=ahead claim=True
+  68/80 9ae7a201eafaf37a visible goal=ahead claim=True
+  69/80 a64f97d64ab9d48b visible goal=left claim=True
+  70/80 4c74e92e8f2cf054 visible goal=ahead claim=True
+  71/80 7465632d0ccb3f43 visible goal=ahead claim=True
+  72/80 1e5bd7f11e8c50a8 visible goal=ahead claim=True
+  73/80 ef36973cd7292849 visible goal=right claim=True
+  74/80 6b636bd231ab383d visible goal=ahead claim=True
+  75/80 541e02a0d5b453b1 visible goal=ahead claim=True
+  76/80 a0f474ce2ca40fd5 visible goal=ahead claim=True
+  77/80 3e4911fbff591acb visible goal=ahead claim=True
+  78/80 d827e6fb6cb211d6 visible goal=right claim=True
+  79/80 340ce1d90e6dfb74 visible goal=ahead claim=True
+  80/80 38e10d90331abfcf visible goal=ahead claim=True
+=== Thu Oct 22 11:59:14 PM HKT 2026 a11
+a11: 9 replay frames, 0 already done
+  1/9 033f706ece60f2b5 step0 goal=not_visible claim=False
+  2/9 24fc4acd937d702e step0 goal=not_visible claim=False
+  3/9 2babea37aeab5c1b step0 goal=not_visible claim=False
+  4/9 3fd0f00760cb6946 step0 goal=not_visible claim=False
+  5/9 5b64c9aa3cf586c0 step0 goal=not_visible claim=False
+  6/9 848e9ac2f1687049 step0 goal=ahead claim=True
+  7/9 d154e5ed37e531f0 step0 goal=ahead claim=True
+  8/9 e57f2cb5f823dc01 step0 goal=not_visible claim=False
+  9/9 e7c48b90036d259d step0 goal=ahead claim=True
+a11: 50 replay frames, 0 already done
+  1/50 9ec141a039ed3b2d lost goal=not_visible claim=False
+  2/50 ac44b6a1d62375d6 lost goal=not_visible claim=False
+  3/50 1e74339e1065a669 lost goal=not_visible claim=False
+  4/50 6e52536a2eed0545 lost goal=not_visible claim=False
+  5/50 d82b209fdbf64c62 lost goal=not_visible claim=False
+  6/50 d0689a9c5967dcb6 lost goal=not_visible claim=False
+  7/50 a68d2016b7c44e54 lost goal=not_visible claim=False
+  8/50 829c41af8cd2655f lost goal=not_visible claim=False
+  9/50 c9aaaea9fe97be5c lost goal=not_visible claim=False
+  10/50 9419581d7142367b lost goal=not_visible claim=False
+  11/50 566101d80b04d1f5 lost goal=not_visible claim=False
+  12/50 d6fff60190419855 lost goal=not_visible claim=False
+  13/50 3c39ca4449341e02 lost goal=not_visible claim=False
+  14/50 787f07f76e54d513 lost goal=not_visible claim=False
+  15/50 ed561f519a7e1d15 lost goal=not_visible claim=False
+  16/50 2b1e3c5d9ba879d9 lost goal=not_visible claim=False
+  17/50 676ddd83d11e2578 lost goal=not_visible claim=False
+  18/50 e36f36425c2e468f lost goal=not_visible claim=False
+  19/50 407298b377b7bb4c lost goal=not_visible claim=False
+  20/50 8437f0385b3f449a lost goal=not_visible claim=False
+  21/50 2b7c57de4335e9e0 lost goal=not_visible claim=False
+  22/50 2642c081e03e2e17 lost goal=not_visible claim=False
+  23/50 882c9a0a23edf74f lost goal=not_visible claim=False
+  24/50 c85f6fbaf742b2a4 lost goal=not_visible claim=False
+  25/50 db14832bc63dc474 lost goal=not_visible claim=False
+  26/50 a98d8ad9bec9e4d6 offcentre goal=left claim=True
+  27/50 b619e5de8603d728 offcentre goal=left claim=True
+  28/50 a64f97d64ab9d48b offcentre goal=left claim=True
+  29/50 e2f041cf3129c734 offcentre goal=left claim=True
+  30/50 e88c98527f97baa6 offcentre goal=right claim=True
+  31/50 48c5735b0ab6dfa0 offcentre goal=left claim=True
+  32/50 d5bc1ea9bb75a46d offcentre goal=right claim=True
+  33/50 b7f0bfd01fdd95b9 offcentre goal=ahead claim=True
+  34/50 b69ac549b7edc752 offcentre goal=right claim=True
+  35/50 cf479e2f2b47c7c2 offcentre goal=right claim=True
+  36/50 779199017e764750 offcentre goal=left claim=True
+  37/50 02b16da4ed2cf789 offcentre goal=right claim=True
+  38/50 ae858d5c430839f9 offcentre goal=left claim=True
+  39/50 db76d1efa5b4c7b8 offcentre goal=right claim=True
+  40/50 f0529f32adf37b42 offcentre goal=ahead claim=True
+  41/50 120beb3244164c32 offcentre goal=right claim=True
+  42/50 ea0db314b3cee32f offcentre goal=right claim=True
+  43/50 fffed37fd1767c4d offcentre goal=right claim=True
+  44/50 62bfd0b3ae7d2b2d offcentre goal=left claim=True
+  45/50 7b8ccb5758d1b07e offcentre goal=ahead claim=True
+  46/50 33062fc2e15d8d44 offcentre goal=right claim=True
+  47/50 f255296af50c87cd offcentre goal=right claim=False
+  48/50 3e3119a2a70ba4ed offcentre goal=right claim=True
+  49/50 35482d43164d9834 offcentre goal=right claim=True
+  50/50 f399390703e7fff2 offcentre goal=right claim=True
+a11: 80 replay frames, 0 already done
+  1/80 afa2271cee26dae6 spin goal=not_visible claim=False
+  2/80 bd18fc4538ad74f4 spin goal=not_visible claim=False
+  3/80 1187f170d8944ae6 spin goal=not_visible claim=False
+  4/80 7461b8b13138c3b1 spin goal=not_visible claim=False
+  5/80 e46410f8ab7e0466 spin goal=not_visible claim=False
+  6/80 d68dd2d444336a97 spin goal=not_visible claim=False
+  7/80 b5b1ae3cf12b257d spin goal=not_visible claim=False
+  8/80 89fbb70294527290 spin goal=not_visible claim=False
+  9/80 d5299351366ad856 spin goal=not_visible claim=False
+  10/80 a7adeef99ea572ae spin goal=not_visible claim=False
+  11/80 63cc5c3f9f556a9f spin goal=not_visible claim=False
+  12/80 dfe784355b946a53 spin goal=not_visible claim=False
+  13/80 44ebbc8ef65bc843 spin goal=not_visible claim=False
+  14/80 7de289a0c650a663 spin goal=not_visible claim=False
+  15/80 2a22f6568f8f1961 spin goal=not_visible claim=False
+  16/80 7072626d6154dd00 spin goal=not_visible claim=False
+  17/80 ef31f006efee1ab8 spin goal=not_visible claim=False
+  18/80 4801f6ea89fee129 spin goal=not_visible claim=False
+  19/80 8cae6c2af25515ad spin goal=not_visible claim=False
+  20/80 2c077700a87f3c27 spin goal=not_visible claim=False
+  21/80 219fb9950a90727b spin goal=not_visible claim=False
+  22/80 9704e35aff52ce55 spin goal=not_visible claim=False
+  23/80 d0ce894ea2193ece spin goal=not_visible claim=False
+  24/80 2ccf9cd64ab993b2 spin goal=not_visible claim=False
+  25/80 a449cabc9fd76f59 spin goal=not_visible claim=False
+  26/80 c401a25f2feaca21 spin goal=not_visible claim=False
+  27/80 8e57986c462d72ed spin goal=not_visible claim=False
+  28/80 5e94d0d793a7267d spin goal=not_visible claim=False
+  29/80 fabfb36a95c32cf8 spin goal=not_visible claim=False
+  30/80 c5e7db9f228451fa spin goal=not_visible claim=False
+  31/80 e9a381b762162b53 spin goal=not_visible claim=False
+  32/80 75b8c85fcf79f961 spin goal=not_visible claim=False
+  33/80 188aeb7fd43aaca9 spin goal=not_visible claim=False
+  34/80 f762e3f2373c1a4a spin goal=not_visible claim=False
+  35/80 06d43dbc4cc7888a spin goal=not_visible claim=False
+  36/80 29ee959a2d37cfc3 spin goal=not_visible claim=False
+  37/80 b358643ed6e9e893 spin goal=not_visible claim=False
+  38/80 00b4abacc025d38d spin goal=not_visible claim=False
+  39/80 da40e046e22e128b spin goal=not_visible claim=False
+  40/80 972a75111783e317 spin goal=not_visible claim=False
+  41/80 68122557af1f2fce moving goal=not_visible claim=False
+  42/80 868289eac215f75d moving goal=not_visible claim=False
+  43/80 2344b2c8b82c91a0 moving goal=not_visible claim=False
+  44/80 4c4befe5b057a79d moving goal=not_visible claim=False
+  45/80 fc56d7af6d65a4bc moving goal=not_visible claim=False
+  46/80 5c67356f0bb6ba3f moving goal=not_visible claim=False
+  47/80 67c3b62ab01398d4 moving goal=not_visible claim=False
+  48/80 3f189ac20083b63e moving goal=not_visible claim=False
+  49/80 ed791027ef1783b8 moving goal=not_visible claim=False
+  50/80 bf6b2a14d73f89ed moving goal=not_visible claim=False
+  51/80 29670d10d428a042 moving goal=not_visible claim=False
+  52/80 262cf704a6e82628 moving goal=not_visible claim=False
+  53/80 8588f4ef2658dc61 moving goal=not_visible claim=False
+  54/80 dd611d6a1f8205a5 moving goal=not_visible claim=False
+  55/80 cbb1e39b080c4dd5 moving goal=not_visible claim=False
+  56/80 3166aa97af798d2a moving goal=not_visible claim=False
+  57/80 7a9b9329f6fdff60 moving goal=not_visible claim=False
+  58/80 f98f4df33e710afa moving goal=not_visible claim=False
+  59/80 74293ec782874808 moving goal=not_visible claim=False
+  60/80 361d0da83423b29c moving goal=not_visible claim=False
+  61/80 b590e2e1c1a5c2b9 visible goal=ahead claim=True
+  62/80 d5bc1ea9bb75a46d visible goal=right claim=True
+  63/80 f3e55e54336f102f visible goal=ahead claim=True
+  64/80 99e413364006e78f visible goal=ahead claim=True
+  65/80 3c60ce61ea86de78 visible goal=ahead claim=True
+  66/80 c6741a5bf3666a6d visible goal=ahead claim=True
+  67/80 a662792d4995eec7 visible goal=ahead claim=True
+  68/80 9ae7a201eafaf37a visible goal=ahead claim=True
+  69/80 a64f97d64ab9d48b visible goal=left claim=True
+  70/80 4c74e92e8f2cf054 visible goal=ahead claim=True
+  71/80 7465632d0ccb3f43 visible goal=ahead claim=True
+  72/80 1e5bd7f11e8c50a8 visible goal=ahead claim=True
+  73/80 ef36973cd7292849 visible goal=right claim=True
+  74/80 6b636bd231ab383d visible goal=ahead claim=True
+  75/80 541e02a0d5b453b1 visible goal=ahead claim=True
+  76/80 a0f474ce2ca40fd5 visible goal=ahead claim=True
+  77/80 3e4911fbff591acb visible goal=ahead claim=True
+  78/80 d827e6fb6cb211d6 visible goal=right claim=True
+  79/80 340ce1d90e6dfb74 visible goal=ahead claim=True
+  80/80 38e10d90331abfcf visible goal=ahead claim=True
+=== Fri Oct 23 12:03:04 AM HKT 2026 a12
+a12: 9 replay frames, 0 already done
+  1/9 033f706ece60f2b5 step0 goal=not_visible claim=False
+  2/9 24fc4acd937d702e step0 goal=not_visible claim=False
+  3/9 2babea37aeab5c1b step0 goal=not_visible claim=False
+  4/9 3fd0f00760cb6946 step0 goal=not_visible claim=False
+  5/9 5b64c9aa3cf586c0 step0 goal=not_visible claim=False
+  6/9 848e9ac2f1687049 step0 goal=ahead claim=True
+  7/9 d154e5ed37e531f0 step0 goal=ahead claim=True
+  8/9 e57f2cb5f823dc01 step0 goal=not_visible claim=False
+  9/9 e7c48b90036d259d step0 goal=ahead claim=True
+a12: 50 replay frames, 0 already done
+  1/50 9ec141a039ed3b2d lost goal=not_visible claim=False
+  2/50 ac44b6a1d62375d6 lost goal=not_visible claim=False
+  3/50 1e74339e1065a669 lost goal=not_visible claim=False
+  4/50 6e52536a2eed0545 lost goal=not_visible claim=False
+  5/50 d82b209fdbf64c62 lost goal=not_visible claim=False
+  6/50 d0689a9c5967dcb6 lost goal=not_visible claim=False
+  7/50 a68d2016b7c44e54 lost goal=not_visible claim=False
+  8/50 829c41af8cd2655f lost goal=not_visible claim=False
+  9/50 c9aaaea9fe97be5c lost goal=not_visible claim=False
+  10/50 9419581d7142367b lost goal=not_visible claim=False
+  11/50 566101d80b04d1f5 lost goal=not_visible claim=False
+  12/50 d6fff60190419855 lost goal=not_visible claim=False
+  13/50 3c39ca4449341e02 lost goal=not_visible claim=False
+  14/50 787f07f76e54d513 lost goal=not_visible claim=False
+  15/50 ed561f519a7e1d15 lost goal=not_visible claim=False
+  16/50 2b1e3c5d9ba879d9 lost goal=not_visible claim=False
+  17/50 676ddd83d11e2578 lost goal=not_visible claim=False
+  18/50 e36f36425c2e468f lost goal=not_visible claim=False
+  19/50 407298b377b7bb4c lost goal=not_visible claim=False
+  20/50 8437f0385b3f449a lost goal=not_visible claim=False
+  21/50 2b7c57de4335e9e0 lost goal=not_visible claim=False
+  22/50 2642c081e03e2e17 lost goal=not_visible claim=False
+  23/50 882c9a0a23edf74f lost goal=not_visible claim=False
+  24/50 c85f6fbaf742b2a4 lost goal=not_visible claim=False
+  25/50 db14832bc63dc474 lost goal=not_visible claim=False
+  26/50 a98d8ad9bec9e4d6 offcentre goal=left claim=True
+  27/50 b619e5de8603d728 offcentre goal=left claim=True
+  28/50 a64f97d64ab9d48b offcentre goal=left claim=True
+  29/50 e2f041cf3129c734 offcentre goal=left claim=True
+  30/50 e88c98527f97baa6 offcentre goal=right claim=True
+  31/50 48c5735b0ab6dfa0 offcentre goal=left claim=True
+  32/50 d5bc1ea9bb75a46d offcentre goal=right claim=True
+  33/50 b7f0bfd01fdd95b9 offcentre goal=ahead claim=True
+  34/50 b69ac549b7edc752 offcentre goal=right claim=True
+  35/50 cf479e2f2b47c7c2 offcentre goal=right claim=True
+  36/50 779199017e764750 offcentre goal=left claim=True
+  37/50 02b16da4ed2cf789 offcentre goal=right claim=True
+  38/50 ae858d5c430839f9 offcentre goal=left claim=True
+  39/50 db76d1efa5b4c7b8 offcentre goal=right claim=True
+  40/50 f0529f32adf37b42 offcentre goal=ahead claim=True
+  41/50 120beb3244164c32 offcentre goal=right claim=True
+  42/50 ea0db314b3cee32f offcentre goal=right claim=True
+  43/50 fffed37fd1767c4d offcentre goal=right claim=True
+  44/50 62bfd0b3ae7d2b2d offcentre goal=left claim=True
+  45/50 7b8ccb5758d1b07e offcentre goal=ahead claim=True
+  46/50 33062fc2e15d8d44 offcentre goal=right claim=True
+  47/50 f255296af50c87cd offcentre goal=right claim=True
+  48/50 3e3119a2a70ba4ed offcentre goal=right claim=True
+  49/50 35482d43164d9834 offcentre goal=right claim=True
+  50/50 f399390703e7fff2 offcentre goal=right claim=True
+a12: 80 replay frames, 0 already done
+  1/80 afa2271cee26dae6 spin goal=not_visible claim=False
+  2/80 bd18fc4538ad74f4 spin goal=not_visible claim=False
+  3/80 1187f170d8944ae6 spin goal=not_visible claim=False
+  4/80 7461b8b13138c3b1 spin goal=not_visible claim=False
+  5/80 e46410f8ab7e0466 spin goal=not_visible claim=False
+  6/80 d68dd2d444336a97 spin goal=not_visible claim=False
+  7/80 b5b1ae3cf12b257d spin goal=not_visible claim=False
+  8/80 89fbb70294527290 spin goal=not_visible claim=False
+  9/80 d5299351366ad856 spin goal=not_visible claim=False
+  10/80 a7adeef99ea572ae spin goal=not_visible claim=False
+  11/80 63cc5c3f9f556a9f spin goal=not_visible claim=False
+  12/80 dfe784355b946a53 spin goal=not_visible claim=False
+  13/80 44ebbc8ef65bc843 spin goal=not_visible claim=False
+  14/80 7de289a0c650a663 spin goal=not_visible claim=False
+  15/80 2a22f6568f8f1961 spin goal=not_visible claim=False
+  16/80 7072626d6154dd00 spin goal=not_visible claim=False
+  17/80 ef31f006efee1ab8 spin goal=not_visible claim=False
+  18/80 4801f6ea89fee129 spin goal=not_visible claim=False
+  19/80 8cae6c2af25515ad spin goal=not_visible claim=False
+  20/80 2c077700a87f3c27 spin goal=not_visible claim=False
+  21/80 219fb9950a90727b spin goal=not_visible claim=False
+  22/80 9704e35aff52ce55 spin goal=not_visible claim=False
+  23/80 d0ce894ea2193ece spin goal=not_visible claim=False
+  24/80 2ccf9cd64ab993b2 spin goal=not_visible claim=False
+  25/80 a449cabc9fd76f59 spin goal=not_visible claim=False
+  26/80 c401a25f2feaca21 spin goal=not_visible claim=False
+  27/80 8e57986c462d72ed spin goal=not_visible claim=False
+  28/80 5e94d0d793a7267d spin goal=not_visible claim=False
+  29/80 fabfb36a95c32cf8 spin goal=not_visible claim=False
+  30/80 c5e7db9f228451fa spin goal=not_visible claim=False
+  31/80 e9a381b762162b53 spin goal=not_visible claim=False
+  32/80 75b8c85fcf79f961 spin goal=not_visible claim=False
+  33/80 188aeb7fd43aaca9 spin goal=not_visible claim=False
+  34/80 f762e3f2373c1a4a spin goal=not_visible claim=False
+  35/80 06d43dbc4cc7888a spin goal=not_visible claim=False
+  36/80 29ee959a2d37cfc3 spin goal=not_visible claim=False
+  37/80 b358643ed6e9e893 spin goal=not_visible claim=False
+  38/80 00b4abacc025d38d spin goal=not_visible claim=False
+  39/80 da40e046e22e128b spin goal=not_visible claim=False
+  40/80 972a75111783e317 spin goal=not_visible claim=False
+  41/80 68122557af1f2fce moving goal=not_visible claim=False
+  42/80 868289eac215f75d moving goal=not_visible claim=False
+  43/80 2344b2c8b82c91a0 moving goal=not_visible claim=False
+  44/80 4c4befe5b057a79d moving goal=not_visible claim=False
+  45/80 fc56d7af6d65a4bc moving goal=not_visible claim=False
+  46/80 5c67356f0bb6ba3f moving goal=not_visible claim=False
+  47/80 67c3b62ab01398d4 moving goal=not_visible claim=False
+  48/80 3f189ac20083b63e moving goal=not_visible claim=False
+  49/80 ed791027ef1783b8 moving goal=not_visible claim=False
+  50/80 bf6b2a14d73f89ed moving goal=not_visible claim=False
+  51/80 29670d10d428a042 moving goal=not_visible claim=False
+  52/80 262cf704a6e82628 moving goal=not_visible claim=False
+  53/80 8588f4ef2658dc61 moving goal=not_visible claim=False
+  54/80 dd611d6a1f8205a5 moving goal=not_visible claim=False
+  55/80 cbb1e39b080c4dd5 moving goal=not_visible claim=False
+  56/80 3166aa97af798d2a moving goal=not_visible claim=False
+  57/80 7a9b9329f6fdff60 moving goal=not_visible claim=False
+  58/80 f98f4df33e710afa moving goal=not_visible claim=False
+  59/80 74293ec782874808 moving goal=not_visible claim=False
+  60/80 361d0da83423b29c moving goal=not_visible claim=False
+  61/80 b590e2e1c1a5c2b9 visible goal=ahead claim=True
+  62/80 d5bc1ea9bb75a46d visible goal=right claim=True
+  63/80 f3e55e54336f102f visible goal=ahead claim=True
+  64/80 99e413364006e78f visible goal=ahead claim=True
+  65/80 3c60ce61ea86de78 visible goal=ahead claim=True
+  66/80 c6741a5bf3666a6d visible goal=ahead claim=True
+  67/80 a662792d4995eec7 visible goal=ahead claim=True
+  68/80 9ae7a201eafaf37a visible goal=ahead claim=True
+  69/80 a64f97d64ab9d48b visible goal=left claim=True
+  70/80 4c74e92e8f2cf054 visible goal=ahead claim=True
+  71/80 7465632d0ccb3f43 visible goal=ahead claim=True
+  72/80 1e5bd7f11e8c50a8 visible goal=ahead claim=True
+  73/80 ef36973cd7292849 visible goal=right claim=True
+  74/80 6b636bd231ab383d visible goal=ahead claim=True
+  75/80 541e02a0d5b453b1 visible goal=ahead claim=True
+  76/80 a0f474ce2ca40fd5 visible goal=ahead claim=True
+  77/80 3e4911fbff591acb visible goal=ahead claim=True
+  78/80 d827e6fb6cb211d6 visible goal=right claim=True
+  79/80 340ce1d90e6dfb74 visible goal=ahead claim=True
+  80/80 38e10d90331abfcf visible goal=ahead claim=True
+=== Fri Oct 23 12:08:08 AM HKT 2026 a10 spin rerun
+a10: 80 replay frames, 0 already done
+  1/80 afa2271cee26dae6 spin goal=not_visible claim=False
+  2/80 bd18fc4538ad74f4 spin goal=not_visible claim=False
+  3/80 1187f170d8944ae6 spin goal=not_visible claim=False
+  4/80 7461b8b13138c3b1 spin goal=not_visible claim=False
+  5/80 e46410f8ab7e0466 spin goal=not_visible claim=False
+  6/80 d68dd2d444336a97 spin goal=not_visible claim=False
+  7/80 b5b1ae3cf12b257d spin goal=not_visible claim=False
+  8/80 89fbb70294527290 spin goal=not_visible claim=False
+  9/80 d5299351366ad856 spin goal=not_visible claim=False
+  10/80 a7adeef99ea572ae spin goal=not_visible claim=False
+  11/80 63cc5c3f9f556a9f spin goal=not_visible claim=False
+  12/80 dfe784355b946a53 spin goal=not_visible claim=False
+  13/80 44ebbc8ef65bc843 spin goal=not_visible claim=False
+  14/80 7de289a0c650a663 spin goal=not_visible claim=False
+  15/80 2a22f6568f8f1961 spin goal=not_visible claim=False
+  16/80 7072626d6154dd00 spin goal=not_visible claim=False
+  17/80 ef31f006efee1ab8 spin goal=not_visible claim=False
+  18/80 4801f6ea89fee129 spin goal=not_visible claim=False
+  19/80 8cae6c2af25515ad spin goal=not_visible claim=False
+  20/80 2c077700a87f3c27 spin goal=not_visible claim=False
+  21/80 219fb9950a90727b spin goal=not_visible claim=False
+  22/80 9704e35aff52ce55 spin goal=not_visible claim=False
+  23/80 d0ce894ea2193ece spin goal=not_visible claim=False
+  24/80 2ccf9cd64ab993b2 spin goal=not_visible claim=False
+  25/80 a449cabc9fd76f59 spin goal=not_visible claim=False
+  26/80 c401a25f2feaca21 spin goal=not_visible claim=False
+  27/80 8e57986c462d72ed spin goal=not_visible claim=False
+  28/80 5e94d0d793a7267d spin goal=not_visible claim=False
+  29/80 fabfb36a95c32cf8 spin goal=not_visible claim=False
+  30/80 c5e7db9f228451fa spin goal=not_visible claim=False
+  31/80 e9a381b762162b53 spin goal=not_visible claim=False
+  32/80 75b8c85fcf79f961 spin goal=not_visible claim=False
+  33/80 188aeb7fd43aaca9 spin goal=not_visible claim=False
+  34/80 f762e3f2373c1a4a spin goal=not_visible claim=False
+  35/80 06d43dbc4cc7888a spin goal=not_visible claim=False
+  36/80 29ee959a2d37cfc3 spin goal=not_visible claim=False
+  37/80 b358643ed6e9e893 spin goal=not_visible claim=False
+  38/80 00b4abacc025d38d spin goal=not_visible claim=False
+  39/80 da40e046e22e128b spin goal=not_visible claim=False
+  40/80 972a75111783e317 spin goal=not_visible claim=False
+  41/80 68122557af1f2fce moving goal=not_visible claim=False
+  42/80 868289eac215f75d moving goal=not_visible claim=False
+  43/80 2344b2c8b82c91a0 moving goal=not_visible claim=False
+  44/80 4c4befe5b057a79d moving goal=not_visible claim=False
+  45/80 fc56d7af6d65a4bc moving goal=not_visible claim=False
+  46/80 5c67356f0bb6ba3f moving goal=not_visible claim=False
+  47/80 67c3b62ab01398d4 moving goal=not_visible claim=False
+  48/80 3f189ac20083b63e moving goal=not_visible claim=False
+  49/80 ed791027ef1783b8 moving goal=not_visible claim=False
+  50/80 bf6b2a14d73f89ed moving goal=not_visible claim=False
+  51/80 29670d10d428a042 moving goal=not_visible claim=False
+  52/80 262cf704a6e82628 moving goal=not_visible claim=False
+  53/80 8588f4ef2658dc61 moving goal=not_visible claim=False
+  54/80 dd611d6a1f8205a5 moving goal=not_visible claim=False
+  55/80 cbb1e39b080c4dd5 moving goal=not_visible claim=False
+  56/80 3166aa97af798d2a moving goal=not_visible claim=False
+  57/80 7a9b9329f6fdff60 moving goal=not_visible claim=False
+  58/80 f98f4df33e710afa moving goal=not_visible claim=False
+  59/80 74293ec782874808 moving goal=not_visible claim=False
+  60/80 361d0da83423b29c moving goal=not_visible claim=False
+  61/80 b590e2e1c1a5c2b9 visible goal=ahead claim=True
+  62/80 d5bc1ea9bb75a46d visible goal=right claim=True
+  63/80 f3e55e54336f102f visible goal=ahead claim=True
+  64/80 99e413364006e78f visible goal=ahead claim=True
+  65/80 3c60ce61ea86de78 visible goal=ahead claim=True
+  66/80 c6741a5bf3666a6d visible goal=ahead claim=True
+  67/80 a662792d4995eec7 visible goal=ahead claim=True
+  68/80 9ae7a201eafaf37a visible goal=ahead claim=True
+  69/80 a64f97d64ab9d48b visible goal=left claim=True
+  70/80 4c74e92e8f2cf054 visible goal=ahead claim=True
+  71/80 7465632d0ccb3f43 visible goal=ahead claim=True
+  72/80 1e5bd7f11e8c50a8 visible goal=ahead claim=True
+  73/80 ef36973cd7292849 visible goal=right claim=True
+  74/80 6b636bd231ab383d visible goal=ahead claim=True
+  75/80 541e02a0d5b453b1 visible goal=ahead claim=True
+  76/80 a0f474ce2ca40fd5 visible goal=ahead claim=True
+  77/80 3e4911fbff591acb visible goal=ahead claim=True
+  78/80 d827e6fb6cb211d6 visible goal=right claim=True
+  79/80 340ce1d90e6dfb74 visible goal=ahead claim=True
+  80/80 38e10d90331abfcf visible goal=ahead claim=True
+# R8 probe: step-0 picks
+
+9 frames, 18 cells (cells that share a start frame share a row). Reference: `a10`. Flight: the pick recorded at step 0 in the source round.
+
+| agent | answered | same pick as a10 | same pick as flight | turn-around |
+|---|---|---|---|---|
+| a10 | 18 / 18 | 18/18 (100%) | 18/18 (100%) | 2/18 (11%) |
+| a11 | 18 / 18 | 12/18 (67%) | 12/18 (67%) | 1/18 (6%) |
+| a12 | 18 / 18 | 15/18 (83%) | 15/18 (83%) | 3/18 (17%) |
+
+Cells where a pick differs from `a10` (pick, turn-around marked T):
+
+| cell | flight | a10 | a11 | a12 |
+|---|---|---|---|---|
+| s02a/final/seed1 | 0 T | 0 T | 1 | 0 T |
+| s02c/final/seed1 | 0 T | 0 T | 1 | 3 |
+| s02va/final/seed1 | 3 | 3 | 3 | 0 T |
+| s02vc/final/seed1 | 3 | 3 | 0 T | 0 T |
+| s03/dynamic/seed1 | 3 | 3 | 5 | 3 |
+| s03/final/seed1 | 3 | 3 | 5 | 3 |
+| s03/initial/seed1 | 3 | 3 | 5 | 3 |
+# R7 probe: lost and off-centre frames
+
+| agent | group | answered | errors | turn-around | goal claimed around | same pick |
+|---|---|---|---|---|---|---|
+| a10 | lost | 25 / 25 | 0 | 3/25 (12%) | 0/25 (0%) | 16/25 (64%) |
+| a10 | offcentre | 25 / 25 | 0 | 3/25 (12%) | 25/25 (100%) | 21/25 (84%) |
+| a11 | lost | 25 / 25 | 0 | 5/25 (20%) | 0/25 (0%) | 13/25 (52%) |
+| a11 | offcentre | 25 / 25 | 0 | 1/25 (4%) | 24/25 (96%) | 17/25 (68%) |
+| a12 | lost | 25 / 25 | 0 | 4/25 (16%) | 0/25 (0%) | 12/25 (48%) |
+| a12 | offcentre | 25 / 25 | 0 | 1/25 (4%) | 25/25 (100%) | 16/25 (64%) |
+# R8 probe: spin replay
+
+| agent | spin: turn-around | moving: turn-around | visible: turn-around | answered | same pick as a10 |
+|---|---|---|---|---|---|
+| a10 | 5/40 | 1/20 | 0/20 | 80 / 80 | 80 / 80 |
+| a10r | 5/40 | 1/20 | 0/20 | 80 / 80 | 80 / 80 |
+| a11 | 8/40 | 4/20 | 0/20 | 80 / 80 | 44 / 80 |
+| a12 | 7/40 | 1/20 | 1/20 | 80 / 80 | 45 / 80 |
+PROBEDONE Fri Oct 23 12:10:34 AM HKT 2026

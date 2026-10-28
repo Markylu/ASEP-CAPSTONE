@@ -1,0 +1,10 @@
+| Check | Value | Threshold | Pass |
+|---|---|---|---|
+| q03 detour >= 3 m nearer the goal | 95% | >= 60% | yes |
+| q03 chooses explore | 1% | <= 10% | yes |
+| p14 pick open with the agent's notes | 11/12 (92%) | >= 80% | yes |
+
+detour calls answered 86; toward steps answered 14
+toward steps scored apart (goal one move ahead and wall close on one action): s02a/dynamic/seed1 3: pick 3 not open, R10 pick 3; s02a/initial/seed1 3: pick 3 not open, R10 pick 3
+
+LIVE LINES PASSED

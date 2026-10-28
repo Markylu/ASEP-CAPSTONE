@@ -1,0 +1,12 @@
+{
+  "round": "R11C",
+  "title": "a14 control on the R11 host",
+  "citable": false,
+  "agent_version": "a14",
+  "status": "complete",
+  "git_sha": "caa209a",
+  "started": "2026-10-27T18:43:50+00:00",
+  "finished": "2026-10-27T19:46:42+00:00",
+  "operator": "Markylu",
+  "notes": "Flown on sctsvr6 right after R11 at the same SHA. 18/18 valid. 11/18 (initial 5/6, final 4/6, dynamic 2/6), against R10's 11/18 with the same agent: 2 of 18 outcomes and 7 of 18 pick sequences differ."
+}

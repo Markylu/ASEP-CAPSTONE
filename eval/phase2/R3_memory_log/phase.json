@@ -1,0 +1,12 @@
+{
+  "round": "R3",
+  "title": "Memory log, code-written",
+  "citable": false,
+  "agent_version": "a03",
+  "status": "complete",
+  "git_sha": "53998a3",
+  "started": "2026-10-12T22:38:39+00:00",
+  "finished": "2026-10-12T23:56:48+00:00",
+  "operator": "Markylu",
+  "notes": "18/18 valid at 53998a3, replays exact. s02a dynamic needed a second attempt: a01 hit the wall-clock limit (end reason wall_clock_limit), a02 valid; two interrupted starts are kept in _attempts. Labels reviewed by Claude, confirmed by the operator 2026-10-13."
+}

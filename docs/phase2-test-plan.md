@@ -20,7 +20,9 @@ what is kept between steps. It never changes the model or its weights (proposal)
 is a success rate of at least 50% on every layout.
 
 Each round tests one change. The operator chooses the change; this spec only says how a change
-is identified, flown and compared.
+is identified, flown and compared. A bundle round (R9 on) changes several things at once by the
+operator's decision; its README names every part, its result is credited to the bundle and not
+to any part, and it flies beside a control on the same host (§8, 2026-10-22).
 
 ## 2. What is fixed and what varies
 
@@ -67,20 +69,79 @@ failing runs take 60 steps), plus preflight and labelling.
 
 ## 4. Procedure per round
 
-1. **Define.** Open an Issue from the "Phase 2 round" template. Add the agent version (and prompt
+1. **Define.** Open an Issue from the "Phase 2 round" template. Create the round's branch (§4.2).
+   Add the agent version (and prompt
    version if the wording changes), then add the round to `ROUNDS` in `eval/phase2.py`.
-   Run `python eval/phase2.py init`. Commit.
-2. **Preflight** (P1 §7.2 step 1): clean tree; tunnel up; decider started with
+   Run `python eval/phase2.py init`, which writes a stub `README.md` in the round folder.
+   **Write it up before flying** (§4.1). Commit the agent change and the write-up together.
+2. **Probe** (required when the change touches what the model is asked to perceive or report,
+   optional otherwise). The README's Probe gate is written and committed first. Then:
+   `python eval/goal_probe.py sample <earlier rounds> --out <round>/probe`, `run --agent` for the
+   new agent and for a calibration agent whose failure in flight is known, and `report`. The probe
+   sends recorded frames with ground truth to the model, one call per frame and no Godot, at about
+   5 min per agent. An agent with a log is also replayed with the log in place (`sample-replay`,
+   `run-replay`): recorded decisions whose last sighting is 5–20 steps old, scored on whether the
+   reason still places the goal around the drone (R4's phantoms needed a log, which step-0 frames
+   lack). If the gate fails, the round does not fly: the README's Outcome records the
+   probe, and the next idea is a new version. Commit `probe/` before flying.
+3. **Preflight** (P1 §7.2 step 1): clean tree; tunnel up; decider started with
    `python -m server.decider --profile remote --agent <aNN>`; `/health` reports the round's
    agent sha and prompt sha.
-3. **Fly:** `python eval/phase2.py run --round R<N>`. One SHA for the whole round (P1 §7.1).
-4. **Validity gate:** P1 §10, plus `agent_version` and `agent_sha` in every `run.json` match the
+4. **Fly:** `python eval/phase2.py run --round R<N>`. One SHA for the whole round (P1 §7.1).
+5. **Validity gate:** P1 §10, plus `agent_version` and `agent_sha` in every `run.json` match the
    round lock. Invalid runs are rerun; valid failures never are.
-5. **Label:** `python eval/phase1_label.py --round R<N>`, then manual review of every run (P1 §9).
-6. **Summarise:** `summary.md` in the round folder; `phase.json` status `complete`;
-   `python eval/phase2.py results`.
-7. **Merge:** PR closes the Issue; merge commit (never squash: run records cite the flown SHAs);
-   tag `p2-r<N>`.
+6. **Label:** `python eval/phase1_label.py --round R<N>`, then manual review of every run (P1 §9).
+7. **Summarise:** `summary.md` in the round folder, opening with whether the hypothesis held;
+   run `python eval/agent_evidence.py eval/phase2/R<N>_<slug>` for the manipulation check; fill
+   the README's Outcome line; `phase.json` status `complete`; `python eval/phase2.py results`.
+8. **Open the PR, never merge it** (§4.2). Tag the branch tip `p2-r<N>`. Close the Issue by hand
+   with a link to the PR.
+
+### 4.1 Round write-up
+
+Every round has a `README.md` in its folder, written and committed **before** the round flies, so
+a later write-up can trace evidence → hypothesis → prediction → result for each round.
+`eval/phase2.py init` creates the stub, once, and never for a round that has already flown.
+Sections:
+
+| Section | Content |
+|---|---|
+| Change | The one change, against the agent it builds on |
+| Evidence | Past data that points at the change. Every claim cites a path: `results.md`, a `summary.md`, a run ID and step, or `evidence.md` |
+| Hypothesis | One falsifiable sentence |
+| Predictions | Per arm against R0 (and the best round so far), per site where it differs |
+| Manipulation check | A measurable sign that the change took effect, independent of success |
+| Drop criterion | The result that means the change is not carried forward |
+| Probe gate | `eval/goal_probe.py` thresholds that must pass before flying (§4 step 2), or "Not needed" |
+| Builds on | Previous round and agent |
+| Outcome | After flying, the only edit: held or not, and a link to `summary.md` |
+
+### 4.2 Branches and PRs: one per round, never merged
+
+Phase 2 is an iteration record, so each round stays visible as its own branch and PR instead of
+being folded into `main`.
+
+- **Branch** `phase2/r<N>-<slug>`, cut from the tip of the previous round's branch. R1 is cut
+  from `main` after `p2-setup`. The rounds form one chain, so the tip of the latest branch holds
+  every agent version, every round's data, and the cross-round `results.md`.
+- **PR** base is the previous round's branch (R1: `main`), so its diff is exactly that round:
+  the agent change, the write-up, the runs, labels and summary. The body links the write-up and
+  gives the round table and the delta against the best round so far.
+- **Never merged**, including the final round. A PR stays open as the record of its iteration.
+  Close the Issue by hand (closing keywords only fire on merge).
+- **Never rebased, force-pushed or deleted.** `run.json` cites the SHA each run was flown at,
+  and those commits exist only on the round branch. Deleting a base branch would also close
+  every PR stacked on it.
+- A round that does not build on the one before (its README's "Builds on" names an earlier
+  agent) still branches from the latest tip. Agent versions are append-only, so the old agent
+  is still there to build on.
+- Process and tooling changes that every round needs (the runner, labeller, templates, this
+  spec) are not round work. They go to `main` through an ordinary, merged PR. A round branch
+  that needs them merges `main` in before its first flight, never after.
+
+`evidence.md` beside it is generated by `python eval/agent_evidence.py <phase or round folder>
+--out <round>/evidence.md`. It gives per site and arm what the reasons cite and how often the
+pick is the action nearest the true goal bearing. It is regenerated, never edited.
 
 ## 5. Dependent variables and rubric
 
@@ -88,12 +149,48 @@ As P1 §8 and §9, unchanged, so labels compare across phases. The round compari
 `eval/phase2/results/results.md` shows, per round: success by arm, and per cell either the steps
 to goal or the failure label.
 
+**Added secondary tag: `failed_goal_identification`.** It goes in the `tags` column only, so it
+leaves the terminal labels, their order and the frozen thresholds untouched. Several tags in one
+cell are separated by `;`. The tag applies to a failed run (not `success`) that meets any one of
+three facets:
+
+| Facet | Rule |
+|---|---|
+| phantom goal | ≥ 5 decisions report the goal while ground truth has it out of view |
+| missed goal | ≥ 3 decisions report `not_visible` while the goal is in view, and that is ≥ 50% of the in-view decisions |
+| lost at close range | closest approach ≤ 3.0 m (arrival radius 1.0 m) without arriving |
+
+- Ground truth is `true_goal()` in `eval/agent_evidence.py`: line of sight, and a bearing inside
+  the camera's field of view.
+- The first two facets need a `goal` field in the reply (`a03` on). For an agent without one,
+  the reviewer judges them from the reasons.
+- `eval/phase1_label.py` writes the facet counts and the suggested tag to `auto_labels.json`
+  (`goal_id`). The reviewer confirms the tag like any other.
+- Added in R4, whose phantom sightings came from the log. R1–R3 keep their labels and tags as
+  they were reviewed (operator, 2026-10-14). The rubric grew with the experiment, and the round
+  where a tag first appears records when that failure mode was recognised. R3's missed goals
+  (R3 summary) would have met the "missed goal" facet.
+
+**Added secondary tag: `spin_failure`.** In the `tags` column like the tag above. It applies to a
+failed run in which the agent picks turn-around in place on **≥ 5 consecutive decisions**: two
+turn-arounds cancel, so the drone stands still while the run's steps run out.
+
+- `eval/phase1_label.py` reads the chosen action's `turn_around` flag from each manifest and writes
+  the longest streak, where it starts, the total number of turn-arounds and the suggested tag to
+  `auto_labels.json` (`spin`). The reviewer confirms it like any other tag.
+- The threshold sits above every successful run in R1–R5 (longest streak 4, R5 s03 `final`).
+- Added in R5, whose failures turned around in place in streaks of 7–36 (operator, 2026-10-16).
+  R1–R4 keep their labels and tags as reviewed. By the rule, 9 of R3's 18 failures and 6 of R4's 13
+  would have met it.
+
 ## 6. Final round
 
 The agent chosen from the screening rounds is frozen and flown under the full Phase 1 design
 (P1 §5–§7): 6 sites × 3 arms × 5 seeds. The results use P1 §11's tables and contrasts, and add a
 Phase 1 vs Phase 2 comparison per cell. The final round's order is generated with
-`random.Random("phase2-F")`.
+`random.Random("phase2-F")`. It follows §4.2 like any round: branch `phase2/final` from the
+latest round's tip, PR against that branch, never merged, tip tagged `phase2-complete`. The
+citable Phase 2 results live on that branch and tag.
 
 ## 7. Data layout
 
@@ -106,6 +203,9 @@ eval/phase2/
 ├── matrix.csv              ← every planned run, column `round` instead of `mini_phase`
 ├── P2.0_shakedown/
 ├── R1_<slug>/
+│   ├── README.md           ← write-up, committed before flying (§4.1)
+│   ├── evidence.md         ← eval/agent_evidence.py output the README cites
+│   ├── probe/              ← eval/goal_probe.py set, answers and probe.md (§4 step 2)
 │   ├── config.lock.json    ← phase lock + this round's agent
 │   ├── phase.json, order.txt, labels.csv, summary.md
 │   ├── runs/<site>/<arm>/seed1/
@@ -120,4 +220,14 @@ Git: same committed and ignored files as P1 §14.
 
 | Date | Change |
 |---|---|
+| 2026-10-26 | Goal truth (operator's decision, for R11 on): code on an orchestrated agent's planner side (target policy, detour scoring, progress monitor) may read the goal's true position, as well as the strategist's prompt. No navigator or perceiver text may carry it; the navigator gets the goal only as "toward your target". `eval/spatial_replay.py audit` reports note use, near-repeat collisions, the goal estimate and the strategist's choices for a round (R11 evidence, `eval/phase2/R11_goal_default/evidence.md`). |
+| 2026-10-24 | R10 (`a14`, operator's decisions): the goal's true position may be given to an orchestrated agent's planner only (`goal_truth: planner`): the strategist's prompt and target list carry it, and no other part sees it (the navigator gets "head for the goal" and "toward your target", no distance or direction). Since R1 no agent had the goal's position; Phase 1's `a00` had its distance and bearing in the navigator prompt. An agent may leave an action off its list and out of its schema (`turn_rule: no_repeat_when_open`: no turn-around right after a turn-around while a move ahead is open); the frame still shows the marker, and the record carries `hidden`. The operator accepts the hidden action for R10, not as a lasting design. a14's added wording is hashed separately (`spatial.wording_sha_a14()`), so `a13` keeps its sha and flies as R10's control. Probe: `eval/r10_probe.py` (q02 on R9's 321 strategist calls; the navigator on R9's 25 turn-arounds a14 would not offer). |
+| 2026-10-22 | Bundle round (R9, operator's decision): several changes in one agent, credited to the bundle, flown beside a control on the same host; an ablation round follows if it wins. Orchestrated agents (`a13` on, `server/decider/orchestrator.py`): one step is several calls of the frozen model with one job each (perceiver, strategist, navigator, and a critic's one retry), and every subagent prompt and the spatial memory's wording and parameters are part of `agent_sha`. Spatial memory (`server/decider/spatial.py`) is built only from the drone's pose and what the perceiver reads off the clean frame, never from site geometry, depth, the `collided` flag or goal ground truth, and is rebuilt from `decisions.jsonl` each step. Probe: `eval/r9_probe.py` (perceiver against ground truth, trap replay through the real step). Checks: `eval/spatial_replay.py` (memory against the R7 comparison lines, manipulation-check counts, top-down maps). |
+| 2026-10-22 | Control rounds (R7C, R8N): a round with no change of its own, flown at the same SHA and on the same host as the round it controls, and listed in `ROUNDS` beside it. R7C re-flies the previous agent on a new host; R8N flies a no-op prompt edit (`a12`) to measure how far wording alone moves a round. A round flown with a no-op control states an attribution rule in its README before flying. `eval/agent_evidence.py` gains heading columns (degrees, compass word, heading arithmetic, turn-around with the goal in view). |
+| 2026-10-16 | Secondary tag `spin_failure` (§5): a failed run with ≥ 5 consecutive turn-around picks, computed by `eval/phase1_label.py`. Tags only; applies from R5. |
+| 2026-10-15 | Clean frames: an agent whose goal identifier reads the frame without annotations (`goal_identifier.frame: clean`, a06) gets it from Godot beside the annotated frame, saved as `frames/c<step>.png`. `eval/replay.py --save-clean-frames` recovers clean frames for recorded runs at their exact poses, and `goal_probe.py attach-clean` pairs them with probe frames. |
+| 2026-10-15 | Replay probe (§4 step 2): `eval/goal_probe.py sample-replay` / `run-replay` send recorded frames with the log the agent had, scored by `claims_goal()` (`eval/agent_evidence.py`). Gates are per round (`report --gate`). Agents may carry a goal identifier, a second call per step whose prompt sha is part of `agent_sha` (R5). |
+| 2026-10-14 | Secondary tag `failed_goal_identification` (§5): phantom goal, missed goal or lost at close range, computed by `eval/phase1_label.py`. Tags only; the rubric's terminal labels are unchanged. |
+| 2026-10-14 | Probe step (§4 step 2) and a Probe gate section in the write-up: `eval/goal_probe.py` checks offline, on recorded frames, whether an agent sees the goal before a round flies. R3 flew 0/18 on an agent that had stopped seeing it. |
+| 2026-10-08 | Round write-ups (§4.1): `README.md` per round before flying, `evidence.md` from `eval/agent_evidence.py`. Branches (§4.2): one branch and PR per round, stacked on the previous round, never merged; replaces "merge, never squash". |
 | 2026-10-08 | Initial spec. Agent versions (`agent.py`, a00 = Phase 1 agent). Rounds are 6 sites × 3 arms × seed 1 = 18 runs; R0 is Phase 1's seed-1 runs; final round is the full 90-run design. Runner shared with Phase 1 (`eval/phaselib.py`). |

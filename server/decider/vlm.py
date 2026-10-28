@@ -18,7 +18,7 @@ import re
 import time
 from typing import AsyncIterator
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import httpx
 
@@ -132,9 +132,12 @@ class Decision:
     #: that had to fall back — deliberately: one answers "what did this step
     #: cost", the other "what did the model cost once it worked".
     timing: Optional[Timing] = None
+    #: Where the model said the goal is in this frame (schema.GOAL_REPORTS), for
+    #: an agent whose reply reports it; None otherwise, and then not recorded.
+    goal: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        out = {
             "index": self.index,
             "reason": self.reason,
             "rung": self.rung,
@@ -146,11 +149,21 @@ class Decision:
             "raw": self.raw,
             "timing": self.timing.to_dict() if self.timing else None,
         }
+        if self.goal is not None:
+            out["goal"] = self.goal
+        return out
 
 
-def _messages(manifest: Dict[str, Any], frame_b64: str, schema_hint: str = "") -> List[Dict[str, Any]]:
+def _messages(manifest: Dict[str, Any], frame_b64: str, schema_hint: str = "",
+              memory: Optional[List[Dict[str, Any]]] = None,
+              sighting: Optional[str] = None) -> List[Dict[str, Any]]:
     prompt = agent.current().prompt
-    text = prompt.render(prompt, manifest)
+    if memory is None:
+        text = prompt.render(prompt, manifest)
+    elif agent.current().features.get("goal_identifier"):
+        text = prompt.render(prompt, manifest, memory, sighting)
+    else:
+        text = prompt.render(prompt, manifest, memory)
     if schema_hint:
         text += "\n\n" + schema_hint
     return [
@@ -163,35 +176,66 @@ def _messages(manifest: Dict[str, Any], frame_b64: str, schema_hint: str = "") -
     ]
 
 
-def _body(rung: str, manifest: Dict[str, Any], frame_b64: str, indices: List[int]) -> Dict[str, Any]:
+def _reports_goal() -> bool:
+    """Whether this agent's reply carries a goal report (agent.py features).
+
+    Never when a goal identifier reports it instead (a05 on): the navigator's
+    reply is then reason and action only."""
+    features = agent.current().features
+    if features.get("goal_identifier"):
+        return False
+    memory = features.get("memory") or {}
+    return "goal" in memory.get("fields", [])
+
+
+def _goal_after_reason() -> bool:
+    """Whether the goal report comes after the reason, not first (a04)."""
+    return agent.current().features.get("goal_order") == "after_reason"
+
+
+def _body(rung: str, manifest: Dict[str, Any], frame_b64: str, indices: List[int],
+          memory: Optional[List[Dict[str, Any]]] = None,
+          sighting: Optional[str] = None) -> Dict[str, Any]:
+    goal = _reports_goal()
+    after = _goal_after_reason()
     body: Dict[str, Any] = {
         "model": config.VLM_MODEL,
         "max_tokens": config.MAX_TOKENS,
         "temperature": config.TEMPERATURE,
     }
     if rung == "json_schema":
-        body["messages"] = _messages(manifest, frame_b64)
-        body["response_format"] = schema.response_format(indices)
+        body["messages"] = _messages(manifest, frame_b64, memory=memory, sighting=sighting)
+        body["response_format"] = schema.response_format(indices, goal, after)
     elif rung == "json_object":
         hint = ("Reply with JSON only, matching this schema exactly:\n"
-                + json.dumps(schema.action_schema(indices)))
-        body["messages"] = _messages(manifest, frame_b64, hint)
+                + json.dumps(schema.action_schema(indices, goal, after)))
+        body["messages"] = _messages(manifest, frame_b64, hint, memory, sighting)
         body["response_format"] = {"type": "json_object"}
     elif rung == "tool_call":
-        body["messages"] = _messages(manifest, frame_b64)
-        body["tools"] = [schema.tool_spec(indices)]
+        body["messages"] = _messages(manifest, frame_b64, memory=memory, sighting=sighting)
+        body["tools"] = [schema.tool_spec(indices, goal, after)]
         # "required" rather than the object form: with exactly one tool it means
         # the same thing, and LM Studio rejects {"type": "function", ...} with
         # "Invalid tool_choice type: 'object'".
         body["tool_choice"] = "required"
     else:
-        hint = ('Reply with a line "REASON: ..." then a line "ACTION: <number>".')
-        body["messages"] = _messages(manifest, frame_b64, hint)
+        if goal and after:
+            hint = ('Reply with a line "REASON: ...", then a line "GOAL: '
+                    + "|".join(schema.GOAL_REPORTS) + '", then a line "ACTION: <number>".')
+        elif goal:
+            hint = ('Reply with a line "GOAL: ' + "|".join(schema.GOAL_REPORTS) + '", then a '
+                    'line "REASON: ...", then a line "ACTION: <number>".')
+        else:
+            hint = ('Reply with a line "REASON: ..." then a line "ACTION: <number>".')
+        body["messages"] = _messages(manifest, frame_b64, hint, memory, sighting)
     return body
 
 
 def _extract(rung: str, payload: Dict[str, Any], indices: List[int]) -> Dict[str, Any]:
-    """Pull (index, reason, raw) out of a completion, or raise VLMError."""
+    """Pull (index, reason, goal, raw) out of a completion, or raise VLMError.
+
+    `goal` is None when the reply has no valid goal report; that never fails
+    the decision, which is about the action."""
     choice = payload["choices"][0]
     message = choice.get("message", {})
 
@@ -207,9 +251,11 @@ def _extract(rung: str, payload: Dict[str, Any], indices: List[int]) -> Dict[str
         if not match:
             raise VLMError("no integer in response")
         reason_match = re.search(r"REASON:\s*(.+)", raw)
+        goal_match = re.search(r"GOAL:\s*(\w+)", raw)
         parsed = {
             "action": int(match.group(1)),
             "reason": reason_match.group(1).strip() if reason_match else raw.strip()[:500],
+            "goal": goal_match.group(1).lower() if goal_match else None,
         }
     else:
         raw = message.get("content") or ""
@@ -220,7 +266,9 @@ def _extract(rung: str, payload: Dict[str, Any], indices: List[int]) -> Dict[str
     index = int(parsed["action"])
     if index not in indices:
         raise VLMError("model chose {0}, not on this frame ({1})".format(index, indices))
-    return {"index": index, "reason": str(parsed.get("reason", "")), "raw": raw}
+    goal = parsed.get("goal")
+    return {"index": index, "reason": str(parsed.get("reason", "")),
+            "goal": goal if goal in schema.GOAL_REPORTS else None, "raw": raw}
 
 
 # Set False for the process the first time a provider refuses a streamed
@@ -485,11 +533,17 @@ async def _request(client: httpx.AsyncClient, url: str,
     return await _post_plain(client, url, headers, body, rtt_ms)
 
 
-async def decide(manifest: Dict[str, Any], frame_b64: str) -> Decision:
-    indices = schema.visible_indices(manifest)
-    if not indices:
-        raise VLMError("manifest offers no actions")
+async def _ladder(build_body: Callable[[str], Dict[str, Any]],
+                  extract: Callable[[str, Dict[str, Any]], Dict[str, Any]],
+                  max_tokens: int) -> Dict[str, Any]:
+    """Walk the rungs until one answers; shared by the navigator and the goal
+    identifier, so both get the same transport retries, truncation doubling
+    and memory of rejected rungs.
 
+    `build_body(rung)` gives the request, `extract(rung, payload)` the parsed
+    reply or an exception. Returns the winning rung, its parsed result, the
+    payload, its timing and every failed attempt; raises VLMError if none.
+    """
     headers = {"Content-Type": "application/json"}
     if config.LITELLM_API_KEY:
         headers["Authorization"] = "Bearer " + config.LITELLM_API_KEY
@@ -501,7 +555,7 @@ async def decide(manifest: Dict[str, Any], frame_b64: str) -> Decision:
 
     http = client()
 
-    # Before the ladder, not inside it: one probe per decision, on a
+    # Before the ladder, not inside it: one probe per call, on a
     # connection the real call then reuses.
     rtt_ms = await _probe_rtt(http, config.LITELLM_BASE_URL, headers)
 
@@ -510,12 +564,12 @@ async def decide(manifest: Dict[str, Any], frame_b64: str) -> Decision:
         # capability. Retrying the same rung with more room is the right
         # answer; dropping to a weaker rung would hide the real cause and
         # make every later step weaker too.
-        budget = config.MAX_TOKENS
+        budget = max_tokens
         attempt = 0
         transport_failures = 0
         while attempt < 2:
             try:
-                body = _body(rung, manifest, frame_b64, indices)
+                body = build_body(rung)
                 body["max_tokens"] = budget
                 status, payload, error_text, timing = await _request(
                     http, url, headers, body, rtt_ms)
@@ -528,7 +582,7 @@ async def decide(manifest: Dict[str, Any], frame_b64: str) -> Decision:
                                      "error": error_text[:300]})
                     break
                 truncated = (payload.get("choices") or [{}])[0].get("finish_reason") == "length"
-                result = _extract(rung, payload, indices)
+                result = extract(rung, payload)
             except (httpx.HTTPError, VLMError, KeyError, ValueError,
                     json.JSONDecodeError) as exc:
                 note = {"rung": rung, "error": "{0}: {1}".format(type(exc).__name__, exc)[:300]}
@@ -558,18 +612,305 @@ async def decide(manifest: Dict[str, Any], frame_b64: str) -> Decision:
                     attempt += 1
                     continue
 
-            usage = payload.get("usage") or {}
-            return Decision(
-                index=result["index"],
-                reason=result["reason"],
-                rung=rung,
-                latency_ms=(time.perf_counter() - started) * 1000.0,
-                model=payload.get("model", config.VLM_MODEL),
-                prompt_tokens=usage.get("prompt_tokens"),
-                completion_tokens=usage.get("completion_tokens"),
-                attempts=attempts,
-                raw=result["raw"],
-                timing=timing,
-            )
+            return {"rung": rung, "result": result, "payload": payload, "timing": timing,
+                    "attempts": attempts,
+                    "latency_ms": (time.perf_counter() - started) * 1000.0}
 
     raise VLMError("every rung failed: " + json.dumps(attempts))
+
+
+async def decide(manifest: Dict[str, Any], frame_b64: str,
+                 memory: Optional[List[Dict[str, Any]]] = None,
+                 sighting: Optional[str] = None) -> Decision:
+    """`memory` is the run's earlier decisions for an agent that has memory,
+    None for one that does not (the prompt is then rendered without it).
+    `sighting` is the goal identifier's report for this frame, for an agent
+    that has one (identify_goal)."""
+    indices = schema.visible_indices(manifest)
+    if not indices:
+        raise VLMError("manifest offers no actions")
+
+    won = await _ladder(
+        lambda rung: _body(rung, manifest, frame_b64, indices, memory, sighting),
+        lambda rung, payload: _extract(rung, payload, indices),
+        config.MAX_TOKENS)
+    result, payload = won["result"], won["payload"]
+    usage = payload.get("usage") or {}
+    return Decision(
+        index=result["index"],
+        reason=result["reason"],
+        rung=won["rung"],
+        latency_ms=won["latency_ms"],
+        model=payload.get("model", config.VLM_MODEL),
+        prompt_tokens=usage.get("prompt_tokens"),
+        completion_tokens=usage.get("completion_tokens"),
+        attempts=won["attempts"],
+        raw=result["raw"],
+        timing=won["timing"],
+        goal=result["goal"],
+    )
+
+
+#: The identifier's reply is a short description and one word.
+IDENTIFIER_MAX_TOKENS = 512
+
+
+@dataclass
+class Sighting:
+    """The goal identifier's answer for one frame (agent feature
+    `goal_identifier`). `goal` is None when it gave no valid report; the step
+    then goes on without one, it never fails because of the identifier."""
+    goal: Optional[str]
+    reason: str = ""
+    rung: Optional[str] = None
+    latency_ms: float = 0.0
+    model: Optional[str] = None
+    prompt_tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
+    attempts: List[Dict[str, Any]] = field(default_factory=list)
+    raw: str = ""
+    timing: Optional[Timing] = None
+    error: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        out = {
+            "goal": self.goal,
+            "reason": self.reason,
+            "rung": self.rung,
+            "latency_ms": round(self.latency_ms, 1),
+            "model": self.model,
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "attempts": self.attempts,
+            "raw": self.raw,
+            "timing": self.timing.to_dict() if self.timing else None,
+        }
+        if self.error is not None:
+            out["error"] = self.error
+        return out
+
+
+def _identifier_messages(manifest: Dict[str, Any], frame_b64: str,
+                         schema_hint: str = "") -> List[Dict[str, Any]]:
+    prompt = agent.current().identifier_prompt
+    text = prompt.render(prompt, manifest)
+    if schema_hint:
+        text += "\n\n" + schema_hint
+    return [
+        {"role": "system", "content": prompt.system},
+        {"role": "user", "content": [
+            {"type": "text", "text": text},
+            {"type": "image_url",
+             "image_url": {"url": "data:image/png;base64," + frame_b64}},
+        ]},
+    ]
+
+
+def _identifier_body(rung: str, manifest: Dict[str, Any], frame_b64: str) -> Dict[str, Any]:
+    body: Dict[str, Any] = {
+        "model": config.VLM_MODEL,
+        "max_tokens": IDENTIFIER_MAX_TOKENS,
+        "temperature": config.TEMPERATURE,
+    }
+    if rung == "json_schema":
+        body["messages"] = _identifier_messages(manifest, frame_b64)
+        body["response_format"] = schema.identifier_response_format()
+    elif rung == "json_object":
+        hint = ("Reply with JSON only, matching this schema exactly:\n"
+                + json.dumps(schema.identifier_schema()))
+        body["messages"] = _identifier_messages(manifest, frame_b64, hint)
+        body["response_format"] = {"type": "json_object"}
+    elif rung == "tool_call":
+        body["messages"] = _identifier_messages(manifest, frame_b64)
+        body["tools"] = [schema.identifier_tool_spec()]
+        body["tool_choice"] = "required"
+    else:
+        hint = ('Reply with a line "REASON: ...", then a line "GOAL: '
+                + "|".join(schema.GOAL_REPORTS) + '".')
+        body["messages"] = _identifier_messages(manifest, frame_b64, hint)
+    return body
+
+
+def _identifier_extract(rung: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Pull (goal, reason, raw) out of an identifier reply, or raise. Unlike
+    the navigator, a reply without a valid goal is a failed rung: the goal is
+    the identifier's whole answer."""
+    message = payload["choices"][0].get("message", {})
+    if rung == "tool_call":
+        calls = message.get("tool_calls") or []
+        if not calls:
+            raise VLMError("no tool call in response")
+        raw = calls[0]["function"]["arguments"]
+        parsed = json.loads(raw)
+    elif rung == "text":
+        raw = message.get("content") or ""
+        goal_match = re.search(r"GOAL:\s*(\w+)", raw)
+        reason_match = re.search(r"REASON:\s*(.+)", raw)
+        parsed = {"goal": goal_match.group(1).lower() if goal_match else None,
+                  "reason": reason_match.group(1).strip() if reason_match else raw.strip()[:500]}
+    else:
+        raw = message.get("content") or ""
+        fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.S)
+        parsed = json.loads(fenced.group(1) if fenced else raw)
+    goal = parsed.get("goal")
+    if goal not in schema.GOAL_REPORTS:
+        raise VLMError("identifier gave no valid goal report: {0!r}".format(goal))
+    return {"goal": goal, "reason": str(parsed.get("reason", "")), "raw": raw}
+
+
+async def identify_goal(manifest: Dict[str, Any], frame_b64: str) -> Sighting:
+    """The goal identifier: this frame and nothing else, asked only where the
+    goal is. Never raises for a model failure; returns Sighting(goal=None)."""
+    try:
+        won = await _ladder(
+            lambda rung: _identifier_body(rung, manifest, frame_b64),
+            _identifier_extract,
+            IDENTIFIER_MAX_TOKENS)
+    except VLMError as exc:
+        return Sighting(goal=None, error=str(exc)[:1000])
+    result, payload = won["result"], won["payload"]
+    usage = payload.get("usage") or {}
+    return Sighting(
+        goal=result["goal"],
+        reason=result["reason"],
+        rung=won["rung"],
+        latency_ms=won["latency_ms"],
+        model=payload.get("model", config.VLM_MODEL),
+        prompt_tokens=usage.get("prompt_tokens"),
+        completion_tokens=usage.get("completion_tokens"),
+        attempts=won["attempts"],
+        raw=result["raw"],
+        timing=won["timing"],
+    )
+
+
+# --- R9: one structured call per subagent (a13) ----------------------------------
+
+@dataclass
+class SubCall:
+    """One subagent's reply for one step: the parsed object, or an error. Shaped
+    like Sighting so a decision record reads the same for every subagent."""
+    name: str
+    result: Optional[Dict[str, Any]]
+    rung: Optional[str] = None
+    latency_ms: float = 0.0
+    model: Optional[str] = None
+    prompt_tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
+    attempts: List[Dict[str, Any]] = field(default_factory=list)
+    raw: str = ""
+    timing: Optional[Timing] = None
+    error: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        out = {
+            "result": self.result,
+            "rung": self.rung,
+            "latency_ms": round(self.latency_ms, 1),
+            "model": self.model,
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "attempts": self.attempts,
+            "raw": self.raw,
+            "timing": self.timing.to_dict() if self.timing else None,
+        }
+        if self.error is not None:
+            out["error"] = self.error
+        return out
+
+
+def _structured_messages(system: str, text: str, image_b64: Optional[str],
+                         hint: str = "",
+                         follow_up: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
+    if hint:
+        text = text + "\n\n" + hint
+    content: Any = text
+    if image_b64 is not None:
+        content = [{"type": "text", "text": text},
+                   {"type": "image_url", "image_url": {"url": "data:image/png;base64," + image_b64}}]
+    messages = [{"role": "system", "content": system}, {"role": "user", "content": content}]
+    return messages + list(follow_up or [])
+
+
+def _structured_body(rung: str, name: str, json_schema: Dict[str, Any], system: str,
+                     text: str, image_b64: Optional[str], max_tokens: int,
+                     follow_up: Optional[List[Dict[str, Any]]]) -> Dict[str, Any]:
+    body: Dict[str, Any] = {"model": config.VLM_MODEL, "max_tokens": max_tokens,
+                            "temperature": config.TEMPERATURE}
+    if rung == "json_schema":
+        body["messages"] = _structured_messages(system, text, image_b64, follow_up=follow_up)
+        body["response_format"] = {"type": "json_schema", "json_schema": {
+            "name": name, "strict": True, "schema": json_schema}}
+    elif rung == "json_object":
+        hint = "Reply with JSON only, matching this schema exactly:\n" + json.dumps(json_schema)
+        body["messages"] = _structured_messages(system, text, image_b64, hint, follow_up)
+        body["response_format"] = {"type": "json_object"}
+    elif rung == "tool_call":
+        body["messages"] = _structured_messages(system, text, image_b64, follow_up=follow_up)
+        body["tools"] = [{"type": "function", "function": {
+            "name": name, "description": "Give your answer.", "parameters": json_schema}}]
+        body["tool_choice"] = "required"
+    else:
+        hint = ("Reply with one JSON object only, no other text, matching this schema:\n"
+                + json.dumps(json_schema))
+        body["messages"] = _structured_messages(system, text, image_b64, hint, follow_up)
+    return body
+
+
+def _structured_extract(rung: str, payload: Dict[str, Any],
+                        validate: Callable[[Dict[str, Any]], Dict[str, Any]]) -> Dict[str, Any]:
+    message = payload["choices"][0].get("message", {})
+    if rung == "tool_call":
+        calls = message.get("tool_calls") or []
+        if not calls:
+            raise VLMError("no tool call in response")
+        raw = calls[0]["function"]["arguments"]
+        parsed = json.loads(raw)
+    else:
+        raw = message.get("content") or ""
+        fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.S)
+        if fenced:
+            parsed = json.loads(fenced.group(1))
+        elif rung == "text":
+            match = re.search(r"\{.*\}", raw, re.S)
+            if not match:
+                raise VLMError("no JSON object in response")
+            parsed = json.loads(match.group(0))
+        else:
+            parsed = json.loads(raw)
+    if not isinstance(parsed, dict):
+        raise VLMError("reply is not a JSON object")
+    return {"parsed": validate(parsed), "raw": raw}
+
+
+async def call_structured(name: str, system: str, text: str, image_b64: Optional[str],
+                          json_schema: Dict[str, Any],
+                          validate: Callable[[Dict[str, Any]], Dict[str, Any]],
+                          max_tokens: int,
+                          follow_up: Optional[List[Dict[str, Any]]] = None) -> SubCall:
+    """One subagent call on the shared ladder. `validate` returns the cleaned
+    reply or raises VLMError (a failed rung). Never raises for a model failure:
+    returns SubCall(result=None, error=...) and the orchestrator decides what
+    a missing answer means. `follow_up` appends turns after the first user
+    message (the critic's retry)."""
+    try:
+        won = await _ladder(
+            lambda rung: _structured_body(rung, name, json_schema, system, text, image_b64,
+                                          max_tokens, follow_up),
+            lambda rung, payload: _structured_extract(rung, payload, validate),
+            max_tokens)
+    except VLMError as exc:
+        return SubCall(name=name, result=None, error=str(exc)[:1000])
+    usage = won["payload"].get("usage") or {}
+    return SubCall(
+        name=name,
+        result=won["result"]["parsed"],
+        rung=won["rung"],
+        latency_ms=won["latency_ms"],
+        model=won["payload"].get("model", config.VLM_MODEL),
+        prompt_tokens=usage.get("prompt_tokens"),
+        completion_tokens=usage.get("completion_tokens"),
+        attempts=won["attempts"],
+        raw=won["result"]["raw"],
+        timing=won["timing"],
+    )

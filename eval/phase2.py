@@ -51,6 +51,70 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     "P2.0": {"folder": "P2.0_shakedown", "title": "Shakedown (fake decider)",
              "agent": "a00", "sites": ROUND_SITES, "seeds": ROUND_SEEDS,
              "citable": False},
+    "R1": {"folder": "R1_no_goal_hint", "title": "No goal hint", "agent": "a01",
+           "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R2": {"folder": "R2_text_memory", "title": "Text memory, full run", "agent": "a02",
+           "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R3": {"folder": "R3_memory_log", "title": "Memory log, code-written", "agent": "a03",
+           "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R4": {"folder": "R4_goal_after_reason", "title": "Memory log, goal reported last",
+           "agent": "a04", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # Defined with a05; its probe failed (the identifier took the drawn turn-around
+    # marker for the goal), so before flying the round moved to a06, which shows
+    # the identifier the unannotated frame. R5 README, "Change".
+    "R5": {"folder": "R5_goal_identifier", "title": "Goal identifier on the clean frame, sighting age",
+           "agent": "a06", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # Two candidates were probed: a07 (pose log, sighting line kept) and a08 (pose
+    # log, no sighting line). Defined with a07, the tie-break; a08 won the probe
+    # (spin turn-around 6/40 against 17/40) and flies. R6 README, "Probe gate".
+    "R6": {"folder": "R6_pose_log", "title": "Ground-truth pose in the memory log",
+           "agent": "a08", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # a10 is a08 (no sighting line) plus comparison lines in the log. a09 (a07 plus
+    # the same lines) was probed first and did not fly. R7 README, "Change".
+    "R7": {"folder": "R7_comparison_lines", "title": "Comparison lines in the log",
+           "agent": "a10", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R7C: a08 (R6's agent) flown on sctsvr6 under lavapipe, the host R7 flies on, so R7
+    # against R6 can be read without the renderer change. Not a round of its own: no
+    # change, no prediction. R7 README, "Host".
+    "R7C": {"folder": "R7C_a08_control", "title": "a08 control on the R7 host",
+            "agent": "a08", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R8": {"folder": "R8_heading_word", "title": "Heading as a compass word",
+           "agent": "a11", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R8N: a12 is a10 plus one sentence with no content, flown beside R8 on the same
+    # host and SHA. R8N against R7 is the noise floor of a prompt edit; R8 is read
+    # against it. R8 README, "Attribution rule".
+    "R8N": {"folder": "R8N_noop_control", "title": "No-op prompt edit (noise floor)",
+            "agent": "a12", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R9: the bundle round (operator, 2026-10-22). a13 is several calls with one job
+    # each plus a code-kept map (server/decider/orchestrator.py, spatial.py). More than
+    # one change, by decision: success is credited to the bundle, not its parts. Its
+    # control is R9C below. R9 README, "Change".
+    "R9": {"folder": "R9_hail_mary", "title": "Orchestrated agent with a spatial memory",
+           "agent": "a13", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R9C: a11 (R8's agent, carried forward) flown on the R9 host at the R9 SHA. Not a
+    # round of its own. R9 README, "Control".
+    "R9C": {"folder": "R9C_a11_control", "title": "a11 control on the R9 host",
+            "agent": "a11", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R10: a bundle on a13 (operator, 2026-10-24): the strategist is given the goal's
+    # true position, no turn-around right after a turn-around while a move ahead is
+    # open, no critic. Credited to the bundle. Its control is R10C below. R10 README.
+    "R10": {"folder": "R10_goal_planner", "title": "Goal known to the planner, no double turn",
+            "agent": "a14", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R10C: a13 (R9's agent) flown on the R10 host at the R10 SHA. Not a round of its
+    # own. R10 README, "Control".
+    "R10C": {"folder": "R10C_a13_control", "title": "a13 control on the R10 host",
+             "agent": "a13", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R11: a bundle on a14 (operator, 2026-10-26/27): the goal is the standing target by
+    # default (route planner, goal truth in code only), q03 asked only for detours on a
+    # goal-side menu, a progress monitor, a doorway gate, block memory at the end pose
+    # with a window by kind, wall-aware "toward". Agent a16 (a15 failed its probe).
+    # Credited to the bundle. Its control is R11C. R11 README.
+    "R11": {"folder": "R11_goal_default", "title": "Goal by default, detours on demand",
+            "agent": "a16", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R11C: a14 (R10's agent) flown on the R11 host at the R11 SHA; also a14's
+    # run-to-run floor against R10. Not a round of its own. R11 README, "Control".
+    "R11C": {"folder": "R11C_a14_control", "title": "a14 control on the R11 host",
+             "agent": "a14", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
@@ -83,9 +147,42 @@ for _round, _spec in ROUNDS.items():
     if not _spec.get("agent"):
         raise SystemExit("round {0} names no agent".format(_round))
 
+def round_readme(unit: str) -> str:
+    """Stub for a round's write-up (docs/phase2-test-plan.md §4 step 1).
+
+    Filled in and committed before the round flies; after it flies only the
+    Outcome section changes. Every claim under Evidence cites a path.
+    """
+    spec = ROUNDS[unit]
+    ident = agents.describe(spec["agent"])
+    return "\n".join([
+        "# {0}: {1}".format(unit, spec["title"]), "",
+        "**Agent:** `{agent_version}` (`{agent_sha}`) · **Prompt:** `{prompt_version}` "
+        "(`{prompt_sha}`) · **Status:** pre-registered, not flown".format(**ident), "",
+        "Written before flying. Spec: `docs/phase2-test-plan.md`.", "",
+        "## Change", "", "<!-- One change, and how it differs from the agent it builds on. -->", "",
+        "## Evidence", "",
+        "<!-- Past data that points at this change. Every claim cites a path: results tables,",
+        "     summary.md, run IDs and steps, evidence.md (python eval/agent_evidence.py ...). -->", "",
+        "## Hypothesis", "", "<!-- One falsifiable sentence. -->", "",
+        "## Predictions", "", "<!-- Per arm, and per site where it differs. Direction and size. -->", "",
+        "| Arm | Baseline (R0) | Predicted |", "|---|---|---|",
+        "| initial | | |", "| final | | |", "| dynamic | | |", "",
+        "## Manipulation check", "",
+        "<!-- A measurable sign the change took effect, independent of success. -->", "",
+        "## Drop criterion", "", "<!-- The result that means this change is not carried forward. -->", "",
+        "## Probe gate", "",
+        "<!-- Required when the change touches what the model is asked to perceive (§4 step 2):",
+        "     eval/goal_probe.py thresholds, set before the probe runs. Otherwise \"Not needed\". -->", "",
+        "## Builds on", "", "<!-- Previous round and agent. -->", "",
+        "## Outcome", "", "Not flown. After the round: one line on whether the hypothesis held, "
+        "and a link to [summary.md](summary.md).", ""])
+
+
 PHASE = Phase(number=2, root=PHASE_DIR, unit_key="round", unit_label="Round",
               units=ROUNDS, lock=LOCK, script="eval/phase2.py",
-              spec="docs/phase2-test-plan.md", agent_lock=agents.describe)
+              spec="docs/phase2-test-plan.md", agent_lock=agents.describe,
+              unit_readme=round_readme)
 
 BASELINE = "R0"
 BASELINE_NOTE = ("R0 is the Phase 1 agent (a00), not flown again: its seed-1 runs from "

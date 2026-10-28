@@ -1,0 +1,12 @@
+{
+  "round": "R8N",
+  "title": "No-op prompt edit (noise floor)",
+  "citable": false,
+  "agent_version": "a12",
+  "status": "complete",
+  "git_sha": "4c67fc6",
+  "started": "2026-10-22T16:12:40+00:00",
+  "finished": "2026-10-22T17:16:47+00:00",
+  "operator": "Markylu",
+  "notes": "Flown on sctsvr6 (headless Linux, Docker, Mesa lavapipe) in tmux, before R8 and at the same SHA (64 minutes). 18/18 valid. Control, never carried forward: a no-op edit of a10 changed the outcome of 6 of 18 cells against R7, net 6/18 either way."
+}

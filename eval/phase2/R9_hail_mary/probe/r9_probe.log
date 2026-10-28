@@ -1,0 +1,413 @@
+1/158 R5_goal_identifier/runs/s01/dynamic/seed1 step 1: centre (truth centre)
+2/158 R5_goal_identifier/runs/s01/dynamic/seed1 step 3: centre (truth centre)
+3/158 R5_goal_identifier/runs/s01/dynamic/seed1 step 14: not_visible (truth not_visible)
+4/158 R5_goal_identifier/runs/s01/dynamic/seed1 step 41: not_visible (truth not_visible)
+5/158 R5_goal_identifier/runs/s01/final/seed1 step 3: not_visible (truth not_visible)
+6/158 R5_goal_identifier/runs/s01/final/seed1 step 19: not_visible (truth not_visible)
+7/158 R5_goal_identifier/runs/s01/final/seed1 step 52: not_visible (truth not_visible)
+8/158 R5_goal_identifier/runs/s01/initial/seed1 step 1: centre (truth centre)
+9/158 R5_goal_identifier/runs/s01/initial/seed1 step 3: centre (truth centre)
+10/158 R5_goal_identifier/runs/s01/initial/seed1 step 6: centre (truth centre)
+11/158 R5_goal_identifier/runs/s01/initial/seed1 step 11: centre (truth centre)
+12/158 R5_goal_identifier/runs/s02a/dynamic/seed1 step 0: centre (truth centre)
+13/158 R5_goal_identifier/runs/s02a/dynamic/seed1 step 30: not_visible (truth not_visible)
+14/158 R5_goal_identifier/runs/s02a/dynamic/seed1 step 38: not_visible (truth not_visible)
+15/158 R5_goal_identifier/runs/s02a/final/seed1 step 39: not_visible (truth not_visible)
+16/158 R5_goal_identifier/runs/s02a/initial/seed1 step 6: centre (truth centre)
+17/158 R5_goal_identifier/runs/s02a/initial/seed1 step 10: centre (truth centre)
+18/158 R5_goal_identifier/runs/s02c/dynamic/seed1 step 35: not_visible (truth not_visible)
+19/158 R5_goal_identifier/runs/s02c/dynamic/seed1 step 39: not_visible (truth not_visible)
+20/158 R5_goal_identifier/runs/s02c/dynamic/seed1 step 42: not_visible (truth not_visible)
+21/158 R5_goal_identifier/runs/s02c/dynamic/seed1 step 47: not_visible (truth not_visible)
+22/158 R5_goal_identifier/runs/s02c/final/seed1 step 10: not_visible (truth not_visible)
+23/158 R5_goal_identifier/runs/s02c/final/seed1 step 23: not_visible (truth not_visible)
+24/158 R5_goal_identifier/runs/s02c/final/seed1 step 34: not_visible (truth not_visible)
+25/158 R5_goal_identifier/runs/s02c/final/seed1 step 37: not_visible (truth not_visible)
+26/158 R5_goal_identifier/runs/s02c/final/seed1 step 45: not_visible (truth not_visible)
+27/158 R5_goal_identifier/runs/s02c/initial/seed1 step 1: centre (truth centre)
+28/158 R5_goal_identifier/runs/s02c/initial/seed1 step 2: centre (truth centre)
+29/158 R5_goal_identifier/runs/s02c/initial/seed1 step 5: centre (truth centre)
+30/158 R5_goal_identifier/runs/s02va/dynamic/seed1 step 2: centre (truth centre)
+31/158 R5_goal_identifier/runs/s02va/dynamic/seed1 step 13: not_visible (truth not_visible)
+32/158 R5_goal_identifier/runs/s02va/dynamic/seed1 step 32: not_visible (truth not_visible)
+33/158 R5_goal_identifier/runs/s02va/dynamic/seed1 step 38: not_visible (truth not_visible)
+34/158 R5_goal_identifier/runs/s02va/dynamic/seed1 step 55: not_visible (truth not_visible)
+35/158 R5_goal_identifier/runs/s02va/final/seed1 step 4: not_visible (truth not_visible)
+36/158 R5_goal_identifier/runs/s02va/final/seed1 step 10: not_visible (truth not_visible)
+37/158 R5_goal_identifier/runs/s02va/initial/seed1 step 8: centre (truth centre)
+38/158 R5_goal_identifier/runs/s02va/initial/seed1 step 12: far_right (truth far_right)
+39/158 R5_goal_identifier/runs/s02va/initial/seed1 step 13: centre (truth centre)
+40/158 R5_goal_identifier/runs/s02va/initial/seed1 step 16: centre (truth centre)
+41/158 R5_goal_identifier/runs/s02vc/dynamic/seed1 step 2: centre (truth centre)
+42/158 R5_goal_identifier/runs/s02vc/dynamic/seed1 step 7: not_visible (truth not_visible)
+43/158 R5_goal_identifier/runs/s02vc/dynamic/seed1 step 14: not_visible (truth not_visible)
+44/158 R5_goal_identifier/runs/s02vc/dynamic/seed1 step 18: not_visible (truth not_visible)
+45/158 R5_goal_identifier/runs/s02vc/dynamic/seed1 step 31: not_visible (truth not_visible)
+46/158 R5_goal_identifier/runs/s02vc/dynamic/seed1 step 34: not_visible (truth not_visible)
+47/158 R5_goal_identifier/runs/s02vc/final/seed1 step 45: not_visible (truth not_visible)
+48/158 R5_goal_identifier/runs/s02vc/final/seed1 step 50: not_visible (truth not_visible)
+49/158 R5_goal_identifier/runs/s02vc/initial/seed1 step 0: centre (truth centre)
+50/158 R5_goal_identifier/runs/s02vc/initial/seed1 step 6: centre (truth centre)
+51/158 R5_goal_identifier/runs/s02vc/initial/seed1 step 8: centre (truth centre)
+52/158 R5_goal_identifier/runs/s03/dynamic/seed1 step 8: not_visible (truth not_visible)
+53/158 R5_goal_identifier/runs/s03/dynamic/seed1 step 15: not_visible (truth not_visible)
+54/158 R5_goal_identifier/runs/s03/dynamic/seed1 step 16: not_visible (truth not_visible)
+55/158 R5_goal_identifier/runs/s03/dynamic/seed1 step 21: not_visible (truth not_visible)
+56/158 R5_goal_identifier/runs/s03/dynamic/seed1 step 26: not_visible (truth not_visible)
+57/158 R5_goal_identifier/runs/s03/final/seed1 step 9: not_visible (truth not_visible)
+58/158 R5_goal_identifier/runs/s03/final/seed1 step 16: not_visible (truth not_visible)
+59/158 R5_goal_identifier/runs/s03/initial/seed1 step 8: not_visible (truth not_visible)
+60/158 R5_goal_identifier/runs/s03/initial/seed1 step 34: not_visible (truth not_visible)
+61/158 R5_goal_identifier/runs/s03/initial/seed1 step 35: centre (truth not_visible)
+62/158 R6_pose_log/runs/s01/dynamic/seed1 step 19: not_visible (truth not_visible)
+63/158 R6_pose_log/runs/s01/dynamic/seed1 step 28: centre (truth not_visible)
+64/158 R6_pose_log/runs/s01/dynamic/seed1 step 37: not_visible (truth not_visible)
+65/158 R6_pose_log/runs/s01/dynamic/seed1 step 45: not_visible (truth not_visible)
+66/158 R6_pose_log/runs/s01/final/seed1 step 7: not_visible (truth not_visible)
+67/158 R6_pose_log/runs/s01/final/seed1 step 10: not_visible (truth not_visible)
+68/158 R6_pose_log/runs/s01/final/seed1 step 14: not_visible (truth not_visible)
+69/158 R6_pose_log/runs/s01/final/seed1 step 16: not_visible (truth not_visible)
+70/158 R6_pose_log/runs/s01/final/seed1 step 25: not_visible (truth not_visible)
+71/158 R6_pose_log/runs/s01/final/seed1 step 29: not_visible (truth not_visible)
+72/158 R6_pose_log/runs/s01/final/seed1 step 56: not_visible (truth not_visible)
+73/158 R6_pose_log/runs/s01/initial/seed1 step 0: centre (truth centre)
+74/158 R6_pose_log/runs/s01/initial/seed1 step 3: centre (truth centre)
+75/158 R6_pose_log/runs/s01/initial/seed1 step 10: centre (truth centre)
+76/158 R6_pose_log/runs/s02a/dynamic/seed1 step 0: centre (truth centre)
+77/158 R6_pose_log/runs/s02a/dynamic/seed1 step 20: not_visible (truth not_visible)
+78/158 R6_pose_log/runs/s02a/dynamic/seed1 step 29: not_visible (truth not_visible)
+79/158 R6_pose_log/runs/s02a/dynamic/seed1 step 38: not_visible (truth not_visible)
+80/158 R6_pose_log/runs/s02a/dynamic/seed1 step 41: not_visible (truth not_visible)
+81/158 R6_pose_log/runs/s02a/dynamic/seed1 step 52: not_visible (truth not_visible)
+82/158 R6_pose_log/runs/s02a/dynamic/seed1 step 53: not_visible (truth not_visible)
+83/158 R6_pose_log/runs/s02a/dynamic/seed1 step 55: not_visible (truth not_visible)
+84/158 R6_pose_log/runs/s02a/dynamic/seed1 step 57: not_visible (truth not_visible)
+85/158 R6_pose_log/runs/s02a/final/seed1 step 13: far_right (truth far_right)
+86/158 R6_pose_log/runs/s02a/initial/seed1 step 11: centre (truth left)
+87/158 R6_pose_log/runs/s02c/dynamic/seed1 step 7: not_visible (truth not_visible)
+88/158 R6_pose_log/runs/s02c/dynamic/seed1 step 14: not_visible (truth not_visible)
+89/158 R6_pose_log/runs/s02c/dynamic/seed1 step 22: not_visible (truth not_visible)
+90/158 R6_pose_log/runs/s02c/dynamic/seed1 step 23: not_visible (truth not_visible)
+91/158 R6_pose_log/runs/s02c/dynamic/seed1 step 40: not_visible (truth not_visible)
+92/158 R6_pose_log/runs/s02c/dynamic/seed1 step 41: not_visible (truth not_visible)
+93/158 R6_pose_log/runs/s02c/final/seed1 step 11: not_visible (truth not_visible)
+94/158 R6_pose_log/runs/s02c/final/seed1 step 34: not_visible (truth not_visible)
+95/158 R6_pose_log/runs/s02c/final/seed1 step 38: not_visible (truth not_visible)
+96/158 R6_pose_log/runs/s02c/initial/seed1 step 2: centre (truth centre)
+97/158 R6_pose_log/runs/s02c/initial/seed1 step 3: centre (truth centre)
+98/158 R6_pose_log/runs/s02c/initial/seed1 step 4: centre (truth centre)
+99/158 R6_pose_log/runs/s02c/initial/seed1 step 7: centre (truth centre)
+100/158 R6_pose_log/runs/s02c/initial/seed1 step 8: centre (truth centre)
+101/158 R6_pose_log/runs/s02c/initial/seed1 step 9: centre (truth centre)
+102/158 R6_pose_log/runs/s02c/initial/seed1 step 11: centre (truth left)
+103/158 R6_pose_log/runs/s02c/initial/seed1 step 13: centre (truth centre)
+104/158 R6_pose_log/runs/s02va/dynamic/seed1 step 3: centre (truth not_visible)
+105/158 R6_pose_log/runs/s02va/dynamic/seed1 step 10: not_visible (truth not_visible)
+106/158 R6_pose_log/runs/s02va/dynamic/seed1 step 17: not_visible (truth not_visible)
+107/158 R6_pose_log/runs/s02va/dynamic/seed1 step 19: not_visible (truth not_visible)
+108/158 R6_pose_log/runs/s02va/dynamic/seed1 step 27: not_visible (truth not_visible)
+109/158 R6_pose_log/runs/s02va/dynamic/seed1 step 32: not_visible (truth not_visible)
+110/158 R6_pose_log/runs/s02va/dynamic/seed1 step 33: not_visible (truth not_visible)
+111/158 R6_pose_log/runs/s02va/dynamic/seed1 step 34: not_visible (truth not_visible)
+112/158 R6_pose_log/runs/s02va/dynamic/seed1 step 39: not_visible (truth not_visible)
+113/158 R6_pose_log/runs/s02va/dynamic/seed1 step 47: not_visible (truth not_visible)
+114/158 R6_pose_log/runs/s02va/dynamic/seed1 step 58: not_visible (truth not_visible)
+115/158 R6_pose_log/runs/s02va/final/seed1 step 25: not_visible (truth not_visible)
+116/158 R6_pose_log/runs/s02va/final/seed1 step 38: not_visible (truth not_visible)
+117/158 R6_pose_log/runs/s02va/final/seed1 step 45: centre (truth centre)
+118/158 R6_pose_log/runs/s02va/final/seed1 step 49: far_right (truth not_visible)
+119/158 R6_pose_log/runs/s02va/final/seed1 step 55: not_visible (truth not_visible)
+120/158 R6_pose_log/runs/s02va/initial/seed1 step 0: centre (truth centre)
+121/158 R6_pose_log/runs/s02va/initial/seed1 step 7: centre (truth centre)
+122/158 R6_pose_log/runs/s02va/initial/seed1 step 11: centre (truth centre)
+123/158 R6_pose_log/runs/s02va/initial/seed1 step 22: not_visible (truth not_visible)
+124/158 R6_pose_log/runs/s02va/initial/seed1 step 24: not_visible (truth not_visible)
+125/158 R6_pose_log/runs/s02va/initial/seed1 step 40: not_visible (truth not_visible)
+126/158 R6_pose_log/runs/s02vc/dynamic/seed1 step 0: centre (truth centre)
+127/158 R6_pose_log/runs/s02vc/dynamic/seed1 step 6: not_visible (truth not_visible)
+128/158 R6_pose_log/runs/s02vc/dynamic/seed1 step 15: not_visible (truth not_visible)
+129/158 R6_pose_log/runs/s02vc/dynamic/seed1 step 19: not_visible (truth not_visible)
+130/158 R6_pose_log/runs/s02vc/dynamic/seed1 step 22: not_visible (truth not_visible)
+131/158 R6_pose_log/runs/s02vc/dynamic/seed1 step 48: not_visible (truth not_visible)
+132/158 R6_pose_log/runs/s02vc/dynamic/seed1 step 56: not_visible (truth not_visible)
+133/158 R6_pose_log/runs/s02vc/final/seed1 step 4: not_visible (truth not_visible)
+134/158 R6_pose_log/runs/s02vc/final/seed1 step 15: not_visible (truth not_visible)
+135/158 R6_pose_log/runs/s02vc/final/seed1 step 17: not_visible (truth not_visible)
+136/158 R6_pose_log/runs/s02vc/final/seed1 step 21: not_visible (truth not_visible)
+137/158 R6_pose_log/runs/s02vc/final/seed1 step 42: not_visible (truth not_visible)
+138/158 R6_pose_log/runs/s02vc/final/seed1 step 46: centre (truth centre)
+139/158 R6_pose_log/runs/s02vc/final/seed1 step 49: centre (truth centre)
+140/158 R6_pose_log/runs/s02vc/initial/seed1 step 1: centre (truth centre)
+141/158 R6_pose_log/runs/s02vc/initial/seed1 step 6: centre (truth centre)
+142/158 R6_pose_log/runs/s02vc/initial/seed1 step 8: centre (truth centre)
+143/158 R6_pose_log/runs/s02vc/initial/seed1 step 10: centre (truth centre)
+144/158 R6_pose_log/runs/s02vc/initial/seed1 step 11: centre (truth centre)
+145/158 R6_pose_log/runs/s02vc/initial/seed1 step 18: not_visible (truth not_visible)
+146/158 R6_pose_log/runs/s02vc/initial/seed1 step 23: not_visible (truth not_visible)
+147/158 R6_pose_log/runs/s03/dynamic/seed1 step 14: not_visible (truth not_visible)
+148/158 R6_pose_log/runs/s03/dynamic/seed1 step 16: not_visible (truth not_visible)
+149/158 R6_pose_log/runs/s03/dynamic/seed1 step 23: not_visible (truth not_visible)
+150/158 R6_pose_log/runs/s03/dynamic/seed1 step 57: not_visible (truth not_visible)
+151/158 R6_pose_log/runs/s03/final/seed1 step 1: not_visible (truth not_visible)
+152/158 R6_pose_log/runs/s03/final/seed1 step 7: not_visible (truth not_visible)
+153/158 R6_pose_log/runs/s03/final/seed1 step 14: not_visible (truth not_visible)
+154/158 R6_pose_log/runs/s03/final/seed1 step 44: not_visible (truth not_visible)
+155/158 R6_pose_log/runs/s03/final/seed1 step 55: not_visible (truth not_visible)
+156/158 R6_pose_log/runs/s03/final/seed1 step 56: not_visible (truth not_visible)
+157/158 R6_pose_log/runs/s03/initial/seed1 step 7: not_visible (truth not_visible)
+158/158 R6_pose_log/runs/s03/initial/seed1 step 10: not_visible (truth not_visible)
+1/255 R6_pose_log/runs/s01/dynamic/seed1 step 21: recorded [0] -> a13 [0]
+2/255 R6_pose_log/runs/s01/dynamic/seed1 step 22: recorded [3] -> a13 [3]
+3/255 R6_pose_log/runs/s01/dynamic/seed1 step 25: recorded [3] repeat -> a13 [0]
+4/255 R6_pose_log/runs/s01/dynamic/seed1 step 26: recorded [0] -> a13 [0]
+5/255 R6_pose_log/runs/s01/dynamic/seed1 step 27: recorded [0] -> a13 [0]
+6/255 R6_pose_log/runs/s01/dynamic/seed1 step 28: recorded [3] repeat -> a13 [0] (critic)
+7/255 R6_pose_log/runs/s01/dynamic/seed1 step 29: recorded [5] -> a13 [0] (critic)
+8/255 R6_pose_log/runs/s01/dynamic/seed1 step 30: recorded [3] repeat -> a13 [0]
+9/255 R6_pose_log/runs/s01/dynamic/seed1 step 31: recorded [0] -> a13 [0]
+10/255 R6_pose_log/runs/s01/dynamic/seed1 step 32: recorded [0] -> a13 [1]
+11/255 R6_pose_log/runs/s01/dynamic/seed1 step 33: recorded [0] -> a13 [0] (critic)
+12/255 R6_pose_log/runs/s01/dynamic/seed1 step 34: recorded [0] -> a13 [3]
+13/255 R6_pose_log/runs/s01/dynamic/seed1 step 35: recorded [1] repeat -> a13 [0] (critic)
+14/255 R6_pose_log/runs/s01/dynamic/seed1 step 36: recorded [1] -> a13 [0] (critic)
+15/255 R6_pose_log/runs/s01/dynamic/seed1 step 37: recorded [3] repeat -> a13 [0]
+16/255 R6_pose_log/runs/s01/dynamic/seed1 step 38: recorded [0] -> a13 [0]
+17/255 R6_pose_log/runs/s01/dynamic/seed1 step 39: recorded [0] -> a13 [0]
+18/255 R6_pose_log/runs/s01/dynamic/seed1 step 40: recorded [0] -> a13 [0] (critic)
+19/255 R6_pose_log/runs/s01/dynamic/seed1 step 41: recorded [0] -> a13 [4]
+20/255 R6_pose_log/runs/s01/dynamic/seed1 step 42: recorded [0] -> a13 [0] (critic)
+21/255 R6_pose_log/runs/s01/dynamic/seed1 step 43: recorded [4] -> a13 [2]
+22/255 R6_pose_log/runs/s01/final/seed1 step 13: recorded [3] repeat -> a13 [1]
+23/255 R6_pose_log/runs/s01/final/seed1 step 14: recorded [3] repeat -> a13 [0]
+24/255 R6_pose_log/runs/s01/final/seed1 step 15: recorded [3] repeat -> a13 [0]
+25/255 R6_pose_log/runs/s01/final/seed1 step 16: recorded [1] -> a13 [0]
+26/255 R6_pose_log/runs/s01/final/seed1 step 17: recorded [1] -> a13 [0]
+27/255 R6_pose_log/runs/s01/final/seed1 step 26: recorded [1] repeat -> a13 [4]
+28/255 R6_pose_log/runs/s01/final/seed1 step 29: recorded [4] -> a13 [5]
+29/255 R6_pose_log/runs/s01/final/seed1 step 30: recorded [3] repeat -> a13 [0]
+30/255 R6_pose_log/runs/s01/final/seed1 step 31: recorded [1] -> a13 [0]
+31/255 R6_pose_log/runs/s01/final/seed1 step 32: recorded [3] repeat -> a13 [0]
+32/255 R6_pose_log/runs/s01/final/seed1 step 33: recorded [3] repeat -> a13 [0]
+33/255 R6_pose_log/runs/s01/final/seed1 step 34: recorded [0] -> a13 [0]
+34/255 R6_pose_log/runs/s01/final/seed1 step 35: recorded [3] -> a13 [3]
+35/255 R6_pose_log/runs/s02a/dynamic/seed1 step 34: recorded [3] repeat -> a13 [0]
+36/255 R6_pose_log/runs/s02a/dynamic/seed1 step 35: recorded [2] -> a13 [0]
+37/255 R6_pose_log/runs/s02a/dynamic/seed1 step 36: recorded [1] -> a13 [0]
+38/255 R6_pose_log/runs/s02a/dynamic/seed1 step 39: recorded [3] repeat -> a13 [0]
+39/255 R6_pose_log/runs/s02a/dynamic/seed1 step 40: recorded [0] -> a13 [0]
+40/255 R6_pose_log/runs/s02a/dynamic/seed1 step 41: recorded [3] -> a13 [3]
+41/255 R6_pose_log/runs/s02a/dynamic/seed1 step 55: recorded [3] repeat -> a13 [0]
+42/255 R6_pose_log/runs/s02a/dynamic/seed1 step 56: recorded [3] -> a13 [0]
+43/255 R6_pose_log/runs/s02a/dynamic/seed1 step 57: recorded [1] -> a13 [0]
+44/255 R6_pose_log/runs/s02a/dynamic/seed1 step 59: recorded [3] -> a13 [0]
+45/255 R6_pose_log/runs/s02c/dynamic/seed1 step 20: recorded [3] repeat -> a13 [0]
+46/255 R6_pose_log/runs/s02c/dynamic/seed1 step 21: recorded [0] -> a13 [0]
+47/255 R6_pose_log/runs/s02c/dynamic/seed1 step 22: recorded [3] -> a13 [4]
+48/255 R6_pose_log/runs/s02c/dynamic/seed1 step 41: recorded [3] repeat -> a13 [0]
+49/255 R6_pose_log/runs/s02c/dynamic/seed1 step 42: recorded [3] repeat -> a13 [0]
+50/255 R6_pose_log/runs/s02c/dynamic/seed1 step 43: recorded [0] -> a13 [0]
+51/255 R6_pose_log/runs/s02c/dynamic/seed1 step 44: recorded [3] -> a13 [1]
+52/255 R6_pose_log/runs/s02c/final/seed1 step 15: recorded [0] -> a13 [0]
+53/255 R6_pose_log/runs/s02c/final/seed1 step 16: recorded [3] -> a13 [1]
+54/255 R6_pose_log/runs/s02c/final/seed1 step 34: recorded [3] repeat -> a13 [0]
+55/255 R6_pose_log/runs/s02c/final/seed1 step 35: recorded [0] -> a13 [0]
+56/255 R6_pose_log/runs/s02c/final/seed1 step 36: recorded [2] -> a13 [4]
+57/255 R6_pose_log/runs/s02c/final/seed1 step 49: recorded [3] -> a13 [3]
+58/255 R6_pose_log/runs/s02c/final/seed1 step 52: recorded [3] repeat -> a13 [0]
+59/255 R6_pose_log/runs/s02c/final/seed1 step 53: recorded [0] -> a13 [0]
+60/255 R6_pose_log/runs/s02c/final/seed1 step 54: recorded [3] -> a13 [3]
+61/255 R6_pose_log/runs/s02c/final/seed1 step 58: recorded [1] -> a13 [0]
+62/255 R6_pose_log/runs/s02va/dynamic/seed1 step 19: recorded [1] -> a13 [5]
+63/255 R6_pose_log/runs/s02va/dynamic/seed1 step 21: recorded [0] -> a13 [0]
+64/255 R6_pose_log/runs/s02va/dynamic/seed1 step 22: recorded [1] -> a13 [3]
+65/255 R6_pose_log/runs/s02va/dynamic/seed1 step 23: recorded [5] -> a13 [2]
+66/255 R6_pose_log/runs/s02va/dynamic/seed1 step 34: recorded [3] repeat -> a13 [0]
+67/255 R6_pose_log/runs/s02va/dynamic/seed1 step 35: recorded [3] repeat -> a13 [0]
+68/255 R6_pose_log/runs/s02va/dynamic/seed1 step 36: recorded [3] repeat -> a13 [0]
+69/255 R6_pose_log/runs/s02va/dynamic/seed1 step 37: recorded [3] repeat -> a13 [0]
+70/255 R6_pose_log/runs/s02va/dynamic/seed1 step 38: recorded [3] repeat -> a13 [0]
+71/255 R6_pose_log/runs/s02va/dynamic/seed1 step 39: recorded [3] repeat -> a13 [0]
+72/255 R6_pose_log/runs/s02va/dynamic/seed1 step 40: recorded [1] -> a13 [3] repeat (critic)
+73/255 R6_pose_log/runs/s02va/dynamic/seed1 step 41: recorded [3] repeat -> a13 [1]
+74/255 R6_pose_log/runs/s02va/dynamic/seed1 step 43: recorded [1] -> a13 [0]
+75/255 R6_pose_log/runs/s02va/dynamic/seed1 step 46: recorded [2] -> a13 [0]
+76/255 R6_pose_log/runs/s02va/dynamic/seed1 step 57: recorded [3] repeat -> a13 [0]
+77/255 R6_pose_log/runs/s02va/dynamic/seed1 step 58: recorded [3] repeat -> a13 [0]
+78/255 R6_pose_log/runs/s02va/dynamic/seed1 step 59: recorded [0] -> a13 [0]
+79/255 R6_pose_log/runs/s02va/final/seed1 step 22: recorded [0] -> a13 [0]
+80/255 R6_pose_log/runs/s02va/final/seed1 step 23: recorded [3] -> a13 [1]
+81/255 R6_pose_log/runs/s02va/initial/seed1 step 25: recorded [3] repeat -> a13 [0]
+82/255 R6_pose_log/runs/s02va/initial/seed1 step 26: recorded [0] -> a13 [0]
+83/255 R6_pose_log/runs/s02va/initial/seed1 step 27: recorded [1] -> a13 [3]
+84/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 16: recorded [3] repeat -> a13 [0]
+85/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 17: recorded [3] repeat -> a13 [0]
+86/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 18: recorded [3] repeat -> a13 [0]
+87/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 19: recorded [3] repeat -> a13 [0]
+88/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 20: recorded [3] repeat -> a13 [0]
+89/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 21: recorded [3] repeat -> a13 [0]
+90/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 22: recorded [3] repeat -> a13 [0]
+91/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 23: recorded [0] -> a13 [0]
+92/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 24: recorded [3] -> a13 [3]
+93/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 48: recorded [3] repeat -> a13 [0]
+94/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 49: recorded [0] -> a13 [0]
+95/255 R6_pose_log/runs/s02vc/dynamic/seed1 step 50: recorded [5] -> a13 [1]
+96/255 R6_pose_log/runs/s02vc/final/seed1 step 6: recorded [0] -> a13 [0]
+97/255 R6_pose_log/runs/s02vc/final/seed1 step 7: recorded [1] -> a13 [5]
+98/255 R6_pose_log/runs/s02vc/final/seed1 step 15: recorded [3] repeat -> a13 [0]
+99/255 R6_pose_log/runs/s02vc/final/seed1 step 16: recorded [1] -> a13 [0]
+100/255 R6_pose_log/runs/s02vc/final/seed1 step 17: recorded [3] repeat -> a13 [0]
+101/255 R6_pose_log/runs/s02vc/final/seed1 step 18: recorded [3] repeat -> a13 [0]
+102/255 R6_pose_log/runs/s02vc/final/seed1 step 19: recorded [3] repeat -> a13 [0]
+103/255 R6_pose_log/runs/s02vc/final/seed1 step 20: recorded [3] repeat -> a13 [0]
+104/255 R6_pose_log/runs/s02vc/final/seed1 step 21: recorded [3] repeat -> a13 [0]
+105/255 R6_pose_log/runs/s02vc/final/seed1 step 22: recorded [3] repeat -> a13 [0]
+106/255 R6_pose_log/runs/s02vc/final/seed1 step 23: recorded [3] repeat -> a13 [0]
+107/255 R6_pose_log/runs/s02vc/final/seed1 step 24: recorded [3] repeat -> a13 [0]
+108/255 R6_pose_log/runs/s02vc/final/seed1 step 25: recorded [3] repeat -> a13 [0]
+109/255 R6_pose_log/runs/s02vc/final/seed1 step 26: recorded [3] repeat -> a13 [0]
+110/255 R6_pose_log/runs/s02vc/final/seed1 step 27: recorded [3] repeat -> a13 [0]
+111/255 R6_pose_log/runs/s02vc/final/seed1 step 28: recorded [3] repeat -> a13 [0]
+112/255 R6_pose_log/runs/s02vc/final/seed1 step 29: recorded [3] repeat -> a13 [0]
+113/255 R6_pose_log/runs/s02vc/final/seed1 step 30: recorded [0] -> a13 [0]
+114/255 R6_pose_log/runs/s02vc/final/seed1 step 31: recorded [3] -> a13 [3]
+115/255 R6_pose_log/runs/s02vc/initial/seed1 step 25: recorded [3] repeat -> a13 [0]
+116/255 R6_pose_log/runs/s02vc/initial/seed1 step 26: recorded [0] -> a13 [0]
+117/255 R6_pose_log/runs/s02vc/initial/seed1 step 27: recorded [1] -> a13 [3]
+118/255 R6_pose_log/runs/s03/dynamic/seed1 step 8: recorded [0] -> a13 [0]
+119/255 R6_pose_log/runs/s03/dynamic/seed1 step 9: recorded [2] -> a13 [4]
+120/255 R6_pose_log/runs/s03/dynamic/seed1 step 15: recorded [1] -> a13 [0]
+121/255 R6_pose_log/runs/s03/dynamic/seed1 step 22: recorded [3] repeat -> a13 [0]
+122/255 R6_pose_log/runs/s03/dynamic/seed1 step 23: recorded [3] repeat -> a13 [0]
+123/255 R6_pose_log/runs/s03/dynamic/seed1 step 24: recorded [0] -> a13 [0]
+124/255 R6_pose_log/runs/s03/dynamic/seed1 step 25: recorded [3] -> a13 [3]
+125/255 R6_pose_log/runs/s03/dynamic/seed1 step 30: recorded [3] -> a13 [2]
+126/255 R6_pose_log/runs/s03/dynamic/seed1 step 40: recorded [3] repeat -> a13 [0]
+127/255 R6_pose_log/runs/s03/dynamic/seed1 step 41: recorded [1] -> a13 [0]
+128/255 R6_pose_log/runs/s03/dynamic/seed1 step 44: recorded [3] repeat -> a13 [0]
+129/255 R6_pose_log/runs/s03/dynamic/seed1 step 45: recorded [0] -> a13 [0]
+130/255 R6_pose_log/runs/s03/dynamic/seed1 step 46: recorded [5] -> a13 [3]
+131/255 R6_pose_log/runs/s03/dynamic/seed1 step 56: recorded [3] -> a13 [0]
+132/255 R6_pose_log/runs/s03/dynamic/seed1 step 57: recorded [3] repeat -> a13 [0]
+133/255 R6_pose_log/runs/s03/dynamic/seed1 step 58: recorded [5] -> a13 [0]
+134/255 R6_pose_log/runs/s03/final/seed1 step 8: recorded [0] -> a13 [0]
+135/255 R6_pose_log/runs/s03/final/seed1 step 9: recorded [2] -> a13 [3]
+136/255 R6_pose_log/runs/s03/final/seed1 step 15: recorded [1] -> a13 [0]
+137/255 R6_pose_log/runs/s03/final/seed1 step 22: recorded [3] repeat -> a13 [0]
+138/255 R6_pose_log/runs/s03/final/seed1 step 23: recorded [3] repeat -> a13 [0]
+139/255 R6_pose_log/runs/s03/final/seed1 step 24: recorded [0] -> a13 [0]
+140/255 R6_pose_log/runs/s03/final/seed1 step 25: recorded [3] -> a13 [3]
+141/255 R6_pose_log/runs/s03/final/seed1 step 30: recorded [3] -> a13 [3]
+142/255 R6_pose_log/runs/s03/final/seed1 step 40: recorded [3] repeat -> a13 [0]
+143/255 R6_pose_log/runs/s03/final/seed1 step 41: recorded [1] -> a13 [0]
+144/255 R6_pose_log/runs/s03/final/seed1 step 44: recorded [3] repeat -> a13 [0]
+145/255 R6_pose_log/runs/s03/final/seed1 step 45: recorded [0] -> a13 [0]
+146/255 R6_pose_log/runs/s03/final/seed1 step 46: recorded [5] -> a13 [3]
+147/255 R6_pose_log/runs/s03/final/seed1 step 56: recorded [3] -> a13 [0]
+148/255 R6_pose_log/runs/s03/final/seed1 step 57: recorded [3] repeat -> a13 [0]
+149/255 R6_pose_log/runs/s03/final/seed1 step 58: recorded [5] -> a13 [0]
+150/255 R6_pose_log/runs/s03/initial/seed1 step 8: recorded [0] -> a13 [0]
+151/255 R6_pose_log/runs/s03/initial/seed1 step 9: recorded [2] -> a13 [1]
+152/255 R6_pose_log/runs/s03/initial/seed1 step 15: recorded [1] -> a13 [0]
+153/255 R6_pose_log/runs/s03/initial/seed1 step 22: recorded [3] repeat -> a13 [0]
+154/255 R6_pose_log/runs/s03/initial/seed1 step 23: recorded [3] repeat -> a13 [0]
+155/255 R6_pose_log/runs/s03/initial/seed1 step 24: recorded [0] -> a13 [0]
+156/255 R6_pose_log/runs/s03/initial/seed1 step 25: recorded [3] -> a13 [3]
+157/255 R6_pose_log/runs/s03/initial/seed1 step 30: recorded [3] -> a13 [3]
+158/255 R6_pose_log/runs/s03/initial/seed1 step 40: recorded [3] repeat -> a13 [0]
+159/255 R6_pose_log/runs/s03/initial/seed1 step 41: recorded [1] -> a13 [0]
+160/255 R6_pose_log/runs/s03/initial/seed1 step 44: recorded [3] repeat -> a13 [0]
+161/255 R6_pose_log/runs/s03/initial/seed1 step 45: recorded [0] -> a13 [0]
+162/255 R6_pose_log/runs/s03/initial/seed1 step 46: recorded [5] -> a13 [3]
+163/255 R6_pose_log/runs/s03/initial/seed1 step 56: recorded [3] -> a13 [0]
+164/255 R6_pose_log/runs/s03/initial/seed1 step 57: recorded [3] repeat -> a13 [0]
+165/255 R6_pose_log/runs/s03/initial/seed1 step 58: recorded [5] -> a13 [0]
+166/255 R5_goal_identifier/runs/s02a/final/seed1 step 54: recorded [3] repeat -> a13 [0]
+167/255 R5_goal_identifier/runs/s02a/final/seed1 step 55: recorded [0] -> a13 [0]
+168/255 R5_goal_identifier/runs/s02a/final/seed1 step 56: recorded [1] -> a13 [1]
+169/255 R5_goal_identifier/runs/s02c/final/seed1 step 12: recorded [3] repeat -> a13 [0]
+170/255 R5_goal_identifier/runs/s02c/final/seed1 step 13: recorded [1] -> a13 [0]
+171/255 R5_goal_identifier/runs/s02c/final/seed1 step 18: recorded [3] -> a13 [3]
+172/255 R5_goal_identifier/runs/s02c/final/seed1 step 19: recorded [3] -> a13 [0]
+173/255 R5_goal_identifier/runs/s02c/final/seed1 step 20: recorded [0] -> a13 [0]
+174/255 R5_goal_identifier/runs/s02c/final/seed1 step 21: recorded [0] -> a13 [1]
+175/255 R5_goal_identifier/runs/s02c/final/seed1 step 22: recorded [3] repeat -> a13 [0] (critic)
+176/255 R5_goal_identifier/runs/s02c/final/seed1 step 23: recorded [3] repeat -> a13 [0] (critic)
+177/255 R5_goal_identifier/runs/s02c/final/seed1 step 24: recorded [3] repeat -> a13 [0]
+178/255 R5_goal_identifier/runs/s02c/final/seed1 step 25: recorded [0] -> a13 [0]
+179/255 R5_goal_identifier/runs/s02c/final/seed1 step 26: recorded [0] -> a13 [0]
+180/255 R5_goal_identifier/runs/s02c/final/seed1 step 27: recorded [0] -> a13 [0] (critic)
+181/255 R5_goal_identifier/runs/s02c/final/seed1 step 28: recorded [3] -> a13 [5] (critic)
+182/255 R5_goal_identifier/runs/s02c/final/seed1 step 31: recorded [3] repeat -> a13 [0]
+183/255 R5_goal_identifier/runs/s02c/final/seed1 step 32: recorded [0] -> a13 [0]
+184/255 R5_goal_identifier/runs/s02c/final/seed1 step 33: recorded [0] -> a13 [2]
+185/255 R5_goal_identifier/runs/s02c/final/seed1 step 34: recorded [3] repeat -> a13 [0] (critic)
+186/255 R5_goal_identifier/runs/s02c/final/seed1 step 35: recorded [0] -> a13 [0] (critic)
+187/255 R5_goal_identifier/runs/s02c/final/seed1 step 36: recorded [0] -> a13 [0] (critic)
+188/255 R5_goal_identifier/runs/s02c/final/seed1 step 37: recorded [3] repeat -> a13 [0] (critic)
+189/255 R5_goal_identifier/runs/s02c/final/seed1 step 38: recorded [0] -> a13 [0] (critic)
+190/255 R5_goal_identifier/runs/s02c/final/seed1 step 39: recorded [0] -> a13 [0] (critic)
+191/255 R5_goal_identifier/runs/s02c/final/seed1 step 40: recorded [3] repeat -> a13 [0] (critic)
+192/255 R5_goal_identifier/runs/s02c/final/seed1 step 41: recorded [3] repeat -> a13 [0] (critic)
+193/255 R5_goal_identifier/runs/s02c/final/seed1 step 42: recorded [3] repeat -> a13 [0]
+194/255 R5_goal_identifier/runs/s02c/final/seed1 step 43: recorded [0] -> a13 [0]
+195/255 R5_goal_identifier/runs/s02c/final/seed1 step 44: recorded [0] -> a13 [2]
+196/255 R5_goal_identifier/runs/s02c/final/seed1 step 45: recorded [3] repeat -> a13 [0] (critic)
+197/255 R5_goal_identifier/runs/s02c/final/seed1 step 46: recorded [3] repeat -> a13 [0] (critic)
+198/255 R5_goal_identifier/runs/s02c/final/seed1 step 47: recorded [3] repeat -> a13 [0]
+199/255 R5_goal_identifier/runs/s02c/final/seed1 step 48: recorded [0] -> a13 [0]
+200/255 R5_goal_identifier/runs/s02c/final/seed1 step 49: recorded [0] -> a13 [2]
+201/255 R5_goal_identifier/runs/s02c/final/seed1 step 50: recorded [3] repeat -> a13 [0] (critic)
+202/255 R5_goal_identifier/runs/s02c/final/seed1 step 51: recorded [0] -> a13 [0] (critic)
+203/255 R5_goal_identifier/runs/s02c/final/seed1 step 52: recorded [0] -> a13 [2]
+204/255 R5_goal_identifier/runs/s02c/final/seed1 step 53: recorded [3] repeat -> a13 [0] (critic)
+205/255 R5_goal_identifier/runs/s02c/final/seed1 step 54: recorded [0] -> a13 [0] (critic)
+206/255 R5_goal_identifier/runs/s02c/final/seed1 step 55: recorded [0] -> a13 [3]
+207/255 R5_goal_identifier/runs/s02c/final/seed1 step 56: recorded [3] repeat -> a13 [0] (critic)
+208/255 R5_goal_identifier/runs/s02c/final/seed1 step 57: recorded [3] repeat -> a13 [0] (critic)
+209/255 R5_goal_identifier/runs/s02c/final/seed1 step 58: recorded [3] repeat -> a13 [0]
+210/255 R5_goal_identifier/runs/s02c/final/seed1 step 59: recorded [1] -> a13 [0]
+211/255 R5_goal_identifier/runs/s02va/dynamic/seed1 step 20: recorded [0] -> a13 [0]
+212/255 R5_goal_identifier/runs/s02va/dynamic/seed1 step 21: recorded [0] -> a13 [3]
+213/255 R5_goal_identifier/runs/s02va/dynamic/seed1 step 22: recorded [0] -> a13 [0] (critic)
+214/255 R5_goal_identifier/runs/s02va/dynamic/seed1 step 23: recorded [4] -> a13 [3]
+215/255 R5_goal_identifier/runs/s02va/dynamic/seed1 step 34: recorded [0] -> a13 [5]
+216/255 R5_goal_identifier/runs/s02va/dynamic/seed1 step 35: recorded [0] -> a13 [4]
+217/255 R5_goal_identifier/runs/s02va/dynamic/seed1 step 36: recorded [0] -> a13 [3]
+218/255 R5_goal_identifier/runs/s02va/dynamic/seed1 step 37: recorded [0] -> a13 [5]
+219/255 R5_goal_identifier/runs/s02va/dynamic/seed1 step 38: recorded [3] -> a13 [3]
+220/255 R5_goal_identifier/runs/s02vc/final/seed1 step 19: recorded [0] -> a13 [4]
+221/255 R5_goal_identifier/runs/s02vc/final/seed1 step 20: recorded [0] -> a13 [2] (critic)
+222/255 R5_goal_identifier/runs/s02vc/final/seed1 step 21: recorded [0] -> a13 [0] (critic)
+223/255 R5_goal_identifier/runs/s02vc/final/seed1 step 22: recorded [0] -> a13 [2]
+224/255 R5_goal_identifier/runs/s02vc/final/seed1 step 23: recorded [0] -> a13 [2]
+225/255 R5_goal_identifier/runs/s02vc/final/seed1 step 24: recorded [3] -> a13 [0] (critic)
+226/255 R5_goal_identifier/runs/s02vc/final/seed1 step 33: recorded [0] -> a13 [4]
+227/255 R5_goal_identifier/runs/s02vc/final/seed1 step 34: recorded [0] -> a13 [2]
+228/255 R5_goal_identifier/runs/s02vc/final/seed1 step 35: recorded [0] -> a13 [0] (critic)
+229/255 R5_goal_identifier/runs/s02vc/final/seed1 step 36: recorded [0] -> a13 [2]
+230/255 R5_goal_identifier/runs/s02vc/final/seed1 step 37: recorded [0] -> a13 [0] (critic)
+231/255 R5_goal_identifier/runs/s02vc/final/seed1 step 38: recorded [0] -> a13 [2]
+232/255 R5_goal_identifier/runs/s02vc/final/seed1 step 39: recorded [0] -> a13 [0] (critic)
+233/255 R5_goal_identifier/runs/s02vc/final/seed1 step 40: recorded [0] -> a13 [2]
+234/255 R5_goal_identifier/runs/s02vc/final/seed1 step 41: recorded [0] -> a13 [0] (critic)
+235/255 R5_goal_identifier/runs/s02vc/final/seed1 step 42: recorded [0] -> a13 [2]
+236/255 R5_goal_identifier/runs/s02vc/final/seed1 step 43: recorded [0] -> a13 [0] (critic)
+237/255 R5_goal_identifier/runs/s02vc/final/seed1 step 44: recorded [0] -> a13 [0] (critic)
+238/255 R5_goal_identifier/runs/s02vc/final/seed1 step 45: recorded [3] repeat -> a13 [0] (critic)
+239/255 R5_goal_identifier/runs/s02vc/final/seed1 step 46: recorded [1] -> a13 [0] (critic)
+240/255 R5_goal_identifier/runs/s02vc/final/seed1 step 47: recorded [3] repeat -> a13 [0]
+241/255 R5_goal_identifier/runs/s02vc/final/seed1 step 48: recorded [3] repeat -> a13 [0]
+242/255 R5_goal_identifier/runs/s02vc/final/seed1 step 49: recorded [3] repeat -> a13 [0]
+243/255 R5_goal_identifier/runs/s02vc/final/seed1 step 50: recorded [3] repeat -> a13 [0]
+244/255 R5_goal_identifier/runs/s02vc/final/seed1 step 51: recorded [0] -> a13 [0]
+245/255 R5_goal_identifier/runs/s02vc/final/seed1 step 52: recorded [3] -> a13 [3]
+246/255 R5_goal_identifier/runs/s03/dynamic/seed1 step 17: recorded [0] -> a13 [0]
+247/255 R5_goal_identifier/runs/s03/dynamic/seed1 step 18: recorded [1] -> a13 [3]
+248/255 R5_goal_identifier/runs/s03/dynamic/seed1 step 21: recorded [3] -> a13 [1]
+249/255 R5_goal_identifier/runs/s03/final/seed1 step 17: recorded [0] -> a13 [0]
+250/255 R5_goal_identifier/runs/s03/final/seed1 step 18: recorded [1] -> a13 [3]
+251/255 R5_goal_identifier/runs/s03/final/seed1 step 21: recorded [3] -> a13 [3]
+252/255 R5_goal_identifier/runs/s03/final/seed1 step 34: recorded [3] -> a13 [4]
+253/255 R5_goal_identifier/runs/s03/initial/seed1 step 17: recorded [0] -> a13 [0]
+254/255 R5_goal_identifier/runs/s03/initial/seed1 step 18: recorded [1] -> a13 [3]
+255/255 R5_goal_identifier/runs/s03/initial/seed1 step 21: recorded [3] -> a13 [3]
