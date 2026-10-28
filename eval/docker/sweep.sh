@@ -21,7 +21,9 @@ set -eu
 
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
 IMAGE=${PHASE1_IMAGE:-asep-phase1:latest}
-DECIDER=phase1-decider
+# PHASE1_DECIDER, DECIDER_PORT, PHASE1_STATE and XVFB_SERVERNUM set per lane
+# give parallel flights their own decider, Godot cache and X display.
+DECIDER=${PHASE1_DECIDER:-phase1-decider}
 STATE=${PHASE1_STATE:-$HOME/.cache/asep-phase1}
 # Not 8000: vLLM's text models hold :8000-:8003 on sctsvr6.
 DECIDER_PORT=${DECIDER_PORT:-8100}
@@ -39,6 +41,7 @@ run() {
     docker run --rm $tty --network host --user "$(id -u):$(id -g)" \
         -v "$REPO:/repo" -v "$STATE:/tmp/home" $gitconfig \
         -e USER="${USER:-operator}" -e LP_NUM_THREADS="${LP_NUM_THREADS:-16}" \
+        ${XVFB_SERVERNUM:+-e XVFB_SERVERNUM="$XVFB_SERVERNUM"} \
         "$@"
 }
 

@@ -11,8 +11,16 @@ Shakedown next. Below, `a17` names the bundle's code, which `a19` runs unchanged
 
 Draft written 2026-10-28 from R11's [failure analysis](../R11_goal_default/failure_analysis.md)
 and the operator's direction the same day. The shas are re-checked against `config.lock.json`
-before the round flies. R12 flies beside a control, **R12C** (`a13` unchanged), on the same host at
-the same SHA. Spec: `docs/phase2-test-plan.md`.
+before the round flies. Spec: `docs/phase2-test-plan.md`.
+
+## R12C dropped (operator, 2026-10-28, before flying)
+
+The operator's aim is the best-performing agent; hiding the goal's position is one of its tools,
+not a variable under test. So R12 is read against the best round so far, **R11** (`a16`, 11/18),
+not against an `a13` control, and **R12C is not flown**. Where the predictions below say R12C,
+they are read against R10C (`a13`'s last flight, 7/18). The attribution rule changes with it
+(below). R12 flies on 4 parallel lanes (own checkout, decider, Godot cache and X display each),
+one SHA.
 
 ## Goal truth dropped (operator, 2026-10-28)
 
@@ -109,16 +117,17 @@ coverage, stages or reachability. `final` + `dynamic` rises above R12C.
 
 ## Attribution rule
 
-As R11. R12 is read against R12C.
+R12 is read against R11, the best round so far (R12C dropped, above).
 
-- A success change is credited to the bundle only if R12 changes **more than F of 18** outcomes
-  against R12C **and** gains more cells than it loses.
-- F = max(6, the number of outcomes R12C changes against R10C).
-- R12C against R10C is reported as `a13`'s run-to-run floor. It was 3 of 18 for R10C against R9.
+- R12 is credited as better than R11 only if it changes **more than F of 18** outcomes against R11
+  **and** gains more cells than it loses.
+- F = 6: max(6, re-fly noise), with re-fly noise 2 of 18 (R11C against R10, `a14`) and 3 of 18
+  (R10C against R9, `a13`).
+- R12 against R10C (`a13`, the last agent without the goal's position) is reported too.
 
 ## Control
 
-**R12C flies `a13`** (`3de550e110e7`), unchanged, on the R12 host at R12's SHA, right after R12.
+None flown (R12C dropped, above). Planned as `a13` (`3de550e110e7`) on the R12 host;
 [R12C README](../R12C_a13_control/README.md).
 
 - `a13` is the last agent with no goal truth. R10C flew it at 7/18: `initial` 5/6, `final` 1/6,
@@ -245,7 +254,7 @@ One unscored `dynamic` run per site on the flight host:
 
 ## Host
 
-sctsvr6 headless (Docker, Mesa lavapipe), as R7–R11, with R12C there too. The tunnel is the
+sctsvr6 headless (Docker, Mesa lavapipe), as R7–R11, on 4 parallel lanes. The tunnel is the
 operator's.
 
 ## Builds on

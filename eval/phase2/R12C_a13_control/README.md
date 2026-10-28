@@ -2,7 +2,7 @@
 
 **Agent:** `a13` (`3de550e110e7`) · **Navigator prompt:** `p14` (`31a9f28eaf94`) · **Perceiver:**
 `g03` (`3531e4d9ade9`) · **Strategist:** `q01` (`40fb0fbc3285`) · **Spatial memory:**
-`eceb875a68a3` · **Status:** draft, not flown
+`eceb875a68a3` · **Status:** dropped 2026-10-28 by the operator before flying (R12 README)
 
 Draft written 2026-10-28 with [R12's draft](../R12_staged_search/README.md). Spec:
 `docs/phase2-test-plan.md`.
@@ -54,4 +54,4 @@ predictions.
 
 ## Outcome
 
-Not flown.
+Not flown: dropped. R12 is read against R11, the best round so far.

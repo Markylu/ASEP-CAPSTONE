@@ -118,14 +118,10 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # R12: a bundle with no goal truth anywhere (operator, 2026-10-28): staged search
     # (explore until the goal is seen, then head for it), a coverage map of searched
     # ground, an evaluator per step, reachable search targets (q04), perceiver g04,
-    # stop walls and doors passed only when crossed. Agent a17. Credited to the
-    # bundle. Its control is R12C. R12 README.
+    # stop walls and doors passed only when crossed. Agent a19 (perceiver g05).
+    # Read against R11; R12C (a13) dropped by the operator. R12 README.
     "R12": {"folder": "R12_staged_search", "title": "Staged search with a coverage map",
             "agent": "a19", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
-    # R12C: a13 (the last agent with no goal truth) flown on the R12 host at the R12
-    # SHA; also a13's run-to-run floor against R10C. R12 README, "Control".
-    "R12C": {"folder": "R12C_a13_control", "title": "a13 control on the R12 host",
-             "agent": "a13", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

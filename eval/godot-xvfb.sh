@@ -48,6 +48,12 @@ done
 # and run_session.gd's runtime window_set_size() leaves the project's 16:9
 # shape: frames came out 768x432 instead of 768x768.
 
-# shellcheck disable=SC2086 # gpu_args and resolution are intentionally word-split
-exec xvfb-run -a -s "-screen 0 1280x1024x24" \
+# XVFB_SERVERNUM pins the display: containers on the host network share X's
+# abstract sockets, so parallel flights (one per lane) each need their own;
+# `-a` alone picks :99 in every container.
+server="-a"
+[ -n "${XVFB_SERVERNUM:-}" ] && server="-n $XVFB_SERVERNUM"
+
+# shellcheck disable=SC2086 # gpu_args, resolution and server are intentionally word-split
+exec xvfb-run $server -s "-screen 0 1280x1024x24" \
     "$GODOT_BIN" --audio-driver Dummy --rendering-driver vulkan $gpu_args $resolution "$@"
