@@ -18,7 +18,9 @@ What changed:
 - **Collisions 58** (R11C 24, R10 36): the most since R10C's 57.
 - **The detours did not get nearer the goal.** 376 steps stood on goal-side unexplored ground,
   gaining 0.01 m a step toward the goal, and 13% of the forward moves made under them stopped
-  short (R11C's unexplored ground 2%).
+  short (R11C's unexplored ground 2%). The targets could not be reached: on 34 of 37 frontier picks
+  the straight line to the target crosses a wall, and only 1 of 33 detours ended "reached"
+  ([failure_analysis.md](failure_analysis.md)).
 - **`a14` re-flown moved 2 of 18 outcomes** (R11C against R10) and repeated 11 of 18 pick
   sequences: its run-to-run floor is lower than `a13`'s (3 of 18 outcomes, 7 of 18 sequences
   repeated).
@@ -40,7 +42,8 @@ What changed:
   change").
 - Labels reviewed by Claude and confirmed by the operator on 2026-10-28. No overrides.
 - Pre-registration: [README.md](README.md). Manipulation check:
-  [manipulation_check.md](manipulation_check.md).
+  [manipulation_check.md](manipulation_check.md). Failure analysis (after labelling, read-only):
+  [failure_analysis.md](failure_analysis.md).
 
 ## Result
 
@@ -62,12 +65,15 @@ What changed:
 
 | Site | initial R11C → R11 | final R11C → R11 | dynamic R11C → R11 |
 |---|---|---|---|
-| s01 | ✓ 14 → ✓ 14 [–] | ✓ 16 → ✓ 29 [4] | ✗ timeout → **✓ 29** [8] |
-| s02a | ✓ 19 → ✓ 19 [–] | ✓ 32 → ✓ 26 [10] | ✗ replan → ✗ replan [8] |
-| s02c | ✓ 14 → ✓ 19 [14] | ✓ 47 → **✗ replan** [4] | ✗ replan → ✗ replan [8] |
-| s02va | ✓ 19 → ✓ 19 [–] | ✗ replan → **✓ 34** [2] | ✓ 48 → **✗ replan** [6] |
-| s02vc | ✓ 19 → ✓ 19 [–] | ✗ replan → ✗ replan [3] | ✓ 38 → **✗ replan** [13] |
-| s03 | ✗ replan → **✓ 39** [6] | ✓ 35 → ✓ 39 [15] | ✗ pre-change → ✗ replan [6] |
+| s01 | ✓ 14 → ✓ 14 [–] | ✓ 16 → ✓ 29 [3] | ✗ timeout → **✓ 29** [7] |
+| s02a | ✓ 19 → ✓ 19 [–] | ✓ 32 → ✓ 26 [9] | ✗ replan → ✗ replan [7] |
+| s02c | ✓ 14 → ✓ 19 [13] | ✓ 47 → **✗ replan** [3] | ✗ replan → ✗ replan [7] |
+| s02va | ✓ 19 → ✓ 19 [–] | ✗ replan → **✓ 34** [1] | ✓ 48 → **✗ replan** [5] |
+| s02vc | ✓ 19 → ✓ 19 [–] | ✗ replan → ✗ replan [2] | ✓ 38 → **✗ replan** [12] |
+| s03 | ✗ replan → **✓ 39** [5] | ✓ 35 → ✓ 39 [14] | ✗ pre-change → ✗ replan [5] |
+
+Steps are 0-based, as in the R10 and R11C summaries (corrected 2026-10-28; first written 1-based).
+4 of 18 cells have the same pick sequence as R11C from step 0 to the end.
 
 ## Pre-registered predictions
 
@@ -104,11 +110,19 @@ went through after two detours. The strategist was not asked at all on five of t
 runs.
 
 **Where a wall stood between the drone and the goal, the detours sent it back into the wall.**
-`a16` offers unexplored ground at the edge's cell nearest the goal; when the way is walled, that
-cell lies against the wall in question. 37 of 38 detours were such points, and they stood about
-10 steps each. s02c `final` (lost): 43 of 60 steps on detours, 9 collisions, revisit rate 0.40.
+`a16` offers unexplored ground at the edge's cell nearest the goal. The memory marks floor free 6 m
+along every perceiver ray, collisions never write wall cells, and a newer look erases older wall
+marks, so that cell lies beyond the wall or inside it, not in front of it: 25 of 27 s02 frontier
+picks were on the goal side of the divider, 5 picks were inside a solid object, and with a perfect
+perceiver the top frontier would still be beyond or inside a wall at 37 of 38 strategist calls.
+37 of 38 detours were such points, and they stood about 10 steps each; `q03` re-picked the same
+point 7 times. s02c `final` (lost): 43 of 60 steps on detours, 9 collisions, revisit rate 0.40.
 s02va and s02vc `dynamic` (lost): 45 and 32 steps on detours. A doorway was chosen once; R11C's
-strategist chose doorways 78 times, and standing on a doorway gained 0.87 m a step.
+strategist chose doorways 78 times, and standing on a doorway gained 0.87 m a step. Doorways were on
+the menu at 19 of 38 calls but worded "as far" or "farther" (placed on the near side of the wall,
+against frontiers beyond it, under a prompt that says to prefer nearer), and the real open door was
+in memory at 14 of the s02 calls but listed at 4: it was struck as "passed" once the drone came
+within 1.5 m, without going through. Menu order was not the cause: doorways are listed first.
 
 **Where the drone did get round, the goal took it the rest of the way.** s02va `final` (gained)
 stood on the goal for 29 of 34 steps around two short detours; s01 `dynamic` (gained) went round
@@ -116,7 +130,22 @@ the cube and closed in under the goal.
 
 **The block note did not change the repeats.** With the narrow window, "blocked here before" was
 offered on 25 moves and "stopped short here before" on 154; the navigator picked one of them
-once, and 15 of 16 near-repeat collisions carried no note at all.
+once, and 15 of 16 near-repeat collisions carried no note at all. The perceiver had said open far
+on the picked strip for 48 of the 57 stopped-short moves, so the missing piece is the map (no wall
+written on a collision), not the perceiver's view.
+
+**Two things the round's numbers hide.** 10 of the 14 "goal in view" hand-backs were goal
+sightings without line of sight, 7 of them in failed runs; a 20° check against the true bearing
+rejects all 10 and keeps the 4 real ones. And on byte-identical frames 50 of 178 perceiver outputs
+differ between R11 and R11C at temperature 0; in s02a and s02c `dynamic` one such read of the closed
+door B seeded the first unreachable target. Of the gains, s01 `dynamic` and s03 `initial` went
+through on an unreachable target and a false sighting respectively (inferred: luck).
+
+**The navigator is not what changed.** It follows a forward "toward your target" 71% of the time
+and a goal note every time in both rounds, and its stated reason contradicts the notes or the
+outcome on 24% of steps in both. `a16` left the target behind the drone, with no forward action
+carrying "toward", on 185 steps (R11C 113), over which the drone moved 158 m away from the goal
+(R11C 47 m).
 
 ## R11C as a determinism check
 
@@ -125,13 +154,20 @@ of 18 outcomes (it gains s01 `final`, loses s02a `dynamic`). [R11C summary](../R
 
 ## For the next round
 
-1. **Detour targets that lead round the wall, not into it.** Offer doorways first when the way is
-   walled, and unexplored ground at a point the drone can reach with the goal off to one side,
-   not the edge cell nearest the goal.
-2. **Shorter detours.** Hand back to the goal once the drone has moved a few metres sideways of
-   the wall, not after 12 steps.
-3. **The block note is not the lever.** Two windows (45°, 15°/25°) both left the repeat
-   collisions unwarned or warned everything. A note for "this move continues into the wall you
-   just hit" may need the perceiver's view, not the map.
+Ranked in [failure_analysis.md](failure_analysis.md), Q6, each with an offline test.
+
+1. **Reachable detour targets (code).** A collision or stopped-short move writes wall cells that a
+   later look cannot erase; `open_far` rays stop at about 4 m; a frontier is offered only if a path
+   over known free cells reaches it; a failed detour's target is dropped. Shortening detours alone
+   would only ask `q03` again, and it re-picked the same unreachable point 7 times.
+2. **"toward" when the target is behind (code).** Put it on the sharpest forward move on the
+   target's side when nothing in the fan is within 55°, and never hide [0] while it alone carries
+   "toward".
+3. **Doorways (code and `q03` wording).** Mark a doorway passed only on crossing the wall; when
+   walled, list doorways first and drop "prefer nearer" for them.
+4. **Goal sightings checked against the true bearing (code)** before they hand a detour back.
+5. **The block note is not the lever.** Two windows (45°, 15°/25°) both left the repeat
+   collisions unwarned or warned everything; with walls written on collision (1), the map can
+   warn without the perceiver.
 4. **Keep the parts that held:** goal by default where the way is open (`initial` 6/6), wall-aware
    "toward", the role-view leak check.
