@@ -5,9 +5,8 @@
 **Perceiver:** `g05` (`133ed83db46b`, new; floor map in "Line 7, perceiver changes") · **Strategist:** `q04` (`f8fdf4b5946c`, new) ·
 **Spatial memory:** `spatial.A17` (`spatial` `eceb875a68a3`, `spatial_a14` `0075a8a0e5c0`,
 `spatial_a17` `63ccdaa218d9`) · **Stage machine:** `planner_a17` `6eb22517c3e0` ·
-**Status:** pre-registered 2026-10-28 (operator: "fly it on the server"), not yet flown. Offline
-probe passed; line 7 failed for `a17` (`g04`) and `a18`, passed for `a19` on R11C's held-out frames.
-Shakedown next. Below, `a17` names the bundle's code, which `a19` runs unchanged with `g05`.
+**Status:** flown 2026-10-28, complete: 5/18 (Outcome). Offline probe passed; line 7 failed for
+`a17` (`g04`) and `a18`, passed for `a19` on R11C's held-out frames; shakedown 6/6 valid. Below, `a17` names the bundle's code, which `a19` runs unchanged with `g05`.
 
 Draft written 2026-10-28 from R11's [failure analysis](../R11_goal_default/failure_analysis.md)
 and the operator's direction the same day. The shas are re-checked against `config.lock.json`
@@ -267,4 +266,26 @@ operator's.
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-28 on sctsvr6 at `09d11a0`, 4 parallel lanes merged into one round. 18/18 valid.
+Ended by the operator without labels or a summary.
+
+| Arm | R10C (`a13`) | R11 (`a16`) | R12 (`a19`) |
+|---|---|---|---|
+| `initial` | 5/6 | 6/6 | 5/6 |
+| `final` | 1/6 | 4/6 | 0/6 |
+| `dynamic` | 1/6 | 1/6 | 0/6 |
+| total | 7/18 | 11/18 | **5/18** |
+
+- **Against R11:** 6 outcomes lost (s03 `initial`, four `final`, s01 `dynamic`), none gained.
+  Not better than R11.
+- **Drop criterion:** `final` + `dynamic` 0/12 holds; `initial` 5/6 and the wall clock do not;
+  `spin_failure` was not labelled. `a19` is not carried forward either way.
+- **Why, from the records (evaluation uses geometry):**
+  - In `final` the goal was never reported in 5 of 6 runs.
+  - The drone flew 60–80 m a run but stayed within 6–18 m of its start (R11: 13–32 m), with
+    12–35 turn-arounds a run (R11: 1–17).
+  - `g05` under `a19`'s map read 39–67% of strips blocked (R11's `g03`: 8–36%). Walls written
+    0.75 m out in most directions kept search targets near the start and put "wall close" on most
+    moves. Line 7 checked that searched ground was in sight, not that the drone could still move.
+  - In `dynamic` the goal was reported at step 0 in 5 of 6 runs, then disproved or lost within a
+    few steps and not found again.
