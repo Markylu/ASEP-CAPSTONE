@@ -3,10 +3,10 @@
   "title": "Goal by default, detours on demand",
   "citable": false,
   "agent_version": "a16",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "caa209a",
+  "started": "2026-10-27T17:44:20+00:00",
+  "finished": "2026-10-27T18:43:26+00:00",
+  "operator": "Markylu",
+  "notes": "Flown on sctsvr6 (headless Linux, Docker, Mesa lavapipe) in tmux after an unscored shakedown, then R11C at the same SHA. 18/18 valid. 11/18 (initial 6/6, final 4/6, dynamic 1/6); R11C 11/18. a16 not dropped (0 of 4 drop conditions); 6 of 18 outcomes changed against R11C (3 gained, 3 lost), not more than the floor of max(6, 2) = 6, so by the pre-registered rule no change is credited."
 }

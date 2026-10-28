@@ -2,7 +2,7 @@
 
 **Agent:** `a14` (`63ad006476b6`) · **Navigator prompt:** `p14` (`31a9f28eaf94`) · **Perceiver:**
 `g03` (`3531e4d9ade9`) · **Strategist:** `q02` (`f3a866c9d927`) · **Spatial memory:**
-`eceb875a68a3` + a14 wording `0075a8a0e5c0` · **Status:** **draft, not flown**
+`eceb875a68a3` + a14 wording `0075a8a0e5c0` · **Status:** flown (18/18 valid)
 
 Draft written 2026-10-25 with [R11's draft](../R11_goal_default/README.md). Spec:
 `docs/phase2-test-plan.md`.
@@ -45,4 +45,7 @@ llvmpipe, and every run's captured frame size must be 768x768 (checked by valida
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-27 on sctsvr6 at `caa209a`, right after R11, 18/18 valid. 11/18 (initial 5/6, final
+4/6, dynamic 2/6), against R10's 11/18 with the same agent: 2 outcomes differ (1 gained, 1 lost)
+and 7 of 18 pick sequences differ. The prediction missed on `final` (4/6, not 3/6) and `dynamic`
+(2/6, not 3/6). [summary.md](summary.md).

@@ -3,8 +3,9 @@
 **Agent:** `a16` (`6d614e3c4450`) · **Navigator prompt:** `p14` (`31a9f28eaf94`, as `a14`) ·
 **Perceiver:** `g03` (as `a14`) · **Strategist:** `q03` (new, detour only) · **Spatial memory:**
 `spatial.A16` (`spatial_a16` `1af123e381c0`; `spatial` `eceb875a68a3` and `spatial_a14`
-`0075a8a0e5c0` as `a14`) · **Status:** **pre-registered 2026-10-27; probe gate passed for `a16`
-under the re-set gate ([probe/probe_a16.md](probe/probe_a16.md)); not yet flown.** `a15`
+`0075a8a0e5c0` as `a14`) · **Status:** flown (18/18 valid), not dropped, not credited;
+pre-registered 2026-10-27, probe gate passed for `a16` under the re-set gate
+([probe/probe_a16.md](probe/probe_a16.md)). `a15`
 (`a17e9cadddc3`) was built first and failed its probe ([probe/probe_a15.md](probe/probe_a15.md));
 it is not flown.
 
@@ -205,4 +206,9 @@ it repeat itself).
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-27 on sctsvr6 at `caa209a`, 18/18 valid. 11/18 (initial 6/6, final 4/6, dynamic
+1/6), R11C 11/18; `final` + `dynamic` 5/12 against R11C's 6/12, so the hypothesis did not hold.
+6 of 18 outcomes changed against R11C (3 gained, 3 lost), not more than the floor of 6, so no
+change is credited. **Not dropped** (0 of 4). The goal by default held where the way was open
+(`initial` 6/6, s03 `initial` solved); the goal-side detours led back into the wall (collisions 58,
+R11C 24). [summary.md](summary.md), [manipulation_check.md](manipulation_check.md).
