@@ -58,17 +58,30 @@ EXPLORE = "explore"
 
 # --- validators: the cleaned reply, or VLMError (a failed rung) ------------------
 
-def perception_from(parsed: Dict[str, Any]) -> Dict[str, Any]:
+def perception_from(parsed: Dict[str, Any], version: str = "g03",
+                    floor_map: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """The perceiver's reply, checked. g03 gives a doorway as a bool; g04 and
+    g05 as "open", "closed" or "none", kept as "open"/"closed" or False. g05
+    says where the floor ends in the image; `floor_map` (the agent's) turns
+    that into the floor class the map reads, the answer kept as floor_end."""
     goal = parsed.get("goal")
     if goal not in schema.STRIPS + ["not_visible"]:
         raise vlm.VLMError("perceiver gave no valid goal: {0!r}".format(goal))
     lanes = []
     for strip in schema.STRIPS:
         lane = parsed.get(strip) or {}
-        if lane.get("floor") not in schema.FLOOR_CLASSES:
+        if lane.get("floor") not in schema.floor_classes(version):
             raise vlm.VLMError("perceiver gave no valid floor for {0}".format(strip))
-        lanes.append({"strip": strip, "floor": lane["floor"],
-                      "doorway": bool(lane.get("doorway"))})
+        door = lane.get("doorway")
+        if version in ("g04", "g05"):
+            door = door if door in ("open", "closed") else False
+        else:
+            door = bool(door)
+        if version == "g05":
+            lanes.append({"strip": strip, "floor": (floor_map or {})[lane["floor"]],
+                          "floor_end": lane["floor"], "doorway": door})
+        else:
+            lanes.append({"strip": strip, "floor": lane["floor"], "doorway": door})
     goal_range = parsed.get("goal_range")
     if goal == "not_visible":
         goal_range = None
@@ -122,6 +135,11 @@ def plan_line(target: Optional[spatial.Target], mode: Optional[str],
         # gets no distance or direction for it, only "toward your target".
         return spatial.WORDS_A14["plan_goal"].format(mode=mode or "approach")
     return "head for {0} ({1}).".format(target.words(here), mode or "explore")
+
+
+def without_goal(manifest: Dict[str, Any]) -> Dict[str, Any]:
+    """The manifest with its goal ground truth removed (a17)."""
+    return {k: v for k, v in manifest.items() if k != "goal"}
 
 
 def goal_at(manifest: Dict[str, Any]) -> Optional[spatial.Point]:
@@ -256,7 +274,9 @@ async def perceive(s: Step) -> Optional[str]:
     """The clean frame and nothing else."""
     p = prompts.get(s.features["perceiver"])
     seen = await ask(s, views.perceiver(p, s.manifest, s.clean_b64),
-                     schema.PERCEIVER_SCHEMA_NAME, schema.perceiver_schema(), perception_from,
+                     schema.PERCEIVER_SCHEMA_NAME, schema.perceiver_schema(p.version),
+                     lambda parsed: perception_from(parsed, p.version,
+                                                    s.features.get("floor_map")),
                      PERCEIVER_MAX_TOKENS)
     s.perception = seen.result
     s.record["perceiver"] = seen.to_dict()
@@ -326,6 +346,40 @@ async def route(s: Step) -> Optional[str]:
         if plan.result is not None:
             s.mode = plan.result["mode"]
             s.target = next((t for t in menu if t.id == plan.result["target"]), None)
+    _set_target(s)
+    return None
+
+
+async def stage_plan(s: Step) -> Optional[str]:
+    """a17: the stage machine (planner.staged) sets the target from what the
+    agent has seen, and asks q04 for a search target or a detour when it must.
+    The evaluator's record of this step is kept beside the stage."""
+    assert s.mem is not None
+    standing, mode, last_called, _ = previous(s.records, s.step)
+    prev = next((r.get("stage") for r in sorted(
+        (r for r in s.records if "step" in r and r["step"] < s.step),
+        key=lambda r: r["step"], reverse=True) if r.get("stage")), None)
+    r = planner.staged(s.mem, s.manifest, s.perception, planner.StageState.from_dict(prev),
+                       standing, mode, last_called)
+    s.target, s.mode = r.target, r.mode
+    if r.ask is not None and s.here is not None:
+        ids = [t.id for t in r.menu] + [EXPLORE]
+        view = views.strategist(prompts.get(s.features["strategist"]),
+                                planner.search_situation(s.mem, s.manifest, r.state, r.menu,
+                                                         r.ask))
+        plan = await ask(s, view, schema.STRATEGIST_SCHEMA_NAME, schema.strategist_schema(ids),
+                         _strategy(ids), STRATEGIST_MAX_TOKENS)
+        s.record["strategist"] = dict(plan.to_dict(), trigger=planner.ASKED_A17[r.ask],
+                                      text=view.text, menu=[t.to_dict() for t in r.menu])
+        # A failed call keeps what the planner had; "explore" is no target.
+        if plan.result is not None:
+            s.mode = plan.result["mode"]
+            s.target = next((t for t in r.menu if t.id == plan.result["target"]), None)
+            r.state.target_dist_m = (
+                round(spatial.dist(s.here[:2], (s.target.x, s.target.y)), 2)
+                if s.target is not None else None)
+    s.record["stage"] = r.state.to_dict()
+    s.record["evaluator"] = dict(r.evaluator, events=r.events, ask=r.ask)
     _set_target(s)
     return None
 
@@ -404,6 +458,9 @@ def pipeline(features: Dict[str, Any]) -> List[Stage]:
     elif policy == "goal_default_llm_detour":
         planning = Stage("route", route, features.get("strategist"),
                          "every step; q03 only when the way to the goal is shut")
+    elif policy == "staged_search":
+        planning = Stage("stages", stage_plan, features.get("strategist"),
+                         "every step; q04 when a search target or a detour is needed")
     else:
         raise ValueError("unknown target_policy {0!r}".format(policy))
     stages = [Stage("perceiver", perceive, features.get("perceiver")),
@@ -429,6 +486,11 @@ async def decide(request: Any, run: Run, frame_path: str):
     if not request.clean_frame_png_b64:
         return _error(run, record, "agent wants the clean frame and the request has none")
     record["clean_frame"] = run.save_clean_frame(step, request.clean_frame_png_b64)
+    # a17 (R12, operator 2026-10-28): no goal truth anywhere in the agent. Its
+    # stages see the manifest without the goal block; the record keeps it for
+    # evaluation.
+    if features.get("goal_truth") == "none":
+        manifest = without_goal(manifest)
     s = Step(features=features, cfg=spatial.config_for(features), manifest=manifest, step=step,
              records=_read_jsonl(run.decisions), record=record,
              frame_b64=request.frame_png_b64, clean_b64=request.clean_frame_png_b64)

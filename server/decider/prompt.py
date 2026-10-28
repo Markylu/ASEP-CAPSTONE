@@ -1168,6 +1168,91 @@ Choose a mode and a detour.""",
 )
 
 
+# g04: the perceiver for a17 (R12). g03, with the far floor split by whether a
+# wall ends it (wall_far, 4 to 8 m) or not (open_very_far), and a doorway said
+# open or closed. a17's coverage map ends each strip's cone where its floor
+# ends, so the far class decides how much ground one look searches. R11 against
+# the site geometry: open_far had a wall within 6 m on 849 of 2589 lane reads,
+# and a featureless wall face within 1 m read open_far on 33% of blocked_near
+# lanes (failure_analysis.md Q4).
+
+G04 = Prompt(
+    version="g04",
+    system="""You check one image from the front camera of a small indoor drone.
+Judge this image alone.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+1. The goal is a glowing red sphere. Say which strip it is in, or not_visible.
+   If you can see it, say how far away it looks: touching (it is large in the
+   image, under 2 m away), near (2 to 6 m), mid (6 to 15 m), far (over 15 m).
+   If it is not visible, its distance is none.
+2. For each strip, look along the floor straight ahead in that strip and say
+   where the open floor ends:
+   blocked_near if a wall or obstacle is right in front (under about 2 m);
+   open_near if a wall or obstacle stands a few metres away (about 2 to 4 m);
+   wall_far if the floor runs on but a wall or door ends it in the distance
+   (about 4 to 8 m);
+   open_very_far if no wall ends the floor within about 8 m.
+   A surface that fills the strip with no floor line across it is a wall right
+   in front: blocked_near.
+   Also say whether that strip shows a doorway: open if there is an opening in
+   a wall the drone could fly through, closed if a door fills the opening, or
+   none.
+
+First describe what you see: walls, openings, doors, obstacles, and anything
+that could be the goal. Then give the report.""",
+    user_template="Report on this image.",
+    render=render_identifier_question,
+)
+
+
+# q04: the search strategist for a17 (R12). No goal truth: code sets the stage
+# (explore until the goal is seen, then head for where it was seen) and asks
+# q04 only for a place to search, or for a detour when the way toward a seen
+# goal is shut. Each place is worded by how much unsearched ground it opens and
+# its path length over known floor; nothing is worded "nearer the goal". R11:
+# q03 picked the item worded largest gain toward the goal on 35 of 38 calls,
+# and 34 of 37 of those lay behind or inside a wall.
+
+Q04 = Prompt(
+    version="q04",
+    system="""You plan where a small indoor drone searches for a goal, a glowing red
+sphere. Another model flies the drone one step at a time. You do not see the
+camera image.
+
+The system keeps a map from the drone's own moves and from what its camera has
+seen. Ground the camera has looked over without seeing the goal is searched;
+the goal is not there. The system tells you whether the goal has been seen and
+lists the places you can choose from, each with its distance and direction from
+the drone as it faces now:
+- unsearched ground: the edge of ground the camera has not yet looked over,
+  with how much of it there is and how far the path there is over known floor;
+- doorways: openings seen in a wall, which lead to ground not yet searched;
+- a place the drone was at before, which still had an untried way on.
+Every place listed can be reached over known floor.
+
+Choose a mode and a place:
+- explore: search unsearched ground or go through a doorway.
+- approach: get round a wall toward the goal, when it has been seen.
+- backtrack: go back to an earlier place; use it when no unsearched ground is
+  left here, as in a dead end.
+- escape: the drone keeps returning to the same ground; pick a place in a
+  direction it has not been trying.
+
+Prefer more unsearched ground over a shorter path, and a doorway when no
+unsearched ground is listed. Choose "explore" as the place when nothing listed
+looks useful.
+
+Give your reasoning first, then the mode, then one place id exactly as listed.""",
+    user_template="""{situation}
+
+Choose a mode and a place.""",
+    render=render_strategist,
+)
+
+
 # p14: the navigator. The frame with its markers, the planner's target, the
 # perceiver's answer for this image, the last three moves in words, and notes
 # from the map against each action.
@@ -1254,9 +1339,52 @@ Pick one number.""",
     render=render_orchestrated,
 )
 
+
+# --- g05: Phase 2 R12, where the floor ends in the image -------------------------
+# g04 asked for metres and read 69% of strips open_very_far, walls under 1 m
+# among them (R12 line 7). The camera is level at 1.75 m with a 87-degree view,
+# so a floor line at fraction v of the half-height below the image centre is
+# 1.84 / v metres away, and a wall under 1.84 m hides the floor. g05 asks where
+# the floor ends in the image; code turns that into a reach (agent floor_map).
+
+G05 = Prompt(
+    version="g05",
+    system="""You check one image from the front camera of a small indoor drone.
+Judge this image alone.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+1. The goal is a glowing red sphere. Say which strip it is in, or not_visible.
+   If you can see it, say how far away it looks: touching (it is large in the
+   image, under 2 m away), near (2 to 6 m), mid (6 to 15 m), far (over 15 m).
+   If it is not visible, its distance is none.
+2. For each strip, find where its floor ends: the line where the floor meets a
+   wall, door or obstacle. The camera is level, so the nearer the obstacle, the
+   lower that line sits in the image, and an obstacle close in front hides the
+   floor completely. Say:
+   no_floor if no floor shows at the bottom of the strip: a wall, door, pillar
+   or plain surface fills it from the bottom up. A dark plain surface is a wall
+   close in front, not open space;
+   bottom if floor shows but ends within the bottom quarter of the image;
+   lower if the floor ends higher than that but well below the middle of the
+   image;
+   middle if the floor runs up to just below the middle of the image.
+   Judge by the floor you can see, its edges and lines, never by darkness.
+   Also say whether that strip shows a doorway: open if there is an opening in
+   a wall the drone could fly through, closed if a door fills the opening, or
+   none.
+
+First say, for each strip from left to right, what fills the bottom of the
+strip and where its floor ends. Then describe walls, openings, doors and
+anything that could be the goal. Then give the report.""",
+    user_template="Report on this image.",
+    render=render_identifier_question,
+)
+
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
-                                                      G03, Q01, Q02, Q03)}
+                                                      G03, Q01, Q02, Q03, G04, Q04, G05)}
 
 
 def get(version: str) -> Prompt:

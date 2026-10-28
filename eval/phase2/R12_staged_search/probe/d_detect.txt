@@ -1,0 +1,13 @@
+true distance  reported/in view  rate   range classes when reported
+ 0-2  m        25/25         100%  touching 25
+ 2-4  m        70/70         100%  touching 70
+ 4-6  m        53/53         100%  touching 51, near 2
+ 6-8  m        58/58         100%  touching 52, near 6
+ 8-10 m        61/61         100%  touching 50, near 11
+10-12 m        44/44         100%  touching 22, near 15, far 5, mid 2
+12-15 m        68/68         100%  near 50, far 9, touching 9
+15-18 m        56/56         100%  near 27, mid 17, far 11, touching 1
+18-22 m        77/77         100%  near 62, far 15
+22-30 m       110/110        100%  near 70, far 27, mid 13
+30+   m        40/40         100%  near 40
+reported while out of view: 123/3290 (3.7%)

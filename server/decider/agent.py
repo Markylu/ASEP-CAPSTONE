@@ -64,7 +64,15 @@ class Agent:
         if self.spatial_config is not None:
             for segment in self.spatial_config.sha_segments():
                 blob += "\x00" + segment
+        # a17's stage machine and evaluator thresholds (planner.py), appended
+        # only for the staged policy.
+        if self.staged:
+            blob += "\x00planner_a17:" + planner_a17_sha()
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+    @property
+    def staged(self) -> bool:
+        return (self.features.get("orchestrator") or {}).get("target_policy") == "staged_search"
 
     @property
     def spatial_config(self):
@@ -213,6 +221,55 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "offered at the edge's point nearest the goal. a15's probe: a 45-degree block "
           "window noted every forward move on 28 of R10's steps and the navigator took "
           "the blocked one; 52 of 88 detour menus held nothing 3 m nearer the goal."),
+    Agent("a17", "p14", {"orchestrator": {"perceiver": "g04", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_search",
+                                          "memory": "a17",
+                                          "spatial": "server/decider/spatial.py"}},
+          "R12 bundle, no goal truth anywhere (operator, 2026-10-28): code runs two "
+          "stages, explore until the goal is seen and then head for where it was seen "
+          "(planner.staged). A coverage map marks ground each look's cone searched; a "
+          "search strategist (q04) picks reachable edges of unsearched ground, doorways "
+          "or a way back; an evaluator scores each step by ground newly searched and "
+          "progress, blacklists a target after four unproductive steps, and drops a "
+          "sighting a later look disproves. Perceiver g04 says where far floor ends and "
+          "whether a doorway is open. Memory a17: stop walls, reachable targets, doors "
+          "passed only when crossed. R11: 34 of 37 detour targets lay behind or inside "
+          "a wall; g03 sees the goal at any range in line of sight (612 of 612)."),
+    Agent("a18", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_search",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R12 after a17's live probe failed: a17 with perceiver g05, which says where "
+          "each strip's floor ends in the image (no floor, bottom quarter, lower, just "
+          "below the middle) instead of metres; code maps that to a reach. The camera is "
+          "level at 1.75 m, so no floor in a strip means an obstacle under 1.84 m. g04 read "
+          "69% of R11's strips open_very_far, 53% of walls under 1 m among them."),
+    Agent("a19", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_search",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "blocked_near",
+                                                        "lower": "open_near",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R12 after a18's live probe failed narrowly (86.8% of searched cells in sight, "
+          "16.2% of walls under 1 m read open): a18 with each g05 floor end mapped one "
+          "class nearer, so a misread wall cuts the cone short instead of running it "
+          "through. On a18's R11 answers this map gave 90.0% and 6.8% with a third fewer "
+          "cells searched; fitted there, so it is gated on R11C's frames."),
 )}
 
 DEFAULT_AGENT = "a00"
@@ -263,7 +320,18 @@ def describe(version: str) -> Dict[str, Any]:
             out["spatial_a15_sha"] = spatial.wording_sha_a15()
         if agent.spatial_config.name == "a16":
             out["spatial_a16_sha"] = spatial.wording_sha_a16()
+        if agent.spatial_config.name == "a17":
+            out["spatial_a17_sha"] = spatial.wording_sha_a17()
+    if agent.staged:
+        out["planner_a17_sha"] = planner_a17_sha()
     return out
+
+
+def planner_a17_sha() -> str:
+    """Identity of a17's stage machine parameters and q04 trigger wording."""
+    from . import planner
+    blob = json.dumps(planner.stage_sha_blob(), sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
 def record() -> Dict[str, Any]:

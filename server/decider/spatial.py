@@ -229,6 +229,65 @@ def wording_sha_a16() -> str:
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
+#: a17's parameters (R12, operator, 2026-10-28): staged search with a coverage
+#: map, and no goal truth anywhere. R11's failure analysis: detour targets lay
+#: behind or inside walls (34 of 37), because collisions never wrote walls,
+#: newer looks erased them, open floor ran a fixed 6 m and targets were never
+#: checked for a path. R9-R11 (analysis/d_detect.py): g03 reports the goal in
+#: view 612 of 612 times out past 30 m, so a look's cone is cut by walls only,
+#: and its range class says nothing (a single sighting is a bearing).
+PARAMS_A17: Dict[str, Any] = dict(
+    {k: v for k, v in PARAMS_A16.items() if k != "frontier"},
+    # Open floor along a strip, by class; g03's classes kept for replay on
+    # R9-R11. g04 splits open_far into wall_far and open_very_far. Against
+    # R11's geometry (eval/r12_probe.py): blocked_near had the wall within 1 m
+    # on 378 of 606 lane reads, open_near within 2.5 m on 69 of 335, open_far
+    # within 6 m on 849 of 2589 (within 4 m, 393).
+    floor_range_m={"blocked_near": 0.5, "open_near": 2.0, "open_far": 4.0,
+                   "wall_far": 6.0, "open_very_far": 10.0},
+    # Classes whose floor ends at a wall (or door) the perceiver saw.
+    floor_ends=["blocked_near", "open_near", "wall_far"],
+    # Classes with no wall seen at their end: a look down such a strip that
+    # does not show the goal disproves a belief on that line.
+    open_floor=["open_far", "open_very_far"],
+    opening_at_m={"blocked_near": 1.0, "open_near": 2.0, "open_far": 5.0,
+                  "wall_far": 6.0, "open_very_far": 6.0},
+    # Rays per strip, as offsets in image units from the strip's centre (a
+    # strip is 0.4 wide).
+    cone_rays=[-0.13, 0.0, 0.13],
+    # A move under short_below_m writes a wall one cell ahead of where it
+    # stopped; looks cannot erase it.
+    stop_wall=True,
+    # A doorway is passed when a move's segment runs through it this close.
+    door_cross_m=0.6,
+    # One sighting: steer on its bearing, at this distance along it.
+    single_ray_m=10.0,
+    # Search targets: edges of unsearched ground reachable over known floor,
+    # keeping a cell from walls; a blacklisted point removes its edge.
+    frontier="search",
+    frontier_min_cells=2,
+    frontier_min_m=1.5,
+    frontier_path_bias_m=2.0,
+    blacklist_near_m=1.5,
+    # A move's look ahead for "new ground" against "searched already".
+    searched_ahead_m=4.0,
+)
+
+#: Every sentence a17 adds (R12).
+WORDS_A17: Dict[str, Any] = {
+    "searched": "searched already this way",
+    "frontier": "unsearched ground ({cells} cells along its edge), {path:.0f} m away over "
+                "known floor",
+    "doorway": "doorway {label} (seen at step {step}), {path:.0f} m away over known floor",
+}
+
+
+def wording_sha_a17() -> str:
+    """Identity of a17's parameters and added wording, for agent.sha()."""
+    blob = json.dumps({"params_a17": PARAMS_A17, "words_a17": WORDS_A17}, sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+
 @dataclass(frozen=True)
 class SpatialConfig:
     """One agent's memory: which wording it is shown and which a15 behaviours
@@ -246,8 +305,11 @@ class SpatialConfig:
     #: a16: the window after a move that did not get going; None uses
     #: block_within_deg for both kinds.
     block_within_deg_blocked: Optional[float] = None
-    #: "size" (largest edges, at their centres) or "goal_side" (a16).
+    #: "size" (largest edges, at their centres), "goal_side" (a16) or
+    #: "search" (a17: reachable edges of unsearched ground).
     frontier: str = "size"
+    #: a17: a look's cone marks ground searched; stop walls; doors crossed.
+    coverage: bool = False
 
     def sha_segments(self) -> List[str]:
         out = ["spatial:" + wording_sha()]
@@ -257,6 +319,8 @@ class SpatialConfig:
             out.append("spatial_a15:" + wording_sha_a15())
         if self.name == "a16":
             out.append("spatial_a16:" + wording_sha_a16())
+        if self.name == "a17":
+            out.append("spatial_a17:" + wording_sha_a17())
         return out
 
 
@@ -276,10 +340,22 @@ A16 = SpatialConfig("a16", WORDS_A14["triggers"], a14_words=True,
                     doorway_min_seen=PARAMS_A16["doorway_min_seen"],
                     doorway_ttl_steps=PARAMS_A16["doorway_ttl_steps"],
                     frontier=PARAMS_A16["frontier"])
+#: a17 keeps a16's block windows, wall-aware "toward" and doorway gate, with
+#: a14's trigger wording (unused: a17 has no goal triggers).
+A17 = SpatialConfig("a17", WORDS_A14["triggers"], a14_words=True,
+                    block_end_pose=PARAMS_A17["block_end_pose"],
+                    block_within_deg=PARAMS_A17["block_within_deg_short"],
+                    block_within_deg_blocked=PARAMS_A17["block_within_deg_blocked"],
+                    toward="open", toward_within_deg=PARAMS_A17["toward_open_within_deg"],
+                    doorway_min_seen=PARAMS_A17["doorway_min_seen"],
+                    doorway_ttl_steps=PARAMS_A17["doorway_ttl_steps"],
+                    frontier=PARAMS_A17["frontier"], coverage=True)
 
 
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
     """The memory an orchestrated agent's features name (agent.py)."""
+    if orchestrator.get("memory") == "a17":
+        return A17
     if orchestrator.get("memory") == "a15":
         return A15
     if orchestrator.get("memory") == "a16":
@@ -338,6 +414,14 @@ def strip_offset(strip: str) -> float:
     return math.degrees(math.atan(u * math.tan(math.radians(FOV_DEG / 2.0))))
 
 
+def strip_ray_offsets(strip: str, du: Iterable[float]) -> List[float]:
+    """a17: degrees left of ahead for rays spread across one strip, `du` image
+    units either side of its centre (pinhole, as strip_offset)."""
+    u0 = (2 - STRIPS.index(strip)) * 0.4
+    t = math.tan(math.radians(FOV_DEG / 2.0))
+    return [math.degrees(math.atan((u0 + d) * t)) for d in du]
+
+
 def relative_word(rel_deg: float) -> str:
     """One of eight words for a direction relative to the drone's heading."""
     return WORDS["rel"][int(((wrap(rel_deg) + 22.5) % 360.0) // 45.0)]
@@ -384,6 +468,20 @@ class Opening:
 
 
 @dataclass
+class Look:
+    """a17: what one look's cone covered. `cells` excludes the strip the goal
+    was reported in; `new` of them had never been searched before."""
+    step: int
+    cells: frozenset
+    new: int
+
+    @property
+    def revisit(self) -> float:
+        """Share of the cone already searched: 'seen this view before'."""
+        return 1.0 - self.new / len(self.cells) if self.cells else 1.0
+
+
+@dataclass
 class Target:
     """What the strategist chose, as a map point code can steer by. `label`
     names it ("doorway A (seen at step 6)"); where it is from the drone is
@@ -420,6 +518,11 @@ class SpatialMemory:
     openings: List[Opening] = field(default_factory=list)
     trail: List[Tuple[int, float, float, float]] = field(default_factory=list)
     turn_arounds: List[int] = field(default_factory=list)
+    #: a17: ground searched (seen with no goal in it), walls written where a
+    #: move stopped (never erased by a look), and each look's cone.
+    seen: Dict[Tuple[int, int], int] = field(default_factory=dict)
+    stop_wall: Dict[Tuple[int, int], int] = field(default_factory=dict)
+    looks: List[Look] = field(default_factory=list)
     cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
@@ -429,6 +532,7 @@ class SpatialMemory:
         c = cell(where[:2])
         self.visits.setdefault(c, []).append(step)
         self.wall.pop(c, None)
+        self.stop_wall.pop(c, None)
 
     def move(self, step: int, before: Pose, after: Pose, action: Dict[str, Any]) -> None:
         """What a move did, from where it started and where the next decision was."""
@@ -452,12 +556,21 @@ class SpatialMemory:
             if self.cfg.block_end_pose and moved >= BLOCKED_BELOW_M:
                 self.blocks.append(Block(after[0], after[1],
                                          action_heading(action, before[2]), step, moved))
+            # a17: the move hit something one cell on from where it stopped.
+            if self.cfg.coverage:
+                c = cell(ahead(after[:2], action_heading(action, before[2]), CELL_M))
+                if c not in self.visits:
+                    self.stop_wall[c] = step
+                    self.free.pop(c, None)
 
     def observe(self, step: int, where: Pose, perception: Optional[Dict[str, Any]]) -> None:
         """Fold one perceiver report taken at `where` into the map. Seen floor is
         weak evidence: a visit always overrides a wall mark, and a newer look
         overwrites an older one."""
         if not perception:
+            return
+        if self.cfg.coverage:
+            self._observe_cone(step, where, perception)
             return
         here = where[:2]
         for lane in perception.get("lanes") or []:
@@ -482,6 +595,62 @@ class SpatialMemory:
                 self._add_opening(step, ahead(here, heading, OPENING_AT_M[floor]))
             self._close_openings(step, here, heading, reach)
         goal = perception.get("goal")
+        if goal in STRIPS:
+            self.goal_rays.append(Ray(here[0], here[1],
+                                      (where[2] + strip_offset(goal)) % 360.0, step,
+                                      perception.get("goal_range") or "mid"))
+
+    def _observe_cone(self, step: int, where: Pose, perception: Dict[str, Any]) -> None:
+        """a17: each strip is a slice of the cone, cast as a few rays out to where
+        the perceiver says its floor ends, or to a stop wall first. Floor that
+        ends at a wall or a closed door writes a wall there; a stop wall is never
+        erased. Ground under the cone is searched unless the goal was reported
+        in that strip."""
+        here = where[:2]
+        goal = perception.get("goal")
+        rng = PARAMS_A17["floor_range_m"]
+        covered = set()
+        for lane in perception.get("lanes") or []:
+            strip = lane.get("strip")
+            floor = lane.get("floor")
+            if strip not in STRIPS or floor not in rng:
+                continue
+            reach = rng[floor]
+            ends = floor in PARAMS_A17["floor_ends"]
+            door = lane.get("doorway")
+            if door is True:
+                door = "open"  # g03 flags a doorway without saying open or closed
+            for off in strip_ray_offsets(strip, PARAMS_A17["cone_rays"]):
+                heading = (where[2] + off) % 360.0
+                d, cut = CELL_M / 2.0, False
+                while d <= reach:
+                    c = cell(ahead(here, heading, d))
+                    if c in self.stop_wall:
+                        cut = True
+                        break
+                    self.free[c] = step
+                    self.wall.pop(c, None)
+                    if goal != strip:
+                        covered.add(c)
+                    d += CELL_M / 2.0
+                if ends and not cut and door != "open":
+                    end = cell(ahead(here, heading, reach + CELL_M / 2.0))
+                    if end not in self.visits:
+                        self.wall[end] = step
+                        self.free.pop(end, None)
+            centre = (where[2] + strip_offset(strip)) % 360.0
+            at = ahead(here, centre, PARAMS_A17["opening_at_m"][floor])
+            if door == "open":
+                self._add_opening(step, at)
+            elif door == "closed":
+                for o in self.openings:
+                    if dist((o.x, o.y), at) < OPENING_MERGE_M:
+                        o.closed = True
+            self._close_openings(step, here, centre, reach)
+        new = sum(1 for c in covered if c not in self.seen)
+        for c in covered:
+            self.seen.setdefault(c, step)
+        self.looks.append(Look(step, frozenset(covered), new))
         if goal in STRIPS:
             self.goal_rays.append(Ray(here[0], here[1],
                                       (where[2] + strip_offset(goal)) % 360.0, step,
@@ -513,10 +682,27 @@ class SpatialMemory:
                 o.closed = True
 
     def settle(self) -> None:
-        """Mark openings passed once the trail has come close to them."""
+        """Mark openings passed once the trail has come close to them (a17: once
+        a move ran through them)."""
         for o in self.openings:
-            if any(dist((x, y), (o.x, o.y)) < OPENING_PASSED_M for _, x, y, _ in self.trail):
+            if self.cfg.coverage:
+                o.passed = self._crossed((o.x, o.y))
+            elif any(dist((x, y), (o.x, o.y)) < OPENING_PASSED_M for _, x, y, _ in self.trail):
                 o.passed = True
+
+    def _crossed(self, p: Point) -> bool:
+        """a17: some move's segment passes within door_cross_m of `p`, with `p`
+        between its two ends. R11: 10 of 14 true doors were struck as passed
+        because the drone came within 1.5 m of the near-side estimate."""
+        for (_, x0, y0, _), (_, x1, y1, _) in zip(self.trail, self.trail[1:]):
+            vx, vy = x1 - x0, y1 - y0
+            n2 = vx * vx + vy * vy
+            if n2 < 1e-6:
+                continue
+            t = ((p[0] - x0) * vx + (p[1] - y0) * vy) / n2
+            if 0.0 < t < 1.0 and dist((x0 + t * vx, y0 + t * vy), p) < PARAMS_A17["door_cross_m"]:
+                return True
+        return False
 
     # -- queries ---------------------------------------------------------------
 
@@ -549,15 +735,17 @@ class SpatialMemory:
     def visits_at(self, p: Point) -> List[int]:
         return list(self.visits.get(cell(p), []))
 
-    def goal_belief(self) -> Optional[Tuple[float, float, int]]:
+    def goal_belief(self, since: int = -1) -> Optional[Tuple[float, float, int]]:
         """Where the goal probably is, from the perceiver's sightings: (x, y, step).
 
         The least-squares point nearest every ray, when the rays spread at least
         RAY_SPREAD_DEG and the point lies in front of each; otherwise the latest
-        ray at its range class. `step` is the latest sighting it rests on."""
-        if not self.goal_rays:
+        ray at its range class (a17: at single_ray_m, the range class being
+        uninformative). `step` is the latest sighting it rests on. a17: only
+        rays from step `since` on, the planner dropping those a look disproved."""
+        rays = [r for r in self.goal_rays if r.step >= since]
+        if not rays:
             return None
-        rays = self.goal_rays
         last = rays[-1]
         spread = max(abs(wrap(a.heading - b.heading)) for a in rays for b in rays)
         if len(rays) >= 2 and spread >= RAY_SPREAD_DEG:
@@ -580,8 +768,153 @@ class SpatialMemory:
                     + (py - r.y) * math.sin(math.radians(r.heading)) > 0 for r in rays)
                 if in_front:
                     return px, py, last.step
+        if self.cfg.coverage:
+            p = ahead((last.x, last.y), last.heading, PARAMS_A17["single_ray_m"])
+            return p[0], p[1], last.step
         p = ahead((last.x, last.y), last.heading, GOAL_RANGE_M.get(last.range, 10.0))
         return p[0], p[1], last.step
+
+    def goal_rays_since(self, since: int) -> int:
+        return sum(1 for r in self.goal_rays if r.step >= since)
+
+    def covered(self, p: Point, step: int) -> bool:
+        """a17: whether the look at `step` searched the cell `p` lies in (its
+        cone reached it and the goal was not reported in that strip)."""
+        look = next((l for l in reversed(self.looks) if l.step == step), None)
+        return look is not None and cell(p) in look.cells
+
+    def faces_unseen(self, p: Point, where: Pose,
+                     perception: Optional[Dict[str, Any]]) -> bool:
+        """a17: a look from `where` that should have shown a goal at `p` and did
+        not. The perceiver reports the goal whenever it is in view, at any
+        distance (R9-R11, 612 of 612): so `p` within the cone, the strip toward
+        it reading floor open past where its floor would end at a wall, and no
+        wall the map knows on the line, means the goal is not at `p`."""
+        if not perception or perception.get("goal") in STRIPS:
+            return False
+        rel = wrap(bearing(where[:2], p) - where[2])
+        if abs(rel) > FOV_DEG / 2.0 - 4.0:
+            return False
+        lane = next((l for l in perception.get("lanes") or []
+                     if l.get("strip") == strip_for(rel)), None)
+        if lane is None or lane.get("floor") not in PARAMS_A17["open_floor"]:
+            return False
+        d, far = CELL_M / 2.0, dist(where[:2], p)
+        while d < far:
+            c = cell(ahead(where[:2], bearing(where[:2], p), d))
+            if (c in self.wall or c in self.stop_wall) and c not in self.visits:
+                return False
+            d += CELL_M / 2.0
+        return True
+
+    def last_look(self) -> Optional[Look]:
+        return self.looks[-1] if self.looks else None
+
+    # -- a17: reachability and search targets ----------------------------------
+
+    def _blocked_cell(self, c: Tuple[int, int]) -> bool:
+        return c in self.wall or c in self.stop_wall
+
+    def reach(self, here: Point,
+              parent: Optional[Dict[Tuple[int, int], Tuple[int, int]]] = None
+              ) -> Dict[Tuple[int, int], float]:
+        """Path length in metres from `here` to every known-floor cell a path
+        over visited or seen-free cells reaches, keeping one cell clear of walls
+        (a visited cell is always allowed: the drone has been there). `parent`,
+        if given, is filled with each cell's previous cell on its path."""
+        def ok(c: Tuple[int, int]) -> bool:
+            if c in self.visits:
+                return True
+            if c not in self.free or self._blocked_cell(c):
+                return False
+            return not any(self._blocked_cell((c[0] + dx, c[1] + dy))
+                           for dx in (-1, 0, 1) for dy in (-1, 0, 1))
+        start = cell(here)
+        out = {start: 0.0}
+        todo = [start]
+        diag = CELL_M * math.sqrt(2.0)
+        # Uniform-ish costs: a plain breadth-first pass, relaxed once more.
+        while todo:
+            nxt = []
+            for c in todo:
+                for dx in (-1, 0, 1):
+                    for dy in (-1, 0, 1):
+                        if dx == 0 and dy == 0:
+                            continue
+                        n = (c[0] + dx, c[1] + dy)
+                        cost = out[c] + (diag if dx and dy else CELL_M)
+                        if (n not in out or cost < out[n] - 1e-9) and ok(n):
+                            out[n] = cost
+                            if parent is not None:
+                                parent[n] = c
+                            nxt.append(n)
+            todo = nxt
+        return out
+
+    def search_frontiers(self, here: Point, blacklist: Iterable[Point] = (),
+                         limit: int = 3) -> List[Tuple[Point, int, float]]:
+        """a17: edges of unsearched ground a known path reaches, as (point, edge
+        cells, path metres), best first: edge cells / (path + bias). Each edge is
+        offered one cell short of its reachable cell nearest the drone, on the
+        path there: an edge cell can sit in a wall the map has not seen (R11
+        geometry: 10 of 38 top edges did)."""
+        parent: Dict[Tuple[int, int], Tuple[int, int]] = {}
+        reach = self.reach(here, parent)
+        edge = set()
+        for c in reach:
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                n = (c[0] + dx, c[1] + dy)
+                if n not in self.seen and n not in self.visits and not self._blocked_cell(n):
+                    edge.add(c)
+                    break
+        black = list(blacklist)
+        clusters: List[List[Tuple[int, int]]] = []
+        done = set()
+        for c in sorted(edge):
+            if c in done:
+                continue
+            group, todo = [], [c]
+            done.add(c)
+            while todo:
+                cur = todo.pop()
+                group.append(cur)
+                for dx in (-1, 0, 1):
+                    for dy in (-1, 0, 1):
+                        n = (cur[0] + dx, cur[1] + dy)
+                        if n in edge and n not in done:
+                            done.add(n)
+                            todo.append(n)
+            clusters.append(group)
+        out = []
+        for g in clusters:
+            if len(g) < PARAMS_A17["frontier_min_cells"]:
+                continue
+            pts = [((c[0] + 0.5) * CELL_M, (c[1] + 0.5) * CELL_M) for c in g]
+            if any(dist(p, b) < PARAMS_A17["blacklist_near_m"] for p in pts for b in black):
+                continue
+            far = [(reach[c], c) for c, p in zip(g, pts)
+                   if dist(here, p) >= PARAMS_A17["frontier_min_m"]]
+            if not far:
+                continue
+            path, c = min(far)
+            back = parent.get(c, c)
+            p = ((back[0] + 0.5) * CELL_M, (back[1] + 0.5) * CELL_M)
+            if dist(here, p) < PARAMS_A17["frontier_min_m"]:
+                p = ((c[0] + 0.5) * CELL_M, (c[1] + 0.5) * CELL_M)
+            out.append((p, len(g), path))
+        out.sort(key=lambda t: -t[1] / (t[2] + PARAMS_A17["frontier_path_bias_m"]))
+        return out[:limit]
+
+    def reachable(self, p: Point, reach: Dict[Tuple[int, int], float],
+                  within_m: float = 1.5) -> Optional[float]:
+        """a17: path metres to the nearest reached cell within `within_m` of `p`
+        (a doorway sits on its wall, so its own cell is never reached), or None."""
+        best = None
+        for c, d in reach.items():
+            q = ((c[0] + 0.5) * CELL_M, (c[1] + 0.5) * CELL_M)
+            if dist(q, p) <= within_m and (best is None or d < best):
+                best = d
+        return best
 
     def frontiers(self, here: Point, limit: int = 3,
                   goal: Optional[Point] = None) -> List[Point]:
@@ -830,9 +1163,16 @@ def project(mem: SpatialMemory, manifest: Dict[str, Any],
             flying = [a for a in flying if not not_open(mem, here, a, lanes)]
         best = min(flying, key=lambda a: abs(wrap(action_heading(a, here[2]) - want)),
                    default=None)
+        side = [a for a in flying
+                if wrap(action_heading(a, here[2]) - here[2]) * wrap(want - here[2]) > 0]
         if (best is not None and abs(wrap(action_heading(best, here[2]) - want))
                 <= mem.cfg.toward_within_deg):
             toward = int(best["index"])
+        elif mem.cfg.coverage and side:
+            # a17: nothing in the fan points at the target; the sharpest open
+            # move on its side does (R11: 185 steps with "toward" on [0] not
+            # followed, +158 m away from the goal).
+            toward = int(max(side, key=lambda a: abs(float(a.get("theta_deg") or 0.0)))["index"])
         elif abs(wrap(want - here[2])) > 90.0:
             toward = next((int(a["index"]) for a in actions if a.get("turn_around")), None)
 
@@ -870,7 +1210,10 @@ def project(mem: SpatialMemory, manifest: Dict[str, Any],
             out.append(WORDS["visited"].format(n=len(been), times="time" if len(been) == 1
                                                else "times", last=max(been)))
         elif b is None and lane.get("floor") != "blocked_near":
-            out.append(WORDS["new_ground"])
+            if not mem.cfg.coverage or _unsearched_ahead(mem, land, heading):
+                out.append(WORDS["new_ground"])
+            else:
+                out.append(WORDS_A17["searched"])
         del out[3:]
     return tags
 
@@ -1009,6 +1352,20 @@ _NOT_OPEN = (WORDS["blocked"].split(" (")[0], WORDS["short"].split(" (")[0],
              WORDS["wall_seen"])
 
 
+def _unsearched_ahead(mem: SpatialMemory, land: Point, heading: float) -> bool:
+    """a17: whether the ground a move lands facing has some cell not yet
+    searched within searched_ahead_m (a wall cell ends the look)."""
+    d = CELL_M / 2.0
+    while d <= PARAMS_A17["searched_ahead_m"]:
+        c = cell(ahead(land, heading, d))
+        if c in mem.wall or c in mem.stop_wall:
+            return False
+        if c not in mem.seen and c not in mem.visits:
+            return True
+        d += CELL_M / 2.0
+    return False
+
+
 def hide_turn_around(mem: SpatialMemory, manifest: Dict[str, Any],
                      tags: Dict[int, List[str]]) -> List[int]:
     """The turn-around indices to leave off this step (a14, operator 2026-10-24):
@@ -1021,6 +1378,9 @@ def hide_turn_around(mem: SpatialMemory, manifest: Dict[str, Any],
         return []
     actions = manifest.get("actions") or []
     turn = [int(a["index"]) for a in actions if a.get("turn_around")]
+    # a17: never hide a turn-around that alone carries "toward your target".
+    if mem.cfg.coverage and any(WORDS["toward_target"] in tags.get(i, []) for i in turn):
+        return []
     forward_open = any(
         not any(w.startswith(_NOT_OPEN) for w in tags.get(int(a["index"]), []))
         for a in actions if not a.get("turn_around"))

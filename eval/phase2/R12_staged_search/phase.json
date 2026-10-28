@@ -1,0 +1,13 @@
+{
+  "round": "R12",
+  "title": "Staged search with a coverage map",
+  "citable": false,
+  "agent_version": "a19",
+  "status": "complete",
+  "git_sha": "09d11a0",
+  "started": "2026-10-28T20:55:49+00:00",
+  "finished": "2026-10-28T21:27:45+00:00",
+  "operator": "Markylu",
+  "notes": "Flown on sctsvr6 (headless, Docker, Mesa lavapipe) on 4 parallel lanes at one SHA after an unscored 6-run shakedown (6/6 valid); R12C dropped by the operator. 18/18 valid. 5/18 (initial 5/6, final 0/6, dynamic 0/6) against R11's 11/18: 6 outcomes lost, 0 gained. In final the goal was never seen in 5 of 6 runs; the drone flew 60-80 m but stayed within 6-18 m of its start (R11: 13-32 m), with 12-35 turn-arounds a run (R11: 1-17), and g05 under a19's map read 39-67% of strips blocked (R11's g03: 8-36%).",
+  "lanes": "4 parallel lanes, merged from ~/asep-r12, -l2, -l3, -l4 (operator, 2026-10-28)"
+}

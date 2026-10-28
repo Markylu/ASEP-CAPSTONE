@@ -156,15 +156,51 @@ PERCEIVER_SCHEMA_NAME = "perceiver"
 STRATEGIST_SCHEMA_NAME = "strategist"
 
 
-def perceiver_schema() -> Dict[str, Any]:
-    lane = {
-        "type": "object",
-        "properties": {
+#: g04 (a17): the far floor split by whether a wall ends it, and a doorway said
+#: open or closed.
+FLOOR_CLASSES_G04 = ["open_very_far", "wall_far", "open_near", "blocked_near"]
+DOORWAYS_G04 = ["open", "closed", "none"]
+
+#: g05 (a18): where the strip's floor ends in the image, lowest first; the
+#: agent's floor_map turns it into a floor class. Doorways as g04.
+FLOOR_ENDS_G05 = ["no_floor", "bottom", "lower", "middle"]
+
+
+def floor_classes(version: str = "g03") -> List[str]:
+    if version == "g05":
+        return FLOOR_ENDS_G05
+    return FLOOR_CLASSES_G04 if version == "g04" else FLOOR_CLASSES
+
+
+def perceiver_schema(version: str = "g03") -> Dict[str, Any]:
+    if version == "g05":
+        lane_props: Dict[str, Any] = {
+            "floor": {"type": "string", "enum": FLOOR_ENDS_G05,
+                      "description": "Where this strip's floor ends in the image: no floor "
+                                     "at its bottom, the bottom quarter, lower, or just "
+                                     "below the middle."},
+            "doorway": {"type": "string", "enum": DOORWAYS_G04,
+                        "description": "An opening in a wall in this strip: open, closed by "
+                                       "a door, or none."},
+        }
+    elif version == "g04":
+        lane_props = {
+            "floor": {"type": "string", "enum": FLOOR_CLASSES_G04,
+                      "description": "Where the open floor straight ahead in this strip ends."},
+            "doorway": {"type": "string", "enum": DOORWAYS_G04,
+                        "description": "An opening in a wall in this strip: open, closed by "
+                                       "a door, or none."},
+        }
+    else:
+        lane_props = {
             "floor": {"type": "string", "enum": FLOOR_CLASSES,
                       "description": "How far open floor runs straight ahead in this strip."},
             "doorway": {"type": "boolean",
                         "description": "Whether this strip shows an opening in a wall."},
-        },
+        }
+    lane = {
+        "type": "object",
+        "properties": lane_props,
         "required": ["floor", "doorway"],
         "additionalProperties": False,
     }
