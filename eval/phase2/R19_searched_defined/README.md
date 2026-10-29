@@ -86,6 +86,7 @@ flew.
 | steps on a stalled detour | 43 | ≤ 25 | **4** | 0 |
 
 Three of four predictions held; the total did not. s03 initial and final solved, the first s03
-`final` since R11. The s02 `final`/`dynamic` runs (2 of 8) are where the score is lost: the
-doorway confirmer (R20) and along-the-wall detours (R21) are aimed there.
+`final` since R11. The s02 `final`/`dynamic` runs are where the score is lost: R19 1 of 8 (s02c
+dynamic), R19K 3 of 8; the doorway confirmer (R20) and along-the-wall detours (R21) are aimed
+there. Failure analysis of those 12 runs: [s02_failure_analysis.md](s02_failure_analysis.md).
 [manipulation.txt](manipulation.txt): median turn-arounds 9.5, blocked_near 20%.

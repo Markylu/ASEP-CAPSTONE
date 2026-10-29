@@ -1675,6 +1675,33 @@ forward move is blocked before, stopped short or "wall close"."""),
     render=render_orchestrated,
 )
 
+# --- p18: Phase 2 R23, through the open doorway -----------------------------------
+# R19/R19K s02 failure analysis (eval/phase2/R19_searched_defined/s02_failure_analysis.md):
+# from the side of the open door nearer closed door B, the straight line to the
+# goal clips the door frame on 197 of 202 steps; 36 moves straight through the
+# door were not taken near it. The memory a17c tags an open doorway and a closed
+# door apart ("doorway (seen now)" was also on 362 of 1188 strips called closed).
+# p18 is p17 with those tags defined and the doorway put before "toward".
+
+P18 = Prompt(
+    version="p18",
+    system=P17.system.replace(
+        """- "wall close (seen now)" or "doorway (seen now)": what the perceiver sees that
+  way in this image.""",
+        """- "wall close (seen now)", "open doorway (seen now)" or "closed door (seen
+  now)": what the perceiver sees that way in this image. A closed door is a
+  wall.""").replace(
+        """2. The move with "toward your target", whether it is a forward move or marker 0.""",
+        """2. A move with "open doorway (seen now)" next to the move with "toward your
+   target" (the same marker or one beside it): fly straight through the
+   opening. Near a door, "toward your target" often cuts across the door frame.
+3. The move with "toward your target", whether it is a forward move or marker 0.""").replace(
+        """3. Otherwise a move onto new ground""",
+        """4. Otherwise a move onto new ground"""),
+    user_template=P17.user_template,
+    render=render_orchestrated,
+)
+
 # --- c01: Phase 2 R16, the goal confirmer ----------------------------------------
 # R13 failure analysis: of 26 losses of sight, 21 rested on a hallucinated goal
 # report and 4 on a stale frame at a door switch; only 1 was genuine. R11: 10 of
@@ -1753,7 +1780,7 @@ open, closed or none.""",
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08)}
+                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18)}
 
 
 def get(version: str) -> Prompt:

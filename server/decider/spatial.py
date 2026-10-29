@@ -312,6 +312,8 @@ class SpatialConfig:
     coverage: bool = False
     #: a17b: floor classes whose end writes a wall; None keeps PARAMS_A17's.
     floor_ends: Optional[Tuple[str, ...]] = None
+    #: a17c: an open doorway and a closed door tagged apart (WORDS_A17C).
+    door_tags: bool = False
 
     def sha_segments(self) -> List[str]:
         out = ["spatial:" + wording_sha()]
@@ -321,10 +323,12 @@ class SpatialConfig:
             out.append("spatial_a15:" + wording_sha_a15())
         if self.name == "a16":
             out.append("spatial_a16:" + wording_sha_a16())
-        if self.name in ("a17", "a17b"):
+        if self.name in ("a17", "a17b", "a17c"):
             out.append("spatial_a17:" + wording_sha_a17())
         if self.floor_ends is not None:
             out.append("floor_ends:" + ",".join(self.floor_ends))
+        if self.door_tags:
+            out.append("door_tags:" + json.dumps(WORDS_A17C, sort_keys=True))
         return out
 
 
@@ -363,6 +367,15 @@ A17 = SpatialConfig("a17", WORDS_A14["triggers"], a14_words=True,
 #: (eval/phase2/R17_doorway_first/s03_analysis.md).
 A17B = replace(A17, name="a17b", floor_ends=("blocked_near", "wall_far"))
 
+#: a17c (a44 on): a17b with an open doorway and a closed door tagged apart. a17
+#: tagged "doorway (seen now)" on any strip with a doorway, closed ones too:
+#: R19/R19K, 362 of 1188 such tags (s02_failure_analysis.md).
+WORDS_A17C: Dict[str, str] = {
+    "doorway_open": "open doorway (seen now)",
+    "doorway_closed": "closed door (seen now)",
+}
+A17C = replace(A17B, name="a17c", door_tags=True)
+
 
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
     """The memory an orchestrated agent's features name (agent.py)."""
@@ -370,6 +383,8 @@ def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
         return A17
     if orchestrator.get("memory") == "a17b":
         return A17B
+    if orchestrator.get("memory") == "a17c":
+        return A17C
     if orchestrator.get("memory") == "a15":
         return A15
     if orchestrator.get("memory") == "a16":
@@ -1220,7 +1235,9 @@ def project(mem: SpatialMemory, manifest: Dict[str, Any],
             out.append(WORDS["wall_seen"])
         if toward == i:
             out.append(WORDS["toward_target"])
-        if lane.get("doorway"):
+        if mem.cfg.door_tags and lane.get("doorway") in ("open", "closed"):
+            out.append(WORDS_A17C["doorway_" + lane["doorway"]])
+        elif lane.get("doorway"):
             out.append(WORDS["doorway_seen"])
         land = ahead(here[:2], heading, float(a.get("r") or 1.7))
         been = [s for s in mem.visits_at(land) if s < step]
