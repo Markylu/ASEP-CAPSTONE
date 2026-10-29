@@ -1364,6 +1364,24 @@ Q09 = Prompt(
     render=render_strategist,
 )
 
+# q10: the detour strategist for a50. q08 with a dead-end rule and the "other way
+# at the fork" detour (planner.other_way): s03 analysis, the drones stayed in the
+# tine whose door was shut and never took the other one.
+
+Q10 = Prompt(
+    version="q10",
+    system=Q08.system.replace(
+        """Choose "explore" as the target when nothing listed looks useful.""",
+        """5. A dead end: a closed door was seen in the last few steps (the situation
+   says so) and at most one "along the wall" item is listed, or both were
+   followed twice or more. Then the way on is not here: choose the "other way"
+   detour, the end of the wall you met earlier that the drone never went to,
+   even though it lies behind and farther from the goal.
+Choose "explore" as the target when nothing listed looks useful."""),
+    user_template=Q03.user_template,
+    render=render_strategist,
+)
+
 # p14: the navigator. The frame with its markers, the planner's target, the
 # perceiver's answer for this image, the last three moves in words, and notes
 # from the map against each action.
@@ -1798,7 +1816,7 @@ open, closed or none.""",
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09)}
+                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09, Q10)}
 
 
 def get(version: str) -> Prompt:

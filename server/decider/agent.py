@@ -143,6 +143,22 @@ THROUGH_A46: Dict[str, Any] = {
 }
 
 
+#: a50: the other way at the fork, and closed doors in the situation
+#: (planner.other_way, planner.closed_door_line). In the features, so the sha.
+OTHER_WAY_A50: Dict[str, Any] = {
+    "from_m": 6.0,
+    "reached_m": 1.5,
+    "reach_within_m": 4.0,
+    "max_steps": 24,
+    "recent_steps": 5,
+    "words": {
+        "item": "the other way along the wall you met at step {step} (you never went "
+                "there), {path:.0f} m back over known floor",
+        "closed": "A closed door was seen ahead at step(s) {steps}.",
+    },
+}
+
+
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
     Agent("a01", "p03", {}, "No goal hint: p03 drops the goal's distance and bearing "
@@ -805,6 +821,42 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                                         "middle": "open_far"},
                                           "spatial": "server/decider/spatial.py"}},
           "a37 (R20) on memory a17b (as a48)."),
+    Agent("a50", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q10",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A50,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a43 with the other way at the fork (planner.other_way: the newest "
+          "along-the-wall end offered at an earlier call 6 m or more away that the drone "
+          "never reached), closed doors seen in the last 5 steps in the situation, and "
+          "strategist q10 (q08 + a dead-end rule). s03 tines analysis."),
+    Agent("a51", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q10",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A50,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a42 with a50's other way at the fork, closed-door line and q10."),
 )}
 
 DEFAULT_AGENT = "a00"

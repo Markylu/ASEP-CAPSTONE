@@ -400,8 +400,9 @@ async def route(s: Step) -> Optional[str]:
     standing, mode, last_called, _ = previous(s.records, s.step)
     stall = s.features.get("detour_stall")
     along = s.features.get("along_wall")
+    other = s.features.get("other_way")
     r = planner.route(s.mem, s.manifest, s.perception, s.records, standing, mode, last_called,
-                      s.goal, stall, along)
+                      s.goal, stall, along, other)
     s.record["planner"] = r.to_dict()
     s.target, s.mode = r.target, r.mode
     if r.ask is not None and s.here is not None:
@@ -420,11 +421,18 @@ async def route(s: Step) -> Optional[str]:
             if through is not None and along is not None:
                 menu = planner.through_doorways(s.mem, s.here, s.step, s.goal, along,
                                                 through) + menu
+            # a50: the along-the-wall end not taken at an earlier fork, last.
+            if other is not None:
+                menu = menu + planner.other_way(s.mem, s.here, s.step, s.records, black,
+                                                other)
         else:
             menu = planner.detours(s.mem, s.here, s.step, s.goal)
         ids = [t.id for t in menu] + [EXPLORE]
         view = views.strategist(prompts.get(s.features["strategist"]),
-                                planner.detour_situation(s.mem, s.manifest, menu, r.ask, s.goal))
+                                planner.detour_situation(
+                                    s.mem, s.manifest, menu, r.ask, s.goal,
+                                    planner.closed_door_line(s.records + [s.record], s.step, other)
+                                    if other is not None else None))
         plan = await ask(s, view, schema.STRATEGIST_SCHEMA_NAME, schema.strategist_schema(ids),
                          _strategy(ids), STRATEGIST_MAX_TOKENS)
         s.record["strategist"] = dict(plan.to_dict(), trigger=spatial.WORDS_A15["asked"][r.ask],

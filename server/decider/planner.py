@@ -130,7 +130,8 @@ def route(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
           standing: Optional[spatial.Target], mode: Optional[str],
           last_called: Optional[int], goal: spatial.Point,
           stall: Optional[Dict[str, float]] = None,
-          along: Optional[Dict[str, Any]] = None) -> Route:
+          along: Optional[Dict[str, Any]] = None,
+          other: Optional[Dict[str, Any]] = None) -> Route:
     """The target for this step, and whether q03 must be asked for a detour."""
     step = int(manifest.get("step", 0))
     here = spatial.pose_xyh(manifest.get("pose"))
@@ -156,7 +157,10 @@ def route(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
             # wall. A goal off to the side counts as open in goal_way (the
             # turn faces it), which along a wall it always is.
             hand_back = "along_way_open"
-        elif step - standing.step > P["detour_max_steps"]:
+        elif step - standing.step > (other["max_steps"]
+                                     if other is not None and standing.kind == "other_way"
+                                     else P["detour_max_steps"]):
+            # a50: the way back to the fork is longer than a detour.
             hand_back = "detour_too_long"
         elif (perception or {}).get("goal") in spatial.STRIPS and way == "open":
             hand_back = "goal_in_view"
@@ -271,6 +275,63 @@ def along_wall(mem: spatial.SpatialMemory, here: spatial.Pose, step: int, goal: 
     return out
 
 
+# --- a50: the other way at the fork --------------------------------------------
+#
+# s03 analysis (eval/phase2/R22K_open_near_unwalled_goal_confirmer/
+# s03_tines_analysis.md): the failed drones took the tine whose door was shut and
+# stayed in it 34-46 steps; the menu never offered the other tine. The along-the-
+# wall item not taken at the crossbar ended in its mouth on 20 of 20 calls. So
+# each detour call also lists the newest along-the-wall end offered at an
+# earlier call far from here that the drone never came near, and the situation
+# says when a closed door was seen in the last few steps. q10 decides.
+# Parameters in the agent's features["other_way"].
+
+
+def other_way(mem: spatial.SpatialMemory, here: spatial.Pose, step: int,
+              records: List[Dict[str, Any]], blacklist: List[List[float]],
+              p: Dict[str, Any]) -> List[spatial.Target]:
+    """a50: the newest along-the-wall end, offered at a call at least `from_m`
+    from here, that the drone never came within `reached_m` of and a known path
+    reaches; at most one item."""
+    reach = None
+    for r in sorted((r for r in records if "step" in r and r["step"] < step),
+                    key=lambda r: r["step"], reverse=True):
+        menu = (r.get("strategist") or {}).get("menu") or []
+        at = spatial.pose_xyh((r.get("manifest") or {}).get("pose"))
+        if not menu or at is None or spatial.dist(here[:2], at[:2]) < p["from_m"]:
+            continue
+        for t in menu:
+            if t.get("kind") != "along":
+                continue
+            end = (t["x"], t["y"])
+            if any(spatial.dist(end, (x, y)) < p["reached_m"] for _, x, y, _ in mem.trail):
+                continue
+            if any(spatial.dist(end, (b[0], b[1])) < p["reached_m"] for b in blacklist):
+                continue
+            if reach is None:
+                reach = mem.reach(here[:2])
+            path = mem.reachable(end, reach, p["reach_within_m"])
+            if path is None:
+                continue
+            return [spatial.Target("other_way_{0}".format(r["step"]), "other_way", end[0],
+                                   end[1], p["words"]["item"].format(step=r["step"],
+                                                                     path=path), step)]
+    return []
+
+
+def closed_door_line(records: List[Dict[str, Any]], step: int,
+                     p: Dict[str, Any]) -> Optional[str]:
+    """a50: the steps, within the last `recent_steps`, on which the doorway
+    confirmer called a reported doorway closed; None when there were none."""
+    seen = sorted({r["step"] for r in records
+                   if "step" in r and step - p["recent_steps"] <= r["step"] <= step
+                   and "closed" in (((r.get("door_confirmer") or {}).get("result")
+                                     or {}).values())})
+    if not seen:
+        return None
+    return p["words"]["closed"].format(steps=", ".join(str(n) for n in seen))
+
+
 # --- a46: through the doorway in the blocking wall ------------------------------
 #
 # R19/R19K s02 failure analysis (mode K): from the side of the open door nearer
@@ -347,7 +408,8 @@ def detours(mem: spatial.SpatialMemory, here: spatial.Pose, step: int,
 
 
 def detour_situation(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
-                     menu: List[spatial.Target], ask: str, goal: spatial.Point) -> str:
+                     menu: List[spatial.Target], ask: str, goal: spatial.Point,
+                     extra: Optional[str] = None) -> str:
     """What q03 is told, in words: why it is asked, where the goal is, which
     moves from here were blocked, and each detour with how much nearer the
     goal it lies. Not whether the goal is in the image, nor how long the drone
@@ -365,6 +427,8 @@ def detour_situation(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
         if blocked:
             lines.append("Moves from here that were blocked before: {0}.".format(
                 ", ".join(blocked)))
+    if extra:
+        lines.append(extra)
     lines.append(spatial.WORDS_A15["menu"])
     for t in menu:
         if here is None:
