@@ -12,4 +12,12 @@ Change, evidence, predictions, gate and host: [R14's README](../R14_open_floor/R
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-29 03:05–04:00 UTC, 4 lanes, 18/18 valid. **7/18**: `initial` 4/6 (s02va, s03
+failed), `final` 2/6 (s01 in 54 steps, s02c), `dynamic` 1/6 (s02vc). R13G 5/18, R14 7/18, R11
+11/18.
+
+Per run: [manipulation.txt](manipulation.txt). Median `blocked_near` 10% (R13G 44%), turn-arounds
+8.5 (19.5), max distance from start 19.5 m (14.7 m). The floor fix took here as in R14; the goal
+words in the search menu bought one more `final` and lost one `initial` against R14. Same score
+as R14: the goal's position in the strategist's text alone does not make the no-truth search an
+agent that reaches R11.

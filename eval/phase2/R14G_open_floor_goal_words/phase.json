@@ -3,10 +3,11 @@
   "title": "R14 with goal truth in the search menu",
   "citable": false,
   "agent_version": "a23",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "5b62a8e",
+  "started": "2026-10-29T03:05:47+00:00",
+  "finished": "2026-10-29T03:59:10+00:00",
+  "operator": "Markylu",
+  "notes": "Flown overnight on parallel lanes; merged with eval/phase2_merge.py.",
+  "lanes": "4 lanes on sctsvr6: ~/asep-r14g-l5..l8 (8 with R14)"
 }
