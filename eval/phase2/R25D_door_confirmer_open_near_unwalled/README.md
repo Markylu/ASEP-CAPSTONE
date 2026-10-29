@@ -32,4 +32,25 @@ R20 (`a37`).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Flown 2026-10-29, lanes 1–4 beside R25: 18/18 valid. **14/18** (initial 6, final 3, dynamic 5)
+against R20's 11/18: **hypothesis held** (+ 3). **Best Phase 2 score so far** (R20K, R22K, R25
+12/18).
+
+| site | initial | final | dynamic |
+|---|---|---|---|
+| s01 | 1 | 1 | 1 |
+| s02a | 1 | 1 | 1 |
+| s02c | 1 | . | 1 |
+| s02va | 1 | . | 1 |
+| s02vc | 1 | 1 | 1 |
+| s03 | 1 | . | . |
+
+- `dynamic` 5/6 (R20 1/6), the best arm in any round: every s02 `dynamic` run solved. `final`
+  3/6 (R20 4/6): s03 `final` lost (9.2 m away), s02vc `final` gained.
+- Turn-arounds against a forward "toward" 4 (R20 14). s03 crossbar first reached at step 8 in
+  `initial` and `dynamic`, 31 in `final`. s03 `final`/`dynamic` fail as in the s03 tines analysis
+  ([../R22K_open_near_unwalled_goal_confirmer/s03_tines_analysis.md](../R22K_open_near_unwalled_goal_confirmer/s03_tines_analysis.md)):
+  8.9–9.2 m from the goal, in the shut tine.
+- One seed per run: + 3 is the largest step in Phase 2, and part of it may be seed-1 luck
+  (R21's `dynamic` 4/6 did not repeat in R22).
+- [manipulation.txt](manipulation.txt).

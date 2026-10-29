@@ -55,4 +55,22 @@ R20K (`a38`).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Flown 2026-10-29, lanes 5–8 beside R25D: 18/18 valid. **12/18** (initial 6, final 3, dynamic 3)
+against R20K's 12/18: **level, hypothesis not held, not carried forward**. R25D (`a49`, the same
+change without the goal confirmer) scored 14/18.
+
+| site | initial | final | dynamic |
+|---|---|---|---|
+| s01 | 1 | 1 | 1 |
+| s02a | 1 | 1 | 1 |
+| s02c | 1 | . | 1 |
+| s02va | 1 | . | . |
+| s02vc | 1 | . | . |
+| s03 | 1 | 1 | . |
+
+- Turn-arounds against a forward "toward" 5 (R20K 20; predicted under 10): the mechanism took.
+  s03 crossbar first reached at step 8 in all three arms (R20K 14, 12, 8); s03 `final` solved,
+  `dynamic` 8.9 m away in the shut tine.
+- Lost against R20K: s02c `final`. Gained: s02c `dynamic`. s02va and s02vc `final`/`dynamic` all
+  unsolved (12.5–20.7 m away).
+- [manipulation.txt](manipulation.txt).
