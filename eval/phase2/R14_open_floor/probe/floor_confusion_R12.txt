@@ -1,0 +1,11 @@
+true m       no_floor    bottom     lower    middle
+0-1              144        12        18        10
+1-1.9             87        35        16         9
+1.9-3             34       101        41        43
+3-5               25       164        61       126
+5-8               30       288        89       234
+8-99             157       974       301      1311
+no_floor  n=  477  true<1.9m (move of 1.7 fails) 48.4%
+bottom    n= 1574  true<1.9m (move of 1.7 fails) 3.0%
+lower     n=  526  true<1.9m (move of 1.7 fails) 6.5%
+middle    n= 1733  true<1.9m (move of 1.7 fails) 1.1%

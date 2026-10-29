@@ -176,11 +176,11 @@ def cmd_smoke(args: argparse.Namespace) -> int:
     example = None
     with tempfile.TemporaryDirectory() as tmp:
         for run in runs_under(Path(args.root).resolve()):
-            os.environ["VLM_AGENT"] = "a20"
-            with_goal = smoke_run(run, Path(tmp) / "a20", False)
-            without = smoke_run(run, Path(tmp) / "a20-none", True)
-            os.environ["VLM_AGENT"] = "a21"
-            truth = smoke_run(run, Path(tmp) / "a21", False)
+            os.environ["VLM_AGENT"] = args.agents[0]
+            with_goal = smoke_run(run, Path(tmp) / "base", False)
+            without = smoke_run(run, Path(tmp) / "base-none", True)
+            os.environ["VLM_AGENT"] = args.agents[1]
+            truth = smoke_run(run, Path(tmp) / "truth", False)
             errors += abs(len(with_goal) - len(without)) + abs(len(with_goal) - len(truth))
             for a, b, c in zip(with_goal, without, truth):
                 steps += 1
@@ -197,12 +197,13 @@ def cmd_smoke(args: argparse.Namespace) -> int:
                 nav_known += known in (c.get("navigator_text") or "")
     ok = (errors == 0 and differ_a20 == 0 and differ_a21 == 0 and nav_known == 0
           and q_known == q_calls)
-    print("2. smoke on {0}: decisions {1}; failed steps {2}".format(args.root, steps, errors))
-    print("   a20 with and without the goal block: differ {0}".format(differ_a20))
-    print("   a21 against a20, strategist text aside: differ {0}".format(differ_a21))
-    print("   a21 strategist texts with the goal's position {0}/{1}; navigator texts {2}".format(
+    print("2. smoke ({0} and {1}) on {2}: decisions {3}; failed steps {4}".format(
+        args.agents[0], args.agents[1], args.root, steps, errors))
+    print("   no-truth agent with and without the goal block: differ {0}".format(differ_a20))
+    print("   truth twin against it, strategist text aside: differ {0}".format(differ_a21))
+    print("   truth twin strategist texts with the goal's position {0}/{1}; navigator texts {2}".format(
         q_known, q_calls, nav_known))
-    print("   a20 stages {0}; events {1}".format(dict(stages), dict(events)))
+    print("   stages {0}; events {1}".format(dict(stages), dict(events)))
     print("smoke: " + ("PASS" if ok else "FAIL"))
     print("\nfirst a21 strategist text:\n" + (example or "(none)"))
     return 0 if ok else 1
@@ -277,6 +278,8 @@ def main() -> int:
     sub.add_parser("transitions", help="1. synthetic stage transitions")
     smoke = sub.add_parser("smoke", help="2. a20 and a21's real step on recorded manifests")
     smoke.add_argument("root")
+    smoke.add_argument("--agents", nargs=2, default=["a20", "a21"],
+                       help="the no-truth agent and its strategist-truth twin (a22 a23)")
     sub.add_parser("offline", help="3. open-loop count on R12's paths")
     args = ap.parse_args()
     return {"transitions": cmd_transitions, "smoke": cmd_smoke,

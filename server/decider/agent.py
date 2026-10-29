@@ -312,6 +312,42 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "worded with how much nearer it lies. The stages, map and navigator see no "
           "goal truth. R11: the menu's goal-side items lay behind walls; a17's menu "
           "offers reachable places only."),
+    Agent("a22", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "verify_budget": {"min_steps": 8,
+                                                            "extra_steps": 4,
+                                                            "steps_per_m": 0.8},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R14: a20 with a18's floor map (g05's 'bottom' is open_near, not a wall) and a "
+          "verify step limit that grows with the distance back (4 + 0.8 per metre, at "
+          "least 8). R12/R13 records against site geometry: of 1574 strips g05 read "
+          "'bottom', 3% were truly blocked within 1.9 m (62% open past 8 m), yet a19's map "
+          "walled them 0.75 m out; R13 shakedown: three verify timeouts were turn-around "
+          "ping-pong on that 'wall close', three were trips back of 5-9 m."),
+    Agent("a23", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q05",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "strategist",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "verify_budget": {"min_steps": 8,
+                                                            "extra_steps": 4,
+                                                            "steps_per_m": 0.8},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R14G, flown beside R14: a21 (goal truth in the strategist's text) with a22's "
+          "floor map and verify step limit."),
 )}
 
 DEFAULT_AGENT = "a00"

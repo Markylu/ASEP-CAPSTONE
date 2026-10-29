@@ -397,7 +397,8 @@ async def verify_plan(s: Step) -> Optional[str]:
         (r for r in s.records if "step" in r and r["step"] < s.step),
         key=lambda r: r["step"], reverse=True) if r.get("stage")), None)
     r = planner.staged_verify(s.mem, s.manifest, s.perception,
-                              planner.VerifyState.from_dict(prev), standing, mode, last_called)
+                              planner.VerifyState.from_dict(prev), standing, mode, last_called,
+                              s.features.get("verify_budget"))
     s.target, s.mode = r.target, r.mode
     if r.ask is not None and s.here is not None:
         ids = [t.id for t in r.menu] + [EXPLORE]

@@ -133,6 +133,14 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # candidate. R13 README, "Two agents".
     "R13G": {"folder": "R13G_verify_goal_words", "title": "R13 with goal truth in the search menu",
              "agent": "a21", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R14: a20 with a18's floor map and a verify step limit grown with the distance
+    # back (a22); R14G: the same on a21 (a23). Flown beside R13/R13G's results
+    # (operator, 2026-10-28: fix what probing finds, then fly, without waiting).
+    "R14": {"folder": "R14_open_floor", "title": "R13 with g05's floor read as open",
+            "agent": "a22", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R14G": {"folder": "R14G_open_floor_goal_words",
+             "title": "R14 with goal truth in the search menu",
+             "agent": "a23", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

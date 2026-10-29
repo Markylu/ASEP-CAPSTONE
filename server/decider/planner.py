@@ -529,11 +529,16 @@ class VerifyState(StageState):
     the sighting, step) and the step verify began."""
     vantage: Optional[List[float]] = None
     verify_since: int = -1
+    # a22: steps allowed for this verify, set from the distance back when it
+    # began (agent feature `verify_budget`); -1 is a20's fixed limit.
+    verify_budget: int = -1
 
     def to_dict(self) -> Dict[str, Any]:
         d = super().to_dict()
         d["vantage"] = [round(v, 2) for v in self.vantage] if self.vantage else None
         d["verify_since"] = self.verify_since
+        if self.verify_budget >= 0:
+            d["verify_budget"] = self.verify_budget
         return d
 
     @classmethod
@@ -542,7 +547,7 @@ class VerifyState(StageState):
         d = d or {}
         return cls(base.stage, base.rays_since, base.miss, base.unproductive, base.blacklist,
                    base.target_dist_m, list(d["vantage"]) if d.get("vantage") else None,
-                   int(d.get("verify_since", -1)))
+                   int(d.get("verify_since", -1)), int(d.get("verify_budget", -1)))
 
 
 def _last_ray(mem: spatial.SpatialMemory, since: int):
@@ -578,14 +583,28 @@ def verify_target(st: VerifyState, here: spatial.Pose, step: int) -> spatial.Tar
 
 def _to_explore(st: VerifyState, step: int, why: str, events: List[str]) -> None:
     st.stage, st.rays_since, st.vantage, st.verify_since = "explore", step + 1, None, -1
+    if st.verify_budget >= 0:
+        st.verify_budget = 0
     events.extend([why, "lost"])
+
+
+def verify_steps(budget: Dict[str, float], here: Optional[spatial.Pose],
+                 vantage: List[float]) -> int:
+    """a22: steps allowed to get back to the vantage and look, from the
+    straight-line distance back when verify began. Shakedown: three of six
+    a20 timeouts were honest trips of 5-9 m that ran past 8 steps."""
+    d = spatial.dist(here[:2], (vantage[0], vantage[1])) if here is not None else 0.0
+    return max(int(budget["min_steps"]),
+               int(math.ceil(budget["extra_steps"] + d * budget["steps_per_m"])))
 
 
 def staged_verify(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
                   perception: Optional[Dict[str, Any]], prev: VerifyState,
                   standing: Optional[spatial.Target], mode: Optional[str],
-                  last_called: Optional[int]) -> Staged:
-    """a20's target for this step, and whether the strategist must be asked."""
+                  last_called: Optional[int],
+                  budget: Optional[Dict[str, float]] = None) -> Staged:
+    """a20's target for this step, and whether the strategist must be asked.
+    a22 (`budget`): the step limit scales with the distance back."""
     V = STAGE_PARAMS_A20
     step = int(manifest.get("step", 0))
     here = spatial.pose_xyh(manifest.get("pose"))
@@ -611,6 +630,8 @@ def staged_verify(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
         elif not detour:
             st.stage, st.verify_since = "verify", step
             st.vantage = [ray.x, ray.y, ray.heading, ray.step]
+            if budget is not None:
+                st.verify_budget = verify_steps(budget, here, st.vantage)
             standing, mode = None, None
             events.append("goal_lost")
     elif st.stage == "verify":
@@ -630,7 +651,8 @@ def staged_verify(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
             if (step > st.verify_since and at
                     and abs(spatial.wrap(here[2] - vh)) <= V["check_within_deg"]):
                 why = "verify_failed"
-            elif step - st.verify_since > V["verify_max_steps"]:
+            elif step - st.verify_since > (st.verify_budget if st.verify_budget > 0
+                                           else V["verify_max_steps"]):
                 why = "verify_timeout"
             elif not at and mem.reachable((vx, vy), mem.reach(here[:2])) is None:
                 why = "verify_unreachable"
