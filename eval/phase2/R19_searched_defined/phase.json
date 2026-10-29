@@ -3,10 +3,11 @@
   "title": "R15N with 'searched already' defined and stalled detours handed back",
   "citable": false,
   "agent_version": "a35",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "b8eab8c",
+  "started": "2026-10-29T05:39:09+00:00",
+  "finished": "2026-10-29T06:15:23+00:00",
+  "operator": "Markylu",
+  "notes": "Flown overnight 2026-10-29 beside R19K.",
+  "lanes": "sctsvr6 lanes 1-4 (asep-r19-l1..4), shared vLLM :8004"
 }

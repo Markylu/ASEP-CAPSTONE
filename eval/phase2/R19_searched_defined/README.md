@@ -64,4 +64,28 @@ Not carried forward if it does not beat R15N. If it beats R11, it is the agent t
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-29, lanes 1–4 beside R19K: 18/18 valid. **10/18** (initial 6, final 2, dynamic 2),
+level with R15N's 10/18, so by the drop criterion **not beaten**. R19K (`a36`, the same with
+`c01`) scored 11/18. Both carry on only as the base of R20–R22, which were laid out before they
+flew.
+
+| site | initial | final | dynamic |
+|---|---|---|---|
+| s01 | 1 | 1 | 1 |
+| s02a | 1 | . | . |
+| s02c | 1 | . | 1 |
+| s02va | 1 | . | . |
+| s02vc | 1 | . | . |
+| s03 | 1 | 1 | . |
+
+| Measure | R15N | predicted | R19 | R19K |
+|---|---|---|---|---|
+| total | 10/18 | ≥ 12/18 | 10/18 | 11/18 |
+| turn-arounds against a forward "toward" | 50 | ≤ 25 | **25** | 18 |
+| s03 solved (any arm) | 0/3 | ≥ 1/3 | **2/3** | 1/3 |
+| steps on a stalled detour | 43 | ≤ 25 | **4** | 0 |
+
+Three of four predictions held; the total did not. s03 initial and final solved, the first s03
+`final` since R11. The s02 `final`/`dynamic` runs (2 of 8) are where the score is lost: the
+doorway confirmer (R20) and along-the-wall detours (R21) are aimed there.
+[manipulation.txt](manipulation.txt): median turn-arounds 9.5, blocked_near 20%.
