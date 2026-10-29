@@ -267,6 +267,9 @@ strict JSON, which is the worst of both for a pure reader.
 
 | N1 | 2026-10-29 | Same step-0 frame: alone, 2 distinct readings of 20 (2–3% strip fields differ); with 7 neighbours, 6 and 11 of 20 (16–28%). The `:8006` copy passes as a stand-in | **Holds**: the lottery is batching. Noise floor under load is 21.9%, so C1/F1 must run alone |
 | A1 | 2026-10-29 | Repeat agreement 73% vs reordered 59%: +14.2 pts, no call. The code-first item is picked 19% when first, 18% when last; changed picks follow position 1 of 124 times, and 110 of 124 are explore↔item flips | Not supported. A dropped (no primacy bias). The strategist re-rolls under any text change |
+| C1 | 2026-10-29 | 300 frames, concurrency 1. Fields where orig and mirror agree are 81.0% accurate against 67.8% for orig (+13.2; the repeat control gives +5.5), but they agree on only 67.7%. Floor error follows the *image* side: by strip from far_left to far_right, orig reads 42/48/62/62/59%, and the mirror flips that. Post hoc, taking each strip from the read that saw it on the image's right half gives floor +7.7 pts | **No call** (agreement < 80%; lean on all fields +9.5, just under 10). Lead: two-read image-right fusion, needs its own test |
+| F1 | 2026-10-29 | Without reason-first: floor +2.9, doorway −0.6, goal +1.3 pts; none counts. 40% faster (0.85 s vs 1.42 s) | **No call**: reason neither helps nor clearly hurts. g05-nr is a free latency cut |
+| (noise) | 2026-10-29 | Repeat reads disagree on 18.6% of strip fields even at concurrency 1. N1's alone runs differ only on trial 0, which points to cold vs prefix-cached calls | Repeats on vLLM are not independent. Prefix caching is the operator's call |
 
 Details and readings: each probe's README under `eval/phase2/_probes/`.
 

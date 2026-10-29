@@ -72,3 +72,8 @@ mostly batching.
 reading carried this noise. An 18-run round cannot separate small agent changes from it. The fix
 on the host side is the operator's call: a batch-invariant vLLM (`VLLM_BATCH_INVARIANT=1`, MoE
 support unverified), or flying fewer lanes per instance and spreading them over more instances.
+
+**Later note (C1/F1, same day).** In both frames the *alone* arm's odd reading is trial 0, and
+trials 1–19 are identical. The ~2% *alone* noise is therefore most likely the first, uncached call
+against prefix-cached repeats. On 300 varied frames, C1/F1 measured that cold-vs-warm gap at 18.6%
+of strip fields. See [c1f1/README.md](../c1f1/README.md).
