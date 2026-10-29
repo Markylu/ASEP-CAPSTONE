@@ -74,4 +74,23 @@ Not carried forward if it does not beat R15.
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-29 05:01–05:42 UTC (lanes 1–4, beside R17K): 18/18 valid. **8/18** (initial 5,
+final 2, dynamic 1) against R15's 9/18. **Hypothesis not held; q07 not carried forward** (R19 and
+on keep q03).
+
+| site | initial | final | dynamic |
+|---|---|---|---|
+| s01 | 1 | 1 | 1 |
+| s02a | 1 | . | . |
+| s02c | 1 | 1 | . |
+| s02va | 1 | . | . |
+| s02vc | 1 | . | . |
+| s03 | . | . | . |
+
+- Manipulation took: doorway picked on 24 of 26 calls that listed one (R15 18 of 44);
+  `explore` 7 of 82 calls (R15 32 of 96).
+- s02 `final` + `dynamic`: 1 solved (R15 3). The doorways the drone was sent to were mostly the
+  false ones the R15 analysis counted (4 of 54 real), so "doorway first" spent the s02 runs at
+  closed doors. The doorway confirmer (R20) comes first.
+- s01 3/3 (R15 1/3); s03 0/3 (R15 1/3).
+- [manipulation.txt](manipulation.txt): median blocked_near 19%, turn-arounds 8.

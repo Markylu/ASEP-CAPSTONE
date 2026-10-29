@@ -29,4 +29,7 @@ Not carried forward if it does not beat the best of R15, R16K and R17.
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-29 beside R17 (lanes 5–8): 18/18 valid. **8/18** (initial 5, final 2, dynamic 1)
+against R16K's 10/18. **Not carried forward.** Doorway picked on 25 of 28 calls that listed one;
+s01 3/3, s02a initial + final, the other s02 initial only, s03 0/3. Same reading as R17: doorway
+first sends the drone to false doorways until they are checked. [manipulation.txt](manipulation.txt).
