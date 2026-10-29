@@ -1666,6 +1666,26 @@ could be the goal. Then give the report.""",
     render=render_identifier_question,
 )
 
+# --- g07: Phase 2 R27, g05 without describe-first ---------------------------------
+# Probes F1 and C2 (eval/phase2/_probes/c1f1, c2): g05 with its closing "First
+# say ... Then give the report." replaced by "Give the report.", and no reason in
+# the schema (schema.perceiver_schema). Same classes and wording otherwise. On
+# 600 recorded frames it missed 3-4% of truly blocked strips (g05 17-22%), but
+# read about 40% of open strips on the image's left half as no_floor. a60 asks
+# it twice, on the frame and on the frame mirrored (orchestrator.perceive).
+
+_G05_DESCRIBE_FIRST = """First say, for each strip from left to right, what fills the bottom of the
+strip and where its floor ends. Then describe walls, openings, doors and
+anything that could be the goal. Then give the report."""
+assert G05.system.endswith(_G05_DESCRIBE_FIRST)
+
+G07 = Prompt(
+    version="g07",
+    system=G05.system[:-len(_G05_DESCRIBE_FIRST)] + "Give the report.",
+    user_template="Report on this image.",
+    render=render_identifier_question,
+)
+
 # --- p16: Phase 2 R15, the notes in an order -------------------------------------
 # p15's probe on R11's steps: "toward your target" on marker 0 followed 31% (p14
 # 18%). p14 also says to prefer new ground, and marker 0 nearly always carries
@@ -1862,7 +1882,8 @@ open, closed or none.""",
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09, Q10, Q11, Q12, Q13)}
+                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09, Q10, Q11, Q12, Q13,
+                                                      G07)}
 
 
 def get(version: str) -> Prompt:

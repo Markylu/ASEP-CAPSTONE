@@ -33,6 +33,7 @@ decisions.jsonl, like the map, so a run replays from its record alone.
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import math
 from dataclasses import dataclass, field
@@ -40,7 +41,7 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from fastapi.responses import JSONResponse
 
-from . import agent, config, planner, prompt as prompts, schema, spatial, views, vlm
+from . import agent, config, mirror, planner, prompt as prompts, schema, spatial, views, vlm
 from .recorder import Run, _read_jsonl
 
 log = logging.getLogger("decider")
@@ -73,11 +74,11 @@ def perception_from(parsed: Dict[str, Any], version: str = "g03",
         if lane.get("floor") not in schema.floor_classes(version):
             raise vlm.VLMError("perceiver gave no valid floor for {0}".format(strip))
         door = lane.get("doorway")
-        if version in ("g04", "g05", "g06"):
+        if version in ("g04", "g05", "g06", "g07"):
             door = door if door in ("open", "closed") else False
         else:
             door = bool(door)
-        if version in ("g05", "g06"):
+        if version in ("g05", "g06", "g07"):
             lanes.append({"strip": strip, "floor": (floor_map or {})[lane["floor"]],
                           "floor_end": lane["floor"], "doorway": door})
         else:
@@ -274,13 +275,66 @@ async def ask(s: Step, view: views.View, schema_name: str, json_schema: Dict[str
 async def perceive(s: Step) -> Optional[str]:
     """The clean frame and nothing else."""
     p = prompts.get(s.features["perceiver"])
-    seen = await ask(s, views.perceiver(p, s.manifest, s.clean_b64),
-                     schema.PERCEIVER_SCHEMA_NAME, schema.perceiver_schema(p.version),
-                     lambda parsed: perception_from(parsed, p.version,
-                                                    s.features.get("floor_map")),
-                     PERCEIVER_MAX_TOKENS)
+
+    def read(b64: str):
+        return ask(s, views.perceiver(p, s.manifest, b64),
+                   schema.PERCEIVER_SCHEMA_NAME, schema.perceiver_schema(p.version),
+                   lambda parsed: perception_from(parsed, p.version,
+                                                  s.features.get("floor_map")),
+                   PERCEIVER_MAX_TOKENS)
+
+    if s.features.get("perceiver_mirror") == "image_right":
+        return await perceive_mirrored(s, read)
+    seen = await read(s.clean_b64)
     s.perception = seen.result
     s.record["perceiver"] = seen.to_dict()
+    s.record["goal"] = LEGACY_GOAL[s.perception["goal"]] if s.perception else None
+    return None
+
+
+#: A read of the mirrored frame names the real frame's strips mirrored.
+MIRRORED = {"far_left": "far_right", "left": "right", "centre": "centre",
+            "right": "left", "far_right": "far_left"}
+#: a60: the strips the mirrored read gives, those it saw on the image's right half.
+FROM_MIRROR = ("far_left", "left")
+
+
+def unmirrored(perception: Dict[str, Any]) -> Dict[str, Any]:
+    """A read of the mirrored frame, in the real frame's strips."""
+    lanes = {MIRRORED[l["strip"]]: dict(l, strip=MIRRORED[l["strip"]])
+             for l in perception["lanes"]}
+    return dict(perception, goal=MIRRORED.get(perception["goal"], perception["goal"]),
+                lanes=[lanes[strip] for strip in spatial.STRIPS])
+
+
+def image_right(own: Dict[str, Any], flipped: Dict[str, Any]) -> Dict[str, Any]:
+    """a60 (probe C2): each strip from the read that saw it on the image's right
+    half, far_left and left from the mirrored read. The goal is the frame's own
+    read's."""
+    by = {l["strip"]: l for l in flipped["lanes"]}
+    return dict(own, lanes=[by[l["strip"]] if l["strip"] in FROM_MIRROR else l
+                            for l in own["lanes"]])
+
+
+async def perceive_mirrored(s: Step, read) -> Optional[str]:
+    """a60: the perceiver on the clean frame and, at the same time, on the frame
+    mirrored left-right; the map gets image_right() of the two. Either read
+    alone stands when the other fails. The step's latency counts both calls."""
+    async def flipped():
+        try:
+            b64 = await asyncio.to_thread(mirror.flip_png_b64, s.clean_b64)
+        except ValueError as e:
+            log.warning("step %s: frame not mirrored: %s", s.step, e)
+            return None
+        return await read(b64)
+
+    seen, seen_m = await asyncio.gather(read(s.clean_b64), flipped())
+    own = seen.result
+    other = unmirrored(seen_m.result) if seen_m is not None and seen_m.result else None
+    s.perception = image_right(own, other) if own and other else (own or other)
+    s.record["perceiver"] = dict(seen.to_dict(), result=s.perception, result_own=own)
+    s.record["perceiver_mirror"] = (dict(seen_m.to_dict(), result_unmirrored=other)
+                                    if seen_m is not None else None)
     s.record["goal"] = LEGACY_GOAL[s.perception["goal"]] if s.perception else None
     return None
 

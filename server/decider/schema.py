@@ -172,7 +172,7 @@ FLOOR_ENDS_G06 = ["wall_at_bottom", "bottom", "lower", "middle", "runs_on"]
 
 
 def floor_classes(version: str = "g03") -> List[str]:
-    if version == "g05":
+    if version in ("g05", "g07"):
         return FLOOR_ENDS_G05
     if version == "g06":
         return FLOOR_ENDS_G06
@@ -190,7 +190,7 @@ def perceiver_schema(version: str = "g03") -> Dict[str, Any]:
                         "description": "An opening in a wall in this strip: open, closed by "
                                        "a door, or none."},
         }
-    elif version == "g05":
+    elif version in ("g05", "g07"):
         lane_props = {
             "floor": {"type": "string", "enum": FLOOR_ENDS_G05,
                       "description": "Where this strip's floor ends in the image: no floor "
@@ -230,6 +230,8 @@ def perceiver_schema(version: str = "g03") -> Dict[str, Any]:
         "goal_range": {"type": "string", "enum": GOAL_RANGES,
                        "description": "How far away the goal looks; none if not visible."},
     }
+    if version == "g07":  # g05 without the reason written first (probe F1)
+        del properties["reason"]
     for strip in STRIPS:
         properties[strip] = dict(lane, description="The {0} strip.".format(strip))
     return {"type": "object", "properties": properties, "required": list(properties),
