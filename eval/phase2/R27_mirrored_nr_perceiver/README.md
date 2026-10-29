@@ -1,7 +1,7 @@
 # R27: R25D with the perceiver read twice, plain and mirrored (g07)
 
 **Agent:** `a60` (`464cf29e24ed`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g07` ×2 ·
-**Memory:** `a17b` · **Status:** pre-registered 2026-10-29, probe gate not run, not flown
+**Memory:** `a17b` · **Status:** pre-registered 2026-10-29, probe gate passed, not flown
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Comes from the research probes
 ([docs/research/probe-plan.md](../../../docs/research/probe-plan.md)): F1, C1 and C2.

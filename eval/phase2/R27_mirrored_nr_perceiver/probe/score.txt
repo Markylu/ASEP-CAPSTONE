@@ -1,0 +1,17 @@
+R27 probe: 300 frames sampled, 300 with all three reads; 0 failed calls
+  truth: 158 blocked strips (< 1 m), 1342 open; 117 frames with the goal in view
+
+  read         missed wall  phantom wall   doorway      goal   phantom wall image-left / right
+  g05                16.5%         11.7%     83.7%     92.3%   12.3% / 13.7%
+  g07                 6.3%         26.2%     81.7%     93.7%   39.2% / 21.7%
+  g07_mirror          2.5%         26.4%     80.7%     91.3%   45.1% / 16.2%
+  fused               5.1%         17.0%     82.1%     93.7%   16.2% / 21.7%
+
+  median latency (ms): g05 1429, g07 844, g07_mirror 878
+
+## Gate (all four)
+  missed walls <= half of g05's     5.1% vs 16.5%  pass
+  phantom walls <= g05 + 6 pts           +5.3 pts  pass
+  goal strip >= g05 - 1 pt               +1.3 pts  pass
+  doorway >= g05 - 2 pts                 -1.7 pts  pass
+  verdict: PASS
