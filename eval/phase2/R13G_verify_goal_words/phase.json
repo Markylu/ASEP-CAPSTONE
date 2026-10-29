@@ -3,10 +3,11 @@
   "title": "R13 with goal truth in the search menu",
   "citable": false,
   "agent_version": "a21",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "3a8f6fb",
+  "started": "2026-10-29T02:30:28+00:00",
+  "finished": "2026-10-29T03:15:08+00:00",
+  "operator": "Markylu",
+  "notes": "Flown beside R13 at 3a8f6fb, lanes 5-8. 18/18 valid. 5/18 (initial 5/6, final 0/6, dynamic 0/6).",
+  "lanes": "4 parallel lanes, merged from ~/asep-r13g-l5..l8 (a21), beside R13 (overnight, 2026-10-29)"
 }

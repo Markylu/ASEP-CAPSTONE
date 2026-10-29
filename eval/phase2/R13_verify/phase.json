@@ -3,10 +3,11 @@
   "title": "Lose sight, verify, then explore or pursue",
   "citable": false,
   "agent_version": "a20",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "3a8f6fb",
+  "started": "2026-10-29T02:30:27+00:00",
+  "finished": "2026-10-29T03:15:08+00:00",
+  "operator": "Markylu",
+  "notes": "Flown on sctsvr6 (headless, Docker, Mesa lavapipe) on 4 parallel lanes at 3a8f6fb beside R13G, after a 12-run shakedown. 18/18 valid. 6/18 (initial 5/6, final 0/6, dynamic 1/6) against R12's 5/18 and R11's 11/18.",
+  "lanes": "4 parallel lanes, merged from ~/asep-r13-l1..l4 (a20), beside R13G on lanes 5-8 (overnight, 2026-10-29)"
 }
