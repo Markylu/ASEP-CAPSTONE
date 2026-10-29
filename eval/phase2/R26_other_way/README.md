@@ -88,6 +88,17 @@ first gate.**
 `q12` = `q11` with rule 5 put before rules 1–4, and "do not follow the wall here again". `a54`
 and `a55` are `a52` and `a53` with `q12`. Same gate as `q11`, set before the `q12` probe.
 
+**Result (`q12`, [probe/q12_score.txt](probe/q12_score.txt)): failed on the third gate.**
+- s03 dead end: "other way" 9/10.
+- s02: misleading 7 of 189.
+- Divider: along 76 + good "other way" 18 = 94/187, against `q08`'s 167/187. The way back was
+  taken on 82 divider calls: "do not follow the wall here again" was read off the dead end too.
+
+### Fourth candidate: `a56`, `a57`
+
+`q13` = `q11` with rule 5 put before rules 1–4 and nothing else. `a56` and `a57` are `a52` and
+`a53` with `q13`. Same gate, set before the `q13` probe. This is the last candidate tonight.
+
 ## Hypothesis
 
 At the s03 dead end the drone goes back to the other tine and reaches the chamber: R26 scores

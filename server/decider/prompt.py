@@ -1415,6 +1415,19 @@ Q12 = Prompt(
     render=render_strategist,
 )
 
+# q13: q11 with rule 5 put before rules 1-4, and nothing else. R26 q12 probe: q12's
+# "do not follow the wall here again" turned 82 of 187 divider calls into the way back.
+
+Q13 = Prompt(
+    version="q13",
+    system=Q11.system.replace(
+        """5. An "other way" detour is listed only in a dead end""",
+        """5. This rule comes before rules 1-4. An "other way" detour is listed only in a
+   dead end"""),
+    user_template=Q03.user_template,
+    render=render_strategist,
+)
+
 # p14: the navigator. The frame with its markers, the planner's target, the
 # perceiver's answer for this image, the last three moves in words, and notes
 # from the map against each action.
@@ -1849,7 +1862,7 @@ open, closed or none.""",
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09, Q10, Q11, Q12)}
+                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09, Q10, Q11, Q12, Q13)}
 
 
 def get(version: str) -> Prompt:
