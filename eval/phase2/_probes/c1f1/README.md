@@ -128,6 +128,12 @@ reading bias of about 15 pts on floor. Plain "keep what agrees" leaves a third o
 no answer, though, so it is not usable as is. The lead for a round is the image-right fusion above
 (two perceiver calls per step). It is post hoc, so it needs its own probe or round before it counts.
 
+**Correction (C2, same day).** Truth is 78% `open_far`, so raw floor accuracy rewards reads that say
+"far" more often. Both the +7.7 fusion gain and the floor lean above are mostly that. Balanced
+accuracy moves only +1.7 pts, and wall errors barely change: missed walls 21.5% → 24.2%, phantom
+walls 14.4% → 12.6%. See [C2](../c2/README.md), which drops g05 fusion and finds the wall-level
+effect in g05-nr instead.
+
 ### F1: no call
 
 | Gate term | *nr* − *orig* | Band (2× \|*orig* − *orig2*\|) | Counts |
