@@ -421,6 +421,21 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "and stages read it; and a verify check look counted within 2.6 m of the vantage. "
           "R13 failure analysis: 21 of 26 losses of sight rested on hallucinated reports; 5 "
           "of 8 timeouts reached the vantage but could not face the bearing inside 1.5 m."),
+    Agent("a28", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a25 (known goal, reachable detours) with the goal confirmer c01: a goal report "
+          "the confirmer refuses does not hand a detour back ('goal in view') or put a goal "
+          "note on a move. R11: 10 of 14 'goal in view' hand-backs were hallucinated."),
 )}
 
 DEFAULT_AGENT = "a00"

@@ -1,0 +1,3 @@
+goal reports asked: 454 genuine, 73 false
+  genuine kept   433/454 = 95.4%
+  false refused  53/73 = 72.6%

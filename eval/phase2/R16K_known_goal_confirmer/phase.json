@@ -1,0 +1,12 @@
+{
+  "round": "R16K",
+  "title": "R15 (known goal) with a goal confirmer",
+  "citable": false,
+  "agent_version": "a28",
+  "status": "planned",
+  "git_sha": null,
+  "started": null,
+  "finished": null,
+  "operator": null,
+  "notes": ""
+}

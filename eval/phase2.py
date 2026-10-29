@@ -150,6 +150,14 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     "R15N": {"folder": "R15N_known_goal_ranked_notes",
              "title": "R15 with the navigator's notes ranked (p16)",
              "agent": "a26", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R16: a22 (R14) with the goal confirmer c01 and verify's check look within 2.6 m
+    # (a27); R16K: a25 (R15, known goal) with c01 (a28). Each line moves on beside
+    # the other before its previous round is read (overnight, 2026-10-29).
+    "R16": {"folder": "R16_goal_confirmer", "title": "R14 with a goal confirmer",
+            "agent": "a27", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R16K": {"folder": "R16K_known_goal_confirmer",
+             "title": "R15 (known goal) with a goal confirmer",
+             "agent": "a28", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
