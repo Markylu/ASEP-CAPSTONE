@@ -1,0 +1,28 @@
+A0 over R11-R26: 10749 strategist menu items in 2679 calls; 19178 navigator calls
+
+## Strategist: pick rate by list position (menus with 2+ items)
+  good      first listed 547/953 = 57%; listed 2nd or later 455/2787 = 16%; position effect +41 pts
+  not good  first listed 783/1590 = 49%; listed 2nd or later 407/5283 = 8%; position effect +42 pts
+  content effect at pos1: good minus not-good +8 pts
+  content effect at pos2+: good minus not-good +9 pts
+  explore picked on 406/2679 = 15% of calls
+
+## Strategist: pick rate when listed, by kind
+  along                          420/755 = 56%
+  backtrack                      86/2536 = 3%
+  backtrack, in s03 shut tine    1/74 = 1%
+  frontier                       1399/5826 = 24%
+  goal                           69/226 = 31%
+  opening                        285/1390 = 21%
+  other_way                      14/16 = 88%
+
+## Navigator: left/right lean (slots 1,2 left; 4,5 right)
+  'toward' on slot 1: followed 1711/3443 = 50%; on slot 5: followed 3034/3746 = 81%
+  'toward' on slot 2: followed 427/1244 = 34%; on slot 4: followed 802/1201 = 67%
+  lean (left minus right, mean of the two pairs): -32 pts
+  same notes on mirrored slots, one of them picked: left 302/429 = 70%
+
+## Gate
+  position signal (pos1 minus pos2+ >= 15 pts, good or not-good): YES
+  content signal (good minus not-good >= 15 pts at both positions): no
+  left/right lean (|lean| >= 10 pts, or tie share outside 40-60% with n >= 50): YES

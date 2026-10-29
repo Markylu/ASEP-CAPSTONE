@@ -256,6 +256,17 @@ strict JSON, which is the worst of both for a pure reader.
 
 ---
 
+## Results so far
+
+| Probe | Run | Result | Belief |
+|---|---|---|---|
+| Batch 0, lane index | 2026-10-29 | 702/702 repo runs found on the lanes, all R15–R26N among them, and every lane copy matches the repo. **Check fails on R6 only**: none of its 18 runs has frames on the lanes. No planned probe uses R6 frames | — |
+| A0 | 2026-10-29 | Position effect +41/+42 pts (first-listed picked 49–57%, later 8–16%); content effect +8/+9 pts. Navigator lean −32 pts (right favoured on "toward"), but ties go left 70% | Position signal **yes** → A1 first. Lean flagged for C1 |
+| B0 | 2026-10-29 | All three rules fail (hits 0–1 of 17). In the shut tine `planner.way` reads `open` on 78% of decisions, so no rule could fire | **Refuted**, B dropped. The gap is `goal_way` reading open in a dead end |
+| E0 | 2026-10-29 | 17/56 = 30% of runs have a "searched" note on a door-ward action (upper bound; no stale blocks); those runs solved more often. Door B is still listed open after shutting in 32% of runs | Holds, weakly, on the threshold. The stale-open doorway is the stronger lead |
+
+Details and readings: each probe's README under `eval/phase2/_probes/`.
+
 ## After the probes
 
 - Write one line per probe into the research note, giving the result and whether the belief held.

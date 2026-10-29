@@ -40,4 +40,23 @@ they were not changed after it. The R25 output was overwritten by the full run.
 
 ## Result
 
-Pending.
+Run 2026-10-29 on sctsvr6 (`~/asep-research-probes`, `b2d262f`), through the lane index:
+2,679 strategist calls (10,749 menu items) and 19,178 navigator calls, R11–R26N. Full output:
+[score.txt](score.txt).
+
+| Readout | Result | Gate |
+|---|---|---|
+| Position | First-listed items picked 57% (good) and 49% (not good); later items 16% and 8%. Effect +41 and +42 pts | **YES** |
+| Content | Good minus not-good: +8 pts first-listed, +9 pts later | no |
+| Lean | "toward" followed 50% on slot 1 vs 81% on slot 5; 34% on slot 2 vs 67% on slot 4. Mean −32 pts (right favoured). Identical notes on mirrored slots: left picked 302/429 = 70% | **YES** |
+
+**Reading.**
+- Where an item sits in the list matters about five times more than whether it leads toward the
+  goal. A not-good item listed first (49%) is picked three times as often as a good item listed
+  later (16%). This is still confounded, because code lists its best-scored item first and geo's
+  "good" is not code's score. A1 is the clean test, and it now goes first among the model probes.
+- Backtrack items are almost never picked: 86/2,536 (3%) overall and 1/74 inside the s03 shut
+  tine. That matches the "listed but ignored" pattern behind B.
+- The lean points both ways. The navigator follows "toward" far more on the right, yet on ties it
+  goes left 70% of the time. Site geometry may drive part of this: s03's shut tine is L in
+  `final`, and s02a/s02c are mirror pairs. So this is a flag for C1, not a conclusion.

@@ -57,4 +57,26 @@ Fires in `initial` are reported, not gated.
 
 ## Result
 
-Pending.
+Run 2026-10-29 on sctsvr6 (`b2d262f`): 324 runs, R15–R26N, with 17 shut-tine failures (all six
+named in the plan among them). Full output: [score.txt](score.txt), per-run fires:
+[fires.jsonl](fires.jsonl).
+
+| Rule | Hits | Useful (of hits) | Harm | `initial` fired | Gate |
+|---|---|---|---|---|---|
+| R-pocket | 1/17 = 6% | 0/1 | 32/184 = 17% | 9 | fail |
+| R-blacklist | 0/17 | — | 1/184 = 1% | 1 | fail |
+| R-stall | 1/17 = 6% | 0/1 | 28/184 = 15% | 8 | fail |
+
+**Belief B refuted for the three rules as registered. B is dropped.**
+
+**Why they missed** (a diagnostic run after scoring; the gate stands as it is):
+- The planner's `way` read **`open` on 376 of 485 decisions (78%)** made inside the shut tine
+  (`walled` 68, `blocked` 41). Every rule requires `way` not to be open, so none could fire. In
+  the shut tine, our memory says the way to the goal is open.
+- The drone *was* confined. In 15 of 17 runs, its tightest 10-pose window spans at most 3.4 m.
+  A pocket rule without the `way` condition would have had something to see.
+
+This matches the gate's refutation clause: the gap is in what the memory and planner record
+(`goal_way` reads open in a dead end), not in the prompt. A rule without the `way` condition is a
+new probe with its own gate, not a retune of this one. It would also have to answer this probe's
+harm numbers, since R-pocket already fires early in 17% of solved runs.

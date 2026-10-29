@@ -43,4 +43,28 @@ because the sample is small.
 
 ## Result
 
-Pending.
+Run 2026-10-29 on sctsvr6 (`b2d262f`): 72 s02 `dynamic` runs with a switch, R15–R26N, of which
+56 were offered a door-ward action after it. Full output: [score.txt](score.txt), per run:
+[runs.jsonl](runs.jsonl).
+
+| Readout | Result |
+|---|---|
+| Runs with a stale note on a door-ward action | **17/56 = 30% → gate: holds, exactly on the threshold** |
+| Door-ward calls with a stale note | 34/219 (pre-switch block notes 0, "searched" notes 46) |
+| Solved, with vs without stale notes | 9/17 = 53% vs 16/39 = 41% |
+| Wall cell within 1 m of the new door after the switch | 18/72 = 25% of runs |
+| Open doorway still listed at shut door B, > 3 steps after the switch | **23/72 = 32% of runs** |
+
+**Reading.** The belief holds as registered, but weakly:
+- It sits exactly on the 30% line.
+- Every stale note is "searched already this way", and the definition counts every such note on a
+  door-ward action, including ones built from cells seen after the switch. So 30% is an upper
+  bound.
+- No pre-switch block note ever appeared.
+- Runs with stale notes solved *more* often (53% vs 41%), the opposite of harm.
+
+The stronger finding is the secondary one, and it runs the other way: **in a third of runs, the
+memory still offers door B as an open doorway after it has shut.** Doorways update newest-first,
+but only when looked at again. The drone usually does not look back, so the stale "open" survives.
+Any follow-up should start there (expiring openings at doors a switch can close, or re-checking
+before a detour to one), not with expiring "searched" cells.
