@@ -1382,6 +1382,23 @@ Choose "explore" as the target when nothing listed looks useful."""),
     render=render_strategist,
 )
 
+# q11: the detour strategist for a52. q08 with the "other way" detour, which a52
+# lists only in a dead end (a closed door seen, at most one way along the wall).
+# q10 took it off the dead end too (R26 probe: 36 of 82 divider calls).
+
+Q11 = Prompt(
+    version="q11",
+    system=Q08.system.replace(
+        """Choose "explore" as the target when nothing listed looks useful.""",
+        """5. An "other way" detour is listed only in a dead end: a closed door was seen
+   ahead and the wall offers no more way along it. When it is listed, choose
+   it, even though it lies behind and farther from the goal: it is the end of
+   the wall you met earlier that the drone never went to.
+Choose "explore" as the target when nothing listed looks useful."""),
+    user_template=Q03.user_template,
+    render=render_strategist,
+)
+
 # p14: the navigator. The frame with its markers, the planner's target, the
 # perceiver's answer for this image, the last three moves in words, and notes
 # from the map against each action.
@@ -1816,7 +1833,7 @@ open, closed or none.""",
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09, Q10)}
+                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09, Q10, Q11)}
 
 
 def get(version: str) -> Prompt:

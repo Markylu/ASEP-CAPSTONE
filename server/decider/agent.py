@@ -159,6 +159,11 @@ OTHER_WAY_A50: Dict[str, Any] = {
 }
 
 
+#: a52: a50's other way, listed only in a dead end (planner.dead_end).
+OTHER_WAY_A52: Dict[str, Any] = dict(OTHER_WAY_A50, only_dead_end=True,
+                                     dead_end_max_along=1)
+
+
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
     Agent("a01", "p03", {}, "No goal hint: p03 drops the goal's distance and bearing "
@@ -857,6 +862,41 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                                         "middle": "open_far"},
                                           "spatial": "server/decider/spatial.py"}},
           "a42 with a50's other way at the fork, closed-door line and q10."),
+    Agent("a52", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q11",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A52,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a50 with the other way listed only in a dead end (a closed door seen in the "
+          "last 5 steps, at most one along-the-wall item) and strategist q11, which takes "
+          "it when listed. R26 probe: q10 took it off the dead end too."),
+    Agent("a53", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q11",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A52,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a51 with a52's dead-end listing and q11."),
 )}
 
 DEFAULT_AGENT = "a00"

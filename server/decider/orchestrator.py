@@ -422,7 +422,9 @@ async def route(s: Step) -> Optional[str]:
                 menu = planner.through_doorways(s.mem, s.here, s.step, s.goal, along,
                                                 through) + menu
             # a50: the along-the-wall end not taken at an earlier fork, last.
-            if other is not None:
+            # a52: only in a dead end.
+            if other is not None and (not other.get("only_dead_end") or planner.dead_end(
+                    s.records + [s.record], s.step, menu, other)):
                 menu = menu + planner.other_way(s.mem, s.here, s.step, s.records, black,
                                                 other)
         else:

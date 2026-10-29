@@ -319,6 +319,14 @@ def other_way(mem: spatial.SpatialMemory, here: spatial.Pose, step: int,
     return []
 
 
+def dead_end(records: List[Dict[str, Any]], step: int, menu: List[spatial.Target],
+             p: Dict[str, Any]) -> bool:
+    """a52: a closed door seen in the last `recent_steps` and at most
+    `dead_end_max_along` along-the-wall items on the menu."""
+    return (closed_door_line(records, step, p) is not None
+            and sum(t.kind == "along" for t in menu) <= p["dead_end_max_along"])
+
+
 def closed_door_line(records: List[Dict[str, Any]], step: int,
                      p: Dict[str, Any]) -> Optional[str]:
     """a50: the steps, within the last `recent_steps`, on which the doorway

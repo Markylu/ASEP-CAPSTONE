@@ -14,7 +14,7 @@ analysis/geo.py):
 other-way picks on s03 dead-end calls, misleading other-way picks on s02, and
 along-the-wall picks at the s02 divider against the recorded q08 answer.
 
-    python3 eval/r26_other_way_probe.py items RUNS...
+    python3 eval/r26_other_way_probe.py items RUNS...      (R26_AGENT=a52 for a52's listing)
     VLM_PROFILE=remote python eval/r26_other_way_probe.py run RUNS... --out q10.jsonl
     python3 eval/r26_other_way_probe.py score q10.jsonl RUNS...
 """
@@ -39,7 +39,9 @@ from spatial_replay import label, load, runs_under  # noqa: E402
 import geo  # noqa: E402
 
 
-A50 = agent.get("a50")
+import os  # noqa: E402
+
+A50 = agent.get(os.environ.get("R26_AGENT", "a50"))
 CFG = A50.spatial_config
 P = A50.features["orchestrator"]["other_way"]
 
@@ -88,8 +90,10 @@ def cases(roots: List[str]):
                 perception = (r.get("perceiver") or {}).get("result")
                 mem = spatial.rebuild(rows[:i], r["manifest"], perception, CFG)
                 black = planner.failed_detours(rows[:i])
-                items = planner.other_way(mem, here, r["step"], rows[:i], black, P)
-                menu = [spatial.Target.from_dict(m) for m in s["menu"]] + items
+                menu = [spatial.Target.from_dict(m) for m in s["menu"]]
+                if not P.get("only_dead_end") or planner.dead_end(rows[:i + 1], r["step"],
+                                                                  menu, P):
+                    menu = menu + planner.other_way(mem, here, r["step"], rows[:i], black, P)
                 text = planner.detour_situation(mem, r["manifest"], menu, ask, goal,
                                                 planner.closed_door_line(rows[:i + 1],
                                                                          r["step"], P))

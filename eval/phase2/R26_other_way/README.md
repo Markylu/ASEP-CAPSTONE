@@ -54,6 +54,29 @@ with the item and line added, text only):
 - s02: "other way" chosen where it is misleading on ≤ 10% of the s02 calls asked;
 - s02 divider: along-the-wall picks no more than 10 points below the recorded `q08` picks.
 
+**Result (`q10`, [probe/q10_score.txt](probe/q10_score.txt), 251 of 252 calls answered): failed.**
+- s03 dead-end calls with the cue: "other way" 7/10 (gate 75%).
+- s02: misleading "other way" picks 24 of 199 calls, 12% (gate 10%).
+- Divider along picks 101/188 against `q08`'s 168/188.
+
+`q10` took the item off the dead end too (36 of 82 divider calls without the cue), so `a50`/`a51`
+are not flown.
+
+### Second candidate: `a52`, `a53`
+
+The item is listed only in a dead end (`planner.dead_end`: a closed door seen in the last 5
+steps and at most one along item on the menu; `agent.OTHER_WAY_A52`). Strategist `q11` = `q08` +
+rule 5, "listed only in a dead end; when listed, choose it". `a52` (`0621b10d620d`) is `a50` with
+both changes; `a53` (`9d5f211ff902`) is `a51` with them. Items
+([probe/items_a52.txt](probe/items_a52.txt)): s03 in a tine, listed 10 of 22, all 10 good; s02
+divider, listed 26 of 189, 19 good. Smoke: `a52` 0 failed steps.
+
+Gate, set before the `q11` probe:
+- s03 calls in a tine with the item: "other way" chosen on ≥ 75%;
+- s02: misleading "other way" picks on ≤ 10% of the calls asked;
+- s02 divider: along-the-wall picks plus good "other way" picks no more than 10 points below
+  `q08`'s along picks.
+
 ## Hypothesis
 
 At the s03 dead end the drone goes back to the other tine and reaches the chamber: R26 scores
