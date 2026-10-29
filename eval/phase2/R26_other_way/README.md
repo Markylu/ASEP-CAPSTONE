@@ -1,12 +1,15 @@
 # R26: R22K with the other way at the fork
 
-**Agent:** `a50` (`122780a7de8a`) · **Prompt:** `p17` (`cb3578251cfe`) · **Strategist:** `q10` ·
-**Memory:** `a17b` · **Status:** laid out 2026-10-29, probe gate pending
+**Agent:** `a58` (`4bc903546a08`) · **Prompt:** `p17` (`cb3578251cfe`) · **Strategist:** `q13` ·
+**Memory:** `a17b` · **Status:** pre-registered 2026-10-29, probe gate passed (fifth candidate)
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Built overnight without the operator
 (operator, 2026-10-28: "mantain a prefrence for subagents over hard coded tasks": code lists one
-more way, the strategist decides when to take it). Second agent at the same SHA: **R26N**, `a51`
-(`d96785ba4e1c`) = `a42` (R22, no goal confirmer) with the same change.
+more way, the strategist decides when to take it). Second agent at the same SHA: **R26N**, `a59`
+(`8b190373a9f0`) = `a42` (R22, no goal confirmer) with the same change
+([R26N](../R26N_other_way_no_goal_confirmer/README.md)). The section below describes the first
+candidate, `a50`; the probe gate records the four that failed and what changed, and the flown
+agent is the fifth, `a58`.
 
 ## Change
 
@@ -111,6 +114,13 @@ and `a55` are `a52` and `a53` with `q12`. Same gate as `q11`, set before the `q1
 `a56` and `a57` with the closed-door line shown only when the "other way" is listed
 (`agent.OTHER_WAY_A58`). Strategist `q13`. Same gate, set before this probe.
 
+**Result (`a58`, `q13`, [probe/q13_a58_score.txt](probe/q13_a58_score.txt), 202 of 202
+answered): passed.**
+- s03 dead end: "other way" 9/10 (gate 75%), all 9 in the open tine.
+- s02: misleading 6 of 191, 3% (gate 10%).
+- Divider: along 153 + good "other way" 17 = 170/189, against `q08`'s 169/189 (gate: no more than
+  10 points below).
+
 ## Hypothesis
 
 At the s03 dead end the drone goes back to the other tine and reaches the chamber: R26 scores
@@ -140,4 +150,4 @@ R22K (`a43`).
 
 ## Outcome
 
-Not flown.
+Not flown. After the round: one line on whether the hypothesis held.
