@@ -415,6 +415,11 @@ async def route(s: Step) -> Optional[str]:
             if along is not None:
                 menu = planner.along_wall(s.mem, s.here, s.step, s.goal, s.records,
                                           along) + menu
+            # a46: through a confirmed gap in that wall, before everything.
+            through = s.features.get("through")
+            if through is not None and along is not None:
+                menu = planner.through_doorways(s.mem, s.here, s.step, s.goal, along,
+                                                through) + menu
         else:
             menu = planner.detours(s.mem, s.here, s.step, s.goal)
         ids = [t.id for t in menu] + [EXPLORE]

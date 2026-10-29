@@ -139,6 +139,11 @@ def route(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     hand_back = None
     if standing is not None and standing.kind != "goal" and here is not None:
         state = spatial.target_state(mem, standing, here[:2], goal)
+        if state == "reached" and standing.kind == "through" and standing.via:
+            # a46: in front of the gap; now square through it.
+            beyond = spatial.Target(standing.id, "through_beyond", standing.via[0],
+                                    standing.via[1], standing.label, step)
+            return Route(beyond, mode, way, gained)
         if state != "open":
             hand_back = "detour_" + state
         elif stall is not None and detour_stalled(mem, standing, stall):
@@ -185,6 +190,13 @@ def wall_axis(mem: spatial.SpatialMemory, here: spatial.Pose, want: float,
     """Heading along the wall between the drone and the goal, pointing to the
     drone's left of the goal: the main axis of the wall cells within `look_m`
     toward the goal, or square to the goal when the map has too few."""
+    return _wall_fit(mem, here, want, p)[0]
+
+
+def _wall_fit(mem: spatial.SpatialMemory, here: spatial.Pose, want: float,
+              p: Dict[str, Any]) -> Tuple[float, Optional[spatial.Point]]:
+    """wall_axis, and the centre of the wall cells it was fitted to (None when
+    the map has too few)."""
     cells = set(mem.wall) | set(mem.stop_wall)
     pts = []
     for c in cells:
@@ -194,6 +206,7 @@ def wall_axis(mem: spatial.SpatialMemory, here: spatial.Pose, want: float,
                 <= p["look_within_deg"]):
             pts.append(q)
     axis = (want + 90.0) % 360.0
+    centre = None
     if len(pts) >= p["min_wall_cells"]:
         mx = sum(q[0] for q in pts) / len(pts)
         my = sum(q[1] for q in pts) / len(pts)
@@ -201,9 +214,10 @@ def wall_axis(mem: spatial.SpatialMemory, here: spatial.Pose, want: float,
         syy = sum((q[1] - my) ** 2 for q in pts)
         sxy = sum((q[0] - mx) * (q[1] - my) for q in pts)
         axis = math.degrees(0.5 * math.atan2(2.0 * sxy, sxx - syy)) % 360.0
+        centre = (mx, my)
     if spatial.wrap(axis - want) < 0:
         axis = (axis + 180.0) % 360.0
-    return axis
+    return axis, centre
 
 
 def along_room(mem: spatial.SpatialMemory, here: spatial.Pose, heading: float,
@@ -255,6 +269,68 @@ def along_wall(mem: spatial.SpatialMemory, here: spatial.Pose, step: int, goal: 
                                   "{0} ({1})".format(w["item"].format(side=side, d=room),
                                                      "; ".join(notes)), step))
     return out
+
+
+# --- a46: through the doorway in the blocking wall ------------------------------
+#
+# R19/R19K s02 failure analysis (mode K): from the side of the open door nearer
+# closed door B, the straight line to the goal clips the door frame on 197 of
+# 202 steps, and a doorway target placed 5 m down a sighting ray sits off the
+# gap. Code places the gap where the open-doorway sighting rays (after the
+# doorway confirmer) meet the wall that stopped the drone, and offers a detour
+# square through it: a point in front of the gap, then one beyond. The
+# strategist (q09) chooses. Parameters in the agent's features["through"].
+
+
+def through_doorways(mem: spatial.SpatialMemory, here: spatial.Pose, step: int,
+                     goal: spatial.Point, along: Dict[str, Any],
+                     p: Dict[str, Any]) -> List[spatial.Target]:
+    """Detours square through a gap in the wall between the drone and the goal
+    that at least `min_rays` recent open-doorway sightings, from `min_steps`
+    different steps, point at."""
+    want = spatial.bearing(here[:2], goal)
+    axis, centre = _wall_fit(mem, here, want, along)
+    if centre is None:
+        return []
+    ux, uy = math.cos(math.radians(axis)), math.sin(math.radians(axis))
+    # The wall's normal, pointing from the drone's side to the far side.
+    nx, ny = -uy, ux
+    if (centre[0] - here[0]) * nx + (centre[1] - here[1]) * ny < 0:
+        nx, ny = -nx, -ny
+    hits = []
+    for r in mem.door_rays:
+        if r.step < step - p["recent_steps"] or spatial.dist(here[:2], (r.x, r.y)) > p["from_m"]:
+            continue
+        dx, dy = math.cos(math.radians(r.heading)), math.sin(math.radians(r.heading))
+        den = dx * nx + dy * ny
+        if den < 0.2:
+            continue  # along the wall or away from it
+        t = ((centre[0] - r.x) * nx + (centre[1] - r.y) * ny) / den
+        if 0.0 < t <= p["ray_m"]:
+            hits.append((r.x + t * dx, r.y + t * dy, r.step))
+    out: List[spatial.Target] = []
+    used: set = set()
+    for i, h in enumerate(hits):
+        if i in used:
+            continue
+        group = [j for j, g in enumerate(hits)
+                 if j not in used and spatial.dist(h[:2], g[:2]) <= p["merge_m"]]
+        if len(group) < p["min_rays"] or len({hits[j][2] for j in group}) < p["min_steps"]:
+            continue
+        used.update(group)
+        gx = sum(hits[j][0] for j in group) / len(group)
+        gy = sum(hits[j][1] for j in group) / len(group)
+        # A move into the wall that a wall stopped near the gap: it is shut.
+        into = math.degrees(math.atan2(ny, nx))
+        if any(spatial.dist((b.x, b.y), (gx, gy)) <= p["blocked_near_m"]
+               and abs(spatial.wrap(b.heading - into)) <= 60.0 for b in mem.blocks):
+            continue
+        front = (gx - p["front_m"] * nx, gy - p["front_m"] * ny)
+        beyond = [gx + p["beyond_m"] * nx, gy + p["beyond_m"] * ny]
+        k = len(out) + 1
+        out.append(spatial.Target("through_{0}".format(k), "through", front[0], front[1],
+                                  p["words"]["item"].format(n=len(group)), step, beyond))
+    return out[:2]
 
 
 def gain_words(here: spatial.Pose, target: spatial.Target, goal: spatial.Point) -> str:

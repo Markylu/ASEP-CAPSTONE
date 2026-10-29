@@ -125,6 +125,24 @@ ALONG_WALL_A39: Dict[str, Any] = {
 }
 
 
+#: a46: detours through a confirmed gap in the blocking wall
+#: (planner.through_doorways). In the features, so the sha.
+THROUGH_A46: Dict[str, Any] = {
+    "recent_steps": 20,
+    "from_m": 10.0,
+    "ray_m": 10.0,
+    "merge_m": 1.5,
+    "min_rays": 2,
+    "min_steps": 2,
+    "front_m": 1.5,
+    "beyond_m": 2.0,
+    "blocked_near_m": 2.0,
+    "words": {
+        "item": "through the opening in this wall ({n} open-doorway sightings point at it)",
+    },
+}
+
+
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
     Agent("a01", "p03", {}, "No goal hint: p03 drops the goal's distance and bearing "
@@ -721,6 +739,42 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                                         "middle": "open_far"},
                                           "spatial": "server/decider/spatial.py"}},
           "a43 with p18 and a17c (as a44)."),
+    Agent("a46", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q09",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "through": THROUGH_A46,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a42 with detours through a confirmed gap in the blocking wall: code places "
+          "the gap where open-doorway sighting rays meet that wall and offers a point "
+          "square in front of it, then one beyond; strategist q09 takes it first. R19/R19K "
+          "s02 failure analysis mode K."),
+    Agent("a47", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q09",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "through": THROUGH_A46,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a43 with a46's through-the-doorway detours and q09."),
 )}
 
 DEFAULT_AGENT = "a00"

@@ -1346,6 +1346,24 @@ Choose "explore" as the target when nothing listed looks useful."""),
     render=render_strategist,
 )
 
+# q09: the detour strategist for a46. q08 with the "through the opening" detour
+# first: a gap in the blocking wall that confirmed open-doorway sightings point
+# at (planner.through_doorways). R19/R19K s02 failure analysis, mode K.
+
+Q09 = Prompt(
+    version="q09",
+    system=Q08.system.replace(
+        """So:
+1. Follow the wall one way until that way ends""",
+        """So:
+0. A "through the opening" detour comes first: open-doorway sightings, each
+   checked a second time, point at that gap in the wall. It takes the drone to
+   a spot square in front of the gap, then through it.
+1. Otherwise follow the wall one way until that way ends"""),
+    user_template=Q03.user_template,
+    render=render_strategist,
+)
+
 # p14: the navigator. The frame with its markers, the planner's target, the
 # perceiver's answer for this image, the last three moves in words, and notes
 # from the map against each action.
@@ -1780,7 +1798,7 @@ open, closed or none.""",
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18)}
+                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09)}
 
 
 def get(version: str) -> Prompt:

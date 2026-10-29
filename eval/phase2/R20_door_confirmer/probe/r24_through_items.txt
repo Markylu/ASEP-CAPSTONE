@@ -1,0 +1,35 @@
+eval/phase2/R20_door_confirmer/runs
+  at_open_door: 2
+  at_open_door_clear: 2
+  calls: 67
+  calls_near_divider: 60
+  calls_with_item: 8
+  items: 11
+  near_with_item: 8
+  at an open door 18%; of those, both legs clear 100%
+eval/phase2/R20K_door_confirmer_goal_confirmer/runs
+  at_open_door: 0
+  calls: 71
+  calls_near_divider: 62
+  calls_with_item: 6
+  items: 7
+  near_with_item: 5
+  at an open door 0%; of those, both legs clear 0%
+eval/phase2/R19_searched_defined/runs
+  at_open_door: 5
+  at_open_door_clear: 3
+  calls: 78
+  calls_near_divider: 71
+  calls_with_item: 17
+  items: 24
+  near_with_item: 16
+  at an open door 21%; of those, both legs clear 60%
+eval/phase2/R19K_searched_defined_confirmer/runs
+  at_open_door: 1
+  at_open_door_clear: 1
+  calls: 69
+  calls_near_divider: 62
+  calls_with_item: 12
+  items: 14
+  near_with_item: 10
+  at an open door 7%; of those, both legs clear 100%

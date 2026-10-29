@@ -521,20 +521,27 @@ class Target:
     y: float
     label: str
     step: int = 0
+    #: a46: a second waypoint, flown to once this one is reached (the point
+    #: beyond a doorway). Recorded only when set.
+    via: Optional[List[float]] = None
 
     def words(self, here: "Pose") -> str:
         return "{0}, {1}".format(self.label, where_words(here, (self.x, self.y)))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"id": self.id, "kind": self.kind, "x": round(self.x, 2),
-                "y": round(self.y, 2), "label": self.label, "step": self.step}
+        out = {"id": self.id, "kind": self.kind, "x": round(self.x, 2),
+               "y": round(self.y, 2), "label": self.label, "step": self.step}
+        if self.via is not None:
+            out["via"] = [round(self.via[0], 2), round(self.via[1], 2)]
+        return out
 
     @classmethod
     def from_dict(cls, d: Optional[Dict[str, Any]]) -> Optional["Target"]:
         if not d:
             return None
+        via = d.get("via")
         return cls(d["id"], d["kind"], float(d["x"]), float(d["y"]), d.get("label", ""),
-                   int(d.get("step", 0)))
+                   int(d.get("step", 0)), [float(via[0]), float(via[1])] if via else None)
 
 
 @dataclass
@@ -544,6 +551,8 @@ class SpatialMemory:
     wall: Dict[Tuple[int, int], int] = field(default_factory=dict)
     blocks: List[Block] = field(default_factory=list)
     goal_rays: List[Ray] = field(default_factory=list)
+    #: a46: the centre ray of each strip the perceiver called an open doorway.
+    door_rays: List[Ray] = field(default_factory=list)
     openings: List[Opening] = field(default_factory=list)
     trail: List[Tuple[int, float, float, float]] = field(default_factory=list)
     turn_arounds: List[int] = field(default_factory=list)
@@ -672,6 +681,7 @@ class SpatialMemory:
             at = ahead(here, centre, PARAMS_A17["opening_at_m"][floor])
             if door == "open":
                 self._add_opening(step, at)
+                self.door_rays.append(Ray(here[0], here[1], centre, step, floor))
             elif door == "closed":
                 for o in self.openings:
                     if dist((o.x, o.y), at) < OPENING_MERGE_M:
