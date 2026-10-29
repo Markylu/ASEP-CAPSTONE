@@ -174,6 +174,11 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     "R19K": {"folder": "R19K_searched_defined_confirmer",
              "title": "R19 with the goal confirmer",
              "agent": "a36", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R20": {"folder": "R20_door_confirmer", "title": "R19 with the doorway confirmer",
+            "agent": "a37", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R20K": {"folder": "R20K_door_confirmer_goal_confirmer",
+             "title": "R19K with the doorway confirmer",
+             "agent": "a38", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

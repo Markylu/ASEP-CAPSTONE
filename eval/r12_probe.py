@@ -257,6 +257,14 @@ def smoke_run(run: Path, work: Path, strip_goal: bool) -> List[Dict[str, Any]]:
             cur["confirms"] = cur.get("confirms", 0) + 1
             return vlm.SubCall(name, validate({"reason": "stub", "present":
                                                "no" if cur["confirms"] % 2 else "yes"}), "stub")
+        if name == schema.DOOR_CONFIRMER_SCHEMA_NAME:
+            # Alternate open, closed, none over the reported strips.
+            strips = [k for k in json_schema["properties"] if k != "reason"]
+            cur["doors"] = cur.get("doors", 0) + 1
+            answers = ["open", "closed", "none"]
+            return vlm.SubCall(name, validate(dict(
+                {"reason": "stub"},
+                **{s: answers[(cur["doors"] + i) % 3] for i, s in enumerate(strips)})), "stub")
         enum = json_schema["properties"]["action"]["enum"]
         pick = rec["index"] if rec.get("index") in enum else enum[0]
         return vlm.SubCall(name, validate({"action": pick, "reason": "stub"}), "stub")

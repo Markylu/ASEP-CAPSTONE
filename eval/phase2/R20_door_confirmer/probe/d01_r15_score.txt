@@ -1,0 +1,6 @@
+open-doorway reports asked: 78 genuine, 350 false
+  genuine kept   72/78 = 92.3%
+  false refused  215/350 = 61.4%
+  s01: genuine kept 0/0, false refused 15/17
+  s02: genuine kept 63/69, false refused 191/318
+  s03: genuine kept 9/9, false refused 9/15
