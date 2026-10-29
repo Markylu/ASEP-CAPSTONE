@@ -1,0 +1,123 @@
+{
+  "run_id": "p2_R26N_s03_initial_seed1_a01",
+  "ended": "2026-10-29T09:03:34+00:00",
+  "end_reason": "max_steps",
+  "steps": 60,
+  "decisions": 60,
+  "collisions": 8,
+  "goal_reached": false,
+  "final_goal_distance_m": 6.671,
+  "latency_ms": {
+    "p50": 2410.8,
+    "p95": 4363.7,
+    "mean": 2656.6
+  },
+  "latency_breakdown_ms": {
+    "rtt_ms": {
+      "p50": 2.8,
+      "p95": 4.1,
+      "n": 60
+    },
+    "upload_ms": {
+      "p50": 1.4,
+      "p95": 3.0,
+      "n": 60
+    },
+    "ttft_ms": {
+      "p50": 173.4,
+      "p95": 246.9,
+      "n": 4
+    },
+    "prefill_ms": {
+      "p50": 169.2,
+      "p95": 242.8,
+      "n": 4
+    },
+    "decode_ms": {
+      "p50": 1409.3,
+      "p95": 3361.7,
+      "n": 4
+    },
+    "unaccounted_ms": {
+      "p50": 12.1,
+      "p95": 12.5,
+      "n": 4
+    },
+    "network_ms": {
+      "p50": 4.3,
+      "p95": 6.3,
+      "n": 4
+    },
+    "compute_ms": {
+      "p50": 1577.5,
+      "p95": 3602.7,
+      "n": 4
+    },
+    "total_ms": {
+      "p50": 2405.2,
+      "p95": 4358.0,
+      "n": 60
+    },
+    "decode_tok_s": {
+      "p50": 90.6,
+      "p95": 97.5,
+      "n": 4
+    },
+    "streamed_decisions": 4,
+    "request_bytes_mean": 544739
+  },
+  "tokens_per_frame": {
+    "prompt_mean": 1418.6,
+    "completion_mean": 214.5
+  },
+  "tokens_total": {
+    "prompt": 85116,
+    "completion": 12869
+  },
+  "rungs_used": {
+    "json_schema": 60
+  },
+  "events": [],
+  "site_id": "s03_fork_deadend",
+  "site_version": 2,
+  "scene": "res://sites/s03_fork_deadend/site.tscn",
+  "physics_ticks_per_second": 60,
+  "freeze_world": true,
+  "static_doors": true,
+  "world": "initial",
+  "spawn_seed": 1,
+  "spawn_offset": {
+    "dyaw_deg": -2.23405146598816,
+    "dz": -0.170440912246704
+  },
+  "model": "Qwen3-VL-30B-A3B",
+  "vlm_profile": "remote",
+  "temperature": 0.0,
+  "git_dirty": false,
+  "prompt_version": "p17",
+  "prompt_sha": "cb3578251cfe",
+  "agent_version": "a59",
+  "agent_sha": "8b190373a9f0",
+  "git_sha": "3530802",
+  "frame_size": [
+    768,
+    768
+  ],
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "occlusion_step": null,
+  "goal_visible_steps": 5,
+  "goal_first_hidden_step": 1,
+  "steps_to_reacquire": 55
+}

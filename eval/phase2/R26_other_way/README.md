@@ -150,4 +150,29 @@ R22K (`a43`).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held.
+Flown 2026-10-29, lanes 1–4 beside R26N: 18/18 valid. **9/18** (initial 6, final 2, dynamic 1)
+against R22K's 12/18: **hypothesis not held, not carried forward**.
+
+| site | initial | final | dynamic |
+|---|---|---|---|
+| s01 | 1 | 1 | 1 |
+| s02a | 1 | . | . |
+| s02c | 1 | . | . |
+| s02va | 1 | . | . |
+| s02vc | 1 | 1 | . |
+| s03 | 1 | . | . |
+
+- In s03 `final`/`dynamic` the other way was listed and chosen in every run (R26 1 and 1;
+  R26N 1 and 2 picks). It did not get the drone back to the fork. The target lies behind, about
+  11 m back; the navigator went back and forth (R26 `final`: x −5.3 → −3.6 → −5.3), and the
+  stalled-detour hand-back (4 moves gaining under 0.5 m, `a33`) ended the detour after 4 steps. The
+  strategist then returned to the along-the-wall items. R26 `dynamic` held it 14 steps and reached
+  x = 2.5, then turned back. The probe tested only the strategist's choice, not whether the drone
+  could fly 11 m back to the target.
+- The next step, if this line is kept: exempt the "other way" from the stall hand-back, or hand
+  it to the planner as waypoints back along the trail, rather than as one target 11 m behind.
+- s02 lost 3 runs against R22K (s02a `final`, s02c `dynamic`, s02va `dynamic`). The other way was
+  chosen in all three (3, 1 and 1 times), so part of the loss is the change: on s02 it took the
+  drone back from the divider.
+- Turn-arounds against a forward "toward" 19 (R22K 9).
+- [manipulation.txt](manipulation.txt).

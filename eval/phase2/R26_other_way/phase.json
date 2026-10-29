@@ -3,10 +3,11 @@
   "title": "R22K with the other way at the fork",
   "citable": false,
   "agent_version": "a58",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "3530802",
+  "started": "2026-10-29T08:44:20+00:00",
+  "finished": "2026-10-29T09:23:21+00:00",
+  "operator": "Markylu",
+  "notes": "Flown overnight 2026-10-29 beside R26N.",
+  "lanes": "sctsvr6 lanes 1-4 (asep-r26-l1..4), shared vLLM :8004"
 }
