@@ -248,6 +248,21 @@ def confirmer_schema() -> Dict[str, Any]:
             "additionalProperties": False}
 
 
+DOOR_CONFIRMER_SCHEMA_NAME = "door_confirmer"
+
+
+def door_confirmer_schema(strips: List[str]) -> Dict[str, Any]:
+    """d01 (a37 on): for each strip reported to hold an open doorway, open,
+    closed or none, after a description."""
+    properties: Dict[str, Any] = {
+        "reason": {"type": "string",
+                   "description": "What is in each reported strip: walls, gaps, doors, floor beyond."}}
+    for strip in strips:
+        properties[strip] = {"type": "string", "enum": ["open", "closed", "none"]}
+    return {"type": "object", "properties": properties, "required": list(properties),
+            "additionalProperties": False}
+
+
 def strategist_schema(target_ids: List[str]) -> Dict[str, Any]:
     properties = {
         "reason": {"type": "string",

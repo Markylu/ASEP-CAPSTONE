@@ -1684,10 +1684,48 @@ otherwise no.""",
     render=render_confirm_question,
 )
 
+# --- d01: Phase 2 R20, the doorway confirmer ---------------------------------------
+# R15/R15N failure analysis: doorway items on the detour menus were at a truly
+# open door 4 of 54 and 5 of 52 times; the strategist's doorway picks were real
+# once a round, and the closed exit was picked 3 times in a dead end. g05 reports
+# an open doorway on about 30% of steps. d01 is a second look, asked when the
+# perceiver reports an open doorway: the same clean frame and the strips it
+# named. "closed" or "none" replaces the report before the map reads it.
+
+
+def render_door_question(prompt: Prompt, strips: List[str]) -> str:
+    """The doorway confirmer's question: the strips reported open."""
+    return prompt.user_template.format(
+        strips=", ".join(s.replace("_", " ") for s in strips))
+
+
+D01 = Prompt(
+    version="d01",
+    system="""You check one image from the front camera of a small indoor drone.
+Another model looked at this image and reported an open doorway in some parts
+of it. Reports like that are often wrong. Your job is to check them.
+
+An open doorway is a gap in a wall that the drone could fly through: you can
+see floor continuing on the far side of the gap, and the gap is at least as
+wide as a door. These are not open doorways: a closed door or a door leaf
+filling the gap (that is closed), a plain wall, a corner where two walls meet,
+a darker or lighter panel, a shadow, a window, a frame with a wall behind it,
+and open floor with no wall around it.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+First describe what you see in each reported strip: walls, gaps, doors, and
+whether floor continues beyond any gap. Then answer for each reported strip:
+open, closed or none.""",
+    user_template="""An open doorway was reported in: {strips}. For each of those strips, is there an open doorway?""",
+    render=render_door_question,
+)
+
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17)}
+                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01)}
 
 
 def get(version: str) -> Prompt:

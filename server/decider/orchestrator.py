@@ -311,6 +311,45 @@ async def confirm(s: Step) -> Optional[str]:
     return None
 
 
+def _doors_checked(strips: List[str]) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
+    def check(parsed: Dict[str, Any]) -> Dict[str, Any]:
+        out = {"reason": str(parsed.get("reason", ""))}
+        for strip in strips:
+            if parsed.get(strip) not in ("open", "closed", "none"):
+                raise vlm.VLMError("door confirmer gave no answer for {0}".format(strip))
+            out[strip] = parsed[strip]
+        return out
+    return check
+
+
+async def confirm_doors(s: Step) -> Optional[str]:
+    """a37: when the perceiver reports an open doorway, a second look (d01) at
+    the same clean frame for the strips it named. "closed" marks that strip's
+    doorway closed, "none" removes it, before the map reads it (the record
+    keeps what the perceiver said as doorway_reported). A failed call keeps
+    the reports."""
+    lanes = (s.perception or {}).get("lanes") or []
+    strips = [l["strip"] for l in lanes if l.get("doorway") == "open"]
+    if not strips or s.perception is None:
+        return None
+    p = prompts.get(s.features["door_confirmer"])
+    seen = await ask(s, views.door_confirmer(p, strips, s.clean_b64),
+                     schema.DOOR_CONFIRMER_SCHEMA_NAME, schema.door_confirmer_schema(strips),
+                     _doors_checked(strips), PERCEIVER_MAX_TOKENS)
+    s.record["door_confirmer"] = seen.to_dict()
+    if seen.result is not None:
+        new = []
+        for l in lanes:
+            answer = seen.result.get(l["strip"]) if l["strip"] in strips else None
+            if answer in ("closed", "none"):
+                l = dict(l, doorway="closed" if answer == "closed" else False,
+                         doorway_reported="open")
+            new.append(l)
+        s.perception = dict(s.perception, lanes=new)
+        s.record["perceiver"] = dict(s.record["perceiver"], result=s.perception)
+    return None
+
+
 async def build_map(s: Step) -> Optional[str]:
     s.mem = spatial.rebuild(s.records, s.manifest, s.perception, s.cfg)
     s.here = spatial.pose_xyh(s.manifest.get("pose"))
@@ -543,6 +582,9 @@ def pipeline(features: Dict[str, Any]) -> List[Stage]:
     if features.get("confirmer"):
         stages.append(Stage("confirmer", confirm, features.get("confirmer"),
                             "when the perceiver reports the goal"))
+    if features.get("door_confirmer"):
+        stages.append(Stage("door_confirmer", confirm_doors, features.get("door_confirmer"),
+                            "when the perceiver reports an open doorway"))
     stages += [Stage("mapper", build_map),
               planning,
               Stage("projector", project)]

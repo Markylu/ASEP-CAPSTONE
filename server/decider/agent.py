@@ -99,9 +99,10 @@ class Agent:
     @property
     def subagent_prompts(self) -> List[prompts.Prompt]:
         """The perceiver's and strategist's prompts (a13 on), in that order, then
-        the goal confirmer's (a27 on)."""
+        the goal confirmer's (a27 on), then the doorway confirmer's (a37 on)."""
         orch = self.features.get("orchestrator") or {}
-        return [prompts.get(orch[k]) for k in ("perceiver", "strategist", "confirmer")
+        return [prompts.get(orch[k])
+                for k in ("perceiver", "strategist", "confirmer", "door_confirmer")
                 if orch.get(k)]
 
 
@@ -554,6 +555,37 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                                         "middle": "open_far"},
                                           "spatial": "server/decider/spatial.py"}},
           "a35 with the goal confirmer c01."),
+    Agent("a37", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a35 (known goal, reachable detours, p17, stalled-detour hand-back) with the "
+          "doorway confirmer d01: an open doorway the perceiver reports is checked on the "
+          "same frame before the map lists it. R15/R15N: 4 of 54 menu doorways real."),
+    Agent("a38", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a37 with the goal confirmer c01."),
 )}
 
 DEFAULT_AGENT = "a00"

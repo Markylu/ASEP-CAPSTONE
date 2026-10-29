@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 from . import prompt as prompts, spatial
 
 #: The roles whose texts must never carry the goal's true position.
-NO_GOAL_TRUTH = ("perceiver", "navigator", "confirmer")
+NO_GOAL_TRUTH = ("perceiver", "navigator", "confirmer", "door_confirmer")
 
 
 @dataclass(frozen=True)
@@ -46,6 +46,10 @@ def perceiver(prompt: prompts.Prompt, manifest: Dict[str, Any], clean_b64: str) 
 
 def confirmer(prompt: prompts.Prompt, report: Dict[str, Any], clean_b64: str) -> View:
     return View("confirmer", prompt.system, prompt.render(prompt, report), clean_b64)
+
+
+def door_confirmer(prompt: prompts.Prompt, strips: List[str], clean_b64: str) -> View:
+    return View("door_confirmer", prompt.system, prompt.render(prompt, strips), clean_b64)
 
 
 def strategist(prompt: prompts.Prompt, situation: str) -> View:
