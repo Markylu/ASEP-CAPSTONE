@@ -77,6 +77,17 @@ Gate, set before the `q11` probe:
 - s02 divider: along-the-wall picks plus good "other way" picks no more than 10 points below
   `q08`'s along picks.
 
+**Result (`q11`, [probe/q11_score.txt](probe/q11_score.txt), 202 of 202 answered): failed on the
+first gate.**
+- s03 dead end: "other way" 7/10 (gate 75%); the other 3 calls followed the one along item left.
+- s02: misleading picks 6 of 188, 3%.
+- Divider: along 144 + good "other way" 9 = 153/186, against `q08`'s 166/186: 7 points below.
+
+### Third candidate: `a54`, `a55`
+
+`q12` = `q11` with rule 5 put before rules 1–4, and "do not follow the wall here again". `a54`
+and `a55` are `a52` and `a53` with `q12`. Same gate as `q11`, set before the `q12` probe.
+
 ## Hypothesis
 
 At the s03 dead end the drone goes back to the other tine and reaches the chamber: R26 scores
