@@ -1271,6 +1271,35 @@ Q05 = Prompt(
     render=render_strategist,
 )
 
+
+# q06: the detour strategist for the known-goal agents on a17's reachable menu
+# (a25 onward). q03, with its closing advice replaced: every detour is
+# reachable, a doorway is the way round a wall even when it lies farther from
+# the goal, and a dead end calls for the way back. R11 failure analysis Q6:
+# doorway picks 1 of 19 menus that held one; backtrack never chosen (s03
+# dynamic, 32 steps in a dead end).
+
+Q06 = Prompt(
+    version="q06",
+    system=Q03.system.replace(
+        """Prefer a detour that lies nearer the goal than the drone. Doors can close; the
+list only shows doorways not known to be closed. Choose "explore" as the target
+when nothing listed looks useful.""",
+        """Every detour listed can be reached over known floor. The goal is usually
+behind a wall, and unexplored ground nearer the goal is often still on the
+drone's side of that wall. So:
+1. A doorway is the way round the wall: choose it even when it lies farther
+   from the goal than the drone, unless the drone has just come back through it.
+2. With no doorway listed, choose unexplored ground, the most of it first;
+   nearer the goal only breaks a tie.
+3. If moves from here were blocked on several sides, the drone is in a dead
+   end: go back to an earlier place.
+Doors can close; the list only shows doorways not known to be closed. Choose
+"explore" as the target when nothing listed looks useful."""),
+    user_template=Q03.user_template,
+    render=render_strategist,
+)
+
 # p14: the navigator. The frame with its markers, the planner's target, the
 # perceiver's answer for this image, the last three moves in words, and notes
 # from the map against each action.
@@ -1617,7 +1646,7 @@ otherwise no.""",
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16, C01)}
+                                                      Q05, G06, P15, P16, C01, Q06)}
 
 
 def get(version: str) -> Prompt:

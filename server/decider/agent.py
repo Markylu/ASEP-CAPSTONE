@@ -436,6 +436,35 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "a25 (known goal, reachable detours) with the goal confirmer c01: a goal report "
           "the confirmer refuses does not hand a detour back ('goal in view') or put a goal "
           "note on a move. R11: 10 of 14 'goal in view' hand-backs were hallucinated."),
+    Agent("a29", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q06",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a25 (known goal, reachable detours) with detour strategist q06: a doorway is the "
+          "way round a wall even when farther from the goal, more unexplored ground before "
+          "nearer, the way back in a dead end. R11: doorway picked on 1 of 19 menus with one; "
+          "backtrack never chosen."),
+    Agent("a30", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q06",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a28 (known goal, reachable detours, goal confirmer c01) with detour strategist "
+          "q06: the two known-goal changes together."),
 )}
 
 DEFAULT_AGENT = "a00"
