@@ -74,4 +74,24 @@ R19 (`a35`: `a26` + navigator `p17` + stalled-detour hand-back).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Flown 2026-10-29, lanes 1–4 beside R20K: 18/18 valid. **11/18** (initial 6, final 4, dynamic 1)
+against R19's 10/18: **hypothesis held, by one**; level with R11. `final` + 2 as predicted,
+`dynamic` − 1 (R19 2).
+
+| site | initial | final | dynamic |
+|---|---|---|---|
+| s01 | 1 | 1 | 1 |
+| s02a | 1 | 1 | . |
+| s02c | 1 | 1 | . |
+| s02va | 1 | . | . |
+| s02vc | 1 | . | . |
+| s03 | 1 | 1 | . |
+
+- `d01` asked on 238 steps, 0 failed calls. Doorways on the detour menus 20 (R19 50); picked 7
+  (R19 17). Menu doorways within 2.5 m of an open s02 door 1 of 20 (R19 10 of 50): the confirmer
+  removed most false ones and some real ones; the gain is the drone no longer sent to closed doors.
+- Turn-arounds against a forward "toward" 14 (R19 25).
+- R24's through-the-doorway items, built from R20's confirmed sightings, aimed at an open door 2 of
+  11 times (`eval/r24_through_probe.py`): confirmed sightings are still too few and too scattered
+  to place a gap.
+- [manipulation.txt](manipulation.txt).

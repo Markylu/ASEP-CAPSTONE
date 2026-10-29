@@ -44,4 +44,21 @@ R19K (`a36`).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Flown 2026-10-29, lanes 5–8 beside R20: 18/18 valid. **12/18** (initial 6, final 4, dynamic 2)
+against R19K's 11/18: **hypothesis held**. **The best Phase 2 score so far** (R11 11/18).
+
+| site | initial | final | dynamic |
+|---|---|---|---|
+| s01 | 1 | 1 | 1 |
+| s02a | 1 | 1 | 1 |
+| s02c | 1 | 1 | . |
+| s02va | 1 | . | . |
+| s02vc | 1 | . | . |
+| s03 | 1 | 1 | . |
+
+- `d01` asked on 262 steps, 0 failed. Menu doorways 18 (R19K 54), 3 within 2.5 m of an open
+  door; picked 8 (R19K 16).
+- Turn-arounds against a forward "toward" 20 (R19K 18).
+- s02va and s02vc `final`/`dynamic` still 0/4: the drone does not find door A or C across the
+  divider from B (mode B/K). R21's along-the-wall detours fly next on this agent (`a41`).
+- [manipulation.txt](manipulation.txt).

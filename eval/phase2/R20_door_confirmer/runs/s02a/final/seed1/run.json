@@ -1,0 +1,57 @@
+{
+  "run_id": "p2_R20_s02a_final_seed1_a01",
+  "started": "2026-10-29T06:33:01+00:00",
+  "model": "Qwen3-VL-30B-A3B",
+  "vlm_profile": "remote",
+  "litellm_base_url": "http://127.0.0.1:8004",
+  "agent_version": "a37",
+  "agent_sha": "a07b58847180",
+  "prompt_version": "p17",
+  "prompt_sha": "cb3578251cfe",
+  "subagent_prompts": {
+    "g05": "133ed83db46b",
+    "q03": "1ec0f511a6e0",
+    "d01": "95c80a5ef984"
+  },
+  "spatial_sha": "eceb875a68a3",
+  "spatial_a14_sha": "0075a8a0e5c0",
+  "spatial_a17_sha": "63ccdaa218d9",
+  "git_sha": "24e14b2",
+  "git_dirty": false,
+  "temperature": 0.0,
+  "scene": "res://sites/s02a_doors_open_a/site.tscn",
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "frame_size": [
+    768,
+    768
+  ],
+  "godot_version": "4.7.2-stable (official)",
+  "max_steps": 60,
+  "site_id": "s02a_doors_open_a",
+  "site_version": 2,
+  "physics_ticks_per_second": 60,
+  "freeze_world": true,
+  "static_doors": false,
+  "world": "final",
+  "spawn_seed": 1,
+  "spawn_offset": {
+    "dyaw_deg": -2.23405146598816,
+    "dz": -0.170440912246704
+  },
+  "final_closed": [],
+  "run_dir": "eval/phase2/R20_door_confirmer/runs/s02a/final/seed1",
+  "ended": "2026-10-29T06:39:38+00:00",
+  "end_reason": "goal_reached"
+}
