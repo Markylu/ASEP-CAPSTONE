@@ -84,6 +84,35 @@ frames:
 If it fails, R27 does not fly, the Outcome records the probe, and the next idea is a new version.
 Commit `probe/` before flying.
 
+**Result: passed** (2026-10-29). The script was committed first (`dfee950`). Output:
+[probe/score.txt](probe/score.txt).
+- 300 fresh frames, 900 calls, none failed.
+- Concurrency 1: 150 frames on `:8004` with no flights running, and 150 on a `:8006` copy on GPU 3,
+  stopped afterwards.
+
+| Read | Missed wall (n = 158) | Phantom wall (n = 1342) | Doorway | Goal strip | Phantom, image-left / right |
+|---|---|---|---|---|---|
+| `g05` (a49) | 16.5% | 11.7% | 83.7% | 92.3% | 12.3 / 13.7 |
+| `g07` | 6.3% | 26.2% | 81.7% | 93.7% | 39.2 / 21.7 |
+| `g07` mirrored | 2.5% | 26.4% | 80.7% | 91.3% | 45.1 / 16.2 |
+| **`g07` ×2 fused (a60)** | **5.1%** | **17.0%** | 82.1% | 93.7% | 16.2 / 21.7 |
+
+| | Gate | Value | |
+|---|---|---|---|
+| 1 | Missed walls ≤ half of `g05`'s | 5.1% vs 16.5% | pass |
+| 2 | Phantom walls ≤ `g05` + 6 pts | +5.3 pts | pass, close to the limit |
+| 3 | Goal strip ≥ `g05` − 1 pt | +1.3 pts | pass |
+| 4 | Doorway ≥ `g05` − 2 pts | −1.7 pts | pass, close to the limit |
+
+Reading:
+- The wall effect replicates on a third sample: a60 misses about 3× fewer real walls (5.1% vs
+  16.5%; C2 gave 3.5% vs 17.0%).
+- Its costs are near their limits: phantom walls run 5.3 pts higher and doorway accuracy 1.7 pts
+  lower. This sample's `g05` had fewer phantom walls (11.7%) than C2's (14.6%).
+- In flight, the manipulation check's limits of ≤ 8% missed and ≤ 20% phantom have about 3 pts of
+  room each.
+- Median latency per call: `g07` 0.84–0.88 s, against 1.43 s for `g05`.
+
 Smoke (no model): `eval/probes/a60_smoke.py`, run on sctsvr6, the real step on R25D's 627
 recorded manifests and real clean frames with stub replies. The results were:
 - 0 failed steps;
