@@ -1624,6 +1624,29 @@ Pick one number.""",
     render=render_orchestrated,
 )
 
+# --- p17: Phase 2 R19, "searched already this way" defined ------------------------
+# R15/R15N failure analysis: a17's coverage note "searched already this way" is
+# on every forward move on 40-42% of steps, and the navigator turned around
+# against a forward "toward your target" 50 times a round (R11: 3), reading the
+# note as "explored, did not lead to the goal". p14-p16 never define it. p17 is
+# p16 with the note defined and turning around limited.
+
+P17 = Prompt(
+    version="p17",
+    system=P16.system.replace(
+        """- "new ground" or "been there N times": whether the drone has already been
+  where the move ends.""",
+        """- "new ground" or "been there N times": whether the drone has already been
+  where the move ends.
+- "searched already this way": the camera has looked that way before; the drone
+  has not flown there. It is not a dead end and no reason to turn around.""").replace(
+        """Turning around is also the move when every way ahead is blocked.""",
+        """Turn around only when "toward your target" is on marker 0, or when every
+forward move is blocked before, stopped short or "wall close"."""),
+    user_template=P16.user_template,
+    render=render_orchestrated,
+)
+
 # --- c01: Phase 2 R16, the goal confirmer ----------------------------------------
 # R13 failure analysis: of 26 losses of sight, 21 rested on a hallucinated goal
 # report and 4 on a stale frame at a door switch; only 1 was genuine. R11: 10 of
@@ -1664,7 +1687,7 @@ otherwise no.""",
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16, C01, Q06, Q07)}
+                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17)}
 
 
 def get(version: str) -> Prompt:
