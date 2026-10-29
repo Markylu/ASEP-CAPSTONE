@@ -1,0 +1,2 @@
+a17   forward moves 20020: searched 5883, new ground 7502 (truly blocked within 1.9 m: 461 = 6.1%); toward+searched 1193 (s03 279); steps with no forward new ground 1550/4004 = 39%
+a17b  forward moves 20020: searched 1835, new ground 11550 (truly blocked within 1.9 m: 749 = 6.5%); toward+searched 442 (s03 84); steps with no forward new ground 815/4004 = 20%

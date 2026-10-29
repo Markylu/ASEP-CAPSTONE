@@ -30,7 +30,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 # --- parameters (hashed into the agent: agent.py a13 features) ---------------
@@ -310,6 +310,8 @@ class SpatialConfig:
     frontier: str = "size"
     #: a17: a look's cone marks ground searched; stop walls; doors crossed.
     coverage: bool = False
+    #: a17b: floor classes whose end writes a wall; None keeps PARAMS_A17's.
+    floor_ends: Optional[Tuple[str, ...]] = None
 
     def sha_segments(self) -> List[str]:
         out = ["spatial:" + wording_sha()]
@@ -319,8 +321,10 @@ class SpatialConfig:
             out.append("spatial_a15:" + wording_sha_a15())
         if self.name == "a16":
             out.append("spatial_a16:" + wording_sha_a16())
-        if self.name == "a17":
+        if self.name in ("a17", "a17b"):
             out.append("spatial_a17:" + wording_sha_a17())
+        if self.floor_ends is not None:
+            out.append("floor_ends:" + ",".join(self.floor_ends))
         return out
 
 
@@ -352,10 +356,20 @@ A17 = SpatialConfig("a17", WORDS_A14["triggers"], a14_words=True,
                     frontier=PARAMS_A17["frontier"], coverage=True)
 
 
+#: a17b (a42 on): a17 without the wall at the end of an open_near strip. g05's
+#: "bottom" maps to open_near and is a wall within 1.9 m on 3% of strips (R14),
+#: yet the wall written 2.5 m out made the move ahead "searched already": on
+#: s03, 279 toward moves in R15-R17K, the turn-arounds in the lobby
+#: (eval/phase2/R17_doorway_first/s03_analysis.md).
+A17B = replace(A17, name="a17b", floor_ends=("blocked_near", "wall_far"))
+
+
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
     """The memory an orchestrated agent's features name (agent.py)."""
     if orchestrator.get("memory") == "a17":
         return A17
+    if orchestrator.get("memory") == "a17b":
+        return A17B
     if orchestrator.get("memory") == "a15":
         return A15
     if orchestrator.get("memory") == "a16":
@@ -616,7 +630,8 @@ class SpatialMemory:
             if strip not in STRIPS or floor not in rng:
                 continue
             reach = rng[floor]
-            ends = floor in PARAMS_A17["floor_ends"]
+            ends = floor in (self.cfg.floor_ends if self.cfg.floor_ends is not None
+                             else PARAMS_A17["floor_ends"])
             door = lane.get("doorway")
             if door is True:
                 door = "open"  # g03 flags a doorway without saying open or closed

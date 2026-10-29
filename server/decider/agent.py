@@ -653,6 +653,40 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                                         "middle": "open_far"},
                                           "spatial": "server/decider/spatial.py"}},
           "a38 (a37 + goal confirmer c01) with a39's along-the-wall detours and q08."),
+    Agent("a42", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a40 on memory a17b: no wall written at the end of an open_near (g05 'bottom') "
+          "strip, so the move ahead is not 'searched already' 2.5 m out. s03 R15-R17K: "
+          "first turn-arounds all came on that note (eval/phase2/R17_doorway_first/"
+          "s03_analysis.md)."),
+    Agent("a43", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a41 on memory a17b (as a42)."),
 )}
 
 DEFAULT_AGENT = "a00"
@@ -703,7 +737,7 @@ def describe(version: str) -> Dict[str, Any]:
             out["spatial_a15_sha"] = spatial.wording_sha_a15()
         if agent.spatial_config.name == "a16":
             out["spatial_a16_sha"] = spatial.wording_sha_a16()
-        if agent.spatial_config.name == "a17":
+        if agent.spatial_config.name in ("a17", "a17b"):
             out["spatial_a17_sha"] = spatial.wording_sha_a17()
     if agent.staged:
         out["planner_a17_sha"] = planner_a17_sha()

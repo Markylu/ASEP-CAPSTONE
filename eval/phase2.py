@@ -184,6 +184,12 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     "R21K": {"folder": "R21K_along_wall_goal_confirmer",
              "title": "R20K with along-the-wall detours",
              "agent": "a41", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R22": {"folder": "R22_open_near_unwalled",
+            "title": "R21 without the wall at the end of an open_near strip",
+            "agent": "a42", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R22K": {"folder": "R22K_open_near_unwalled_goal_confirmer",
+             "title": "R21K without the wall at the end of an open_near strip",
+             "agent": "a43", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
