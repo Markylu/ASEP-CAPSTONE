@@ -49,7 +49,11 @@ One against `a37` (R20): along-the-wall detours, in two parts.
   the strategist's choice.
 - Strategist, live (`eval/r21_along_probe.py run`/`score`, q08 on the recorded calls of R15, R15N
   and R16K with the items added and the situation worded again, text only):
-  [probe/q08_score.txt](probe/q08_score.txt). PROBE_RESULT
+  [probe/q08_score.txt](probe/q08_score.txt). 267 of 269 calls answered. An along item was
+  picked on **245 of 246** calls that listed one (the rest: unexplored ground 14, doorway 7,
+  explore 1). At the divider the side picked led toward the open door 73 of 139 times (53%): the
+  first side is a coin flip, so what pays is following it to its end and then turning back
+  ("followed N times" wording), which a replay of single calls cannot show. **Gate passed.**
 - Smoke (`eval/r12_probe.py` `smoke_run`, stub strategist picks the first item, R15's 827
   manifests): `a39`, `a40`, `a41` 0 failed steps; 86 of 93 detour calls list an along item. A first
   version handed an along detour back whenever `goal_way` read open, which counts a goal off to the
