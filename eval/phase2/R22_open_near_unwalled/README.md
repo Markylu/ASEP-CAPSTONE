@@ -76,4 +76,22 @@ R21 (`a40`).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Flown 2026-10-29, lanes 1–4 beside R22K: 18/18 valid. **10/18** (initial 6, final 2, dynamic 2)
+against R21's 11/18: **hypothesis not held, not carried forward**.
+
+| site | initial | final | dynamic |
+|---|---|---|---|
+| s01 | 1 | 1 | 1 |
+| s02a | 1 | . | . |
+| s02c | 1 | . | . |
+| s02va | 1 | 1 | . |
+| s02vc | 1 | . | 1 |
+| s03 | 1 | . | . |
+
+- The mechanism took: turn-arounds against a forward "toward" 3 (R21 28; predicted under 14).
+  s03 crossbar (x < 8) first reached at step 8 in `initial` and `final` (R21: 25 and never),
+  `dynamic` 52. s03 `initial` solved (R21 0/3); s03 `final` ended 11.4 m away (R21 27.3 m).
+- The loss is in s02: `dynamic` 2/6 (R21 4/6), s02c `final` and `dynamic` lost. The along-the-wall
+  part (unchanged from R21) still stalls; R21's `dynamic` gains did not repeat, so they look like
+  seed-1 noise more than an effect of the along items.
+- [manipulation.txt](manipulation.txt).

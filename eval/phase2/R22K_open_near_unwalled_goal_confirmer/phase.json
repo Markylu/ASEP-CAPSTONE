@@ -3,10 +3,11 @@
   "title": "R21K without the wall at the end of an open_near strip",
   "citable": false,
   "agent_version": "a43",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "35c7d8e",
+  "started": "2026-10-29T06:53:15+00:00",
+  "finished": "2026-10-29T08:01:01+00:00",
+  "operator": "Markylu",
+  "notes": "Flown overnight 2026-10-29 beside R22.",
+  "lanes": "sctsvr6 lanes 5-8 (asep-r22k-l5..8), shared vLLM :8004"
 }
