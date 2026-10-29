@@ -67,4 +67,17 @@ a goal report only.
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-29 04:25–05:00 UTC, 4 lanes, 18/18 valid. **6/18**: `initial` 4/6, `final` 1/6
+(s02a), `dynamic` 1/6 (s02vc). R14 7/18. **Hypothesis not held**; not carried forward.
+
+| Measure | R14 (`a22`) | R16 (`a27`) | predicted |
+|---|---|---|---|
+| total | 7/18 | 6/18 | ≥ 8: not held |
+| genuine goal reports refused (`in_view`) | – | 13/139 (9.4%) | ≤ 5%: not held |
+| false goal reports refused | – | 6/11 | |
+| losses of sight → reacquired / failed / timeout | 10 → 2 / 4 / 3 | 15 → 7 / 7 / 1 | |
+
+The confirmer worked as probed on false reports, but this agent made few (11 in 18 runs, against
+139 genuine), and in flight it refused more genuine ones than the probe said (9.4% against 4.6%).
+The verify fix took (1 timeout, 7 reacquired). With few false sightings left after R14's floor
+fix, the confirmer has little to remove here. Per run: [manipulation.txt](manipulation.txt).

@@ -42,4 +42,15 @@ As R16: confirmer probe and smoke (`a28` on R12's 862 manifests, 0 failed steps)
 
 ## Outcome
 
-Not flown. Read against R15 and R11.
+Flown 2026-10-29 04:25–05:00 UTC beside R16, 4 lanes, 18/18 valid. **10/18**: `initial` 5/6 (s03
+failed), `final` 2/6 (s01, s02va), `dynamic` 3/6 (s01, s02c, s02va; best `dynamic` of Phase 2).
+R15 9/18, R15N 10/18, R11 11/18. One above R15: within one seed's spread; below R11, so not
+the best agent.
+
+- Confirmer in flight: genuine reports kept 139/151 (92%), false refused 11/17.
+- "Goal in view" hand-backs 4 (R15 7); detours reached 27, closed 9, too long 4.
+- Per run: [manipulation.txt](manipulation.txt); median `blocked_near` 15%, turn-arounds 7.5, max
+  distance from start 22.1 m.
+
+The confirmer stays in the known-goal line (R17K, R18K, R19K carry it): it costs one call on
+steps with a goal report and did no visible harm.
