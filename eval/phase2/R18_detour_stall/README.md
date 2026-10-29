@@ -49,4 +49,6 @@ paid (round the end of a wall) would show as more strategist calls and no fewer 
 
 ## Outcome
 
-Not flown.
+Not flown: taken off the queue on 2026-10-29 at 05:04 UTC, before it started. R15's failure
+analysis found the menu doorways `q07` prefers real on 4 of 54 menus. Its stalled-detour hand-back
+flies in R19 (`a35`) and R19K (`a36`) on `q03` with navigator `p17`.

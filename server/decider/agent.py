@@ -524,6 +524,36 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                           "spatial": "server/decider/spatial.py"}},
           "a32 (known goal, reachable detours, q07, goal confirmer c01) with a33's stalled "
           "detour hand-back."),
+    Agent("a35", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a26 (known goal, reachable detours, p16) with navigator prompt p17 ('searched "
+          "already this way' defined; turn around only on marker-0 toward or every forward "
+          "move blocked) and a33's stalled-detour hand-back. R15/R15N: 50 turn-arounds a "
+          "round against a forward 'toward' (R11 3)."),
+    Agent("a36", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a35 with the goal confirmer c01."),
 )}
 
 DEFAULT_AGENT = "a00"
