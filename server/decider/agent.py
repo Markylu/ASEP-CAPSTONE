@@ -106,6 +106,24 @@ class Agent:
                 if orch.get(k)]
 
 
+#: a39: along-the-wall detours (planner.along_wall). In the features, so the sha.
+ALONG_WALL_A39: Dict[str, Any] = {
+    "max_m": 5.0,
+    "min_m": 1.5,
+    "step_m": 0.25,
+    "look_m": 3.0,
+    "look_within_deg": 60.0,
+    "min_wall_cells": 3,
+    "hand_back_after": 2,
+    "words": {
+        "item": "along the wall, {side} of the way to the goal, up to {d:.0f} m",
+        "followed": "you followed this way {n} time(s) already",
+        "fresh": "not followed yet",
+        "other_ended": "the {side} way along this wall ends at a wall",
+    },
+}
+
+
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
     Agent("a01", "p03", {}, "No goal hint: p03 drops the goal's distance and bearing "
@@ -586,6 +604,54 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                                         "middle": "open_far"},
                                           "spatial": "server/decider/spatial.py"}},
           "a37 with the goal confirmer c01."),
+    Agent("a39", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a35 with along-the-wall detours: on a walled or blocked call code lists the two "
+          "ways along the wall between the drone and the goal, and strategist q08 follows "
+          "one to its end before the other. R15/R15N mode B (no along-wall search) primary "
+          "in 7 of 17 failures."),
+    Agent("a40", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a37 (a35 + doorway confirmer d01) with a39's along-the-wall detours and q08."),
+    Agent("a41", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a38 (a37 + goal confirmer c01) with a39's along-the-wall detours and q08."),
 )}
 
 DEFAULT_AGENT = "a00"

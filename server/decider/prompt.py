@@ -1318,6 +1318,34 @@ goal is usually more of the same wall. The goal is usually behind a wall,"""),
     render=render_strategist,
 )
 
+# q08: the detour strategist for a39 (along-the-wall detours). q03 with the
+# advice to follow the wall that stopped the drone, one way to its end before
+# the other. R15/R15N failure analysis mode B: no along-wall search at the s02
+# divider was primary in 7 of 17 failures; menu doorways were real 4 of 54.
+
+Q08 = Prompt(
+    version="q08",
+    system=Q03.system.replace(
+        """Prefer a detour that lies nearer the goal than the drone. Doors can close; the
+list only shows doorways not known to be closed. Choose "explore" as the target
+when nothing listed looks useful.""",
+        """When you are asked, a wall usually stands between the drone and the goal, and
+the way round it is along it: a gap or an open door somewhere along that wall.
+The two "along the wall" detours follow it, on the left or the right of the
+way to the goal. So:
+1. Follow the wall one way until that way ends: choose the side you followed
+   last time again. Each item says how often its side was followed.
+2. When that side ends at a wall, or is no longer listed, take the other side.
+3. To start, take the side worded nearer the goal; if both are the same, the
+   side with more room.
+4. Choose a doorway or unexplored ground only when no "along the wall" item is
+   listed. "Nearer the goal" is straight-line distance only and says nothing
+   about the wall in between.
+Choose "explore" as the target when nothing listed looks useful."""),
+    user_template=Q03.user_template,
+    render=render_strategist,
+)
+
 # p14: the navigator. The frame with its markers, the planner's target, the
 # perceiver's answer for this image, the last three moves in words, and notes
 # from the map against each action.
@@ -1725,7 +1753,7 @@ open, closed or none.""",
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01)}
+                                                      Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08)}
 
 
 def get(version: str) -> Prompt:

@@ -129,7 +129,8 @@ def route(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
           perception: Optional[Dict[str, Any]], records: List[Dict[str, Any]],
           standing: Optional[spatial.Target], mode: Optional[str],
           last_called: Optional[int], goal: spatial.Point,
-          stall: Optional[Dict[str, float]] = None) -> Route:
+          stall: Optional[Dict[str, float]] = None,
+          along: Optional[Dict[str, Any]] = None) -> Route:
     """The target for this step, and whether q03 must be asked for a detour."""
     step = int(manifest.get("step", 0))
     here = spatial.pose_xyh(manifest.get("pose"))
@@ -142,6 +143,10 @@ def route(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
             hand_back = "detour_" + state
         elif stall is not None and detour_stalled(mem, standing, stall):
             hand_back = "detour_stalled"
+        elif (along is not None and standing.kind == "along" and way == "open"
+              and step - standing.step >= along["hand_back_after"]):
+            # a39: the way toward the goal opened while following the wall.
+            hand_back = "along_way_open"
         elif step - standing.step > P["detour_max_steps"]:
             hand_back = "detour_too_long"
         elif (perception or {}).get("goal") in spatial.STRIPS and way == "open":
@@ -159,6 +164,93 @@ def route(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     elif stalled:
         ask = "stall"
     return Route(goal_target(goal, step), "approach", way, gained, ask, hand_back)
+
+
+# --- a39: along-the-wall detours ------------------------------------------------
+#
+# R15 failure analysis, change 2. Mode B, no search along the wall that stops
+# the drone, was primary in 7 of R15/R15N's 17 failures (about 368 steps); R11's
+# wins came from a goal-side phantom that slid the drone along that wall. Code
+# offers the two ways along it; the strategist (q08) chooses. The parameters
+# and wording are the agent's features["along_wall"] (agent.ALONG_WALL_A39), so
+# part of its sha.
+
+
+def wall_axis(mem: spatial.SpatialMemory, here: spatial.Pose, want: float,
+              p: Dict[str, Any]) -> float:
+    """Heading along the wall between the drone and the goal, pointing to the
+    drone's left of the goal: the main axis of the wall cells within `look_m`
+    toward the goal, or square to the goal when the map has too few."""
+    cells = set(mem.wall) | set(mem.stop_wall)
+    pts = []
+    for c in cells:
+        q = ((c[0] + 0.5) * spatial.CELL_M, (c[1] + 0.5) * spatial.CELL_M)
+        if (spatial.dist(here[:2], q) <= p["look_m"]
+                and abs(spatial.wrap(spatial.bearing(here[:2], q) - want))
+                <= p["look_within_deg"]):
+            pts.append(q)
+    axis = (want + 90.0) % 360.0
+    if len(pts) >= p["min_wall_cells"]:
+        mx = sum(q[0] for q in pts) / len(pts)
+        my = sum(q[1] for q in pts) / len(pts)
+        sxx = sum((q[0] - mx) ** 2 for q in pts)
+        syy = sum((q[1] - my) ** 2 for q in pts)
+        sxy = sum((q[0] - mx) * (q[1] - my) for q in pts)
+        axis = math.degrees(0.5 * math.atan2(2.0 * sxy, sxx - syy)) % 360.0
+    if spatial.wrap(axis - want) < 0:
+        axis = (axis + 180.0) % 360.0
+    return axis
+
+
+def along_room(mem: spatial.SpatialMemory, here: spatial.Pose, heading: float,
+               p: Dict[str, Any]) -> float:
+    """Metres the drone can go along `heading` before the map shows a wall."""
+    room, d = 0.0, p["step_m"]
+    while d <= p["max_m"] + 1e-9:
+        q = (here[0] + d * math.cos(math.radians(heading)),
+             here[1] + d * math.sin(math.radians(heading)))
+        if mem._blocked_cell(spatial.cell(q)):
+            break
+        room, d = d, d + p["step_m"]
+    return room
+
+
+def along_followed(records: List[Dict[str, Any]]) -> Dict[str, int]:
+    """How many times each along-the-wall side was chosen so far."""
+    n = {"left": 0, "right": 0}
+    for r in records:
+        t = ((r.get("strategist") or {}).get("result") or {}).get("target") or ""
+        if t.startswith("along_") and t[6:] in n:
+            n[t[6:]] += 1
+    return n
+
+
+def along_wall(mem: spatial.SpatialMemory, here: spatial.Pose, step: int, goal: spatial.Point,
+               records: List[Dict[str, Any]], p: Dict[str, Any]) -> List[spatial.Target]:
+    """a39: the two along-the-wall detours, left then right of the goal's
+    direction, each worded with how often that way was followed. A side with
+    less than `min_m` of room is left off, and the other says so."""
+    want = spatial.bearing(here[:2], goal)
+    axis = wall_axis(mem, here, want, p)
+    followed = along_followed(records)
+    w = p["words"]
+    sides = {}
+    for side, heading in (("left", axis), ("right", (axis + 180.0) % 360.0)):
+        room = along_room(mem, here, heading, p)
+        if room >= p["min_m"]:
+            sides[side] = (heading, room)
+    out = []
+    for side, (heading, room) in sides.items():
+        notes = [w["followed"].format(n=followed[side]) if followed[side] else w["fresh"]]
+        other = "right" if side == "left" else "left"
+        if other not in sides:
+            notes.append(w["other_ended"].format(side=other))
+        x = here[0] + room * math.cos(math.radians(heading))
+        y = here[1] + room * math.sin(math.radians(heading))
+        out.append(spatial.Target("along_" + side, "along", x, y,
+                                  "{0} ({1})".format(w["item"].format(side=side, d=room),
+                                                     "; ".join(notes)), step))
+    return out
 
 
 def gain_words(here: spatial.Pose, target: spatial.Target, goal: spatial.Point) -> str:
