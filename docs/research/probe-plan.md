@@ -265,6 +265,9 @@ strict JSON, which is the worst of both for a pure reader.
 | B0 | 2026-10-29 | All three rules fail (hits 0–1 of 17). In the shut tine `planner.way` reads `open` on 78% of decisions, so no rule could fire | **Refuted**, B dropped. The gap is `goal_way` reading open in a dead end |
 | E0 | 2026-10-29 | 17/56 = 30% of runs have a "searched" note on a door-ward action (upper bound; no stale blocks); those runs solved more often. Door B is still listed open after shutting in 32% of runs | Holds, weakly, on the threshold. The stale-open doorway is the stronger lead |
 
+| N1 | 2026-10-29 | Same step-0 frame: alone, 2 distinct readings of 20 (2–3% strip fields differ); with 7 neighbours, 6 and 11 of 20 (16–28%). The `:8006` copy passes as a stand-in | **Holds**: the lottery is batching. Noise floor under load is 21.9%, so C1/F1 must run alone |
+| A1 | 2026-10-29 | Repeat agreement 73% vs reordered 59%: +14.2 pts, no call. The code-first item is picked 19% when first, 18% when last; changed picks follow position 1 of 124 times, and 110 of 124 are explore↔item flips | Not supported. A dropped (no primacy bias). The strategist re-rolls under any text change |
+
 Details and readings: each probe's README under `eval/phase2/_probes/`.
 
 ## After the probes

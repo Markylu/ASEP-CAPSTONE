@@ -48,4 +48,27 @@ F1: an effect there counts only at ≥ 2× this rate.
 
 ## Result
 
-Pending.
+Run 2026-10-29 on the `:8006` copy (GPU 3), nothing else on it; `104463b`. The copy was stopped
+and removed afterwards. Output: [score.txt](score.txt), calls: [calls.jsonl](calls.jsonl).
+
+| Frame | *alone*: distinct readings / raw | *loaded*: distinct readings / raw | Strip-field disagreement with mode (*alone* → *loaded*) |
+|---|---|---|---|
+| s02a/final step 0 | 2 / 2 of 20 | 6 / 11 of 20 | 1.7% → 15.8% |
+| s03/final step 0 | 2 / 2 of 20 | 11 / 14 of 20 | 2.5% → 27.9% |
+
+**Gate: holds.** Same frame, same prompt, temperature 0. With 7 neighbours in the batch, the
+reading changes on 16–28% of strip fields; alone, on 2–3%. The step-0 lottery in `why_14.md` is
+mostly batching.
+
+- **Stand-in: yes.** The copy's *alone* mode agrees with `:8004`'s recorded readings 72% (s02a)
+  and 69% (s03). The recorded readings agree with each other 62% and 73%: 6 recorded s02a runs gave
+  5 distinct readings, and 18 s03 runs gave 7.
+- *alone* is not fully deterministic either: 2 readings in 20, not 1.
+- **Noise floor for C1 and F1: 21.9%** strip-field disagreement under load, the condition flights
+  run in. An effect there must reach about 44% to count under the 2× rule. That is likely out of
+  reach, so C1 and F1 should run at concurrency 1 on a quiet instance, where the floor is about 2%.
+
+**What it means for rounds.** Every flown round has run 8 lanes on one vLLM, so every perceiver
+reading carried this noise. An 18-run round cannot separate small agent changes from it. The fix
+on the host side is the operator's call: a batch-invariant vLLM (`VLLM_BATCH_INVARIANT=1`, MoE
+support unverified), or flying fewer lanes per instance and spreading them over more instances.

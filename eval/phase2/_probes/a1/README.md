@@ -47,4 +47,36 @@ noise directly, the gate does not need N1's numbers.
 
 ## Result
 
-Pending.
+Run 2026-10-29, `104463b`. Shard 0 (150 calls) on `:8004` ran beside N1; shard 1 (150 calls) ran
+on the `:8006` copy after N1 had passed it as a stand-in. Concurrency was 8 per instance. Output:
+[score.txt](score.txt), calls: `calls_0of2.jsonl`, `calls_1of2.jsonl`.
+
+| Readout | All 300 | Not all-explore (255) |
+|---|---|---|
+| *Nn*: same order asked twice | 73.0% | 68.2% |
+| *No*: reordered | 58.8% | 51.6% |
+| *Nn* − *No* | **+14.2 pts** | +16.7 pts |
+| First-listed picked (rec / rec2 / rev / shuf) | 19 / 23 / 5 / 14% | 22 / 27 / 6 / 17% |
+| Where rec ≠ rev, rev's pick at the same list position | 0.8% (1 of 124) | — |
+| Replay fidelity (rec = originally recorded pick) | 68.3% | 65.9% |
+
+**Gate: no call.** +14.2 pts falls between the 5 and 15 thresholds.
+
+**Reading.** Reordering changes picks more than repeating does, but not by following position:
+- The item code lists first is picked 19.0% of the time where it stands first, and 18.0% when the
+  reversal moves it last. Position barely moves it.
+- When a reorder changes the pick, the new pick sits at the same list position in 1 of 124 cases.
+- Of those 124 changes, 110 are flips between `explore` and an item (61 item → explore, 49 the
+  other way). Only 14 are item → item.
+
+So the model has no primacy bias here. Any change to the text re-rolls a coin it was already
+flipping between "take a detour" and "explore". For q03 menus, A0's +41 pt "position effect" was
+not position. A0 also covered q08–q13 menus (along, other-way items listed first), which A1 did not
+test.
+
+**Belief A is not supported. The candidate (order the menu by code rank) is dropped:** the menu is
+already ordered that way, and order is not what drives picks.
+
+**The finding that matters is the noise.** The same strategist text, asked twice under load, gives
+a different target 27% of the time. Recorded picks replay 68% of the time. Together with N1, this
+says every model stage in a flight runs on a coin that batching flips, not only the perceiver.

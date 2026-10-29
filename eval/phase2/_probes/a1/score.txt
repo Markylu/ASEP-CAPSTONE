@@ -1,0 +1,30 @@
+A1: 300 calls x 4 orders; 300 with all four answered
+
+## all (300 calls)
+  Nn (rec vs rec2, noise): 73.0%
+  No (rec vs rev 58.7%, rec vs shuf 59.0%): 58.8%
+  Nn - No: +14.2 pts
+  rec : first-listed picked 19.0%, explore 48.0%
+  rec2: first-listed picked 23.0%, explore 45.3%
+  rev : first-listed picked 5.3%, explore 52.0%
+  shuf: first-listed picked 14.0%, explore 46.0%
+  rec != rev on 124 calls; rev pick at the same list position: 0.8%
+  replay fidelity (rec = originally recorded pick): 68.3%
+
+## not all-explore (255 calls)
+  Nn (rec vs rec2, noise): 68.2%
+  No (rec vs rev 51.4%, rec vs shuf 51.8%): 51.6%
+  Nn - No: +16.7 pts
+  rec : first-listed picked 22.4%, explore 38.8%
+  rec2: first-listed picked 27.1%, explore 35.7%
+  rev : first-listed picked 6.3%, explore 43.5%
+  shuf: first-listed picked 16.5%, explore 36.5%
+  rec != rev on 124 calls; rev pick at the same list position: 0.8%
+  replay fidelity (rec = originally recorded pick): 65.9%
+
+## By instance
+  http://127.0.0.1:8004: 150 calls, Nn 76.7%, No 55.7%
+  http://127.0.0.1:8006: 150 calls, Nn 69.3%, No 62.0%
+
+## Gate (all calls)
+  Nn - No = +14.2 pts -> no call
