@@ -1400,10 +1400,54 @@ anything that could be the goal. Then give the report.""",
     render=render_identifier_question,
 )
 
+# --- g06: Phase 2 R15, the floor that runs on ------------------------------------
+# g05 had no answer for floor that is plainly there but whose far end is not in
+# sight, and answered no_floor for it: of R12's 477 no_floor strips, 157 were
+# clear past 8 m, with reasons such as "the floor is visible across the entire
+# image ... the floor line is not visible". g06 renames no_floor (a wall at the
+# bottom of the strip), adds runs_on, and has the model look at the bottom of
+# the strip first.
+
+G06 = Prompt(
+    version="g06",
+    system="""You check one image from the front camera of a small indoor drone.
+Judge this image alone.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+1. The goal is a glowing red sphere. Say which strip it is in, or not_visible.
+   If you can see it, say how far away it looks: touching (it is large in the
+   image, under 2 m away), near (2 to 6 m), mid (6 to 15 m), far (over 15 m).
+   If it is not visible, its distance is none.
+2. For each strip, first look at the very bottom edge of the strip. The floor
+   is a flat surface with grid lines. The camera is level, so floor at the
+   bottom edge means nothing stands within about 2 m that way.
+   wall_at_bottom only if the bottom edge of the strip shows no floor at all:
+   a wall, door, pillar or object covers it. Darkness or shadow on the floor
+   is still floor.
+   If floor shows at the bottom edge, follow it up the strip and say where it
+   ends, at the line where it meets a wall, door or obstacle:
+   bottom if that line is within the bottom quarter of the image;
+   lower if it is higher than that but well below the middle;
+   middle if it is just below the middle of the image;
+   runs_on if the floor goes on into the distance and you cannot see where it
+   ends, or it ends at the middle of the image.
+   Also say whether that strip shows a doorway: open if there is an opening in
+   a wall the drone could fly through, closed if a door fills the opening, or
+   none.
+
+First say, for each strip from left to right, what is at its bottom edge and
+where its floor ends. Then describe walls, openings, doors and anything that
+could be the goal. Then give the report.""",
+    user_template="Report on this image.",
+    render=render_identifier_question,
+)
+
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05)}
+                                                      Q05, G06)}
 
 
 def get(version: str) -> Prompt:

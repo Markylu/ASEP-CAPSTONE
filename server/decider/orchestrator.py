@@ -73,11 +73,11 @@ def perception_from(parsed: Dict[str, Any], version: str = "g03",
         if lane.get("floor") not in schema.floor_classes(version):
             raise vlm.VLMError("perceiver gave no valid floor for {0}".format(strip))
         door = lane.get("doorway")
-        if version in ("g04", "g05"):
+        if version in ("g04", "g05", "g06"):
             door = door if door in ("open", "closed") else False
         else:
             door = bool(door)
-        if version == "g05":
+        if version in ("g05", "g06"):
             lanes.append({"strip": strip, "floor": (floor_map or {})[lane["floor"]],
                           "floor_end": lane["floor"], "doorway": door})
         else:

@@ -348,6 +348,25 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                           "spatial": "server/decider/spatial.py"}},
           "R14G, flown beside R14: a21 (goal truth in the strategist's text) with a22's "
           "floor map and verify step limit."),
+    Agent("a24", "p14", {"orchestrator": {"perceiver": "g06", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"wall_at_bottom": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far",
+                                                        "runs_on": "open_far"},
+                                          "verify_budget": {"min_steps": 8,
+                                                            "extra_steps": 4,
+                                                            "steps_per_m": 0.8},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a22 with perceiver g06: g05 with no_floor renamed wall_at_bottom, a runs_on "
+          "answer for floor whose end is out of sight, and the bottom edge of each strip "
+          "looked at first. R12: 157 of g05's 477 no_floor strips were clear past 8 m, "
+          "with reasons saying the floor was visible across the image."),
 )}
 
 DEFAULT_AGENT = "a00"

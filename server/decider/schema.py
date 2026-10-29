@@ -165,16 +165,32 @@ DOORWAYS_G04 = ["open", "closed", "none"]
 #: agent's floor_map turns it into a floor class. Doorways as g04.
 FLOOR_ENDS_G05 = ["no_floor", "bottom", "lower", "middle"]
 
+#: g06 (a24): g05's floor ends with no_floor renamed for what it means and
+#: runs_on for floor whose end is not in sight. Doorways as g04.
+FLOOR_ENDS_G06 = ["wall_at_bottom", "bottom", "lower", "middle", "runs_on"]
+
 
 def floor_classes(version: str = "g03") -> List[str]:
     if version == "g05":
         return FLOOR_ENDS_G05
+    if version == "g06":
+        return FLOOR_ENDS_G06
     return FLOOR_CLASSES_G04 if version == "g04" else FLOOR_CLASSES
 
 
 def perceiver_schema(version: str = "g03") -> Dict[str, Any]:
-    if version == "g05":
+    if version == "g06":
         lane_props: Dict[str, Any] = {
+            "floor": {"type": "string", "enum": FLOOR_ENDS_G06,
+                      "description": "Where this strip's floor ends in the image: a wall at "
+                                     "its bottom edge, the bottom quarter, lower, just below "
+                                     "the middle, or runs on out of sight."},
+            "doorway": {"type": "string", "enum": DOORWAYS_G04,
+                        "description": "An opening in a wall in this strip: open, closed by "
+                                       "a door, or none."},
+        }
+    elif version == "g05":
+        lane_props = {
             "floor": {"type": "string", "enum": FLOOR_ENDS_G05,
                       "description": "Where this strip's floor ends in the image: no floor "
                                      "at its bottom, the bottom quarter, lower, or just "
