@@ -119,6 +119,21 @@ One unscored `dynamic` run per site per agent on the flight host: `/health` repo
 `a21`'s shas; every record carries `stage` (with `vantage`, `verify_since`) and `evaluator`; at
 least one `goal_lost` episode reaches a check look; no run passes 700 s.
 
+**Flown 2026-10-28 at `82d2721`, scratch clones `~/r13_shake` (a20, lane 1) and `~/r13g_shake`
+(a21, lane 2) in parallel: 12/12 valid, every criterion met.** `/health` reported both shas;
+all 714 records carry `stage` (with `vantage`) and `evaluator`, 0 failed steps; runs took
+6–7 min; a21's goal position in 62/62 strategist texts and 0 navigator texts. Unscored; for the
+record, a21 reached the goal in s02va (54 steps), the rest hit 60 steps.
+
+Verify episodes, 18: 7 `verify_failed`, 5 `reacquired*`, 6 `verify_timeout`. The usual episode
+takes 3 steps (turn around, fly 1.7 m back, turn to face the seen way). Three timeouts (R13 s01,
+s02a, s02va) are a turn-around ping-pong 1.7 m from the vantage: g05 reads all five strips
+`blocked_near` both ways, so every forward move carries "wall close (seen now)", wall-aware
+"toward" leaves the move back to the vantage unmarked, and the navigator turns around again (R13
+s02va: eight turn-arounds in a row). The drone had flown that 1.7 m one step before. This is
+R12's g05 wall reading, not the verify stage; the other three timeouts are long trips back
+(5–9 m) that ran out of 8 steps.
+
 ## Host
 
 sctsvr6 headless (Docker, Mesa lavapipe), as R7–R12. R13 and R13G fly at one SHA, 4 lanes each
