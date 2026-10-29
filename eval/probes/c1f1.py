@@ -83,7 +83,8 @@ def truth(site, arm, r, rows, met):
     return {"goal": goal, "lanes": lanes}
 
 
-def sample():
+def sample(salt: str = "", exclude=frozenset()):
+    """C1's sample; C2 draws a fresh one with another salt, excluding C1's keys."""
     pool = {}
     for run in runs(FIRST, LAST):
         site, arm = run["site"], run["arm"]
@@ -98,7 +99,9 @@ def sample():
             if not f.exists():
                 continue
             key = "{0}/{1}/{2}/{3}".format(run["round"], site, arm, r["step"])
-            pool.setdefault((site, arm), []).append((h(key), key, str(f), r, rows, met))
+            if key not in exclude:
+                pool.setdefault((site, arm), []).append((h(salt + key), key, str(f), r, rows,
+                                                         met))
     cells = {}
     for (site, arm), items in sorted(pool.items()):
         for hk, key, f, r, rows, met in sorted(items, key=lambda x: x[0])[:PER_SITE_ARM]:
@@ -123,11 +126,13 @@ def unmirror(result):
     return out
 
 
-def mirrored(f) -> Path:
-    return FRAMES / (f["id"] + "_m.png")
+def mirrored(f, out: Path = OUT) -> Path:
+    return out / "frames" / (f["id"] + "_m.png")
 
 
-async def run_probe(shard: int, of: int) -> None:
+async def run_probe(shard: int, of: int, reads=READS, out: Path = OUT) -> None:
+    """Reads: orig/orig2 (g05), mirror (g05 on the flipped frame), nr (g05-nr),
+    nr_mirror (g05-nr on the flipped frame)."""
     from server.decider import agent as agents, config, orchestrator, prompt as prompts
     from server.decider import schema, views, vlm
     feats = agents.get(AGENT).features["orchestrator"]
@@ -140,28 +145,29 @@ async def run_probe(shard: int, of: int) -> None:
     nr_sch["required"] = [k for k in nr_sch["required"] if k != "reason"]
 
     async def call(name, f):
-        frame = mirrored(f) if name == "mirror" else Path(f["frame"])
+        flip = name in ("mirror", "nr_mirror")
+        frame = mirrored(f, out) if flip else Path(f["frame"])
         view = views.perceiver(p, f["manifest"], base64.b64encode(frame.read_bytes()).decode())
-        system, js = (nr_system, nr_sch) if name == "nr" else (view.system, sch)
+        system, js = (nr_system, nr_sch) if name.startswith("nr") else (view.system, sch)
         sub = await vlm.call_structured(
             schema.PERCEIVER_SCHEMA_NAME, system, view.text, view.image_b64, js,
             lambda parsed: orchestrator.perception_from(parsed, "g05", feats.get("floor_map")),
             orchestrator.PERCEIVER_MAX_TOKENS)
         res = sub.result
-        if name == "mirror" and res:
+        if flip and res:
             res = unmirror(res)
         return {"id": f["id"], "key": f["key"], "read": name, "result": res, "raw": sub.raw,
                 "rung": sub.rung, "latency_ms": sub.latency_ms,
                 "instance": config.LITELLM_BASE_URL}
 
-    todo = load_sample()[shard::of]
-    path = OUT / "calls_{0}of{1}.jsonl".format(shard, of)
+    todo = load_sample(out)[shard::of]
+    path = out / "calls_{0}of{1}.jsonl".format(shard, of)
     done = set()
     if path.exists():
         done = {(c["id"], c["read"]) for c in map(json.loads, path.read_text().splitlines())}
     with path.open("a") as fh:
         for n, f in enumerate(todo):
-            for name in READS:  # one at a time: concurrency 1
+            for name in reads:  # one at a time: concurrency 1
                 if (f["id"], name) not in done:
                     fh.write(json.dumps(await call(name, f)) + "\n")
                     fh.flush()
@@ -171,8 +177,8 @@ async def run_probe(shard: int, of: int) -> None:
     print("shard {0}/{1}: done on {2}".format(shard, of, config.LITELLM_BASE_URL))
 
 
-def load_sample():
-    return [json.loads(l) for l in (OUT / "sample.jsonl").read_text().splitlines()]
+def load_sample(out: Path = OUT):
+    return [json.loads(l) for l in (out / "sample.jsonl").read_text().splitlines()]
 
 
 # --- scoring -----------------------------------------------------------------

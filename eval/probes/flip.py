@@ -2,7 +2,7 @@
 
 Stdlib and Pillow only, so it runs outside the probe image, which has no Pillow:
 
-    ~/miniforge3/envs/vllm-ai/bin/python eval/probes/flip.py
+    ~/miniforge3/envs/vllm-ai/bin/python eval/probes/flip.py [probe folder, default c1f1]
 """
 import json
 import sys
@@ -10,7 +10,8 @@ from pathlib import Path
 
 from PIL import Image
 
-OUT = Path(__file__).resolve().parents[2] / "eval" / "phase2" / "_probes" / "c1f1"
+PROBES = Path(__file__).resolve().parents[2] / "eval" / "phase2" / "_probes"
+OUT = PROBES / (sys.argv[1] if len(sys.argv) > 1 else "c1f1")
 
 
 def main() -> int:
