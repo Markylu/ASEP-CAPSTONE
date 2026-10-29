@@ -3,7 +3,7 @@
 **Agent:** `a21` (`97790ec7c54e`) · **Navigator prompt:** `p14` (`31a9f28eaf94`) ·
 **Perceiver:** `g05` (`133ed83db46b`) · **Strategist:** `q05` (`86e1f4104ac0`, new) ·
 **Stage machine:** as `a20` (`planner_a17` `6eb22517c3e0`, `planner_a20` `2ff7c48cdc16`) ·
-**Status:** pre-registered 2026-10-28, not flown. Probe gate passed with R13's.
+**Status:** flown 2026-10-29 beside R13 (18/18 valid, 5/18).
 
 `a21` is `a20` (R13) with the goal's true position in the strategist's text alone
 (`goal_truth: strategist`). The operator's second candidate, flown beside R13 at the same SHA
@@ -24,4 +24,7 @@ Everything else (change, evidence, predictions, gate, host) is in
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-29 beside R13 at `3a8f6fb`, lanes 5–8. 18/18 valid. **5/18** (`initial` 5/6,
+`final` 0/6, `dynamic` 0/6): R12's score, one under R13, far under R11 (11/18). The goal's position
+in the strategist's text did not lift `final` (predicted higher than R13). Verify: 11 losses,
+7 failed checks, 4 timeouts, 0 reacquired. Read with R13's [Outcome](../R13_verify/README.md#outcome).

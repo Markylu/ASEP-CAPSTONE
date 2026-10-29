@@ -384,6 +384,20 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "a17's menu (reachable edges of unsearched ground, reachable doorways, a way "
           "back) on a17's memory, with g05 read as a22. R11's failure analysis: 34 of 37 "
           "detour picks lay behind or inside a wall, 51% of steps stood on them."),
+    Agent("a26", "p16", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a25 with navigator prompt p16: p14 with the notes ranked (goal, then 'toward "
+          "your target' including turning around, then new ground). Probe on R11's steps "
+          "(eval/r15_nav_probe.py): 'toward' on marker 0 followed 35% (p14 21%)."),
 )}
 
 DEFAULT_AGENT = "a00"

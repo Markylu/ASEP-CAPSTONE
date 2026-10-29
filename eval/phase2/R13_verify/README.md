@@ -4,7 +4,7 @@
 **Perceiver:** `g05` (`133ed83db46b`, as `a19`) · **Strategist:** `q04` (`f8fdf4b5946c`, as `a19`) ·
 **Spatial memory:** `spatial.A17` (as `a19`) · **Stage machine:** `planner_a17` `6eb22517c3e0` +
 **verify** `planner_a20` `2ff7c48cdc16` ·
-**Status:** pre-registered 2026-10-28, not flown. Probe gate passed ([probe/](probe/)).
+**Status:** flown 2026-10-29 (18/18 valid, 6/18). Probe gate passed ([probe/](probe/)).
 
 Second agent, flown beside it at the same SHA: **R13G**, `a21` (`97790ec7c54e`), below and in
 [R13G's README](../R13G_verify_goal_words/README.md). Spec: `docs/phase2-test-plan.md`.
@@ -146,4 +146,24 @@ sctsvr6 headless (Docker, Mesa lavapipe), as R7–R12. R13 and R13G fly at one S
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-29 02:30–03:13 UTC on sctsvr6 at `3a8f6fb`, 8 parallel lanes (R13 `a20` on 1–4,
+R13G `a21` on 5–8), merged and closed with `eval/phase2_merge.py`. 18/18 valid each. Built and
+flown overnight without the operator (operator, 2026-10-28: fix, fly, iterate, do not wait).
+
+| Arm | R11 (`a16`) | R12 (`a19`) | R13 (`a20`) | R13G (`a21`) |
+|---|---|---|---|---|
+| `initial` | 6/6 | 5/6 | 5/6 | 5/6 |
+| `final` | 4/6 | 0/6 | 0/6 | 0/6 |
+| `dynamic` | 1/6 | 0/6 | 1/6 (s02c, step 60) | 0/6 |
+| total | 11/18 | 5/18 | **6/18** | **5/18** |
+
+- **Hypothesis not supported.** `dynamic` 1/6 against the predicted ≥ 2/6; `final` 0/6 against
+  ≥ 1/6. R13 beats R12 by one run (the drop criterion's bar), R13G does not; neither is near R11.
+- **Verify episodes** (`evaluator.events`): R13 15 losses of sight → 8 `verify_failed`,
+  4 `verify_timeout`, 1 `reacquired`; R13G 11 → 7, 4, 0. Predicted ≥ 1/3 reacquired: 1/26.
+- **R13G against R13:** goal words in the menu changed nothing measurable (5 vs 6).
+- **Why, first read:** `final` and `dynamic` fail the way R12 did: g05's `bottom` answers walled
+  0.75 m out (3% truly blocked within 1.9 m, `../R14_open_floor/probe/floor_confusion_R12.txt`)
+  keep the drone near its start, so the goal is rarely seen and verify rarely has a real sighting
+  to return to. Fixed in R14 (`a22`/`a23`). Full analysis: [failure_analysis.md](failure_analysis.md)
+  (written by a subagent, read-only).

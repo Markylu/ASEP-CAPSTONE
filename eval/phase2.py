@@ -141,6 +141,15 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     "R14G": {"folder": "R14G_open_floor_goal_words",
              "title": "R14 with goal truth in the search menu",
              "agent": "a23", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R15: the goal's true position kept by the planner again (a16's routing, R11's
+    # 11/18) on a17's memory with reachable detours only and a22's floor map (a25);
+    # R15N: a25 with navigator prompt p16 (a26). Goal truth is a tool here (operator,
+    # 2026-10-28: the aim is the best agent).
+    "R15": {"folder": "R15_known_goal_reach", "title": "Known goal, reachable detours",
+            "agent": "a25", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R15N": {"folder": "R15N_known_goal_ranked_notes",
+             "title": "R15 with the navigator's notes ranked (p16)",
+             "agent": "a26", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
