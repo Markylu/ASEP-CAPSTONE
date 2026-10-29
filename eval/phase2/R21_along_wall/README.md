@@ -94,4 +94,23 @@ R20 (`a37`: `a35` + doorway confirmer `d01`).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Flown 2026-10-29, lanes 1–4 beside R21K: 18/18 valid. **11/18** (initial 5, final 2, dynamic 4)
+against R20's 11/18: **total not beaten, hypothesis not held**; the arms moved apart.
+
+| site | initial | final | dynamic |
+|---|---|---|---|
+| s01 | 1 | 1 | 1 |
+| s02a | 1 | . | . |
+| s02c | 1 | 1 | 1 |
+| s02va | 1 | . | 1 |
+| s02vc | 1 | . | 1 |
+| s03 | . | . | . |
+
+- `dynamic` 4/6 (R20 1/6; the best dynamic arm in Phase 2): s02va and s02vc `dynamic` solved for
+  the first time in any round.
+- `final` 2/6 (R20 4/6): s02a `final` ended 12.9 m away (R20 reached it in 42 steps); s03 0/3
+  (R20 2/3), s03 `final` 27.3 m away.
+- Manipulation took: an along item picked on 79 of the 84 calls that listed one. Not the span:
+  mean non-goal target span 3.4 steps (R20 3.1; predicted ≥ 6). Stalled-detour hand-backs 28
+  (R20 10): along items stall, the drone does not slide along the wall as far as the item lies.
+- [manipulation.txt](manipulation.txt).
