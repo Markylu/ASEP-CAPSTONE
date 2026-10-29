@@ -252,6 +252,11 @@ def smoke_run(run: Path, work: Path, strip_goal: bool) -> List[Dict[str, Any]]:
             ids = json_schema["properties"]["target"]["enum"]
             return vlm.SubCall(name, validate({"reason": "stub", "mode": "explore",
                                                "target": ids[0]}), "stub")
+        if name == schema.CONFIRMER_SCHEMA_NAME:
+            # Refuse every other report, so both branches run.
+            cur["confirms"] = cur.get("confirms", 0) + 1
+            return vlm.SubCall(name, validate({"reason": "stub", "present":
+                                               "no" if cur["confirms"] % 2 else "yes"}), "stub")
         enum = json_schema["properties"]["action"]["enum"]
         pick = rec["index"] if rec.get("index") in enum else enum[0]
         return vlm.SubCall(name, validate({"action": pick, "reason": "stub"}), "stub")
