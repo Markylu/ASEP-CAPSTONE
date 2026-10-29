@@ -17,13 +17,15 @@ navigator text and annotated frame on the flight host, under each prompt's syste
 
 | prompt | "toward" on marker 0 followed | "toward" on a forward move followed |
 |---|---|---|
-| `p14` | 47/228 (21%) | 36/48 (75%) |
-| `p15` (one sentence changed) | 71/228 (31%) | 37/49 (76%) |
-| `p16` | see probe/ | see probe/ |
+| `p14` | 47/228 (21%) | 107/150 (71%) |
+| `p15` (one sentence changed) | 71/228 (31%) | 115/150 (77%) |
+| `p16` | **83/228 (36%)** | **115/150 (77%)** |
 
 With `a17`'s memory "toward" rarely sits on marker 0 (it goes on the sharpest open move on the
 target's side), so the probe's `back` set overstates the change's reach; `ahead` checks it does
-no harm.
+no harm. The R13 failure analysis warns that in the no-truth agents (`a19`/`a20`) the navigator
+already follows "toward" on marker 0 70–80% of the time (ping-pong on false walls), so `p16` is
+flown only on the known-goal agent here.
 
 ## Outcome
 
