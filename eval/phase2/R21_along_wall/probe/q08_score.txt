@@ -1,0 +1,9 @@
+  along_listed: 246
+  calls: 267
+  divider_along_picks: 139
+  divider_toward_open: 73
+  kind_along: 245
+  kind_explore: 1
+  kind_frontier: 14
+  kind_opening: 7
+  along picked when listed 245/246

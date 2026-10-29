@@ -1,0 +1,17 @@
+2. smoke (a22 and a23) on eval/phase2/R12_staged_search/runs: decisions 862; failed steps 0
+   no-truth agent with and without the goal block: differ 0
+   truth twin against it, strategist text aside: differ 0
+   truth twin strategist texts with the goal's position 126/126; navigator texts 0
+   stages {'goal': 124, 'verify': 77, 'explore': 661}; events {'goal_sighted': 14, 'detour_ended': 16, 'goal_lost': 10, 'verify_timeout': 8, 'lost': 9, 'blacklisted': 25, 'reacquired_moved': 1, 'verify_failed': 1}
+smoke: PASS
+
+first a21 strategist text:
+Step 2. You are asked now because the way toward the goal you saw is walled.
+The goal was seen at step 2: about 10 m, ahead.
+The goal's position is known: about 21 m, ahead. It does not move.
+Places you can choose from:
+  unexplored_1: unsearched ground (18 cells along its edge), 2 m away over known floor, close by, behind-right; about as far from the goal as you are
+  back_to_step_0: where you were at step 0, about 3 m, behind; about 3 m farther from the goal than you are
+  explore: no fixed target, go where the image shows open floor
+
+Choose a mode and a place.

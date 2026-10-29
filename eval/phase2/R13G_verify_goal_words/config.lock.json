@@ -1,0 +1,58 @@
+{
+  "spec": "docs/phase2-test-plan.md",
+  "model": "Qwen3-VL-30B-A3B",
+  "vlm_profile": "remote",
+  "temperature": 0.0,
+  "frame_size": [
+    768,
+    768
+  ],
+  "freeze_world": true,
+  "physics_ticks_per_second": 60,
+  "godot_version": "4.7.2-stable (official)",
+  "config": {
+    "fov_deg": 87.0,
+    "camera_pitch": 0.0,
+    "num_actions": 5,
+    "include_turn_around": true,
+    "fan_spread": 1.0,
+    "action_dist": 1.7,
+    "annotation_distance": 6.0
+  },
+  "max_steps": 60,
+  "max_collisions": -1,
+  "stop_on_goal": true,
+  "wall_clock_s": 900,
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "spawn_jitter": {
+    "dz_m": 0.5,
+    "dyaw_deg": 5.0
+  },
+  "sites": {
+    "s01_occluder_dropin": 1,
+    "s02a_doors_open_a": 2,
+    "s02c_doors_open_c": 2,
+    "s02va_doors_visible_a": 1,
+    "s02vc_doors_visible_c": 1,
+    "s03_fork_deadend": 2
+  },
+  "agent_version": "a21",
+  "agent_sha": "97790ec7c54e",
+  "prompt_version": "p14",
+  "prompt_sha": "31a9f28eaf94",
+  "subagent_prompts": {
+    "g05": "133ed83db46b",
+    "q05": "86e1f4104ac0"
+  },
+  "spatial_sha": "eceb875a68a3",
+  "spatial_a14_sha": "0075a8a0e5c0",
+  "spatial_a17_sha": "63ccdaa218d9",
+  "planner_a17_sha": "6eb22517c3e0",
+  "planner_a20_sha": "2ff7c48cdc16"
+}

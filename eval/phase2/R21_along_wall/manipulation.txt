@@ -1,0 +1,20 @@
+== eval/phase2/R21_along_wall/runs
+  s01/dynamic      goal_reached steps 57  blocked_near  24%  turn-arounds 12  max from start  23.4 m  collisions 3
+  s01/final        goal_reached steps 28  blocked_near  21%  turn-arounds  3  max from start  23.0 m  collisions 0
+  s01/initial      goal_reached steps 14  blocked_near  13%  turn-arounds  0  max from start  22.1 m  collisions 0
+  s02a/dynamic     max_steps    steps 60  blocked_near  15%  turn-arounds 10  max from start  13.4 m  collisions 3
+  s02a/final       max_steps    steps 60  blocked_near  22%  turn-arounds 10  max from start  13.9 m  collisions 3
+  s02a/initial     goal_reached steps 14  blocked_near  16%  turn-arounds  0  max from start  22.1 m  collisions 0
+  s02c/dynamic     goal_reached steps 59  blocked_near  25%  turn-arounds  7  max from start  22.6 m  collisions 3
+  s02c/final       goal_reached steps 24  blocked_near  18%  turn-arounds  1  max from start  21.7 m  collisions 1
+  s02c/initial     goal_reached steps 14  blocked_near  27%  turn-arounds  0  max from start  22.1 m  collisions 0
+  s02va/dynamic    goal_reached steps 47  blocked_near  18%  turn-arounds  4  max from start  31.3 m  collisions 4
+  s02va/final      max_steps    steps 60  blocked_near  23%  turn-arounds  9  max from start  22.2 m  collisions 4
+  s02va/initial    goal_reached steps 19  blocked_near  19%  turn-arounds  0  max from start  30.2 m  collisions 0
+  s02vc/dynamic    goal_reached steps 53  blocked_near  18%  turn-arounds  8  max from start  30.8 m  collisions 3
+  s02vc/final      max_steps    steps 60  blocked_near  19%  turn-arounds 10  max from start  22.1 m  collisions 2
+  s02vc/initial    goal_reached steps 19  blocked_near   8%  turn-arounds  0  max from start  30.2 m  collisions 0
+  s03/dynamic      max_steps    steps 60  blocked_near  14%  turn-arounds  7  max from start  13.3 m  collisions 2
+  s03/final        max_steps    steps 60  blocked_near  21%  turn-arounds  9  max from start  11.3 m  collisions 4
+  s03/initial      max_steps    steps 60  blocked_near  25%  turn-arounds 12  max from start  27.9 m  collisions 7
+  median: blocked_near 19%, turn-arounds 7, max from start 22.2 m

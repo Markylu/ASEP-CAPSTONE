@@ -312,7 +312,8 @@ class Phase:
     def __init__(self, *, number: int, root: Path, unit_key: str, unit_label: str,
                  units: Dict[str, Dict[str, Any]], lock: Dict[str, Any], script: str,
                  spec: str, orders: Optional[Dict[str, str]] = None,
-                 agent_lock: Optional[Callable[[str], Dict[str, Any]]] = None) -> None:
+                 agent_lock: Optional[Callable[[str], Dict[str, Any]]] = None,
+                 unit_readme: Optional[Callable[[str], str]] = None) -> None:
         self.number = number
         self.root = root
         self.unit_key = unit_key
@@ -323,6 +324,7 @@ class Phase:
         self.spec = spec
         self.orders = orders or {}
         self.agent_lock = agent_lock
+        self.unit_readme = unit_readme
         self.lock_path = root / "config.lock.json"
         self.matrix_path = root / "matrix.csv"
         self.results_dir = root / "results"
@@ -425,6 +427,13 @@ class Phase:
                 phase.update({"status": "planned", "git_sha": None, "started": None,
                               "finished": None, "operator": None, "notes": ""})
                 write_json(folder / "phase.json", phase)
+            # The unit's write-up, written before it flies. Only a stub, only
+            # once, and never for a unit already flown: a hypothesis written
+            # after the result is not one.
+            readme = folder / "README.md"
+            if (self.unit_readme and not readme.is_file()
+                    and read_json(folder / "phase.json").get("status") == "planned"):
+                readme.write_text(self.unit_readme(unit))
             for site, arm, seed in sorted(order):
                 if (unit, site, arm, str(seed)) in have:
                     continue
@@ -454,8 +463,10 @@ class Phase:
             current = ([self.latest_row(rows, unit, s, a, sd)
                         for s, a, sd in self.order_of(unit)] if rows else [])
             valid = sum(1 for r in current if r["status"] == "valid")
-            summary = ("[summary]({0}/summary.md)".format(spec["folder"])
-                       if (folder / "summary.md").is_file() else "")
+            summary = " · ".join(
+                "[{0}]({1}/{2})".format(name, spec["folder"], file)
+                for name, file in (("write-up", "README.md"), ("summary", "summary.md"))
+                if (folder / file).is_file())
             agent_cell = " {0} |".format(spec.get("agent", "")) if with_agent else ""
             lines.append("| {0} | {1} |{2} {3} | {4} | {5} / {6} | {7} | {8} |".format(
                 unit, spec["title"], agent_cell, "yes" if spec["citable"] else "no",
@@ -526,11 +537,12 @@ class Phase:
                         else "no RUN ENDED line (exit {0})".format(code)))
         return code
 
-    def replay(self, run_dir: Path, decider_url: str, godot: str) -> Dict[str, Any]:
+    def replay(self, run_dir: Path, decider_url: str, godot: str,
+               headless: bool = False) -> Dict[str, Any]:
         verdict_path = run_dir / "replay.json"
         subprocess.run([sys.executable, str(REPLAY_CLI), str(run_dir),
                         "--decider-url", decider_url, "--godot", godot,
-                        "--json", str(verdict_path)],
+                        "--json", str(verdict_path)] + (["--headless"] if headless else []),
                        capture_output=True, text=True, timeout=self.lock["wall_clock_s"])
         return read_json(verdict_path) or {"ok": False, "error": "replay wrote no verdict"}
 
@@ -546,6 +558,13 @@ class Phase:
 
         if metrics.get("end_reason") not in VALID_END_REASONS:
             reasons.append("end reason {0}".format(str(metrics.get("end_reason"))[:80]))
+        # run.json holds the size asked for; the decider logs the size captured. They
+        # differed under Xvfb (768x432), and only the second is what the model saw.
+        captured = {tuple(d.get("frame_size") or ())
+                    for d in read_jsonl(run_dir / "decisions.jsonl") if d.get("frame_size")}
+        if captured - {tuple(self.lock["frame_size"])}:
+            reasons.append("captured frame size {0}, want {1}".format(
+                sorted(captured), self.lock["frame_size"]))
         if any("error" in d for d in read_jsonl(run_dir / "decisions.jsonl")):
             reasons.append("decision_error in decisions.jsonl")
         rungs = metrics.get("rungs_used") or {}
@@ -651,7 +670,8 @@ class Phase:
                     self.retire(unit, site, arm, seed, "a{0:02d}_interrupted".format(attempt))
                 self.fly(site, arm, seed, row["run_id"], run_dir, args.decider_url, args.godot)
                 if read_json(run_dir / "run.json") and read_jsonl(run_dir / "decisions.jsonl"):
-                    verdict = self.replay(run_dir, args.decider_url, args.godot)
+                    verdict = self.replay(run_dir, args.decider_url, args.godot,
+                                         headless=args.headless_replay)
                     print("    replay {0}".format("ok" if verdict.get("ok") else "FAILED"))
                 reasons = self.validate(unit, site, arm, seed, run_dir, phase["git_sha"])
                 row["end_reason"] = read_json(run_dir / "metrics.json").get("end_reason", "")
@@ -763,6 +783,8 @@ class Phase:
                 p.add_argument("--decider-url", default="http://127.0.0.1:8000")
                 p.add_argument("--godot", default=shutil.which("godot") or "godot")
                 p.add_argument("--max-attempts", type=int, default=3)
+                p.add_argument("--headless-replay", action="store_true",
+                               help="replay without a window (a display-less host)")
         if extra:
             extra(sub)
         args = parser.parse_args()

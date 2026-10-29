@@ -1,0 +1,58 @@
+{
+  "run_id": "p2_R14G_s02a_final_seed1_a01",
+  "started": "2026-10-29T03:32:27+00:00",
+  "model": "Qwen3-VL-30B-A3B",
+  "vlm_profile": "remote",
+  "litellm_base_url": "http://127.0.0.1:8004",
+  "agent_version": "a23",
+  "agent_sha": "5bbb755c939f",
+  "prompt_version": "p14",
+  "prompt_sha": "31a9f28eaf94",
+  "subagent_prompts": {
+    "g05": "133ed83db46b",
+    "q05": "86e1f4104ac0"
+  },
+  "spatial_sha": "eceb875a68a3",
+  "spatial_a14_sha": "0075a8a0e5c0",
+  "spatial_a17_sha": "63ccdaa218d9",
+  "planner_a17_sha": "6eb22517c3e0",
+  "planner_a20_sha": "2ff7c48cdc16",
+  "git_sha": "5b62a8e",
+  "git_dirty": false,
+  "temperature": 0.0,
+  "scene": "res://sites/s02a_doors_open_a/site.tscn",
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "frame_size": [
+    768,
+    768
+  ],
+  "godot_version": "4.7.2-stable (official)",
+  "max_steps": 60,
+  "site_id": "s02a_doors_open_a",
+  "site_version": 2,
+  "physics_ticks_per_second": 60,
+  "freeze_world": true,
+  "static_doors": false,
+  "world": "final",
+  "spawn_seed": 1,
+  "spawn_offset": {
+    "dyaw_deg": -2.23405146598816,
+    "dz": -0.170440912246704
+  },
+  "final_closed": [],
+  "run_dir": "eval/phase2/R14G_open_floor_goal_words/runs/s02a/final/seed1",
+  "ended": "2026-10-29T03:41:53+00:00",
+  "end_reason": "max_steps"
+}

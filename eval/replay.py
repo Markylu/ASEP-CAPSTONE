@@ -146,12 +146,20 @@ def main() -> int:
     parser.add_argument("--godot", default=shutil.which("godot") or "godot")
     parser.add_argument("--tolerance", type=float, default=1e-3, help="metres, and radians for yaw")
     parser.add_argument("--timeout", type=float, default=300.0)
+    parser.add_argument("--headless", action="store_true",
+                        help="no window. A replay is SCRIPTED: it never captures a frame, and "
+                             "line of sight and collisions are physics queries, so the pose "
+                             "stream is the same as a windowed replay's (drift 0.0 measured).")
     parser.add_argument("--speed", type=float, default=1.0,
                         help="turn/move speed multiplier, for watching at a human pace. "
                              "Measured drift at 0.25x is 2.4e-5 m, well inside --tolerance, "
                              "but it is nonzero and accumulates, so cite runs flown at 1.0.")
     parser.add_argument("--json", type=Path, default=None,
                         help="also write the verdict here as JSON (phase 1 writes replay.json)")
+    parser.add_argument("--save-clean-frames", action="store_true",
+                        help="also save each step's frame without annotations, at the "
+                             "recorded pose, as <replay dir>/frames/clean/c<step>.png "
+                             "(eval/goal_probe.py attach-clean)")
     args = parser.parse_args()
 
     run_dir = args.run_dir.resolve()
@@ -174,8 +182,8 @@ def main() -> int:
 
     print("replaying {0} on {1}: {2} steps, indices {3}".format(
         run_id, meta.get("scene") or "project main_scene", len(indices), indices))
-    command = [
-        args.godot, "--path", str(GODOT_PROJECT)] + scene_args(meta) + [
+    command = [args.godot] + (["--headless"] if args.headless else []) + [
+        "--path", str(GODOT_PROJECT)] + scene_args(meta) + [
         "--",
         "--run-id=" + replay_id,
         "--decider-url=" + args.decider_url,
@@ -193,6 +201,8 @@ def main() -> int:
         # wall — s02's closed door — are exactly the ones worth replaying.
         "--max-collisions=-1",
     ] + world_args(meta) + dir_args
+    if args.save_clean_frames:
+        command.append("--save-clean-frames=" + str(replay_dir / "frames" / "clean"))
     if args.speed != 1.0:
         command.append("--speed={0}".format(args.speed))
         print("watch mode at {0}x — trajectory is within tolerance but not "

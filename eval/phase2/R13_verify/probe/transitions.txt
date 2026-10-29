@@ -1,0 +1,9 @@
+   reacquired        stages ['goal', 'goal', 'verify', 'goal']; events ['goal_sighted', 'goal_lost', 'reacquired']; asks [] -> pass
+   reacquired_moved  stages ['goal', 'verify', 'goal']; events ['goal_sighted', 'goal_lost', 'reacquired_moved']; asks [] -> pass
+   check_fails       stages ['goal', 'verify', 'explore']; events ['goal_sighted', 'goal_lost', 'verify_failed', 'lost']; asks ['verify_failed'] -> pass
+   fresh_look        stages ['goal', 'verify', 'explore']; events ['goal_sighted', 'goal_lost', 'verify_failed', 'lost']; asks ['verify_failed'] -> pass
+   timeout           stages ['goal', 'verify', 'verify', 'verify', 'verify', 'verify', 'verify', 'verify', 'verify', 'verify', 'explore']; events ['goal_sighted', 'goal_lost', 'verify_timeout', 'lost']; asks ['verify_timeout'] -> pass
+   detour_holds      stages ['goal', 'goal', 'goal', 'goal']; events ['goal_sighted']; asks [] -> pass
+   unreachable       stage explore; events ['verify_unreachable', 'lost']; ask verify_unreachable -> pass
+   verify target: far verify_vantage (0.0, 0.0); at vantage verify_look (0.0, 3.0) -> pass
+1. transitions: PASS

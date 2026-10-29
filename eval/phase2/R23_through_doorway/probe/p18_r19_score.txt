@@ -1,0 +1,6 @@
+through: 34 steps
+  p17 (recorded)  through-move 21/34  doorway-tag move 13/34  truly blocked 4/34
+  p18 + a17c      through-move 22/34  doorway-tag move 15/34  truly blocked 3/34
+control: 150 steps
+  p17 (recorded)  through-move 0/150  doorway-tag move 93/150  truly blocked 11/150
+  p18 + a17c      through-move 0/150  doorway-tag move 114/150  truly blocked 11/150

@@ -6,6 +6,12 @@ labels: []
 milestone: Phase 2
 ---
 
+<!-- The full write-up lives in eval/phase2/R<N>_<slug>/README.md, committed before flying
+     (docs/phase2-test-plan.md §4.1). Keep this issue short and link it. -->
+
+Write-up: `eval/phase2/R<N>_<slug>/README.md`
+Branch: `phase2/r<N>-<slug>` (from the previous round's tip). PR: never merged; close this issue by hand.
+
 ## Change
 
 <!-- What this round changes in the agent. One change per round. -->

@@ -1,0 +1,12 @@
+{
+  "round": "R4",
+  "title": "Memory log, goal reported last",
+  "citable": false,
+  "agent_version": "a04",
+  "status": "complete",
+  "git_sha": "60118e8",
+  "started": "2026-10-14T14:43:22+00:00",
+  "finished": "2026-10-14T15:22:32+00:00",
+  "operator": "Markylu",
+  "notes": "18/18 valid at 60118e8 on the first attempt, replays exact. Probe gate passed before flight (probe/probe.md). Labels reviewed by Claude, confirmed by the operator 2026-10-14; new secondary tag failed_goal_identification (docs/phase2-test-plan.md §5) on 9 of 13 failed runs."
+}

@@ -1,0 +1,11 @@
+{
+  "max_pos_drift": 0.0,
+  "max_yaw_drift": 0.0,
+  "steps_original": 19,
+  "steps_replay": 19,
+  "ok": true,
+  "problems": 0,
+  "events_match": true,
+  "tolerance": 0.001,
+  "replay_dir": "eval/phase2/R16K_known_goal_confirmer/runs/s02vc/initial/seed1/replay"
+}

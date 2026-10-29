@@ -1,0 +1,13 @@
+steps 523
+true m       wall_at_bottom          bottom           lower          middle         runs_on
+0-1                     48              23              16               7              21
+1-1.9                   14              32              38               4               9
+1.9-3                    3              41              35               9              19
+3-5                      1              61              73              18              40
+5-8                      1             146              90               8              63
+8-99                     5             749             380              87             574
+wall_at_bottom  n=   72  true < 1.9 m (a 1.7 m move fails)  86.1%  clear past 8 m   6.9%
+bottom          n= 1052  true < 1.9 m (a 1.7 m move fails)   5.2%  clear past 8 m  71.2%
+lower           n=  632  true < 1.9 m (a 1.7 m move fails)   8.5%  clear past 8 m  60.1%
+middle          n=  133  true < 1.9 m (a 1.7 m move fails)   8.3%  clear past 8 m  65.4%
+runs_on         n=  726  true < 1.9 m (a 1.7 m move fails)   4.1%  clear past 8 m  79.1%

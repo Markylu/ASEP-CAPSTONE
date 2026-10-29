@@ -1,0 +1,4 @@
+recorded  calls  38 | doorway when listed 1/19 | way back in a dead end 0/2 | pick nearer the goal 38/38 | kinds {'frontier': 37, 'opening': 1}
+q03       calls  38 | doorway when listed 1/19 | way back in a dead end 0/2 | pick nearer the goal 38/38 | kinds {'frontier': 37, 'opening': 1}
+q06       calls  38 | doorway when listed 2/19 | way back in a dead end 1/2 | pick nearer the goal 37/38 | kinds {'backtrack': 2, 'frontier': 34, 'opening': 2}
+q07       calls  38 | doorway when listed 10/19 | way back in a dead end 1/2 | pick nearer the goal 29/38 | kinds {'backtrack': 3, 'explore': 1, 'frontier': 24, 'opening': 10}

@@ -163,6 +163,11 @@ func _apply(args: Dictionary) -> void:
 			frame_size = Vector2i(int(wh[0]), int(wh[1]))
 	if DisplayServer.get_name() != "headless":
 		DisplayServer.window_set_size(frame_size)
+		# `--window-mode=minimized` keeps an unattended sweep out of the way.
+		# Godot still renders a minimized window, and the captured frames are
+		# byte-identical to a visible window's; the viewport keeps frame_size.
+		if str(args.get("window-mode", "")) == "minimized":
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MINIMIZED)
 	if args.has("max-steps"):
 		max_steps = int(args["max-steps"])
 	if args.has("max-collisions"):
@@ -223,6 +228,11 @@ func _apply(args: Dictionary) -> void:
 		agent.scripted_indices = indices
 		agent.decision_source = VLMNavController.DecisionSource.SCRIPTED
 		max_steps = min(max_steps, indices.size())
+		# Absolute directory for the clean frame of every step (replay only).
+		if args.has("save-clean-frames"):
+			var dir := str(args["save-clean-frames"])
+			DirAccess.make_dir_recursive_absolute(dir)
+			agent.clean_frame_dir = dir
 
 
 ## Replicates at temperature 0 differ only through their input, so each seed

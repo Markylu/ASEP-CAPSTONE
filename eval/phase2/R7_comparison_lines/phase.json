@@ -1,0 +1,12 @@
+{
+  "round": "R7",
+  "title": "Comparison lines in the log",
+  "citable": false,
+  "agent_version": "a10",
+  "status": "complete",
+  "git_sha": "468d5ef",
+  "started": "2026-10-21T16:28:47+00:00",
+  "finished": "2026-10-21T17:27:40+00:00",
+  "operator": "Markylu",
+  "notes": "Flown on sctsvr6 (headless Linux, Docker, Mesa lavapipe), not the Mac that flew R1-R6, in one sitting in tmux (59 minutes). A first launch failed preflight on an untracked Godot .uid file and flew nothing. 18/18 valid. a10 not dropped (0 of 4 drop conditions); success is not attributable to the change."
+}

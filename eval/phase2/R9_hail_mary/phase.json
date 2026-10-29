@@ -1,0 +1,12 @@
+{
+  "round": "R9",
+  "title": "Orchestrated agent with a spatial memory",
+  "citable": false,
+  "agent_version": "a13",
+  "status": "complete",
+  "git_sha": "756345b",
+  "started": "2026-10-23T16:18:09+00:00",
+  "finished": "2026-10-23T17:36:31+00:00",
+  "operator": "Markylu",
+  "notes": "Flown on sctsvr6 (headless Linux, Docker, Mesa lavapipe) in tmux after an unscored shakedown, then R9C at the same SHA (78 minutes). 18/18 valid. a13 dropped (2 of 4 drop conditions: final+dynamic 1/12, spin_failure on 4 runs); 2 of 18 outcomes changed against R9C, so by the pre-registered rule no change is credited."
+}

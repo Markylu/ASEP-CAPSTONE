@@ -1,0 +1,11 @@
+{
+  "max_pos_drift": 0.0,
+  "max_yaw_drift": 0.0,
+  "steps_original": 60,
+  "steps_replay": 60,
+  "ok": true,
+  "problems": 0,
+  "events_match": true,
+  "tolerance": 0.001,
+  "replay_dir": "eval/phase2/R9C_a11_control/runs/s03/initial/seed1/replay"
+}

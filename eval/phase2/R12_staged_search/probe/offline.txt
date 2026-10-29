@@ -1,0 +1,11 @@
+3. coverage against geometry (a17 memory, g03 as recorded)
+   R10_goal_planner: searched cells in sight 13099/14992 (87.4%); goal ground searched in 0 runs [] -> pass
+   R11C_a14_control: searched cells in sight 12371/14127 (87.6%); goal ground searched in 0 runs [] -> pass
+   R11_goal_default: searched cells in sight 10532/12748 (82.6%); goal ground searched in 0 runs [] -> pass
+4. reachability at R11's q03 calls
+   calls 38; top target unreachable 3 (inside a wall 3); no target 0 -> pass
+5. sightings disproved within 3 steps (stage machine open-loop on R11, R11C)
+   false sightings: faced later 39/46 disproved (all: 39/47)
+   genuine sightings: disproved with the goal in sight 12/285; after it went out of sight 25 -> pass
+   steps 1427: explore 946, goal 481; q04 asked 114 (8%)
+offline gate: PASS

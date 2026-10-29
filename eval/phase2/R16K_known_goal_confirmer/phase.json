@@ -1,0 +1,13 @@
+{
+  "round": "R16K",
+  "title": "R15 (known goal) with a goal confirmer",
+  "citable": false,
+  "agent_version": "a28",
+  "status": "complete",
+  "git_sha": "0566035",
+  "started": "2026-10-29T04:14:11+00:00",
+  "finished": "2026-10-29T05:03:22+00:00",
+  "operator": "Markylu",
+  "notes": "Flown overnight on parallel lanes; merged with eval/phase2_merge.py.",
+  "lanes": "4 lanes on sctsvr6: ~/asep-r16k-l5..l8 (8 with R16)"
+}

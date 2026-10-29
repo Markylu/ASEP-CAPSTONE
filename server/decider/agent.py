@@ -25,7 +25,7 @@ import hashlib
 import json
 import os
 from dataclasses import dataclass, field
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 from . import prompt as prompts
 
@@ -41,13 +41,968 @@ class Agent:
     def prompt(self) -> prompts.Prompt:
         return prompts.get(self.prompt_version)
 
+    @property
+    def identifier_prompt(self) -> Optional[prompts.Prompt]:
+        """The goal identifier's prompt (a05 on), None for an agent without one."""
+        ident = self.features.get("goal_identifier")
+        return prompts.get(ident["prompt"]) if ident else None
+
     def sha(self) -> str:
         blob = self.prompt.sha() + "\x00" + json.dumps(self.features, sort_keys=True)
+        # The identifier's wording is part of the agent too. Appended only when
+        # there is one, so every earlier agent keeps its sha.
+        if self.identifier_prompt is not None:
+            blob += "\x00" + self.identifier_prompt.sha()
+        # An orchestrated agent (a13 on) is also its subagents' wording and the
+        # spatial memory's parameters and notes. Appended only for such an agent,
+        # so every earlier agent keeps its sha.
+        for sub in self.subagent_prompts:
+            blob += "\x00" + sub.version + ":" + sub.sha()
+        # The memory's parameters and wording (spatial.SpatialConfig): a13's,
+        # then a14's added wording (R10), then a15's (R11), each appended only
+        # for an agent that uses it, so every earlier agent keeps its sha.
+        if self.spatial_config is not None:
+            for segment in self.spatial_config.sha_segments():
+                blob += "\x00" + segment
+        # a17's stage machine and evaluator thresholds (planner.py), appended
+        # only for the staged policy.
+        if self.staged:
+            blob += "\x00planner_a17:" + planner_a17_sha()
+        # a20's verify stage (planner.py), appended only for that policy.
+        if self.verifies:
+            blob += "\x00planner_a20:" + planner_a20_sha()
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+    @property
+    def staged(self) -> bool:
+        return (self.features.get("orchestrator") or {}).get("target_policy") in (
+            "staged_search", "staged_verify")
+
+    @property
+    def verifies(self) -> bool:
+        return (self.features.get("orchestrator") or {}).get("target_policy") == "staged_verify"
+
+    @property
+    def spatial_config(self):
+        """The orchestrated agent's spatial.SpatialConfig, or None."""
+        orch = self.features.get("orchestrator")
+        if not orch:
+            return None
+        from . import spatial
+        return spatial.config_for(orch)
+
+    @property
+    def uses_a14_wording(self) -> bool:
+        cfg = self.spatial_config
+        return bool(cfg is not None and cfg.a14_words)
+
+    @property
+    def subagent_prompts(self) -> List[prompts.Prompt]:
+        """The perceiver's and strategist's prompts (a13 on), in that order, then
+        the goal confirmer's (a27 on), then the doorway confirmer's (a37 on)."""
+        orch = self.features.get("orchestrator") or {}
+        return [prompts.get(orch[k])
+                for k in ("perceiver", "strategist", "confirmer", "door_confirmer")
+                if orch.get(k)]
+
+
+#: a39: along-the-wall detours (planner.along_wall). In the features, so the sha.
+ALONG_WALL_A39: Dict[str, Any] = {
+    "max_m": 5.0,
+    "min_m": 1.5,
+    "step_m": 0.25,
+    "look_m": 3.0,
+    "look_within_deg": 60.0,
+    "min_wall_cells": 3,
+    "hand_back_after": 2,
+    "hand_back_within_deg": 60.0,
+    "words": {
+        "item": "along the wall, {side} of the way to the goal, up to {d:.0f} m",
+        "followed": "you followed this way {n} time(s) already",
+        "fresh": "not followed yet",
+        "other_ended": "the {side} way along this wall ends at a wall",
+    },
+}
+
+
+#: a46: detours through a confirmed gap in the blocking wall
+#: (planner.through_doorways). In the features, so the sha.
+THROUGH_A46: Dict[str, Any] = {
+    "recent_steps": 20,
+    "from_m": 10.0,
+    "ray_m": 10.0,
+    "merge_m": 1.5,
+    "min_rays": 2,
+    "min_steps": 2,
+    "front_m": 1.5,
+    "beyond_m": 2.0,
+    "blocked_near_m": 2.0,
+    "words": {
+        "item": "through the opening in this wall ({n} open-doorway sightings point at it)",
+    },
+}
+
+
+#: a50: the other way at the fork, and closed doors in the situation
+#: (planner.other_way, planner.closed_door_line). In the features, so the sha.
+OTHER_WAY_A50: Dict[str, Any] = {
+    "from_m": 6.0,
+    "reached_m": 1.5,
+    "reach_within_m": 4.0,
+    "max_steps": 24,
+    "recent_steps": 5,
+    "words": {
+        "item": "the other way along the wall you met at step {step} (you never went "
+                "there), {path:.0f} m back over known floor",
+        "closed": "A closed door was seen ahead at step(s) {steps}.",
+    },
+}
+
+
+#: a52: a50's other way, listed only in a dead end (planner.dead_end).
+OTHER_WAY_A52: Dict[str, Any] = dict(OTHER_WAY_A50, only_dead_end=True,
+                                     dead_end_max_along=1)
+
+
+#: a58: a52's listing, and the closed-door line only beside the other way.
+OTHER_WAY_A58: Dict[str, Any] = dict(OTHER_WAY_A52, closed_only_with_item=True)
 
 
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
+    Agent("a01", "p03", {}, "No goal hint: p03 drops the goal's distance and bearing "
+          "and each action's angle and distance. The goal is found from the image alone."),
+    Agent("a02", "p04", {"memory": {"kind": "text", "scope": "full_run"}},
+          "Text memory: a01 plus every earlier step of the run in the prompt, oldest "
+          "first: the marker picked and the reason given, verbatim."),
+    Agent("a03", "p05", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal"]}},
+          "Memory log: a01 plus a log written by code of every earlier step's move "
+          "and reported goal, with no marker numbers or reasons; the reply reports "
+          "where the goal is before it reasons."),
+    Agent("a04", "p06", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal"]},
+                         "goal_order": "after_reason"},
+          "a03 with the goal report moved after the reason, and the goal described as "
+          "a glowing red sphere (no beam). R3: the report answered first stopped the "
+          "model seeing the goal."),
+    Agent("a05", "p07", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal"],
+                                    "goal_log": "last_sighting"},
+                         "goal_identifier": {"prompt": "g01"}},
+          "Goal identifier: a second call per step (g01) with the frame and no log "
+          "reports where the goal is. The navigator (p07) gets that answer and a log of "
+          "moves with only the last sighting, its age and the turn since; it no longer "
+          "reports the goal. R4: the log carried stale sightings forward."),
+    Agent("a06", "p07", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal"],
+                                    "goal_log": "last_sighting"},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a05 with the identifier shown the camera frame without annotations (g02). "
+          "R5 probe: g01 took the pink '0 TURN AROUND' marker for the goal."),
+    Agent("a07", "p08", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "last_sighting"},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a06 with the drone's ground-truth position and heading after every move, and "
+          "how far it moved, in the log (p08). R5: the log recorded commands, not outcomes, "
+          "and the drone turned around in place for up to 36 steps (spin_failure)."),
+    Agent("a08", "p09", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "none"},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a07 without the last-sighting line (p09); the identifier's answer for the "
+          "current image stays. R5: the sighting line drove 'goal is behind, turn around'."),
+    Agent("a09", "p10", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "last_sighting",
+                                    "pose_compare": True},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a07 with the log comparing each move to the drone's earlier positions "
+          "(blocked, stopped short, back at step N) (p10). R6: "
+          "143 collisions, 65% of reasons after a blocked move claimed progress. "
+          "Probed, not flown: it turned around on 13/25 lost-goal frames (a08: 4/25)."),
+    Agent("a10", "p11", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "none",
+                                    "pose_compare": True},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a08 (no sighting line) with the log comparing each move to the drone's earlier "
+          "positions (blocked, stopped short, back at step N) (p11). The a09 probe: the "
+          "sighting line brings back the turn-around loop on lost-goal frames."),
+    Agent("a11", "p12", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "none",
+                                    "pose_compare": True},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "a10 with heading as a compass word ('facing south-west') instead of degrees "
+          "(p12). R6 and R7: heading arithmetic in reasons, and turn-arounds on a goal in "
+          "view to the side."),
+    Agent("a12", "p13", {"memory": {"kind": "log", "scope": "full_run",
+                                    "fields": ["move", "goal", "pose"],
+                                    "goal_log": "none",
+                                    "pose_compare": True},
+                         "goal_identifier": {"prompt": "g02", "frame": "clean"}},
+          "No-op control: a10 plus one sentence that adds nothing (p13). R8N measures how "
+          "far a content-free prompt edit moves a round (R7: 5 of 18 first picks moved)."),
+    Agent("a13", "p14", {"orchestrator": {"perceiver": "g03", "strategist": "q01",
+                                          "critic": "retry", "frame": "clean",
+                                          "spatial": "server/decider/spatial.py"}},
+          "R9 bundle: one step is several calls with one job each, and code keeps a map. "
+          "A perceiver (g03) reports goal strip, open floor and doorways on the clean frame; "
+          "code builds the map from pose and those reports; a strategist (q01) picks a "
+          "target from a list code builds; the navigator (p14) sees notes from the map "
+          "against each action and no coordinates or degrees; a critic asks once more "
+          "when the pick was blocked from here, is a third turn-around, or loops. "
+          "R1-R7: the model cannot compare positions or headings itself."),
+    Agent("a14", "p14", {"orchestrator": {"perceiver": "g03", "strategist": "q02",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "spatial": "server/decider/spatial.py"}},
+          "R10 bundle on a13: the strategist (q02) is told the goal's true position, which "
+          "no other part sees (the navigator only gets 'toward your target'); turn-around "
+          "is not offered right after a turn-around while a move ahead is open; no critic. "
+          "R9: four spins of alternating turn-arounds with the way ahead open, the critic "
+          "changed 0 of 19 picks, and q01 chose the goal on 18 of 200 calls out of view."),
+    Agent("a15", "p14", {"orchestrator": {"perceiver": "g03", "strategist": "q03",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_default_llm_detour",
+                                          "memory": "a15",
+                                          "spatial": "server/decider/spatial.py"}},
+          "R11 bundle on a14: code keeps the goal as the standing target (planner.py) and "
+          "asks a detour strategist (q03) only when the way toward it is walled, a move "
+          "toward it was blocked, or six steps brought it no nearer; q03 sees each detour "
+          "with how much nearer the goal it lies, and not whether the goal is in the image. "
+          "Memory a15: a stopped-short move is also recorded where it ended and warns the "
+          "next fan action out; 'toward your target' never on a walled or blocked move; a "
+          "doorway is listed from its second sighting and dropped after 10 steps unseen. "
+          "R10: q02 chose the goal on 70 of 229 calls, 36 of 37 repeat collisions had no "
+          "note, 'toward' sat on a walled move 36 times."),
+    Agent("a16", "p14", {"orchestrator": {"perceiver": "g03", "strategist": "q03",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_default_llm_detour",
+                                          "memory": "a16",
+                                          "spatial": "server/decider/spatial.py"}},
+          "R11 bundle on a14, after a15's probe failed: a15 with memory a16. A block "
+          "warns only its own heading after a move that did not get going, and the next "
+          "fan action out after one that stopped short; q03's unexplored ground is "
+          "offered at the edge's point nearest the goal. a15's probe: a 45-degree block "
+          "window noted every forward move on 28 of R10's steps and the navigator took "
+          "the blocked one; 52 of 88 detour menus held nothing 3 m nearer the goal."),
+    Agent("a17", "p14", {"orchestrator": {"perceiver": "g04", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_search",
+                                          "memory": "a17",
+                                          "spatial": "server/decider/spatial.py"}},
+          "R12 bundle, no goal truth anywhere (operator, 2026-10-28): code runs two "
+          "stages, explore until the goal is seen and then head for where it was seen "
+          "(planner.staged). A coverage map marks ground each look's cone searched; a "
+          "search strategist (q04) picks reachable edges of unsearched ground, doorways "
+          "or a way back; an evaluator scores each step by ground newly searched and "
+          "progress, blacklists a target after four unproductive steps, and drops a "
+          "sighting a later look disproves. Perceiver g04 says where far floor ends and "
+          "whether a doorway is open. Memory a17: stop walls, reachable targets, doors "
+          "passed only when crossed. R11: 34 of 37 detour targets lay behind or inside "
+          "a wall; g03 sees the goal at any range in line of sight (612 of 612)."),
+    Agent("a18", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_search",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R12 after a17's live probe failed: a17 with perceiver g05, which says where "
+          "each strip's floor ends in the image (no floor, bottom quarter, lower, just "
+          "below the middle) instead of metres; code maps that to a reach. The camera is "
+          "level at 1.75 m, so no floor in a strip means an obstacle under 1.84 m. g04 read "
+          "69% of R11's strips open_very_far, 53% of walls under 1 m among them."),
+    Agent("a19", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_search",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "blocked_near",
+                                                        "lower": "open_near",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R12 after a18's live probe failed narrowly (86.8% of searched cells in sight, "
+          "16.2% of walls under 1 m read open): a18 with each g05 floor end mapped one "
+          "class nearer, so a misread wall cuts the cone short instead of running it "
+          "through. On a18's R11 answers this map gave 90.0% and 6.8% with a third fewer "
+          "cells searched; fitted there, so it is gated on R11C's frames."),
+    Agent("a20", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "blocked_near",
+                                                        "lower": "open_near",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R13 (operator, 2026-10-28): a19 with a third stage. The first look without "
+          "the goal, unless a detour stands, goes to verify: back to where it was last "
+          "seen from, facing the way it was seen, and look again. Seen: goal, the old "
+          "sighting dropped if the new one disagrees. Not seen there, no path back or 8 "
+          "steps: the sighting is dropped and the stage is explore. a17's cone and "
+          "'faces it' disproof rules are not used. R12: in dynamic the goal was reported "
+          "at step 0 in 5 of 6 runs, then dropped or chased to a point 10 m out."),
+    Agent("a21", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q05",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "strategist",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "blocked_near",
+                                                        "lower": "open_near",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R13G, flown beside R13: a20 with the goal's true position in the "
+          "strategist's text alone (q05): where the goal is, and each reachable place "
+          "worded with how much nearer it lies. The stages, map and navigator see no "
+          "goal truth. R11: the menu's goal-side items lay behind walls; a17's menu "
+          "offers reachable places only."),
+    Agent("a22", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "verify_budget": {"min_steps": 8,
+                                                            "extra_steps": 4,
+                                                            "steps_per_m": 0.8},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R14: a20 with a18's floor map (g05's 'bottom' is open_near, not a wall) and a "
+          "verify step limit that grows with the distance back (4 + 0.8 per metre, at "
+          "least 8). R12/R13 records against site geometry: of 1574 strips g05 read "
+          "'bottom', 3% were truly blocked within 1.9 m (62% open past 8 m), yet a19's map "
+          "walled them 0.75 m out; R13 shakedown: three verify timeouts were turn-around "
+          "ping-pong on that 'wall close', three were trips back of 5-9 m."),
+    Agent("a23", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q05",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "strategist",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "verify_budget": {"min_steps": 8,
+                                                            "extra_steps": 4,
+                                                            "steps_per_m": 0.8},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R14G, flown beside R14: a21 (goal truth in the strategist's text) with a22's "
+          "floor map and verify step limit."),
+    Agent("a24", "p14", {"orchestrator": {"perceiver": "g06", "strategist": "q04",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"wall_at_bottom": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far",
+                                                        "runs_on": "open_far"},
+                                          "verify_budget": {"min_steps": 8,
+                                                            "extra_steps": 4,
+                                                            "steps_per_m": 0.8},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a22 with perceiver g06: g05 with no_floor renamed wall_at_bottom, a runs_on "
+          "answer for floor whose end is out of sight, and the bottom edge of each strip "
+          "looked at first. R12: 157 of g05's 477 no_floor strips were clear past 8 m, "
+          "with reasons saying the floor was visible across the image."),
+    Agent("a25", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R11's routing with R12's map: code keeps the goal's true position as the "
+          "target and asks the detour strategist (q03) only when the way is walled, "
+          "blocked or six steps gained nothing (a16, R11 11/18), but q03 chooses from "
+          "a17's menu (reachable edges of unsearched ground, reachable doorways, a way "
+          "back) on a17's memory, with g05 read as a22. R11's failure analysis: 34 of 37 "
+          "detour picks lay behind or inside a wall, 51% of steps stood on them."),
+    Agent("a26", "p16", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a25 with navigator prompt p16: p14 with the notes ranked (goal, then 'toward "
+          "your target' including turning around, then new ground). Probe on R11's steps "
+          "(eval/r15_nav_probe.py): 'toward' on marker 0 followed 35% (p14 21%)."),
+    Agent("a27", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "verify_budget": {"min_steps": 8,
+                                                            "extra_steps": 4,
+                                                            "steps_per_m": 0.8,
+                                                            "check_within_m": 2.6},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a22 with a goal confirmer (c01): when g05 reports the goal, a second call on the "
+          "same clean frame checks that strip, and a 'no' removes the report before the map "
+          "and stages read it; and a verify check look counted within 2.6 m of the vantage. "
+          "R13 failure analysis: 21 of 26 losses of sight rested on hallucinated reports; 5 "
+          "of 8 timeouts reached the vantage but could not face the bearing inside 1.5 m."),
+    Agent("a28", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a25 (known goal, reachable detours) with the goal confirmer c01: a goal report "
+          "the confirmer refuses does not hand a detour back ('goal in view') or put a goal "
+          "note on a move. R11: 10 of 14 'goal in view' hand-backs were hallucinated."),
+    Agent("a29", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q06",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a25 (known goal, reachable detours) with detour strategist q06: a doorway is the "
+          "way round a wall even when farther from the goal, more unexplored ground before "
+          "nearer, the way back in a dead end. R11: doorway picked on 1 of 19 menus with one; "
+          "backtrack never chosen."),
+    Agent("a30", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q06",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a28 (known goal, reachable detours, goal confirmer c01) with detour strategist "
+          "q06: the two known-goal changes together."),
+    Agent("a31", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q07",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a25 (known goal, reachable detours) with detour strategist q07: q06 (doorway "
+          "first, more ground before nearer, the way back in a dead end) with 'nearer the goal' "
+          "explained as straight-line only. R11 replay: doorway picked on 10 of 19 menus with "
+          "one (q03 1, q06 2)."),
+    Agent("a32", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q07",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a28 (known goal, reachable detours, goal confirmer c01) with detour strategist "
+          "q07: the two known-goal changes together."),
+    Agent("a33", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q07",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a31 (known goal, reachable detours, q07) with a detour handed back when 4 moves "
+          "bring it under 0.5 m nearer, and detours handed back stalled or too long left off "
+          "later menus. R15 s01 final: 12 steps circling a frontier 3-4 m abeam."),
+    Agent("a34", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q07",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a32 (known goal, reachable detours, q07, goal confirmer c01) with a33's stalled "
+          "detour hand-back."),
+    Agent("a35", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a26 (known goal, reachable detours, p16) with navigator prompt p17 ('searched "
+          "already this way' defined; turn around only on marker-0 toward or every forward "
+          "move blocked) and a33's stalled-detour hand-back. R15/R15N: 50 turn-arounds a "
+          "round against a forward 'toward' (R11 3)."),
+    Agent("a36", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a35 with the goal confirmer c01."),
+    Agent("a37", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a35 (known goal, reachable detours, p17, stalled-detour hand-back) with the "
+          "doorway confirmer d01: an open doorway the perceiver reports is checked on the "
+          "same frame before the map lists it. R15/R15N: 4 of 54 menu doorways real."),
+    Agent("a38", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a37 with the goal confirmer c01."),
+    Agent("a39", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a35 with along-the-wall detours: on a walled or blocked call code lists the two "
+          "ways along the wall between the drone and the goal, and strategist q08 follows "
+          "one to its end before the other. R15/R15N mode B (no along-wall search) primary "
+          "in 7 of 17 failures."),
+    Agent("a40", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a37 (a35 + doorway confirmer d01) with a39's along-the-wall detours and q08."),
+    Agent("a41", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a38 (a37 + goal confirmer c01) with a39's along-the-wall detours and q08."),
+    Agent("a42", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a40 on memory a17b: no wall written at the end of an open_near (g05 'bottom') "
+          "strip, so the move ahead is not 'searched already' 2.5 m out. s03 R15-R17K: "
+          "first turn-arounds all came on that note (eval/phase2/R17_doorway_first/"
+          "s03_analysis.md)."),
+    Agent("a43", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a41 on memory a17b (as a42)."),
+    Agent("a44", "p18", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17c",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a42 with navigator p18 and memory a17c: an open doorway and a closed door "
+          "tagged apart, and an open doorway next to 'toward your target' taken straight "
+          "through. R19/R19K s02 failure analysis mode K: the goal line clips the door "
+          "frame."),
+    Agent("a45", "p18", {"orchestrator": {"perceiver": "g05", "strategist": "q08",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "memory": "a17c",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a43 with p18 and a17c (as a44)."),
+    Agent("a46", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q09",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "through": THROUGH_A46,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a42 with detours through a confirmed gap in the blocking wall: code places "
+          "the gap where open-doorway sighting rays meet that wall and offers a point "
+          "square in front of it, then one beyond; strategist q09 takes it first. R19/R19K "
+          "s02 failure analysis mode K."),
+    Agent("a47", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q09",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "through": THROUGH_A46,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a43 with a46's through-the-doorway detours and q09."),
+    Agent("a48", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a38 (R20K, 12/18) on memory a17b: no wall written at the end of an open_near "
+          "strip (R22's change without R21's along-the-wall detours)."),
+    Agent("a49", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a37 (R20) on memory a17b (as a48)."),
+    Agent("a50", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q10",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A50,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a43 with the other way at the fork (planner.other_way: the newest "
+          "along-the-wall end offered at an earlier call 6 m or more away that the drone "
+          "never reached), closed doors seen in the last 5 steps in the situation, and "
+          "strategist q10 (q08 + a dead-end rule). s03 tines analysis."),
+    Agent("a51", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q10",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A50,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a42 with a50's other way at the fork, closed-door line and q10."),
+    Agent("a52", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q11",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A52,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a50 with the other way listed only in a dead end (a closed door seen in the "
+          "last 5 steps, at most one along-the-wall item) and strategist q11, which takes "
+          "it when listed. R26 probe: q10 took it off the dead end too."),
+    Agent("a53", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q11",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A52,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a51 with a52's dead-end listing and q11."),
+    Agent("a54", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q12",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A52,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a52 with strategist q12: the dead-end rule before rules 1-4. R26 q11 probe: "
+          "the one way left along the wall taken on 3 of 10 dead-end calls."),
+    Agent("a55", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q12",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A52,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a53 with q12 (as a54)."),
+    Agent("a56", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q13",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A52,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a52 with strategist q13: the dead-end rule before rules 1-4, nothing else "
+          "(q12's extra sentence sent the divider calls back)."),
+    Agent("a57", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q13",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A52,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a53 with q13 (as a56)."),
+    Agent("a58", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q13",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A58,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a56 with the closed-door line only when the other way is listed. R26 q13 probe: "
+          "with the line on ordinary divider calls, q13 read them as dead ends (63 ways back)."),
+    Agent("a59", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q13",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A58,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a57 with a58's closed-door line (as a58)."),
 )}
 
 DEFAULT_AGENT = "a00"
@@ -60,6 +1015,15 @@ def get(version: str) -> Agent:
     return AGENTS[version]
 
 
+def wants_clean_frame(version: str) -> bool:
+    """Whether the agent's goal identifier reads the frame without annotations."""
+    features = get(version).features
+    if (features.get("orchestrator") or {}).get("frame") == "clean":
+        return True
+    ident = features.get("goal_identifier") or {}
+    return ident.get("frame") == "clean"
+
+
 def current() -> Agent:
     """The agent this process serves. Read per call so --agent can set the env first."""
     return get(os.environ.get("VLM_AGENT", DEFAULT_AGENT).strip() or DEFAULT_AGENT)
@@ -68,12 +1032,48 @@ def current() -> Agent:
 def describe(version: str) -> Dict[str, Any]:
     """An agent's identity as run.json records it; eval/phase2.py locks rounds on it."""
     agent = get(version)
-    return {
+    out = {
         "agent_version": agent.version,
         "agent_sha": agent.sha(),
         "prompt_version": agent.prompt_version,
         "prompt_sha": agent.prompt.sha(),
     }
+    if agent.identifier_prompt is not None:
+        out["identifier_prompt_version"] = agent.identifier_prompt.version
+        out["identifier_prompt_sha"] = agent.identifier_prompt.sha()
+    for sub in agent.subagent_prompts:
+        out["subagent_prompts"] = out.get("subagent_prompts", {})
+        out["subagent_prompts"][sub.version] = sub.sha()
+    if agent.spatial_config is not None:
+        from . import spatial
+        out["spatial_sha"] = spatial.wording_sha()
+        if agent.uses_a14_wording:
+            out["spatial_a14_sha"] = spatial.wording_sha_a14()
+        if agent.spatial_config.name == "a15":
+            out["spatial_a15_sha"] = spatial.wording_sha_a15()
+        if agent.spatial_config.name == "a16":
+            out["spatial_a16_sha"] = spatial.wording_sha_a16()
+        if agent.spatial_config.name in ("a17", "a17b", "a17c"):
+            out["spatial_a17_sha"] = spatial.wording_sha_a17()
+    if agent.staged:
+        out["planner_a17_sha"] = planner_a17_sha()
+    if agent.verifies:
+        out["planner_a20_sha"] = planner_a20_sha()
+    return out
+
+
+def planner_a17_sha() -> str:
+    """Identity of a17's stage machine parameters and q04 trigger wording."""
+    from . import planner
+    blob = json.dumps(planner.stage_sha_blob(), sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+
+def planner_a20_sha() -> str:
+    """Identity of a20's verify stage parameters and wording."""
+    from . import planner
+    blob = json.dumps(planner.verify_sha_blob(), sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
 def record() -> Dict[str, Any]:
