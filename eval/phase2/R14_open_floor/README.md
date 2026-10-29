@@ -96,4 +96,22 @@ operator's limit is 4). The tunnel is the operator's.
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-29 03:05–03:49 UTC, 4 lanes, 18/18 valid. **7/18**: `initial` 5/6 (s03 failed),
+`final` 1/6 (s02vc, 57 steps), `dynamic` 1/6 (s02c, 43 steps). R13 6/18, R13G 5/18, R12 5/18,
+R11 11/18.
+
+| Measure | R13 (`a20`) | R14 (`a22`) | predicted |
+|---|---|---|---|
+| total | 6/18 | 7/18 | above R13/R13G: **held, by one run** |
+| strips read `blocked_near`, median per run | 48% | 13% | ≤ 20%: held |
+| turn-arounds per run, median | 18 | 8 | ≤ 12: held |
+| max distance from start, median | 18.1 m | 15.0 m | ≥ 13 m: held |
+| losses of sight → reacquired / failed / timeout | 15 → 1 / 8 / 4 | 10 → 2 / 4 / 3 | timeout ≤ 1/4: not held (3/9) |
+
+Per run: [manipulation.txt](manipulation.txt) (`eval/round_manipulation.py`). Stages over all steps:
+explore 657, goal 135, verify 48 (R13: 646 / 163 / 72).
+
+The floor fix took: walls that were never there are gone, the drone turns round half as often,
+and it loses sight of the goal less. The score barely moved. s03 failed in every arm (12–13 m
+from start at most, 13–15 turn-arounds); `final`/`dynamic` stay at 1/6 each. Carried forward
+as the no-truth base (R16, `a27`), not as the best agent: R11 (11/18, goal truth) stays ahead.
