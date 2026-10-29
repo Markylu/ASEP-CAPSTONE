@@ -53,4 +53,7 @@ against R20's 11/18: **hypothesis held** (+ 3). **Best Phase 2 score so far** (R
   8.9–9.2 m from the goal, in the shut tine.
 - One seed per run: + 3 is the largest step in Phase 2, and part of it may be seed-1 luck
   (R21's `dynamic` 4/6 did not repeat in R22).
+- Why 14: [why_14.md](why_14.md). In short, memory `a17b` helps at the open door (45% → 57% once within
+  3 m), on a lucky draw: the same step-0 frame is read differently from round to round at temperature 0, and the
+  `a17b` family expects 11.3 ± 1.4.
 - [manipulation.txt](manipulation.txt).
