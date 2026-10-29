@@ -41,6 +41,17 @@ and probed first; they are not flown.
 
   R11's menus are `a16`'s (frontiers behind walls); `a25`'s menu lists reachable places only,
   so this measures the strategist's preference, not the outcome.
+- The same replay on R15's 96 calls (`a25`'s own reachable menus, flown after this README was
+  first written; [probe/strategist_r15_score.txt](probe/strategist_r15_score.txt)):
+
+  | prompt | doorway when listed | `explore` (no target) | frontier | backtrack |
+  |---|---|---|---|---|
+  | recorded `q03` | 18/44 | 32 | 39 | 7 |
+  | `q03` again | 17/44 | 31 | 44 | 4 |
+  | **`q07`** | **37/44** | 3 | 52 | 4 |
+
+  On `a25`'s menus `q03` already takes a doorway 41% of the time; `q07` doubles it and nearly
+  stops choosing no target. Whether those doorways are the open ones is not scored.
 - Smoke (stub replies, goal kept): `a31` and `a32` on R12's 862 manifests, 0 failed steps,
   102 and 98 strategist calls; `a32`'s 58 refusals all set the perceiver's goal to `not_visible`.
 
