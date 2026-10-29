@@ -164,6 +164,10 @@ OTHER_WAY_A52: Dict[str, Any] = dict(OTHER_WAY_A50, only_dead_end=True,
                                      dead_end_max_along=1)
 
 
+#: a58: a52's listing, and the closed-door line only beside the other way.
+OTHER_WAY_A58: Dict[str, Any] = dict(OTHER_WAY_A52, closed_only_with_item=True)
+
+
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
     Agent("a01", "p03", {}, "No goal hint: p03 drops the goal's distance and bearing "
@@ -965,6 +969,40 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                                         "middle": "open_far"},
                                           "spatial": "server/decider/spatial.py"}},
           "a53 with q13 (as a56)."),
+    Agent("a58", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q13",
+                                          "door_confirmer": "d01",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A58,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a56 with the closed-door line only when the other way is listed. R26 q13 probe: "
+          "with the line on ordinary divider calls, q13 read them as dead ends (63 ways back)."),
+    Agent("a59", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q13",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "along_wall": ALONG_WALL_A39,
+                                          "other_way": OTHER_WAY_A58,
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a57 with a58's closed-door line (as a58)."),
 )}
 
 DEFAULT_AGENT = "a00"

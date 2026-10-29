@@ -94,9 +94,11 @@ def cases(roots: List[str]):
                 if not P.get("only_dead_end") or planner.dead_end(rows[:i + 1], r["step"],
                                                                   menu, P):
                     menu = menu + planner.other_way(mem, here, r["step"], rows[:i], black, P)
-                text = planner.detour_situation(mem, r["manifest"], menu, ask, goal,
-                                                planner.closed_door_line(rows[:i + 1],
-                                                                         r["step"], P))
+                line = planner.closed_door_line(rows[:i + 1], r["step"], P)
+                if P.get("closed_only_with_item") and not any(m.kind == "other_way"
+                                                              for m in menu):
+                    line = None
+                text = planner.detour_situation(mem, r["manifest"], menu, ask, goal, line)
                 pick = (s.get("result") or {}).get("target")
                 yield ("{0}/{1}/{2}".format(rnd, label(run), r["step"]), site, arm, r["step"],
                        here, menu, text, pick)

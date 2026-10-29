@@ -434,7 +434,10 @@ async def route(s: Step) -> Optional[str]:
                                 planner.detour_situation(
                                     s.mem, s.manifest, menu, r.ask, s.goal,
                                     planner.closed_door_line(s.records + [s.record], s.step, other)
-                                    if other is not None else None))
+                                    if other is not None and (
+                                        not other.get("closed_only_with_item")
+                                        or any(t.kind == "other_way" for t in menu))
+                                    else None))
         plan = await ask(s, view, schema.STRATEGIST_SCHEMA_NAME, schema.strategist_schema(ids),
                          _strategy(ids), STRATEGIST_MAX_TOKENS)
         s.record["strategist"] = dict(plan.to_dict(), trigger=spatial.WORDS_A15["asked"][r.ask],

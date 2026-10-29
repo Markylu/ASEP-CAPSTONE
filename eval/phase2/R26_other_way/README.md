@@ -97,7 +97,19 @@ and `a55` are `a52` and `a53` with `q12`. Same gate as `q11`, set before the `q1
 ### Fourth candidate: `a56`, `a57`
 
 `q13` = `q11` with rule 5 put before rules 1–4 and nothing else. `a56` and `a57` are `a52` and
-`a53` with `q13`. Same gate, set before the `q13` probe. This is the last candidate tonight.
+`a53` with `q13`. Same gate, set before the `q13` probe.
+
+**Result (`q13`, [probe/q13_score.txt](probe/q13_score.txt)): failed on the third gate.**
+- s03 dead end: "other way" 10/10.
+- s02: misleading 7 of 188.
+- Divider: along 92 + good "other way" 18 = 110/186, against `q08`'s 167/186, with the way back
+  taken 63 times. The closed-door line stands on 117 of 189 divider calls, most with no "other
+  way" listed; with rule 5 first, `q13` read those as dead ends and went back.
+
+### Fifth candidate: `a58`, `a59`
+
+`a56` and `a57` with the closed-door line shown only when the "other way" is listed
+(`agent.OTHER_WAY_A58`). Strategist `q13`. Same gate, set before this probe.
 
 ## Hypothesis
 
