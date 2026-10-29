@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 from . import prompt as prompts, spatial
 
 #: The roles whose texts must never carry the goal's true position.
-NO_GOAL_TRUTH = ("perceiver", "navigator")
+NO_GOAL_TRUTH = ("perceiver", "navigator", "confirmer")
 
 
 @dataclass(frozen=True)
@@ -42,6 +42,10 @@ class LeakError(RuntimeError):
 
 def perceiver(prompt: prompts.Prompt, manifest: Dict[str, Any], clean_b64: str) -> View:
     return View("perceiver", prompt.system, prompt.render(prompt, manifest), clean_b64)
+
+
+def confirmer(prompt: prompts.Prompt, report: Dict[str, Any], clean_b64: str) -> View:
+    return View("confirmer", prompt.system, prompt.render(prompt, report), clean_b64)
 
 
 def strategist(prompt: prompts.Prompt, situation: str) -> View:

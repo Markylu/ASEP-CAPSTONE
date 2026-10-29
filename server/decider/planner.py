@@ -648,7 +648,12 @@ def staged_verify(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
         elif here is not None:
             vx, vy, vh = st.vantage[:3]
             at = spatial.dist(here[:2], (vx, vy)) < V["vantage_reached_m"]
-            if (step > st.verify_since and at
+            # a27: a check look counts this far from the vantage. Turning to face
+            # the seen bearing takes a 1.7 m move, which leaves a 1.5 m circle:
+            # R13, 5 of 8 timeouts reached the vantage and never checked.
+            near = (spatial.dist(here[:2], (vx, vy))
+                    < (budget or {}).get("check_within_m", V["vantage_reached_m"]))
+            if (step > st.verify_since and near
                     and abs(spatial.wrap(here[2] - vh)) <= V["check_within_deg"]):
                 why = "verify_failed"
             elif step - st.verify_since > (st.verify_budget if st.verify_budget > 0

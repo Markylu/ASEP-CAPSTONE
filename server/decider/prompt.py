@@ -1577,10 +1577,47 @@ Pick one number.""",
     render=render_orchestrated,
 )
 
+# --- c01: Phase 2 R16, the goal confirmer ----------------------------------------
+# R13 failure analysis: of 26 losses of sight, 21 rested on a hallucinated goal
+# report and 4 on a stale frame at a door switch; only 1 was genuine. R11: 10 of
+# 14 "goal in view" hand-backs were hallucinated. c01 is a second look, asked
+# only when the perceiver reports the goal: the same clean frame and one question
+# about the strip it named. A "no" removes the report before anything acts on it.
+
+
+def render_confirm_question(prompt: Prompt, report: Dict[str, Any]) -> str:
+    """The confirmer's question: the strip and range the perceiver reported."""
+    return prompt.user_template.format(
+        strip=str(report.get("strip", "")).replace("_", " "),
+        range=report.get("range") or "distance unknown")
+
+
+C01 = Prompt(
+    version="c01",
+    system="""You check one image from the front camera of a small indoor drone.
+Another model looked at this image and reported the goal in it. Reports like
+that are often wrong. Your job is to check it.
+
+The goal is a glowing red sphere: a round ball, bright red, clearly glowing,
+brighter than anything around it. These are not the goal: red or orange marks,
+labels, stripes or text on walls, door frames, a red tint or reflection, a
+light or bright patch that is not a round red ball, shadows, and anything flat.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+First describe exactly what you see in the strip that was reported and in the
+strips next to it: shapes, colours, brightness. Then answer present: yes only
+if you clearly see a glowing red sphere in that strip or a strip next to it;
+otherwise no.""",
+    user_template="""The goal was reported in the {strip} strip, {range}. Is a glowing red sphere there?""",
+    render=render_confirm_question,
+)
+
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16)}
+                                                      Q05, G06, P15, P16, C01)}
 
 
 def get(version: str) -> Prompt:

@@ -153,6 +153,7 @@ FLOOR_CLASSES = ["open_far", "open_near", "blocked_near"]
 MODES = ["approach", "explore", "backtrack", "escape"]
 
 PERCEIVER_SCHEMA_NAME = "perceiver"
+CONFIRMER_SCHEMA_NAME = "confirmer"
 STRATEGIST_SCHEMA_NAME = "strategist"
 
 
@@ -231,6 +232,18 @@ def perceiver_schema(version: str = "g03") -> Dict[str, Any]:
     }
     for strip in STRIPS:
         properties[strip] = dict(lane, description="The {0} strip.".format(strip))
+    return {"type": "object", "properties": properties, "required": list(properties),
+            "additionalProperties": False}
+
+
+def confirmer_schema() -> Dict[str, Any]:
+    """c01 (a27 on): is the reported goal there, after a description."""
+    properties = {
+        "reason": {"type": "string",
+                   "description": "What is in the reported strip and the strips next to it."},
+        "present": {"type": "string", "enum": ["yes", "no"],
+                    "description": "Whether a glowing red sphere is there."},
+    }
     return {"type": "object", "properties": properties, "required": list(properties),
             "additionalProperties": False}
 

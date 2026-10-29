@@ -98,9 +98,11 @@ class Agent:
 
     @property
     def subagent_prompts(self) -> List[prompts.Prompt]:
-        """The perceiver's and strategist's prompts (a13 on), in that order."""
+        """The perceiver's and strategist's prompts (a13 on), in that order, then
+        the goal confirmer's (a27 on)."""
         orch = self.features.get("orchestrator") or {}
-        return [prompts.get(orch[k]) for k in ("perceiver", "strategist") if orch.get(k)]
+        return [prompts.get(orch[k]) for k in ("perceiver", "strategist", "confirmer")
+                if orch.get(k)]
 
 
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
@@ -398,6 +400,27 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "a25 with navigator prompt p16: p14 with the notes ranked (goal, then 'toward "
           "your target' including turning around, then new ground). Probe on R11's steps "
           "(eval/r15_nav_probe.py): 'toward' on marker 0 followed 35% (p14 21%)."),
+    Agent("a27", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q04",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "none",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "staged_verify",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "verify_budget": {"min_steps": 8,
+                                                            "extra_steps": 4,
+                                                            "steps_per_m": 0.8,
+                                                            "check_within_m": 2.6},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a22 with a goal confirmer (c01): when g05 reports the goal, a second call on the "
+          "same clean frame checks that strip, and a 'no' removes the report before the map "
+          "and stages read it; and a verify check look counted within 2.6 m of the vantage. "
+          "R13 failure analysis: 21 of 26 losses of sight rested on hallucinated reports; 5 "
+          "of 8 timeouts reached the vantage but could not face the bearing inside 1.5 m."),
 )}
 
 DEFAULT_AGENT = "a00"

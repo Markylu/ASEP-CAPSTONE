@@ -285,6 +285,32 @@ async def perceive(s: Step) -> Optional[str]:
     return None
 
 
+def _confirmed(parsed: Dict[str, Any]) -> Dict[str, Any]:
+    if parsed.get("present") not in ("yes", "no"):
+        raise vlm.VLMError("confirmer gave no yes or no")
+    return {"reason": str(parsed.get("reason", "")), "present": parsed["present"]}
+
+
+async def confirm(s: Step) -> Optional[str]:
+    """a27: when the perceiver reports the goal, a second look (c01) at the
+    same clean frame. A "no" removes the report (kept as goal_reported) before
+    the map, the stages or the navigator read it. A failed call keeps it."""
+    if not s.perception or s.perception.get("goal") not in spatial.STRIPS:
+        return None
+    p = prompts.get(s.features["confirmer"])
+    report = {"strip": s.perception["goal"],
+              "range": spatial.WORDS["range"].get(s.perception.get("goal_range"))}
+    seen = await ask(s, views.confirmer(p, report, s.clean_b64), schema.CONFIRMER_SCHEMA_NAME,
+                     schema.confirmer_schema(), _confirmed, PERCEIVER_MAX_TOKENS)
+    s.record["confirmer"] = seen.to_dict()
+    if seen.result is not None and seen.result["present"] == "no":
+        s.perception = dict(s.perception, goal="not_visible", goal_range=None,
+                            goal_reported=s.perception["goal"])
+        s.record["perceiver"] = dict(s.record["perceiver"], result=s.perception)
+        s.record["goal"] = LEGACY_GOAL["not_visible"]
+    return None
+
+
 async def build_map(s: Step) -> Optional[str]:
     s.mem = spatial.rebuild(s.records, s.manifest, s.perception, s.cfg)
     s.here = spatial.pose_xyh(s.manifest.get("pose"))
@@ -510,8 +536,11 @@ def pipeline(features: Dict[str, Any]) -> List[Stage]:
                          "is needed")
     else:
         raise ValueError("unknown target_policy {0!r}".format(policy))
-    stages = [Stage("perceiver", perceive, features.get("perceiver")),
-              Stage("mapper", build_map),
+    stages = [Stage("perceiver", perceive, features.get("perceiver"))]
+    if features.get("confirmer"):
+        stages.append(Stage("confirmer", confirm, features.get("confirmer"),
+                            "when the perceiver reports the goal"))
+    stages += [Stage("mapper", build_map),
               planning,
               Stage("projector", project)]
     if features.get("turn_rule") == "no_repeat_when_open":
