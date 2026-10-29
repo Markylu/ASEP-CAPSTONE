@@ -367,6 +367,23 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "answer for floor whose end is out of sight, and the bottom edge of each strip "
           "looked at first. R12: 157 of g05's 477 no_floor strips were clear past 8 m, "
           "with reasons saying the floor was visible across the image."),
+    Agent("a25", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "R11's routing with R12's map: code keeps the goal's true position as the "
+          "target and asks the detour strategist (q03) only when the way is walled, "
+          "blocked or six steps gained nothing (a16, R11 11/18), but q03 chooses from "
+          "a17's menu (reachable edges of unsearched ground, reachable doorways, a way "
+          "back) on a17's memory, with g05 read as a22. R11's failure analysis: 34 of 37 "
+          "detour picks lay behind or inside a wall, 51% of steps stood on them."),
 )}
 
 DEFAULT_AGENT = "a00"

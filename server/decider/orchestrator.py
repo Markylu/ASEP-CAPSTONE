@@ -338,7 +338,12 @@ async def route(s: Step) -> Optional[str]:
     s.record["planner"] = r.to_dict()
     s.target, s.mode = r.target, r.mode
     if r.ask is not None and s.here is not None:
-        menu = planner.detours(s.mem, s.here, s.step, s.goal)
+        if s.features.get("target_policy") == "goal_reach_detour":
+            # a25: a17's menu, reachable places only, instead of a16's frontier
+            # nearest the goal (R11: 34 of 37 picks lay behind or inside a wall).
+            menu = planner.search_menu(s.mem, s.here, s.step, [])
+        else:
+            menu = planner.detours(s.mem, s.here, s.step, s.goal)
         ids = [t.id for t in menu] + [EXPLORE]
         view = views.strategist(prompts.get(s.features["strategist"]),
                                 planner.detour_situation(s.mem, s.manifest, menu, r.ask, s.goal))
@@ -493,7 +498,7 @@ def pipeline(features: Dict[str, Any]) -> List[Stage]:
     policy = features.get("target_policy", "llm_strategist")
     if policy == "llm_strategist":
         planning = Stage("strategist", strategize, features.get("strategist"), "on a trigger")
-    elif policy == "goal_default_llm_detour":
+    elif policy in ("goal_default_llm_detour", "goal_reach_detour"):
         planning = Stage("route", route, features.get("strategist"),
                          "every step; q03 only when the way to the goal is shut")
     elif policy == "staged_search":

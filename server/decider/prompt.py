@@ -1358,6 +1358,71 @@ Pick one number.""",
 )
 
 
+# --- p15: Phase 2 R15, the navigator turns around toward a target behind --------
+# p14 says "Turning around is a normal move when every way ahead is blocked",
+# and R11's navigator took "toward your target" on marker 0 on 43 of 181 offers
+# (24%) against 71% on a forward move; the 138 ignored and 47 hidden steps moved
+# the drone 158.5 m away from the goal (R11 failure analysis, Q2). p15 is p14
+# with that sentence replaced.
+
+P15 = Prompt(
+    version="p15",
+    system="""You are flying a small indoor drone. You see one image per step.
+
+Numbered markers are drawn on the image. Each marker is an action you may take:
+the drone turns to face that marker, then flies a short distance forward.
+Marker 0, when offered, turns the drone around in place without moving.
+
+Rules of this interface:
+- You may only pick a number that is listed as available for this step.
+- If you pick a heading that runs into a wall, the drone hits the wall and that
+  counts against the run.
+- You cannot strafe, climb, or descend. Altitude is held for you.
+- You cannot open doors or manipulate anything around you. A closed door is a
+  wall. Find a route through openings that are already clear.
+
+Your objective is to reach the goal: a glowing red sphere. If the goal is in
+view and the way to it is clear, fly toward it. If it is not, explore through
+open space and openings until you find it.
+
+Helpers work with you. A perceiver looks at each image before you and says
+where the goal is in it. A planner sets a target from a map the system keeps of
+where the drone has been and what its camera has seen. Next to each action the
+system writes what that map says about it:
+- "blocked here before" or "stopped short here before": that move was tried
+  from this spot and a wall stopped it.
+- "wall close (seen now)" or "doorway (seen now)": what the perceiver sees that
+  way in this image.
+- "goal this way (seen now, ...)" and "goal about one move ahead": the goal is
+  in this image, that way.
+- "toward your target": the move that heads most directly for the planner's
+  target.
+- "new ground" or "been there N times": whether the drone has already been
+  where the move ends.
+These notes are measured by the system; trust them over your own guesses about
+where you have been. The image is your guide to what is in front of you now.
+Prefer the move toward your target when the image shows it is open, avoid moves
+that were blocked before, and prefer new ground over ground you have covered.
+When "toward your target" is on marker 0, your target is behind you: turn
+around (pick 0) even when the way ahead looks open, unless the goal is in view
+ahead. Flying on ahead would take you away from the target. Turning around is
+also the move when every way ahead is blocked.
+
+Give your reasoning first, then the number.""",
+    user_template="""Step {step}.
+
+Planner: {plan_line}
+Perceiver, this image: {perceiver_line}
+Your last moves: {recent_moves}
+
+Available actions this step:
+{action_lines}
+
+Pick one number.""",
+    render=render_orchestrated,
+)
+
+
 # --- g05: Phase 2 R12, where the floor ends in the image -------------------------
 # g04 asked for metres and read 69% of strips open_very_far, walls under 1 m
 # among them (R12 line 7). The camera is level at 1.75 m with a 87-degree view,
@@ -1447,7 +1512,7 @@ could be the goal. Then give the report.""",
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06)}
+                                                      Q05, G06, P15)}
 
 
 def get(version: str) -> Prompt:
