@@ -1300,6 +1300,24 @@ Doors can close; the list only shows doorways not known to be closed. Choose
     render=render_strategist,
 )
 
+
+# q07: q06 with the reason spelt out. On R11's 38 recorded calls q06 still
+# picked the unexplored ground worded nearest the goal on 34 (doorway on 2 of
+# 19 menus with one): its reasoning read "N m nearer the goal" as progress.
+
+Q07 = Prompt(
+    version="q07",
+    system=Q06.system.replace(
+        """Every detour listed can be reached over known floor. The goal is usually
+behind a wall,""",
+        """Every detour listed can be reached over known floor. "Nearer the goal" is
+straight-line distance only: it says nothing about the wall in between, and the
+drone has just been stopped by that wall. Unexplored ground worded nearer the
+goal is usually more of the same wall. The goal is usually behind a wall,"""),
+    user_template=Q03.user_template,
+    render=render_strategist,
+)
+
 # p14: the navigator. The frame with its markers, the planner's target, the
 # perceiver's answer for this image, the last three moves in words, and notes
 # from the map against each action.
@@ -1646,7 +1664,7 @@ otherwise no.""",
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
-                                                      Q05, G06, P15, P16, C01, Q06)}
+                                                      Q05, G06, P15, P16, C01, Q06, Q07)}
 
 
 def get(version: str) -> Prompt:
