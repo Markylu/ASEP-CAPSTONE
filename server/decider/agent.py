@@ -115,6 +115,7 @@ ALONG_WALL_A39: Dict[str, Any] = {
     "look_within_deg": 60.0,
     "min_wall_cells": 3,
     "hand_back_after": 2,
+    "hand_back_within_deg": 60.0,
     "words": {
         "item": "along the wall, {side} of the way to the goal, up to {d:.0f} m",
         "followed": "you followed this way {n} time(s) already",

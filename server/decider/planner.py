@@ -144,8 +144,12 @@ def route(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
         elif stall is not None and detour_stalled(mem, standing, stall):
             hand_back = "detour_stalled"
         elif (along is not None and standing.kind == "along" and way == "open"
-              and step - standing.step >= along["hand_back_after"]):
-            # a39: the way toward the goal opened while following the wall.
+              and step - standing.step >= along["hand_back_after"]
+              and abs(spatial.wrap(spatial.bearing(here[:2], goal) - here[2]))
+              <= along["hand_back_within_deg"]):
+            # a39: the way toward the goal opened ahead while following the
+            # wall. A goal off to the side counts as open in goal_way (the
+            # turn faces it), which along a wall it always is.
             hand_back = "along_way_open"
         elif step - standing.step > P["detour_max_steps"]:
             hand_back = "detour_too_long"
