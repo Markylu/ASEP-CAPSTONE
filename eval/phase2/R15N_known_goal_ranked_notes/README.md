@@ -29,4 +29,8 @@ flown only on the known-goal agent here.
 
 ## Outcome
 
-Not flown. Read against R15 and R11; [R15's README](../R15_known_goal_reach/README.md).
+Flown 2026-10-29 03:50–04:30 UTC beside R15, 4 lanes, 18/18 valid. **10/18**: `initial` 5/6 (s03
+failed), `final` 3/6 (s01, s02c, s02va), `dynamic` 2/6 (s01, s02vc). R15 (same agent with `p14`)
+9/18, R11 11/18. One run above R15, one below R11: within the spread of one seed. Strategist
+doorway picks 17/37; steps on a stalled detour 43/786 (R15 68/827). Per run:
+[manipulation.txt](manipulation.txt). Read with R15's [failure analysis](../R15_known_goal_reach/failure_analysis.md).

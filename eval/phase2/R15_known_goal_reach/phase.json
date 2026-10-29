@@ -3,10 +3,11 @@
   "title": "Known goal, reachable detours",
   "citable": false,
   "agent_version": "a25",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "65ef085",
+  "started": "2026-10-29T03:43:05+00:00",
+  "finished": "2026-10-29T04:30:23+00:00",
+  "operator": "Markylu",
+  "notes": "Flown overnight on parallel lanes; merged with eval/phase2_merge.py.",
+  "lanes": "4 lanes on sctsvr6: ~/asep-r15-l1..l4 (8 with R15N)"
 }

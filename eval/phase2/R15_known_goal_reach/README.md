@@ -70,4 +70,25 @@ operator's limit is 4). The tunnel is the operator's.
 
 ## Outcome
 
-Not flown.
+Flown 2026-10-29 03:43–04:30 UTC, 4 lanes, 18/18 valid. **9/18**: `initial` 6/6, `final` 1/6
+(s02vc), `dynamic` 2/6 (s02a, s02va). R15N (`a26`, `p16`) 10/18; R11 11/18. Not above R11:
+**hypothesis not held**, not carried forward on its own (its two successors R16K–R18K already
+build on it).
+
+| Arm | R11 | R15 | R15N | predicted |
+|---|---|---|---|---|
+| `initial` | 6/6 | 6/6 | 5/6 | ≥ 5/6: held |
+| `final` | 4/6 | 1/6 | 3/6 | ≥ 4/6: not held |
+| `dynamic` | 1/6 | 2/6 | 2/6 | ≥ 2/6: held |
+| total | 11/18 | 9/18 | 10/18 | ≥ 12/18: not held |
+
+- Detour menu: the strategist (`q03`) took a doorway on 18 of the 44 menus that listed one (R11:
+  1/19) and `explore` on 32 of 96 calls. Detours ended reached 36, closed 10, too long 5, goal in
+  view 7. Wall check of the picks against the site geometry not run.
+- Steps on a detour that 4 moves brought under 0.5 m nearer (`eval/r18_stalled_steps.py`): 68/827
+  (R11 156/706). `s01/final` circled a frontier 3–4 m abeam from step 12 to 25: R18's change.
+- Per run: [manipulation.txt](manipulation.txt); median `blocked_near` 19%, turn-arounds 9.5, max
+  distance from start 21.9 m (R11: 15%, 4, 22.9 m).
+
+Reachable detours fixed what R11's analysis named (phantom frontiers; 2/6 `dynamic`), but `final`
+fell from 4/6 to 1/6. Failure analysis: [failure_analysis.md](failure_analysis.md).
