@@ -359,15 +359,18 @@ async def route(s: Step) -> Optional[str]:
     strategist (q03) only when the way toward it is shut."""
     assert s.mem is not None and s.goal is not None
     standing, mode, last_called, _ = previous(s.records, s.step)
+    stall = s.features.get("detour_stall")
     r = planner.route(s.mem, s.manifest, s.perception, s.records, standing, mode, last_called,
-                      s.goal)
+                      s.goal, stall)
     s.record["planner"] = r.to_dict()
     s.target, s.mode = r.target, r.mode
     if r.ask is not None and s.here is not None:
         if s.features.get("target_policy") == "goal_reach_detour":
             # a25: a17's menu, reachable places only, instead of a16's frontier
             # nearest the goal (R11: 34 of 37 picks lay behind or inside a wall).
-            menu = planner.search_menu(s.mem, s.here, s.step, [])
+            # a33: without the detours that stalled or ran too long.
+            black = planner.failed_detours(s.records) if stall is not None else []
+            menu = planner.search_menu(s.mem, s.here, s.step, black)
         else:
             menu = planner.detours(s.mem, s.here, s.step, s.goal)
         ids = [t.id for t in menu] + [EXPLORE]

@@ -98,10 +98,38 @@ def progress(mem: spatial.SpatialMemory, goal: spatial.Point) -> Optional[float]
     return round(spatial.dist((x0, y0), goal) - spatial.dist((x1, y1), goal), 2)
 
 
+def detour_stalled(mem: spatial.SpatialMemory, target: spatial.Target,
+                   stall: Dict[str, float]) -> bool:
+    """a33: the last `steps` moves, all on this detour, brought the drone less
+    than `gain_m` nearer it. R15 s01 final: 12 steps circling a frontier 3-4 m
+    abeam ("sharp right: toward your target" every step)."""
+    k = int(stall["steps"])
+    if len(mem.trail) <= k or mem.trail[-1 - k][0] < target.step:
+        return False
+    _, x0, y0, _ = mem.trail[-1 - k]
+    _, x1, y1, _ = mem.trail[-1]
+    t = (target.x, target.y)
+    return spatial.dist((x0, y0), t) - spatial.dist((x1, y1), t) < float(stall["gain_m"])
+
+
+def failed_detours(records: List[Dict[str, Any]]) -> List[List[float]]:
+    """Where the detours handed back stalled or too long stood: a33 leaves them
+    off later menus (R11 failure analysis Q6, fix 1d)."""
+    rows = {r["step"]: r for r in records if "step" in r}
+    out = []
+    for step, r in rows.items():
+        if (r.get("planner") or {}).get("hand_back") in ("detour_stalled", "detour_too_long"):
+            t = (rows.get(step - 1) or {}).get("target") or {}
+            if t.get("x") is not None and t.get("kind") != "goal":
+                out.append([t["x"], t["y"]])
+    return out
+
+
 def route(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
           perception: Optional[Dict[str, Any]], records: List[Dict[str, Any]],
           standing: Optional[spatial.Target], mode: Optional[str],
-          last_called: Optional[int], goal: spatial.Point) -> Route:
+          last_called: Optional[int], goal: spatial.Point,
+          stall: Optional[Dict[str, float]] = None) -> Route:
     """The target for this step, and whether q03 must be asked for a detour."""
     step = int(manifest.get("step", 0))
     here = spatial.pose_xyh(manifest.get("pose"))
@@ -112,6 +140,8 @@ def route(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
         state = spatial.target_state(mem, standing, here[:2], goal)
         if state != "open":
             hand_back = "detour_" + state
+        elif stall is not None and detour_stalled(mem, standing, stall):
+            hand_back = "detour_stalled"
         elif step - standing.step > P["detour_max_steps"]:
             hand_back = "detour_too_long"
         elif (perception or {}).get("goal") in spatial.STRIPS and way == "open":

@@ -494,6 +494,36 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                           "spatial": "server/decider/spatial.py"}},
           "a28 (known goal, reachable detours, goal confirmer c01) with detour strategist "
           "q07: the two known-goal changes together."),
+    Agent("a33", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q07",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a31 (known goal, reachable detours, q07) with a detour handed back when 4 moves "
+          "bring it under 0.5 m nearer, and detours handed back stalled or too long left off "
+          "later menus. R15 s01 final: 12 steps circling a frontier 3-4 m abeam."),
+    Agent("a34", "p14", {"orchestrator": {"perceiver": "g05", "strategist": "q07",
+                                          "confirmer": "c01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a32 (known goal, reachable detours, q07, goal confirmer c01) with a33's stalled "
+          "detour hand-back."),
 )}
 
 DEFAULT_AGENT = "a00"
