@@ -273,6 +273,7 @@ strict JSON, which is the worst of both for a pure reader.
 | (noise) | 2026-10-29 | Repeat reads disagree on 18.6% of strip fields even at concurrency 1. N1's alone runs differ only on trial 0, which points to cold vs prefix-cached calls | Repeats on vLLM are not independent. Prefix caching is the operator's call |
 | R27 | 2026-10-30 | Flew a60 (g07 ×2, image-right): 12/18 vs R25D 14. In flight, missed walls 2.5% (R25D 17.3%) but phantom walls 28.2%, 60% on s03, where all three runs looped | **Dropped.** The probe gate's frames lacked the s03 views a60 flies into |
 | AG | 2026-10-30 | Wall only where both g07 reads see one, on R27's 576 flight frames. Phantom walls 23.6% vs g05 9.4% (s03 55% vs 10%); on R27's probe sample 11.8% vs 11.7% | **Fails** (3 of 5). On s03 both g07 reads call the same phantom walls, so fusion cannot help: they come from dropping describe-first, not from the image side |
+| W01 (R28 gate) | 2026-10-30 | Wall reader w01 (g05's floor job alone, describe-first kept) on F, P and C2, 4 shards. Missed walls F 16.5% vs g05 16.5%, P 19.6% vs 16.5%, C2 17.5% vs 17.0%; phantom +0.2 / −3.4 / −3.5 pts. 2.6% of calls failed (reason past the token limit) | **Fails** (3 of 5). One job or three, describe-first reads walls the same: the missed walls come from the wording, not the task load. R28 not flown |
 
 Details and readings: each probe's README under `eval/phase2/_probes/`.
 

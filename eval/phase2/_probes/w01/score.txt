@@ -1,0 +1,26 @@
+R28 probe: w01 against g05 (recorded reads), concurrency 1
+
+## Set F: 576 sampled, 16 failed w01 calls: 576 frames
+  read         missed wall  phantom wall  s03 phantom   doorway      goal
+  g05                16.5%          9.4%         9.7%     89.9%     93.8%
+  w01                16.5%          9.6%        10.4%     89.9%     93.8%
+
+## Set P: 300 sampled, 4 failed w01 calls: 300 frames
+  read         missed wall  phantom wall  s03 phantom   doorway      goal
+  g05                16.5%         11.7%        19.8%     83.7%     92.3%
+  w01                19.6%          8.3%        12.4%     83.7%     92.3%
+
+## Set C2: 300 sampled, 10 failed w01 calls: 300 frames
+  read         missed wall  phantom wall  s03 phantom   doorway      goal
+  g05                17.0%         14.6%         9.1%     82.8%     90.0%
+  w01                17.5%         11.1%        10.4%     82.8%     90.0%
+
+  w01 median latency 1643 ms over 1176 calls
+
+## Gate (all five; C2 reported, not gated)
+  F missed <= half of g05's              16.5% vs 16.5%  FAIL
+  F phantom <= g05 + 2 pts                     +0.2 pts  pass
+  P missed <= half of g05's              19.6% vs 16.5%  FAIL
+  P phantom <= g05 + 2 pts                     -3.4 pts  pass
+  F s03 phantom <= g05 + 4 pts                 +0.7 pts  pass
+  verdict: FAIL

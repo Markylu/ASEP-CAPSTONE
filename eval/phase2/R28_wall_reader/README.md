@@ -1,7 +1,8 @@
 # R28: R25D with each strip's floor from a wall reader (w01)
 
 **Agent:** `a61` (`c4cf3f29bc27`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` +
-wall reader `w01` · **Memory:** `a17b` · **Status:** pre-registered 2026-10-30, not flown
+wall reader `w01` · **Memory:** `a17b` · **Status:** pre-registered 2026-10-30, probe gate failed,
+not flown
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Comes from
 [what-we-learned.md](../../../docs/research/what-we-learned.md), idea 1: separate the perceiver's
@@ -80,6 +81,16 @@ If it fails, R28 does not fly, the Outcome records the probe, and the next wall 
 version (for example a narrower per-strip question), not an edit of `w01`. Output:
 `_probes/w01/score.txt`.
 
+**Result: failed** (2026-10-30), 3 of 5. Write-up: [_probes/w01](../_probes/w01/README.md).
+
+| | Gate | Value | |
+|---|---|---|---|
+| 1 | F missed ≤ half of `g05`'s | 16.5% vs 16.5% | FAIL |
+| 2 | F phantom ≤ `g05` + 2 pts | +0.2 pts | pass |
+| 3 | F s03 phantom ≤ `g05` + 4 pts | +0.7 pts | pass |
+| 4 | P missed ≤ half of `g05`'s | 19.6% vs 16.5% | FAIL |
+| 5 | P phantom ≤ `g05` + 2 pts | −3.4 pts | pass |
+
 ## On-policy check
 
 Only if the probe gate passes. A gate on recorded frames is an open-loop test of a closed-loop
@@ -149,4 +160,10 @@ R25D (`a49`).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Not flown: the probe gate failed.** `w01` misses real walls at `g05`'s rate (F 16.5% vs 16.5%,
+P 19.6% vs 16.5%, C2 17.5% vs 17.0%), so taking the goal and doorway out of the question does not
+change the wall reading. The missed walls come with describe-first wording itself: only dropping it
+(`g07`) cut them, and that brought R27's phantom walls. 2.6% of `w01` calls also failed (reason past
+the token limit). The best agent is still `a49` (R25D, 14/18). Next: a wall reader that changes the
+question (narrower per-strip question, or per-strip crops), as a new version with its own gate.
+Probe write-up: [_probes/w01](../_probes/w01/README.md).

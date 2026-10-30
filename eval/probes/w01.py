@@ -97,14 +97,17 @@ def score() -> int:
     for name, (folder, g05_read) in SETS.items():
         g05 = calls_of(folder)
         frames = frames_of(name)
+        # Every frame with a g05 read and a w01 call. A failed w01 call leaves
+        # g05's floors, as a61 does in flight (orchestrator.perceive_walls).
         full = [f for f in frames
-                if (g05.get(f["id"]) or {}).get(g05_read) and (mine.get(name) or {}).get(f["id"])]
+                if (g05.get(f["id"]) or {}).get(g05_read) and f["id"] in (mine.get(name) or {})]
         failed = sum(1 for v in (mine.get(name) or {}).values() if not v)
         res = {}
         for f in full:
-            own = g05[f["id"]][g05_read]
+            own, walls = g05[f["id"]][g05_read], mine[name][f["id"]]
             # w01 reads floors only; doorway and goal stay g05's, as in a61
-            res[f["id"]] = {"g05": own, "w01": orchestrator.with_walls(own, mine[name][f["id"]])}
+            res[f["id"]] = {"g05": own,
+                            "w01": orchestrator.with_walls(own, walls) if walls else own}
         out, stats[name] = table("Set {0}: {1} sampled, {2} failed w01 calls".format(
             name, len(frames), failed), full, res, ("g05", "w01"))
         lines += out
