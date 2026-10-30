@@ -51,4 +51,40 @@ would fly other paths. Set F is a harder test than set P, not the same test as f
 
 ## Result
 
-Not run.
+**Failed** (2026-10-30), 3 of 5 checks. The gate was committed first (`f7e83e3`). Output:
+[score.txt](score.txt).
+- Set F: 576 frames, 1728 calls, none failed.
+- Concurrency 1: half the frames on `:8004` with no flights running, half on a `:8006` copy on GPU 3,
+  stopped afterwards.
+- Median latency: `g05` 1.34–1.45 s, `g07` 0.83–0.95 s.
+
+| Read | F missed | F phantom | F s03 phantom | F doorway | P missed | P phantom |
+|---|---|---|---|---|---|---|
+| `g05` (a49) | 16.5% | 9.4% | 9.7% | 89.9% | 16.5% | 11.7% |
+| `g07` | 2.5% | 35.3% | 64.7% | 86.7% | 6.3% | 26.2% |
+| `g07` mirrored | 2.5% | 36.3% | 64.4% | 85.6% | 2.5% | 26.4% |
+| a60 (image-right) | 2.8% | 28.5% | 58.9% | 87.3% | 5.1% | 17.0% |
+| **agree** | **3.8%** | **23.6%** | **55.3%** | 87.3% | **7.6%** | **11.8%** |
+
+| | Gate | Value | |
+|---|---|---|---|
+| 1 | F missed ≤ half of `g05`'s | 3.8% vs 16.5% | pass |
+| 2 | F phantom ≤ `g05` + 2 pts | +14.2 pts | FAIL |
+| 3 | F s03 phantom ≤ `g05` + 4 pts | +45.6 pts | FAIL |
+| 4 | F doorway ≥ `g05` − 2, goal ≥ `g05` − 1 | −2.6 / +1.4 pts | FAIL |
+| 5 | P missed ≤ half, phantom ≤ `g05` + 2 | 7.6% vs 16.5%, +0.1 pts | pass |
+
+Reading:
+- **On the old sample the rule works.** On set P, `agree` brings phantom walls back to `g05`'s
+  (11.8% vs 11.7%) and keeps most of the missed-wall gain (7.6% vs 16.5%).
+- **On the frames a60 flew it does not.** On R27's s03 frames, both `g07` reads call about 65% of
+  open strips walls, and they call the same ones. That is not the image-side bias the mirror was
+  for, so neither fusion can remove it (a60 59%, agree 55%). `g05` reads the same frames at 9.7%.
+- **The phantom walls come from the prompt.** `g07` is `g05` without the describe-first paragraph.
+  On these views, dropping that paragraph is what produces the walls. The missed-wall gain and the
+  phantom-wall cost come from the same change.
+- **Not batching.** Fresh reads at concurrency 1 match the reads R27 recorded in flight (`g07`
+  35.3% vs 36.0% phantom; a60 28.5% vs 28.2%).
+- **Doorway** fell 2.6 pts against `g05` on these frames; on set P it was −1.7.
+
+The agree rule does not fly.

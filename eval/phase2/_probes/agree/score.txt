@@ -1,0 +1,32 @@
+Probe AG: set F 576 frames, 576 with all three reads, 0 failed calls
+
+## Set F (R27 flight frames, fresh reads): 576 frames
+  read         missed wall  phantom wall  s03 phantom   doorway      goal
+  g05                16.5%          9.4%         9.7%     89.9%     93.8%
+  g07                 2.5%         35.3%        64.7%     86.7%     95.1%
+  g07_mirror          2.5%         36.3%        64.4%     85.6%     95.0%
+  a60                 2.8%         28.5%        58.9%     87.3%     95.1%
+  agree               3.8%         23.6%        55.3%     87.3%     95.1%
+
+## Set P (R27 probe sample, recorded calls): 300 frames
+  read         missed wall  phantom wall  s03 phantom   doorway      goal
+  g05                16.5%         11.7%        19.8%     83.7%     92.3%
+  g07                 6.3%         26.2%        50.3%     81.7%     93.7%
+  g07_mirror          2.5%         26.4%        46.3%     80.7%     91.3%
+  a60                 5.1%         17.0%        35.6%     82.1%     93.7%
+  agree               7.6%         11.8%        32.2%     82.1%     93.7%
+
+## Not gated: set F, the reads recorded in flight: 576 frames
+  read         missed wall  phantom wall  s03 phantom   doorway      goal
+  g07                 2.2%         36.0%        65.5%     85.9%     95.3%
+  g07_mirror          2.5%         36.4%        65.0%     84.7%     95.0%
+  a60                 2.5%         28.2%        59.8%     86.1%     95.3%
+  agree               3.5%         24.1%        57.0%     86.1%     95.3%
+
+## Gate (all five)
+  F missed <= half of g05's                         3.8% vs 16.5%  pass
+  F phantom <= g05 + 2 pts                              +14.2 pts  FAIL
+  F s03 phantom <= g05 + 4 pts                          +45.6 pts  FAIL
+  F doorway >= g05 - 2, goal >= g05 - 1           -2.6 / +1.4 pts  FAIL
+  P missed <= half, phantom <= g05 + 2    7.6% vs 16.5%, +0.1 pts  pass
+  verdict: FAIL
