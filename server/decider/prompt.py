@@ -1686,6 +1686,42 @@ G07 = Prompt(
     render=render_identifier_question,
 )
 
+# --- w01: Phase 2 R28, the wall reader ---------------------------------------------
+# What we learned (docs/research/what-we-learned.md): one perceiver prompt sets
+# the trade-off for walls, doorways and the goal at once, and the three want
+# different prompts. w01 is g05's floor job alone: the same strips, floor
+# classes and describe-first ending, with the goal and the doorway taken out.
+# a61 asks it beside g05 and takes each strip's floor from it
+# (orchestrator.perceive_walls); doorways and the goal stay g05's.
+
+W01 = Prompt(
+    version="w01",
+    system="""You check one image from the front camera of a small indoor drone.
+Judge this image alone.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+For each strip, find where its floor ends: the line where the floor meets a
+wall, door or obstacle. The camera is level, so the nearer the obstacle, the
+lower that line sits in the image, and an obstacle close in front hides the
+floor completely. Say:
+no_floor if no floor shows at the bottom of the strip: a wall, door, pillar
+or plain surface fills it from the bottom up. A dark plain surface is a wall
+close in front, not open space;
+bottom if floor shows but ends within the bottom quarter of the image;
+lower if the floor ends higher than that but well below the middle of the
+image;
+middle if the floor runs up to just below the middle of the image.
+Judge by the floor you can see, its edges and lines, never by darkness.
+
+First say, for each strip from left to right, what fills the bottom of the
+strip and where its floor ends. Then describe walls, openings and doors. Then
+give the report.""",
+    user_template="Report on this image.",
+    render=render_identifier_question,
+)
+
 # --- p16: Phase 2 R15, the notes in an order -------------------------------------
 # p15's probe on R11's steps: "toward your target" on marker 0 followed 31% (p14
 # 18%). p14 also says to prefer new ground, and marker 0 nearly always carries
@@ -1883,7 +1919,7 @@ PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P0
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
                                                       Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09, Q10, Q11, Q12, Q13,
-                                                      G07)}
+                                                      G07, W01)}
 
 
 def get(version: str) -> Prompt:

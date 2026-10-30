@@ -285,6 +285,8 @@ async def perceive(s: Step) -> Optional[str]:
 
     if s.features.get("perceiver_mirror") == "image_right":
         return await perceive_mirrored(s, read)
+    if s.features.get("wall_reader"):
+        return await perceive_walls(s, read)
     seen = await read(s.clean_b64)
     s.perception = seen.result
     s.record["perceiver"] = seen.to_dict()
@@ -335,6 +337,47 @@ async def perceive_mirrored(s: Step, read) -> Optional[str]:
     s.record["perceiver"] = dict(seen.to_dict(), result=s.perception, result_own=own)
     s.record["perceiver_mirror"] = (dict(seen_m.to_dict(), result_unmirrored=other)
                                     if seen_m is not None else None)
+    s.record["goal"] = LEGACY_GOAL[s.perception["goal"]] if s.perception else None
+    return None
+
+
+def walls_from(parsed: Dict[str, Any],
+               floor_map: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """The wall reader's reply (w01), checked: each strip's floor end, and the
+    floor class `floor_map` (the agent's) turns it into, as perception_from."""
+    lanes = []
+    for strip in schema.STRIPS:
+        end = (parsed.get(strip) or {}).get("floor")
+        if end not in schema.FLOOR_ENDS_G05:
+            raise vlm.VLMError("wall reader gave no valid floor for {0}".format(strip))
+        lanes.append({"strip": strip, "floor": (floor_map or {})[end], "floor_end": end})
+    return {"reason": str(parsed.get("reason", "")), "lanes": lanes}
+
+
+def with_walls(own: Dict[str, Any], walls: Dict[str, Any]) -> Dict[str, Any]:
+    """a61: each strip's floor from the wall reader; its doorway and the goal as
+    the perceiver read them."""
+    by = {l["strip"]: l for l in walls["lanes"]}
+    return dict(own, lanes=[dict(l, floor=by[l["strip"]]["floor"],
+                                 floor_end=by[l["strip"]]["floor_end"])
+                            for l in own["lanes"]])
+
+
+async def perceive_walls(s: Step, read) -> Optional[str]:
+    """a61: the perceiver and the wall reader on the clean frame at the same
+    time; the map gets with_walls() of the two. If the wall reader fails, the
+    perceiver's floors stand; if the perceiver fails, there is no reading, as
+    for a49. The step's latency counts both calls."""
+    p = prompts.get(s.features["wall_reader"])
+    walls = ask(s, views.wall_reader(p, s.manifest, s.clean_b64),
+                schema.WALL_READER_SCHEMA_NAME, schema.wall_reader_schema(),
+                lambda parsed: walls_from(parsed, s.features.get("floor_map")),
+                PERCEIVER_MAX_TOKENS)
+    seen, seen_w = await asyncio.gather(read(s.clean_b64), walls)
+    own = seen.result
+    s.perception = with_walls(own, seen_w.result) if own and seen_w.result else own
+    s.record["perceiver"] = dict(seen.to_dict(), result=s.perception, result_own=own)
+    s.record["wall_reader"] = seen_w.to_dict()
     s.record["goal"] = LEGACY_GOAL[s.perception["goal"]] if s.perception else None
     return None
 

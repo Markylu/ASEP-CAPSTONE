@@ -238,6 +238,32 @@ def perceiver_schema(version: str = "g03") -> Dict[str, Any]:
             "additionalProperties": False}
 
 
+WALL_READER_SCHEMA_NAME = "wall_reader"
+
+
+def wall_reader_schema() -> Dict[str, Any]:
+    """w01 (a61 on): g05's floor per strip and nothing else, after a description."""
+    properties: Dict[str, Any] = {
+        "reason": {"type": "string",
+                   "description": "What fills the bottom of each strip and where its floor "
+                                  "ends; walls, openings and doors."},
+    }
+    for strip in STRIPS:
+        properties[strip] = {
+            "type": "object",
+            "properties": {"floor": {"type": "string", "enum": FLOOR_ENDS_G05,
+                                     "description": "Where this strip's floor ends in the "
+                                                    "image: no floor at its bottom, the "
+                                                    "bottom quarter, lower, or just below "
+                                                    "the middle."}},
+            "required": ["floor"],
+            "additionalProperties": False,
+            "description": "The {0} strip.".format(strip),
+        }
+    return {"type": "object", "properties": properties, "required": list(properties),
+            "additionalProperties": False}
+
+
 def confirmer_schema() -> Dict[str, Any]:
     """c01 (a27 on): is the reported goal there, after a description."""
     properties = {
