@@ -1,0 +1,24 @@
+B0 over R15-R26: 324 runs; shut-tine failures: 17
+  R15N/s03/final (tine @45, exit wall @50)
+  R17K/s03/dynamic (tine @53, exit wall @59)
+  R19K/s03/dynamic (tine @28, exit wall @33)
+  R20K/s03/dynamic (tine @24, exit wall @30)
+  R20/s03/dynamic (tine @16, exit wall @22)
+  R21K/s03/dynamic (tine @43, exit wall @57)
+  R21K/s03/final (tine @44, exit wall @50)
+  R22K/s03/dynamic (tine @26, exit wall @31)
+  R22K/s03/final (tine @15, exit wall @20)
+  R22/s03/final (tine @14, exit wall @20)
+  R25D/s03/dynamic (tine @36, exit wall @42)
+  R25D/s03/final (tine @37, exit wall @43)
+  R25/s03/dynamic (tine @29, exit wall @35)
+  R26N/s03/dynamic (tine @27, exit wall @33)
+  R26N/s03/final (tine @15, exit wall @21)
+  R26/s03/dynamic (tine @14, exit wall @39)
+  R26/s03/final (tine @14, exit wall @20)
+
+| rule | hits | useful target (of hits) | harm (solved runs fired before success) | initial runs fired | gate |
+|---|---|---|---|---|---|
+| R-pocket | 1/17 = 6% | 0/1 = 0% | 32/184 = 17% | 9 | fail |
+| R-blacklist | 0/17 = 0% | 0/0 | 1/184 = 1% | 1 | fail |
+| R-stall | 1/17 = 6% | 0/1 = 0% | 28/184 = 15% | 8 | fail |

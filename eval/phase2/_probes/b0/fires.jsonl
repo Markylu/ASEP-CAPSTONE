@@ -1,0 +1,324 @@
+{"run": "R15N/s01/dynamic", "solved_step": 34, "shut_tine": null, "R-pocket": {"step": 24, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 24, "target": null, "path_m": null}}
+{"run": "R15N/s01/final", "solved_step": 51, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15N/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15N/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 38, "target": [8.924999999999999, -1.275], "path_m": 10.406244584051391}, "R-blacklist": null, "R-stall": {"step": 18, "target": [9.775, -0.425], "path_m": 13.514570696119913}}
+{"run": "R15N/s02a/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 20, "target": [2.125, 2.125], "path_m": 11.754163056034258}, "R-blacklist": null, "R-stall": {"step": 20, "target": [2.125, 2.125], "path_m": 11.754163056034258}}
+{"run": "R15N/s02a/initial", "solved_step": 15, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15N/s02c/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 30, "target": [9.775, 0.425], "path_m": 14.15832611206852}, "R-blacklist": null, "R-stall": {"step": 21, "target": [9.775, 0.425], "path_m": 15.00832611206852}}
+{"run": "R15N/s02c/final", "solved_step": 27, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15N/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15N/s02va/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 19, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 32, "target": [8.075, 2.975], "path_m": 9.908326112068522}}
+{"run": "R15N/s02va/final", "solved_step": 55, "shut_tine": null, "R-pocket": {"step": 20, "target": [6.375, 2.125], "path_m": 8.002081528017131}, "R-blacklist": null, "R-stall": {"step": 27, "target": null, "path_m": null}}
+{"run": "R15N/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15N/s02vc/dynamic", "solved_step": 58, "shut_tine": null, "R-pocket": {"step": 23, "target": [13.174999999999999, -0.425], "path_m": 15.712489168102781}, "R-blacklist": null, "R-stall": {"step": 31, "target": [13.174999999999999, -0.425], "path_m": 16.210407640085652}}
+{"run": "R15N/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 56, "target": [13.174999999999999, 0.425], "path_m": 16.06457069611991}, "R-blacklist": null, "R-stall": {"step": 27, "target": [13.174999999999999, 0.425], "path_m": 14.862489168102783}}
+{"run": "R15N/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15N/s03/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 17, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 17, "target": null, "path_m": null}}
+{"run": "R15N/s03/final", "solved_step": null, "shut_tine": [45, 50], "R-pocket": {"step": 31, "target": [14.875, 2.125], "path_m": 10.260407640085653}, "R-blacklist": null, "R-stall": {"step": 31, "target": [14.875, 2.125], "path_m": 10.260407640085653}}
+{"run": "R15N/s03/initial", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 32, "target": null, "path_m": null}}
+{"run": "R15/s01/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 24, "target": [6.375, 4.675], "path_m": 9.556244584051392}, "R-blacklist": null, "R-stall": {"step": 36, "target": [6.375, 2.975], "path_m": 6.508326112068524}}
+{"run": "R15/s01/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 36, "target": [3.8249999999999997, -5.5249999999999995], "path_m": 12.312489168102783}, "R-blacklist": null, "R-stall": {"step": 54, "target": [4.675, -7.225], "path_m": 10.758326112068522}}
+{"run": "R15/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15/s02a/dynamic", "solved_step": 57, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 37, "target": [4.675, -2.975], "path_m": 12.312489168102783}}
+{"run": "R15/s02a/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 44, "target": [4.675, 2.125], "path_m": 8.560407640085655}, "R-blacklist": null, "R-stall": {"step": 17, "target": [4.675, 2.125], "path_m": 14.012489168102782}}
+{"run": "R15/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15/s02c/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15/s02c/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 35, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 26, "target": null, "path_m": null}}
+{"run": "R15/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15/s02va/dynamic", "solved_step": 59, "shut_tine": null, "R-pocket": {"step": 19, "target": [16.575, 1.275], "path_m": 17.704163056034258}, "R-blacklist": null, "R-stall": {"step": 23, "target": [16.575, 1.275], "path_m": 20.460407640085656}}
+{"run": "R15/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 38, "target": [16.575, 1.275], "path_m": 16.35624458405139}, "R-blacklist": null, "R-stall": {"step": 42, "target": [16.575, 1.275], "path_m": 16.00416305603426}}
+{"run": "R15/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 34, "target": [7.225, 2.125], "path_m": 11.814570696119915}, "R-blacklist": null, "R-stall": {"step": 24, "target": [8.075, 0.425], "path_m": 14.01248916810278}}
+{"run": "R15/s02vc/final", "solved_step": 55, "shut_tine": null, "R-pocket": {"step": 34, "target": [18.275, -0.425], "path_m": 22.924978336205577}, "R-blacklist": null, "R-stall": {"step": 34, "target": [18.275, -0.425], "path_m": 22.924978336205577}}
+{"run": "R15/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R15/s03/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 51, "target": [20.825, -4.675], "path_m": 17.412489168102784}, "R-blacklist": null, "R-stall": {"step": 56, "target": [20.825, -4.675], "path_m": 14.716652224137045}}
+{"run": "R15/s03/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 22, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": null}
+{"run": "R15/s03/initial", "solved_step": 36, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16K/s01/dynamic", "solved_step": 59, "shut_tine": null, "R-pocket": {"step": 25, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": null}
+{"run": "R16K/s01/final", "solved_step": 52, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 25, "target": null, "path_m": null}}
+{"run": "R16K/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16K/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 18, "target": [3.8249999999999997, 7.225], "path_m": 2.4041630560342617}}
+{"run": "R16K/s02a/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 23, "target": [7.225, -2.125], "path_m": 10.114570696119916}, "R-blacklist": {"step": 0, "target": null, "path_m": null}, "R-stall": {"step": 27, "target": null, "path_m": null}}
+{"run": "R16K/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16K/s02c/dynamic", "solved_step": 47, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16K/s02c/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 37, "target": [11.475, -0.425], "path_m": 14.01248916810278}, "R-blacklist": null, "R-stall": {"step": 42, "target": [12.325, -0.425], "path_m": 17.970815280171305}}
+{"run": "R16K/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16K/s02va/dynamic", "solved_step": 38, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16K/s02va/final", "solved_step": 46, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16K/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16K/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 59, "target": [10.625, -2.975], "path_m": 20.87289680818844}, "R-blacklist": null, "R-stall": {"step": 22, "target": [8.075, -0.425], "path_m": 11.668733752154177}}
+{"run": "R16K/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 31, "target": [5.5249999999999995, -4.675], "path_m": 7.006244584051393}, "R-blacklist": null, "R-stall": {"step": 22, "target": [8.075, 0.425], "path_m": 17.412489168102784}}
+{"run": "R16K/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16K/s03/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 27, "target": [20.825, -0.425], "path_m": 14.012489168102784}, "R-blacklist": {"step": 53, "target": null, "path_m": null}, "R-stall": {"step": 32, "target": [20.825, -0.425], "path_m": 12.312489168102783}}
+{"run": "R16K/s03/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 23, "target": [17.425, -8.075], "path_m": 15.712489168102781}}
+{"run": "R16K/s03/initial", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 11, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s01/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s01/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s01/initial", "solved_step": 18, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02a/final", "solved_step": 51, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02c/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02c/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02c/initial", "solved_step": 20, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02va/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02vc/dynamic", "solved_step": 54, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s02vc/initial", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s03/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s03/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R16/s03/initial", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17K/s01/dynamic", "solved_step": 26, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17K/s01/final", "solved_step": 40, "shut_tine": null, "R-pocket": {"step": 15, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": null}
+{"run": "R17K/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17K/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 52, "target": [8.924999999999999, -4.675], "path_m": 11.814570696119915}, "R-blacklist": null, "R-stall": {"step": 41, "target": [3.8249999999999997, 1.275], "path_m": 12.458326112068521}}
+{"run": "R17K/s02a/final", "solved_step": 30, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17K/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17K/s02c/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 55, "target": [10.625, -4.675], "path_m": 14.364570696119912}, "R-blacklist": null, "R-stall": {"step": 41, "target": [8.924999999999999, -6.375], "path_m": 8.208326112068523}}
+{"run": "R17K/s02c/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 51, "target": [8.924999999999999, -2.975], "path_m": 10.758326112068522}, "R-blacklist": null, "R-stall": {"step": 31, "target": [11.475, -2.125], "path_m": 19.0270598642227}}
+{"run": "R17K/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17K/s02va/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 18, "target": [8.075, 4.675], "path_m": 9.556244584051392}, "R-blacklist": null, "R-stall": {"step": 25, "target": [8.075, 4.675], "path_m": 14.364570696119912}}
+{"run": "R17K/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 45, "target": [0.425, -6.375], "path_m": 10.552081528017128}, "R-blacklist": null, "R-stall": {"step": 38, "target": [0.425, 2.125], "path_m": 2.902081528017131}}
+{"run": "R17K/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17K/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 20, "target": [18.275, -0.425], "path_m": 20.108326112068525}, "R-blacklist": null, "R-stall": {"step": 31, "target": [4.675, 2.975], "path_m": 10.612489168102785}}
+{"run": "R17K/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 34, "target": [8.924999999999999, -6.375], "path_m": 15.068733752154175}}
+{"run": "R17K/s02vc/initial", "solved_step": 22, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17K/s03/dynamic", "solved_step": null, "shut_tine": [53, 59], "R-pocket": {"step": 33, "target": [17.425, -6.375], "path_m": 14.364570696119912}, "R-blacklist": null, "R-stall": {"step": 50, "target": [19.125, 3.8249999999999997], "path_m": 16.416652224137042}}
+{"run": "R17K/s03/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 31, "target": [19.974999999999998, -7.225], "path_m": 6.508326112068524}}
+{"run": "R17K/s03/initial", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 58, "target": [23.375, -4.675], "path_m": 17.472896808188437}, "R-blacklist": null, "R-stall": {"step": 35, "target": [23.375, -4.675], "path_m": 11.814570696119915}}
+{"run": "R17/s01/dynamic", "solved_step": 50, "shut_tine": null, "R-pocket": {"step": 17, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 17, "target": null, "path_m": null}}
+{"run": "R17/s01/final", "solved_step": 33, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17/s01/initial", "solved_step": 18, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 35, "target": [8.924999999999999, -0.425], "path_m": 10.40624458405139}, "R-blacklist": null, "R-stall": {"step": 36, "target": [8.924999999999999, -2.125], "path_m": 10.05416305603426}}
+{"run": "R17/s02a/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": {"step": 0, "target": null, "path_m": null}, "R-stall": {"step": 53, "target": [4.675, -6.375], "path_m": 24.12705986422271}}
+{"run": "R17/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17/s02c/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 18, "target": null, "path_m": null}}
+{"run": "R17/s02c/final", "solved_step": 40, "shut_tine": null, "R-pocket": {"step": 18, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 19, "target": null, "path_m": null}}
+{"run": "R17/s02c/initial", "solved_step": 17, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17/s02va/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 38, "target": [5.5249999999999995, 5.5249999999999995], "path_m": 15.008326112068518}}
+{"run": "R17/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 26, "target": [15.725, -1.275], "path_m": 19.318733752154177}, "R-blacklist": null, "R-stall": {"step": 33, "target": [1.275, -3.8249999999999997], "path_m": 3.752081528017131}}
+{"run": "R17/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 56, "target": [7.225, -2.975], "path_m": 15.918733752154171}, "R-blacklist": null, "R-stall": {"step": 23, "target": null, "path_m": null}}
+{"run": "R17/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 31, "target": [6.375, -3.8249999999999997], "path_m": 17.120815280171303}}
+{"run": "R17/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R17/s03/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 14, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 23, "target": [16.575, 4.675], "path_m": 3.752081528017131}}
+{"run": "R17/s03/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 28, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": null}
+{"run": "R17/s03/initial", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 31, "target": null, "path_m": null}, "R-blacklist": {"step": 24, "target": null, "path_m": null}, "R-stall": {"step": 49, "target": [14.875, 1.275], "path_m": 10.40624458405139}}
+{"run": "R19K/s01/dynamic", "solved_step": 31, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19K/s01/final", "solved_step": 25, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19K/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19K/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 28, "target": [2.975, -2.975], "path_m": 8.00208152801713}, "R-blacklist": null, "R-stall": {"step": 20, "target": [6.375, 2.125], "path_m": 16.70832611206852}}
+{"run": "R19K/s02a/final", "solved_step": 49, "shut_tine": null, "R-pocket": {"step": 31, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 22, "target": null, "path_m": null}}
+{"run": "R19K/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19K/s02c/dynamic", "solved_step": 28, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19K/s02c/final", "solved_step": 59, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 42, "target": [11.475, -0.425], "path_m": 14.218733752154174}}
+{"run": "R19K/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19K/s02va/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 35, "target": [8.924999999999999, -2.975], "path_m": 14.012489168102782}, "R-blacklist": null, "R-stall": {"step": 35, "target": [8.924999999999999, -2.975], "path_m": 14.012489168102782}}
+{"run": "R19K/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 30, "target": [8.075, 2.125], "path_m": 9.55624458405139}}
+{"run": "R19K/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19K/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 39, "target": [14.875, 1.275], "path_m": 18.11665222413705}, "R-blacklist": null, "R-stall": {"step": 30, "target": [14.875, 1.275], "path_m": 18.11665222413705}}
+{"run": "R19K/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 43, "target": [4.675, -7.225], "path_m": 13.162489168102782}, "R-blacklist": null, "R-stall": {"step": 27, "target": [4.675, -7.225], "path_m": 20.66665222413705}}
+{"run": "R19K/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19K/s03/dynamic", "solved_step": null, "shut_tine": [28, 33], "R-pocket": {"step": 16, "target": [19.125, -0.425], "path_m": 15.85832611206852}, "R-blacklist": null, "R-stall": {"step": 46, "target": [2.975, -5.5249999999999995], "path_m": 10.054163056034259}}
+{"run": "R19K/s03/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 32, "target": [17.425, -4.675], "path_m": 7.710407640085654}, "R-blacklist": null, "R-stall": {"step": 16, "target": [19.974999999999998, 0.425], "path_m": 9.058326112068523}}
+{"run": "R19K/s03/initial", "solved_step": 47, "shut_tine": null, "R-pocket": {"step": 26, "target": [18.275, -1.275], "path_m": 16.21040764008565}, "R-blacklist": null, "R-stall": {"step": 31, "target": [18.275, -1.275], "path_m": 16.91457069611991}}
+{"run": "R19/s01/dynamic", "solved_step": 34, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 20, "target": null, "path_m": null}}
+{"run": "R19/s01/final", "solved_step": 22, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 42, "target": [9.775, 0.425], "path_m": 11.110407640085654}, "R-blacklist": null, "R-stall": {"step": 19, "target": null, "path_m": null}}
+{"run": "R19/s02a/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 15, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 20, "target": [7.225, 0.425], "path_m": 11.462489168102785}}
+{"run": "R19/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19/s02c/dynamic", "solved_step": 41, "shut_tine": null, "R-pocket": {"step": 17, "target": [9.775, -0.425], "path_m": 10.904163056034259}, "R-blacklist": null, "R-stall": {"step": 23, "target": [9.775, -0.425], "path_m": 14.15832611206852}}
+{"run": "R19/s02c/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 18, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 19, "target": null, "path_m": null}}
+{"run": "R19/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19/s02va/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 24, "target": [18.275, -0.425], "path_m": 21.66248916810279}, "R-blacklist": null, "R-stall": {"step": 24, "target": [18.275, -0.425], "path_m": 21.66248916810279}}
+{"run": "R19/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 31, "target": [14.875, -2.975], "path_m": 17.764570696119915}, "R-blacklist": null, "R-stall": {"step": 31, "target": [14.875, -2.975], "path_m": 17.764570696119915}}
+{"run": "R19/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 36, "target": [10.625, -1.275], "path_m": 11.60832611206852}, "R-blacklist": {"step": 0, "target": null, "path_m": null}, "R-stall": {"step": 24, "target": [10.625, -1.275], "path_m": 11.25624458405139}}
+{"run": "R19/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 25, "target": [16.575, -0.425], "path_m": 20.31457069611992}, "R-blacklist": null, "R-stall": {"step": 37, "target": [16.575, -0.425], "path_m": 21.01873375215418}}
+{"run": "R19/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19/s03/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 15, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 19, "target": null, "path_m": null}}
+{"run": "R19/s03/final", "solved_step": 47, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R19/s03/initial", "solved_step": 43, "shut_tine": null, "R-pocket": {"step": 19, "target": [18.275, 0.425], "path_m": 14.656244584051388}, "R-blacklist": null, "R-stall": null}
+{"run": "R20K/s01/dynamic", "solved_step": 28, "shut_tine": null, "R-pocket": {"step": 14, "target": [8.924999999999999, 1.275], "path_m": 11.25624458405139}, "R-blacklist": null, "R-stall": null}
+{"run": "R20K/s01/final", "solved_step": 32, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20K/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20K/s02a/dynamic", "solved_step": 49, "shut_tine": null, "R-pocket": {"step": 18, "target": [9.775, -0.425], "path_m": 9.908326112068522}, "R-blacklist": null, "R-stall": {"step": 18, "target": [9.775, -0.425], "path_m": 9.908326112068522}}
+{"run": "R20K/s02a/final", "solved_step": 35, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20K/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20K/s02c/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 18, "target": null, "path_m": null}}
+{"run": "R20K/s02c/final", "solved_step": 29, "shut_tine": null, "R-pocket": {"step": 15, "target": [9.775, -0.425], "path_m": 12.810407640085652}, "R-blacklist": null, "R-stall": null}
+{"run": "R20K/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20K/s02va/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 54, "target": [12.325, 2.125], "path_m": 15.566652224137043}, "R-blacklist": null, "R-stall": {"step": 31, "target": [12.325, 2.125], "path_m": 19.670815280171308}}
+{"run": "R20K/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 19, "target": [16.575, 1.275], "path_m": 17.060407640085653}, "R-blacklist": null, "R-stall": {"step": 26, "target": [16.575, 1.275], "path_m": 16.85416305603426}}
+{"run": "R20K/s02va/initial", "solved_step": 26, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20K/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 35, "target": [9.775, 2.125], "path_m": 11.402081528017128}, "R-blacklist": null, "R-stall": {"step": 27, "target": [9.775, 2.125], "path_m": 11.754163056034258}}
+{"run": "R20K/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 23, "target": [12.325, -5.5249999999999995], "path_m": 14.158326112068519}, "R-blacklist": null, "R-stall": {"step": 29, "target": [2.125, 8.075], "path_m": 2.4041630560342617}}
+{"run": "R20K/s02vc/initial", "solved_step": 41, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20K/s03/dynamic", "solved_step": null, "shut_tine": [24, 30], "R-pocket": {"step": 43, "target": [3.8249999999999997, 4.675], "path_m": 8.852081528017129}, "R-blacklist": null, "R-stall": {"step": 20, "target": [19.125, 1.275], "path_m": 15.36040764008565}}
+{"run": "R20K/s03/final", "solved_step": 34, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20K/s03/initial", "solved_step": 31, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20/s01/dynamic", "solved_step": 30, "shut_tine": null, "R-pocket": {"step": 19, "target": [8.075, 2.125], "path_m": 13.514570696119913}, "R-blacklist": null, "R-stall": null}
+{"run": "R20/s01/final", "solved_step": 23, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 14, "target": [9.775, -0.425], "path_m": 11.256244584051391}, "R-blacklist": null, "R-stall": {"step": 28, "target": [9.775, -0.425], "path_m": 10.260407640085653}}
+{"run": "R20/s02a/final", "solved_step": 42, "shut_tine": null, "R-pocket": {"step": 28, "target": [8.075, 5.5249999999999995], "path_m": 10.406244584051391}, "R-blacklist": null, "R-stall": null}
+{"run": "R20/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20/s02c/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 19, "target": [8.924999999999999, 0.425], "path_m": 9.55624458405139}, "R-blacklist": null, "R-stall": {"step": 19, "target": [8.924999999999999, 0.425], "path_m": 9.55624458405139}}
+{"run": "R20/s02c/final", "solved_step": 33, "shut_tine": null, "R-pocket": {"step": 24, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 23, "target": null, "path_m": null}}
+{"run": "R20/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20/s02va/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 21, "target": [18.275, -0.425], "path_m": 22.864570696119923}, "R-blacklist": null, "R-stall": {"step": 27, "target": [2.125, 7.225], "path_m": 3.6062445840513924}}
+{"run": "R20/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 32, "target": [8.075, -3.8249999999999997], "path_m": 14.862489168102782}, "R-blacklist": null, "R-stall": {"step": 31, "target": [8.075, -3.8249999999999997], "path_m": 14.012489168102782}}
+{"run": "R20/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 32, "target": [9.775, -2.975], "path_m": 10.199999999999998}, "R-blacklist": null, "R-stall": {"step": 35, "target": [9.775, -2.975], "path_m": 8.852081528017129}}
+{"run": "R20/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 37, "target": [7.225, -2.125], "path_m": 15.068733752154174}, "R-blacklist": null, "R-stall": {"step": 24, "target": [4.675, 1.275], "path_m": 2.0520815280171307}}
+{"run": "R20/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R20/s03/dynamic", "solved_step": null, "shut_tine": [16, 22], "R-pocket": {"step": 35, "target": [6.375, 0.425], "path_m": 17.20624458405139}, "R-blacklist": null, "R-stall": {"step": 35, "target": [6.375, 0.425], "path_m": 17.20624458405139}}
+{"run": "R20/s03/final", "solved_step": 53, "shut_tine": null, "R-pocket": {"step": 24, "target": [15.725, 2.975], "path_m": 13.16248916810278}, "R-blacklist": null, "R-stall": {"step": 31, "target": [15.725, 2.975], "path_m": 12.956244584051388}}
+{"run": "R20/s03/initial", "solved_step": 49, "shut_tine": null, "R-pocket": {"step": 17, "target": [19.974999999999998, 0.425], "path_m": 14.802081528017128}, "R-blacklist": null, "R-stall": null}
+{"run": "R21K/s01/dynamic", "solved_step": 52, "shut_tine": null, "R-pocket": {"step": 16, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": null}
+{"run": "R21K/s01/final", "solved_step": 39, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21K/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21K/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 22, "target": [5.5249999999999995, 2.125], "path_m": 9.908326112068522}, "R-blacklist": null, "R-stall": {"step": 22, "target": [5.5249999999999995, 2.125], "path_m": 9.908326112068522}}
+{"run": "R21K/s02a/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 18, "target": [10.625, -4.675], "path_m": 10.199999999999998}, "R-blacklist": null, "R-stall": {"step": 26, "target": [10.625, -4.675], "path_m": 12.810407640085652}}
+{"run": "R21K/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21K/s02c/dynamic", "solved_step": 34, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 19, "target": [8.924999999999999, 0.425], "path_m": 17.266652224137044}}
+{"run": "R21K/s02c/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 20, "target": [8.075, 7.225], "path_m": 10.260407640085653}, "R-blacklist": null, "R-stall": {"step": 25, "target": [8.075, 7.225], "path_m": 10.260407640085653}}
+{"run": "R21K/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21K/s02va/dynamic", "solved_step": 31, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21K/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 34, "target": [7.225, 5.5249999999999995], "path_m": 9.410407640085653}, "R-blacklist": null, "R-stall": {"step": 50, "target": [7.225, -1.275], "path_m": 14.15832611206852}}
+{"run": "R21K/s02va/initial", "solved_step": 24, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21K/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 41, "target": [6.375, -2.975], "path_m": 17.910407640085655}}
+{"run": "R21K/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 26, "target": [2.975, 2.125], "path_m": 8.35416305603426}, "R-blacklist": null, "R-stall": {"step": 22, "target": [2.975, 2.125], "path_m": 10.406244584051391}}
+{"run": "R21K/s02vc/initial", "solved_step": 30, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21K/s03/dynamic", "solved_step": null, "shut_tine": [43, 57], "R-pocket": {"step": 23, "target": [14.025, 1.275], "path_m": 10.40624458405139}, "R-blacklist": null, "R-stall": {"step": 35, "target": [14.025, 1.275], "path_m": 9.908326112068522}}
+{"run": "R21K/s03/final", "solved_step": null, "shut_tine": [44, 50], "R-pocket": {"step": 18, "target": [19.974999999999998, 0.425], "path_m": 16.70832611206852}, "R-blacklist": null, "R-stall": {"step": 21, "target": [19.974999999999998, 0.425], "path_m": 17.060407640085653}}
+{"run": "R21K/s03/initial", "solved_step": 35, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21/s01/dynamic", "solved_step": 57, "shut_tine": null, "R-pocket": {"step": 24, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 19, "target": null, "path_m": null}}
+{"run": "R21/s01/final", "solved_step": 28, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 59, "target": [12.325, 0.425], "path_m": 20.314570696119915}, "R-blacklist": null, "R-stall": null}
+{"run": "R21/s02a/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 41, "target": [8.075, 2.975], "path_m": 8.35416305603426}, "R-blacklist": null, "R-stall": {"step": 35, "target": [2.975, 5.5249999999999995], "path_m": 9.90832611206852}}
+{"run": "R21/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21/s02c/dynamic", "solved_step": 59, "shut_tine": null, "R-pocket": {"step": 20, "target": [8.924999999999999, 0.425], "path_m": 9.20416305603426}, "R-blacklist": null, "R-stall": {"step": 20, "target": [8.924999999999999, 0.425], "path_m": 9.20416305603426}}
+{"run": "R21/s02c/final", "solved_step": 24, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21/s02va/dynamic", "solved_step": 47, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 30, "target": [18.275, -0.425], "path_m": 19.40416305603426}}
+{"run": "R21/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 42, "target": [8.924999999999999, 2.975], "path_m": 11.960407640085652}, "R-blacklist": null, "R-stall": {"step": 22, "target": [16.575, 1.275], "path_m": 26.762489168102796}}
+{"run": "R21/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21/s02vc/dynamic", "solved_step": 53, "shut_tine": null, "R-pocket": {"step": 35, "target": [7.225, -4.675], "path_m": 9.058326112068523}, "R-blacklist": null, "R-stall": {"step": 40, "target": [7.225, -4.675], "path_m": 8.354163056034261}}
+{"run": "R21/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 27, "target": [9.775, -0.425], "path_m": 12.312489168102784}, "R-blacklist": null, "R-stall": {"step": 23, "target": [9.775, -0.425], "path_m": 11.960407640085652}}
+{"run": "R21/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R21/s03/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 14, "target": [19.974999999999998, 0.425], "path_m": 13.80624458405139}}
+{"run": "R21/s03/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 48, "target": [12.325, 0.425], "path_m": 26.61665222413706}, "R-blacklist": null, "R-stall": {"step": 17, "target": null, "path_m": null}}
+{"run": "R21/s03/initial", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 37, "target": [19.125, -1.275], "path_m": 16.562489168102783}, "R-blacklist": null, "R-stall": {"step": 18, "target": null, "path_m": null}}
+{"run": "R22K/s01/dynamic", "solved_step": 20, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22K/s01/final", "solved_step": 52, "shut_tine": null, "R-pocket": {"step": 26, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 19, "target": null, "path_m": null}}
+{"run": "R22K/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22K/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 42, "target": [7.225, 0.425], "path_m": 9.616652224137047}, "R-blacklist": null, "R-stall": {"step": 19, "target": [2.125, 4.675], "path_m": 2.902081528017131}}
+{"run": "R22K/s02a/final", "solved_step": 50, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22K/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22K/s02c/dynamic", "solved_step": 28, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22K/s02c/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 23, "target": null, "path_m": null}}
+{"run": "R22K/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22K/s02va/dynamic", "solved_step": 26, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22K/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 35, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 44, "target": [2.125, 6.375], "path_m": 9.908326112068522}}
+{"run": "R22K/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22K/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 20, "target": [17.425, -0.425], "path_m": 18.05624458405139}, "R-blacklist": null, "R-stall": {"step": 25, "target": [17.425, -0.425], "path_m": 20.168733752154182}}
+{"run": "R22K/s02vc/final", "solved_step": 37, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22K/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22K/s03/dynamic", "solved_step": null, "shut_tine": [26, 31], "R-pocket": {"step": 17, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 21, "target": null, "path_m": null}}
+{"run": "R22K/s03/final", "solved_step": null, "shut_tine": [15, 20], "R-pocket": {"step": 42, "target": [2.975, -5.5249999999999995], "path_m": 10.552081528017128}, "R-blacklist": null, "R-stall": {"step": 37, "target": [6.375, 1.275], "path_m": 16.70832611206852}}
+{"run": "R22K/s03/initial", "solved_step": 53, "shut_tine": null, "R-pocket": {"step": 29, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 31, "target": null, "path_m": null}}
+{"run": "R22/s01/dynamic", "solved_step": 20, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22/s01/final", "solved_step": 27, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 32, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 18, "target": [3.8249999999999997, 0.425], "path_m": 13.866652224137045}}
+{"run": "R22/s02a/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 44, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 24, "target": [2.125, -0.425], "path_m": 12.956244584051388}}
+{"run": "R22/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22/s02c/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 37, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 37, "target": null, "path_m": null}}
+{"run": "R22/s02c/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 32, "target": [2.125, 0.425], "path_m": 11.110407640085652}, "R-blacklist": null, "R-stall": {"step": 17, "target": [3.8249999999999997, 8.075], "path_m": 2.4041630560342617}}
+{"run": "R22/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22/s02va/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 23, "target": [14.875, 0.425], "path_m": 16.70832611206852}}
+{"run": "R22/s02va/final", "solved_step": 26, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22/s02vc/dynamic", "solved_step": 30, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 30, "target": [14.875, 0.425], "path_m": 20.374978336205572}}
+{"run": "R22/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R22/s03/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 41, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 25, "target": null, "path_m": null}}
+{"run": "R22/s03/final", "solved_step": null, "shut_tine": [14, 20], "R-pocket": {"step": 29, "target": [7.225, 1.275], "path_m": 18.408326112068522}, "R-blacklist": null, "R-stall": {"step": 32, "target": [7.225, 1.275], "path_m": 17.20624458405139}}
+{"run": "R22/s03/initial", "solved_step": 26, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s01/dynamic", "solved_step": 39, "shut_tine": null, "R-pocket": {"step": 13, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 20, "target": null, "path_m": null}}
+{"run": "R25D/s01/final", "solved_step": 29, "shut_tine": null, "R-pocket": {"step": 13, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s02a/dynamic", "solved_step": 23, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s02a/final", "solved_step": 26, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s02c/dynamic", "solved_step": 27, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s02c/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 46, "target": [2.125, 2.975], "path_m": 7.15208152801713}, "R-blacklist": null, "R-stall": {"step": 46, "target": [2.125, 2.975], "path_m": 7.15208152801713}}
+{"run": "R25D/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s02va/dynamic", "solved_step": 34, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 36, "target": null, "path_m": null}}
+{"run": "R25D/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s02vc/dynamic", "solved_step": 36, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s02vc/final", "solved_step": 43, "shut_tine": null, "R-pocket": {"step": 19, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 26, "target": null, "path_m": null}}
+{"run": "R25D/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25D/s03/dynamic", "solved_step": null, "shut_tine": [36, 42], "R-pocket": {"step": 16, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 25, "target": null, "path_m": null}}
+{"run": "R25D/s03/final", "solved_step": null, "shut_tine": [37, 43], "R-pocket": {"step": 53, "target": [2.975, -4.675], "path_m": 10.552081528017128}, "R-blacklist": null, "R-stall": {"step": 15, "target": null, "path_m": null}}
+{"run": "R25D/s03/initial", "solved_step": 50, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 34, "target": null, "path_m": null}}
+{"run": "R25/s01/dynamic", "solved_step": 30, "shut_tine": null, "R-pocket": {"step": 13, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": null}
+{"run": "R25/s01/final", "solved_step": 30, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25/s01/initial", "solved_step": 28, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25/s02a/dynamic", "solved_step": 22, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25/s02a/final", "solved_step": 32, "shut_tine": null, "R-pocket": null, "R-blacklist": {"step": 0, "target": null, "path_m": null}, "R-stall": null}
+{"run": "R25/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25/s02c/dynamic", "solved_step": 27, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25/s02c/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 16, "target": null, "path_m": null}}
+{"run": "R25/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25/s02va/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 18, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 24, "target": null, "path_m": null}}
+{"run": "R25/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 27, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 55, "target": null, "path_m": null}}
+{"run": "R25/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 24, "target": null, "path_m": null}, "R-blacklist": {"step": 0, "target": null, "path_m": null}, "R-stall": {"step": 24, "target": null, "path_m": null}}
+{"run": "R25/s02vc/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 42, "target": [14.875, 0.425], "path_m": 18.82081528017131}, "R-blacklist": null, "R-stall": {"step": 24, "target": [14.875, 0.425], "path_m": 16.70832611206852}}
+{"run": "R25/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25/s03/dynamic", "solved_step": null, "shut_tine": [29, 35], "R-pocket": {"step": 16, "target": null, "path_m": null}, "R-blacklist": {"step": 24, "target": null, "path_m": null}, "R-stall": {"step": 21, "target": null, "path_m": null}}
+{"run": "R25/s03/final", "solved_step": 34, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R25/s03/initial", "solved_step": 25, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s01/dynamic", "solved_step": 25, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s01/final", "solved_step": 21, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 17, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 22, "target": null, "path_m": null}}
+{"run": "R26N/s02a/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 58, "target": null, "path_m": null}, "R-blacklist": {"step": 0, "target": null, "path_m": null}, "R-stall": {"step": 23, "target": null, "path_m": null}}
+{"run": "R26N/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s02c/dynamic", "solved_step": 26, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s02c/final", "solved_step": 26, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s02va/dynamic", "solved_step": 43, "shut_tine": null, "R-pocket": {"step": 19, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 26, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 22, "target": null, "path_m": null}}
+{"run": "R26N/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 27, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 23, "target": null, "path_m": null}}
+{"run": "R26N/s02vc/final", "solved_step": 29, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26N/s03/dynamic", "solved_step": null, "shut_tine": [27, 33], "R-pocket": {"step": 11, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 45, "target": [17.425, -1.275], "path_m": 22.512489168102793}}
+{"run": "R26N/s03/final", "solved_step": null, "shut_tine": [15, 21], "R-pocket": {"step": 31, "target": [8.924999999999999, -4.675], "path_m": 17.55832611206852}, "R-blacklist": null, "R-stall": {"step": 37, "target": [8.924999999999999, -4.675], "path_m": 16.35624458405139}}
+{"run": "R26N/s03/initial", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 34, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 23, "target": null, "path_m": null}}
+{"run": "R26/s01/dynamic", "solved_step": 20, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26/s01/final", "solved_step": 21, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26/s01/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26/s02a/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 14, "target": [8.924999999999999, 0.425], "path_m": 10.05416305603426}, "R-blacklist": null, "R-stall": {"step": 18, "target": [8.924999999999999, 0.425], "path_m": 13.660407640085651}}
+{"run": "R26/s02a/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 30, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 21, "target": null, "path_m": null}}
+{"run": "R26/s02a/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26/s02c/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 33, "target": [3.8249999999999997, -0.425], "path_m": 11.899999999999997}, "R-blacklist": null, "R-stall": {"step": 19, "target": [2.975, -0.425], "path_m": 11.75416305603426}}
+{"run": "R26/s02c/final", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 20, "target": null, "path_m": null}}
+{"run": "R26/s02c/initial", "solved_step": 14, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26/s02va/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 44, "target": [2.125, 4.675], "path_m": 2.0520815280171307}}
+{"run": "R26/s02va/final", "solved_step": null, "shut_tine": null, "R-pocket": {"step": 40, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 53, "target": null, "path_m": null}}
+{"run": "R26/s02va/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26/s02vc/dynamic", "solved_step": null, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 33, "target": null, "path_m": null}}
+{"run": "R26/s02vc/final", "solved_step": 44, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": {"step": 30, "target": null, "path_m": null}}
+{"run": "R26/s02vc/initial", "solved_step": 19, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}
+{"run": "R26/s03/dynamic", "solved_step": null, "shut_tine": [14, 39], "R-pocket": {"step": 26, "target": null, "path_m": null}, "R-blacklist": null, "R-stall": {"step": 30, "target": null, "path_m": null}}
+{"run": "R26/s03/final", "solved_step": null, "shut_tine": [14, 20], "R-pocket": {"step": 27, "target": [7.225, 1.275], "path_m": 17.20624458405139}, "R-blacklist": null, "R-stall": {"step": 36, "target": [7.225, 1.275], "path_m": 13.454163056034258}}
+{"run": "R26/s03/initial", "solved_step": 25, "shut_tine": null, "R-pocket": null, "R-blacklist": null, "R-stall": null}

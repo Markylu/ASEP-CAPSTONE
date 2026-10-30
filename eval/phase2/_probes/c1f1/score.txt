@@ -1,0 +1,73 @@
+C1/F1: 300 frames sampled, 300 with all four reads; 0 failed calls
+  truth: 276 strips with an open door, 101 frames with the goal in view
+
+## Accuracy per read (strip fields: floor class, doorway open or not)
+  read     floor    door    both    goal  door recall   false open
+  orig     54.8%   80.7%   67.8%   90.7%        45.7%        11.4%
+  orig2    55.9%   81.0%   68.4%   90.3%        47.1%        11.4%
+  mirror   59.1%   81.2%   70.1%   91.3%        53.3%        12.5%
+  nr       57.7%   80.1%   68.9%   92.0%        47.1%        12.4%
+
+## Agreement with orig (strip fields)
+  orig vs orig2 : all 81.4%, floor 70.9%, door 91.9%
+  orig vs mirror: all 67.7%, floor 49.4%, door 86.1%
+  orig vs nr    : all 69.3%, floor 50.6%, door 87.9%
+
+## C1
+  orig alone: 67.8%
+  fields where orig = mirror: 81.0% accurate (2032 fields)
+  fields where orig = orig2 (control): 73.3% accurate (2441 fields)
+  floor: orig 54.8%, agreed with mirror 72.2%, agreed with orig2 59.9%
+  door: orig 80.7%, agreed with mirror 86.0%, agreed with orig2 83.6%
+  lean (error left - error right):
+    all  : orig +9.5%, orig2 +7.2%, mirror -3.7%, agreed +3.5%
+    floor: orig +15.5%, orig2 +13.2%, mirror -14.2%, agreed +1.3%
+    door : orig +3.5%, orig2 +1.2%, mirror +6.7%, agreed +4.8%
+
+## By cell (site/arm/door in view): frames, orig acc, orig=mirror agreement
+  s02a/dynamic/False: 11, 76.4%, 70.0%
+  s02a/dynamic/True: 11, 66.4%, 59.1%
+  s02a/final/False: 11, 72.7%, 62.7%
+  s02a/final/True: 11, 65.5%, 70.9%
+  s02a/initial/False: 11, 71.8%, 70.0%
+  s02a/initial/True: 10, 64.0%, 82.0%
+  s02c/dynamic/False: 10, 72.0%, 76.0%
+  s02c/dynamic/True: 10, 68.0%, 70.0%
+  s02c/final/False: 10, 67.0%, 77.0%
+  s02c/final/True: 10, 59.0%, 61.0%
+  s02c/initial/False: 10, 73.0%, 55.0%
+  s02c/initial/True: 10, 60.0%, 69.0%
+  s02va/dynamic/False: 10, 61.0%, 59.0%
+  s02va/dynamic/True: 10, 73.0%, 73.0%
+  s02va/final/False: 10, 79.0%, 79.0%
+  s02va/final/True: 10, 60.0%, 66.0%
+  s02va/initial/False: 10, 67.0%, 71.0%
+  s02va/initial/True: 10, 77.0%, 49.0%
+  s02vc/dynamic/False: 10, 70.0%, 68.0%
+  s02vc/dynamic/True: 10, 60.0%, 55.0%
+  s02vc/final/False: 10, 78.0%, 66.0%
+  s02vc/final/True: 10, 69.0%, 69.0%
+  s02vc/initial/False: 10, 68.0%, 65.0%
+  s02vc/initial/True: 10, 52.0%, 63.0%
+  s03/dynamic/False: 10, 79.0%, 86.0%
+  s03/dynamic/True: 10, 66.0%, 67.0%
+  s03/final/False: 10, 78.0%, 83.0%
+  s03/final/True: 5, 54.0%, 60.0%
+  s03/initial/False: 10, 63.0%, 72.0%
+  s03/initial/True: 10, 55.0%, 55.0%
+
+## By instance: frames, orig vs orig2 agreement
+  http://127.0.0.1:8004: 150, 82.4%
+  http://127.0.0.1:8006: 150, 80.3%
+
+## Gate C1
+  gain of agreed fields +13.2 pts (>= 5) with agreement 67.7% (>= 80%)
+  lean orig +9.5 pts (|.| >= 10), agreed +3.5 pts (|.| <= 3)
+  disagreement orig-mirror 32.3% vs orig-orig2 18.6%
+  verdict: no call
+
+## Gate F1 (nr - orig; counts at >= 3 pts and >= 2x |orig - orig2|)
+  floor: +2.9 pts, band 1.1 pts, counts: no
+  door: -0.6 pts, band 0.3 pts, counts: no
+  goal: +1.3 pts (>= -1)
+  verdict: no call

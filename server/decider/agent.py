@@ -1003,6 +1003,23 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                                         "middle": "open_far"},
                                           "spatial": "server/decider/spatial.py"}},
           "a57 with a58's closed-door line (as a58)."),
+    Agent("a60", "p17", {"orchestrator": {"perceiver": "g07", "perceiver_mirror": "image_right",
+                                          "strategist": "q03",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a49 (R25D, 14/18) with perceiver g07 (g05 without describe-first) read twice, on "
+          "the clean frame and on it mirrored; far_left and left from the mirrored read "
+          "(probes F1, C2)."),
 )}
 
 DEFAULT_AGENT = "a00"

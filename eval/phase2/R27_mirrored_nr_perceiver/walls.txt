@@ -1,0 +1,9 @@
+== eval/phase2/R27_mirrored_nr_perceiver/runs
+  steps 632, both reads on 632 (100.0%)
+  fused   missed wall  2.5% (8/316)   phantom wall 28.2% (722/2564)
+  own     missed wall  2.2% (7/316)   phantom wall 36.0% (922/2564)
+  mirror  missed wall  2.5% (8/316)   phantom wall 36.4% (933/2564)
+  check: missed <= 8% pass, phantom <= 20% FAIL, both reads >= 95% pass
+== eval/phase2/R25D_door_confirmer_open_near_unwalled/runs
+  steps 627, both reads on 0 (0.0%)
+  fused   missed wall 17.3% (63/364)   phantom wall 12.7% (301/2361)

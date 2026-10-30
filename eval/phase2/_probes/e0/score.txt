@@ -1,0 +1,9 @@
+E0 over R15-R26: 72 s02 dynamic runs with a switch; 56 offered a door-ward action after it
+
+runs with a stale note on a door-ward action: 17/56 = 30%  -> gate: HOLDS
+  door-ward calls: 219; with a stale note: 34 (pre-switch block notes 0, 'searched' notes 46)
+solved: with stale notes 9/17 = 53%; without 16/39 = 41%
+
+secondary (memory rebuilt):
+  runs with a wall cell within 1.0 m of the new door after the switch: 18/72 = 25%
+  runs listing an open doorway at shut door B > 3 steps after the switch: 23/72 = 32%

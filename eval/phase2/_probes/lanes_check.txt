@@ -1,0 +1,25 @@
+lane index: 702 runs from 111 roots -> /home/markylu/asep-research-probes/eval/phase2/_probes/lanes.jsonl
+repo runs: 702; R15-R26N in repo: 324
+R15-R26N missing from the lanes: 0
+any round missing from the lanes: 0
+R6+ indexed runs without frames: 18
+decisions.jsonl differs from the repo copy: 0
+check: FAIL
+  no frames: R6_pose_log/s01/dynamic/seed1
+  no frames: R6_pose_log/s01/final/seed1
+  no frames: R6_pose_log/s01/initial/seed1
+  no frames: R6_pose_log/s02a/dynamic/seed1
+  no frames: R6_pose_log/s02a/final/seed1
+  no frames: R6_pose_log/s02a/initial/seed1
+  no frames: R6_pose_log/s02c/dynamic/seed1
+  no frames: R6_pose_log/s02c/final/seed1
+  no frames: R6_pose_log/s02c/initial/seed1
+  no frames: R6_pose_log/s02va/dynamic/seed1
+  no frames: R6_pose_log/s02va/final/seed1
+  no frames: R6_pose_log/s02va/initial/seed1
+  no frames: R6_pose_log/s02vc/dynamic/seed1
+  no frames: R6_pose_log/s02vc/final/seed1
+  no frames: R6_pose_log/s02vc/initial/seed1
+  no frames: R6_pose_log/s03/dynamic/seed1
+  no frames: R6_pose_log/s03/final/seed1
+  no frames: R6_pose_log/s03/initial/seed1

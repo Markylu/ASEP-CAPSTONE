@@ -1,0 +1,16 @@
+N1 on http://127.0.0.1:8006: 80 calls
+
+## R25D/s02a/final (md5 f6bf6c91; same bytes in 6 recorded :8004 runs)
+  alone : 20 calls, distinct raw 2, distinct readings 2, failed 0, strip-field disagreement with mode 1.7%
+  loaded: 20 calls, distinct raw 11, distinct readings 6, failed 0, strip-field disagreement with mode 15.8%
+  recorded :8004 readings: 5 distinct of 6; pairwise agreement 62.2%; copy's alone mode vs recorded 72.2%
+
+## R25D/s03/final (md5 99aa4e04; same bytes in 18 recorded :8004 runs)
+  alone : 20 calls, distinct raw 2, distinct readings 2, failed 0, strip-field disagreement with mode 2.5%
+  loaded: 20 calls, distinct raw 14, distinct readings 11, failed 0, strip-field disagreement with mode 27.9%
+  recorded :8004 readings: 7 distinct of 18; pairwise agreement 72.9%; copy's alone mode vs recorded 68.5%
+
+## Gate
+  verdict: HOLDS
+  stand-in: yes
+  noise floor for C1/F1 (loaded strip-field disagreement, mean): 21.9%
