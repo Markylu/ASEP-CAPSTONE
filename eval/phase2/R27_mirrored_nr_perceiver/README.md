@@ -1,7 +1,7 @@
 # R27: R25D with the perceiver read twice, plain and mirrored (g07)
 
 **Agent:** `a60` (`464cf29e24ed`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g07` ×2 ·
-**Memory:** `a17b` · **Status:** pre-registered 2026-10-29, probe gate passed, not flown
+**Memory:** `a17b` · **Status:** pre-registered 2026-10-29, probe gate passed, flown 2026-10-30: 12/18, dropped
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Comes from the research probes
 ([docs/research/probe-plan.md](../../../docs/research/probe-plan.md)): F1, C1 and C2.
@@ -165,5 +165,25 @@ R25D (`a49`).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to
-[summary.md](summary.md).
+**Did not hold: 12/18 (R25D 14), dropped.** Flown 2026-10-30 at `d6fd12a` on sctsvr6 lanes 1–4,
+alone on `:8004`; 18/18 valid. Per run: [manipulation.txt](manipulation.txt); walls:
+[walls.txt](walls.txt) (`eval/r27_flight.py`).
+
+| Arm | R25D | R27 | Change |
+|---|---|---|---|
+| initial | 6 | 5 | lost s03 |
+| final | 3 | 4 | won s02c, s02va; lost s02a |
+| dynamic | 5 | 3 | lost s02a, s02vc |
+
+- **Manipulation check failed on phantom walls.** Both reads came back on 632/632 steps. The
+  fused reading missed 2.5% of real walls (R25D 17.3%), but read 28.2% of open strips as walls
+  (limit 20%, R25D 12.7%; the probe gate had 17.0%).
+- **s03 is where it broke.** Phantom walls there ran 60% (R25D 16%); the s02 sites stayed at
+  9–21%. All three s03 runs ran out of steps with 15–41 turn-arounds and 45–79% of strips taken
+  as `blocked_near`.
+- **Why the probe missed it.** The probe's frames came from the paths earlier agents flew. Once
+  a60 reads phantom walls in s03's dead end, it turns around in place and keeps looking at the
+  frames it reads worst, which the recorded sample did not contain.
+- **Next.** The missed-wall gain is real and replicated three times; its phantom-wall cost
+  compounds in flight. A next version would need the phantom rate held near g05's before
+  flying, for example `no_floor` only where both reads agree.

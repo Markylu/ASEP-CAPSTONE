@@ -3,10 +3,11 @@
   "title": "R25D with the perceiver read twice, plain and mirrored (g07)",
   "citable": false,
   "agent_version": "a60",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "d6fd12a",
+  "started": "2026-10-30T02:13:27+00:00",
+  "finished": "2026-10-30T02:35:54+00:00",
+  "operator": "Markylu",
+  "notes": "Flown 2026-10-30, alone on :8004.",
+  "lanes": "sctsvr6 lanes 1-4 (asep-r27-l1..4), shared vLLM :8004"
 }
