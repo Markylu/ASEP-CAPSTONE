@@ -826,8 +826,11 @@ def _structured_messages(system: str, text: str, image_b64: Optional[str],
         text = text + "\n\n" + hint
     content: Any = text
     if image_b64 is not None:
-        content = [{"type": "text", "text": text},
-                   {"type": "image_url", "image_url": {"url": "data:image/png;base64," + image_b64}}]
+        # One image, or several in order (w02's strips, R28).
+        images = image_b64 if isinstance(image_b64, list) else [image_b64]
+        content = [{"type": "text", "text": text}] + [
+            {"type": "image_url", "image_url": {"url": "data:image/png;base64," + b64}}
+            for b64 in images]
     messages = [{"role": "system", "content": system}, {"role": "user", "content": content}]
     return messages + list(follow_up or [])
 

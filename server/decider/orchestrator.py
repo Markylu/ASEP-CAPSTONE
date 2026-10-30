@@ -363,6 +363,36 @@ def with_walls(own: Dict[str, Any], walls: Dict[str, Any]) -> Dict[str, Any]:
                             for l in own["lanes"]])
 
 
+#: k01 / w04 (R28): the floor ends a second look may turn into a wall.
+OPEN_ENDS = ("bottom", "lower", "middle")
+
+
+def walls_checked(strips: List[str]) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
+    """The wall confirmer's reply (k01), checked: wall or floor per strip asked."""
+    def check(parsed: Dict[str, Any]) -> Dict[str, Any]:
+        out = {"reason": str(parsed.get("reason", ""))}
+        for strip in strips:
+            if parsed.get(strip) not in ("wall", "floor"):
+                raise vlm.VLMError("wall confirmer gave no answer for {0}".format(strip))
+            out[strip] = parsed[strip]
+        return out
+    return check
+
+
+def with_walls_added(own: Dict[str, Any], walled: List[str],
+                     floor_map: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """k01 / w04: the strips in `walled` become no_floor (blocked_near through
+    the agent's floor map); the record keeps the perceiver's end as
+    floor_end_reported. Doorways, the goal and every other strip unchanged."""
+    lanes = []
+    for l in own["lanes"]:
+        if l["strip"] in walled:
+            l = dict(l, floor=(floor_map or {}).get("no_floor", "blocked_near"),
+                     floor_end="no_floor", floor_end_reported=l.get("floor_end"))
+        lanes.append(l)
+    return dict(own, lanes=lanes)
+
+
 async def perceive_walls(s: Step, read) -> Optional[str]:
     """a61: the perceiver and the wall reader on the clean frame at the same
     time; the map gets with_walls() of the two. If the wall reader fails, the

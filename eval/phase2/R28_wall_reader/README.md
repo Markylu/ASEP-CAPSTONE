@@ -91,6 +91,54 @@ version (for example a narrower per-strip question), not an edit of `w01`. Outpu
 | 4 | P missed ≤ half of `g05`'s | 19.6% vs 16.5% | FAIL |
 | 5 | P phantom ≤ `g05` + 2 pts | −3.4 pts | pass |
 
+## Probe gate, second attempt
+
+Set 2026-10-30 after W01 failed, before any call. The round stays R28 (operator: "stay in this
+round"). The probe is `eval/probes/r28_walls.py`, committed before any call.
+
+**What W01 showed** (recorded reads, F/P/C2): about 84% of truly blocked strips are read
+`no_floor`. Of the rest, 9–13 points are `bottom` and 5–8 are `lower`/`middle`. `bottom` can't be
+remapped to a wall, because 31–50% of truly open strips are also read `bottom`. In two
+missed-wall frames, one is an oblique dark wall at 0.8 m, dark on a dark floor. In the other, all
+five strips are read `bottom` while a pillar fills the right strip: the bright floor elsewhere
+carries over. Truth is one ray down the strip's centre. The camera can't see floor closer than
+1.84 m.
+
+**Candidates.** Each is merged with `g05`'s recorded read the way an agent would, and a failed
+call leaves `g05`'s reading.
+- **`k01`, wall confirmer** (`prompt.K01`, `schema.wall_confirmer_schema`,
+  `orchestrator.walls_checked` / `with_walls_added`). A second look at the strips `g05` read
+  `bottom`, `lower` or `middle`, as `d01` does for doorways. It asks: wall or floor at the middle
+  of the strip's bottom edge? `wall` makes the strip `no_floor`.
+- **`w02`, strip crops** (`prompt.W02`, `strips.crops`, a list of images in `vlm`). The five
+  strips as five images in one call, each with the floor question. Floors replace `g05`'s, as
+  `w01`.
+- **`w03`, marked frame** (`prompt.W03`, `strips.marked`). The frame with the four strip
+  boundaries drawn in yellow, and the floor question. Floors replace `g05`'s.
+- **`w04`, code floor detector** (no model; `strips.bottom_features`). A logistic rule on the
+  bottom twelfth of each strip: brightness, spread, edges, slanted edges, orange, and `g05`'s
+  floor end. It adds a wall to a strip `g05` read open.
+  - Fitted on C1's 300 frames only (`fit`), with C1's recorded `g05` reads.
+  - The threshold keeps the walls it adds on truly open C1 strips at ≤ 1.5% of C1's open strips.
+  - F, P and C2 are never used to fit.
+
+**Frames and calls.** Sets F, P (gated) and C2 (reported), as W01. 3 model calls per frame,
+1176 frames. Four shards, one call at a time each: `:8004` with no flights running, and three
+copies on GPUs 3–5 (`:8006`–`:8008`), stopped afterwards.
+
+**Gate.** The same five checks as W01, for each candidate against `g05` on the same frames:
+- F and P missed walls ≤ half of `g05`'s;
+- F and P phantom walls ≤ `g05` + 2 pts;
+- F s03 phantom walls ≤ `g05` + 4 pts.
+
+**Winner.** Among the candidates that pass all five, the one with the lowest F + P missed walls.
+It gets an agent (`a62` on), its own smoke, and then the on-policy check below. If none passes,
+R28 does not fly.
+
+Dry run (stub replies equal to `g05`, k01 all `floor`, random w04 features): k01, w02 and w03
+reproduce `g05`'s rows exactly. w04 adds +1.4 to +1.5 pts of phantom walls, its fitted cap, and
+catches nothing.
+
 ## On-policy check
 
 Only if the probe gate passes. A gate on recorded frames is an open-loop test of a closed-loop

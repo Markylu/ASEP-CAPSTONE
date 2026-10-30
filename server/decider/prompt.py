@@ -1915,11 +1915,102 @@ open, closed or none.""",
     render=render_door_question,
 )
 
+# --- R28 wall readers after w01 ------------------------------------------------------
+# Probe W01 (eval/phase2/_probes/w01): g05's floor job alone misses real walls
+# at g05's rate, about one in six. Most misses are strips read "bottom" whose
+# wall within 1 m covers only part of the strip, or is dark on a dark floor;
+# others take their answer from a brighter neighbour. Three model readers try a
+# different look at the same frame (strips.py does the image work).
+
+# k01: a second look, as d01 for doorways, at the strips g05 read open
+# (bottom, lower or middle). "wall" there makes the strip blocked_near.
+K01 = Prompt(
+    version="k01",
+    system="""You check one image from the front camera of a small indoor drone.
+Another model looked at this image and reported open floor in some parts of
+it. Those reports sometimes miss a wall, door, pillar or object close in front
+of the drone. Your job is to check them.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+The camera is level, so floor close in front shows at the very bottom of the
+image. Something within about one metre of the drone covers the middle of its
+strip's bottom edge, from the bottom edge up. Dark or plain surfaces at the
+bottom of a strip are often a wall seen at an angle, not floor: floor has grid
+lines that run away from the camera.
+
+First describe, for each reported strip, what is at the middle of its bottom
+edge. Then answer for each reported strip: wall if a wall, door, pillar or
+object covers the middle of its bottom edge, floor if floor shows there.""",
+    user_template="""Open floor was reported in: {strips}. For each of those strips, is there a wall or object close in front?""",
+    render=render_door_question,
+)
+
+# w02: the frame cut into its five strips, one image each, in one call. A
+# strip's answer can only come from what is in that strip.
+W02 = Prompt(
+    version="w02",
+    system="""You check images from the front camera of a small indoor drone.
+
+You get five images. They are the camera's view cut into five equal vertical
+strips, from left to right: far_left, left, centre, right, far_right. Judge
+each strip by its own image only.
+
+For each strip, find where its floor ends: the line where the floor meets a
+wall, door or obstacle. The camera is level, so the nearer the obstacle, the
+lower that line sits in the image, and an obstacle close in front hides the
+floor completely. Say:
+no_floor if no floor shows at the middle of the strip's bottom edge: a wall,
+door, pillar or plain surface fills it from the bottom up.
+A dark plain surface is a wall close in front, not open space;
+bottom if floor shows but ends within the bottom quarter of the image;
+lower if the floor ends higher than that but well below the middle of the
+image;
+middle if the floor runs up to just below the middle of the image.
+Judge by the floor you can see, its edges and lines, never by darkness.
+
+First say, for each strip from left to right, what fills the bottom of the
+strip and where its floor ends. Then give the report.""",
+    user_template="The five strips, far_left to far_right, in order.",
+    render=render_identifier_question,
+)
+
+# w03: the frame with the four strip boundaries drawn on it, and w01's
+# question, so the strips the answer names are the strips in the image.
+W03 = Prompt(
+    version="w03",
+    system="""You check one image from the front camera of a small indoor drone.
+Judge this image alone.
+
+Four yellow vertical lines are drawn on the image. They cut it into five
+strips, from left to right: far_left, left, centre, right, far_right. The
+lines are not part of the scene.
+
+For each strip, look only between its lines and find where its floor ends:
+the line where the floor meets a wall, door or obstacle. The camera is level,
+so the nearer the obstacle, the lower that line sits in the image, and an
+obstacle close in front hides the floor completely. Say:
+no_floor if no floor shows at the middle of the strip's bottom edge: a wall,
+door, pillar or plain surface fills it from the bottom up.
+A dark plain surface is a wall close in front, not open space;
+bottom if floor shows but ends within the bottom quarter of the image;
+lower if the floor ends higher than that but well below the middle of the
+image;
+middle if the floor runs up to just below the middle of the image.
+Judge by the floor you can see, its edges and lines, never by darkness.
+
+First say, for each strip from left to right, what fills the bottom of the
+strip and where its floor ends. Then give the report.""",
+    user_template="Report on this image.",
+    render=render_identifier_question,
+)
+
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
                                                       Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09, Q10, Q11, Q12, Q13,
-                                                      G07, W01)}
+                                                      G07, W01, K01, W02, W03)}
 
 
 def get(version: str) -> Prompt:
