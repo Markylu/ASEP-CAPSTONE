@@ -166,7 +166,7 @@ R25D (`a49`).
 ## Outcome
 
 **Did not hold: 12/18 (R25D 14), dropped.** Flown 2026-10-30 at `d6fd12a` on sctsvr6 lanes 1–4,
-alone on `:8004`; 18/18 valid. Per run: [manipulation.txt](manipulation.txt); walls:
+alone on `:8004`; 18/18 valid. Summary: [summary.md](summary.md). Per run: [manipulation.txt](manipulation.txt); walls:
 [walls.txt](walls.txt) (`eval/r27_flight.py`).
 
 | Arm | R25D | R27 | Change |
