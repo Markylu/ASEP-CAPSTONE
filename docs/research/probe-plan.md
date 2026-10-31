@@ -283,6 +283,9 @@ moves ≥ 10 pts (phantom ≤ L0 + 2 pts when improving) and set B's moves ≥ 5
 the same phantom rule. A alone: no call. Nothing ≥ 10 pts on A: refuted. Fidelity of B/L0 renders
 to the recorded frames must be ≥ 90% of frames at ≥ 90% matching pixels before any call.
 
+**Result (2026-11-01).** Refuted: the rig moves at most 9.7 pts (worse), and every other lighting
+reads 6–19 pts more real walls as floor than the sites' own. Measured eye height 1.48 m. Row below.
+
 ---
 
 ## Results so far
@@ -304,7 +307,7 @@ to the recorded frames must be ≥ 90% of frames at ≥ 90% matching pixels befo
 | AG | 2026-10-30 | Wall only where both g07 reads see one, on R27's 576 flight frames. Phantom walls 23.6% vs g05 9.4% (s03 55% vs 10%); on R27's probe sample 11.8% vs 11.7% | **Fails** (3 of 5). On s03 both g07 reads call the same phantom walls, so fusion cannot help: they come from dropping describe-first, not from the image side |
 | W01 (R28 gate) | 2026-10-30 | Wall reader w01 (g05's floor job alone, describe-first kept) on F, P and C2, 4 shards. Missed walls F 16.5% vs g05 16.5%, P 19.6% vs 16.5%, C2 17.5% vs 17.0%; phantom +0.2 / −3.4 / −3.5 pts. 2.6% of calls failed (reason past the token limit) | **Fails** (3 of 5). One job or three, describe-first reads walls the same: the missed walls come from the wording, not the task load. R28 not flown |
 | R28 walls (R28 second gate) | 2026-10-31 | Four more wall readers on F, P and C2, 4 shards: k01 (ask again about strips read open), w02 (strip crops), w03 (strip boundaries drawn), w04 (code rule on each strip's bottom band, fitted on C1). Missed / phantom on F vs g05 16.5 / 9.4%: k01 9.8 / 25.8, w02 23.1 / 22.0, w03 40.2 / 10.4, w04 12.3 / 10.7 (P: w04 13.3 / 12.8 vs 16.5 / 11.7) | **All fail** (k01 0, w02 0, w03 3, w04 3 of 5). Making the model say wall more often brings phantom walls (k01 = g07's pattern). w04 cuts missed walls by a quarter at +1 pt phantom; on C1, halving them costs +3 pts, so no threshold passes. R28 not flown |
-| LD | gate set 2026-10-31, not yet run | — | — |
+| LD | 2026-11-01 | 1,680 lavapipe renders (90 rig + 150 real poses × 7 lightings), w01 + ld01 × 3 repeats, 4 shards at concurrency 1, 10,080 calls, 2.0% failed. Rig missed walls vs L0 17.6%: −2.8 to +9.7 pts; real poses vs L0 15.9%: +6.4 to +19.3 pts, every lighting worse, phantoms −0.5 to −5.5. B/L0 reproduces flight (g05 16.5%). On the 33 frames g05 missed in flight the replay misses 32.5%. All 3 repeats byte-identical on 3,359 of 3,360 image/read pairs. Metres off by a factor 2.5–3, 15–24% within ×1.5. Eye height measured 1.48 m (prompt says 1.84) | **Refuted.** The sites' lighting is the best of the seven; the model does not read the near wall from lighting cues, and brighter floors trade misses for phantoms like the prompt changes did. Lever is wording or code (`w05`), not the scene. Alone with a warm prefix the reads are deterministic: two thirds of the flight-time misses are the server's state, not the image |
 
 Details and readings: each probe's README under `eval/phase2/_probes/`.
 
