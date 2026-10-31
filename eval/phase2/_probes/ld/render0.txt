@@ -1,0 +1,6 @@
+Render 0: floor line against a light wall, column 384
+  d=2.0: line 304 px below centre -> eye 1.50 m
+  d=3.0: line 199 px below centre -> eye 1.48 m
+  d=4.0: line 152 px below centre -> eye 1.50 m
+  d=6.0: line 98 px below centre -> eye 1.45 m
+  eye height 1.48 m (spread 0.05); nearest visible floor 1.56 m (1.84 assumed in prompt.py g05 note and agent.py)
