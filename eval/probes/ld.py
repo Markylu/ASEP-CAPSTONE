@@ -210,14 +210,17 @@ def render0() -> int:
             lines.append("  {0}: not rendered".format(row["id"]))
             continue
         col, h = luminance_column(p.read_bytes(), HALF_PX)
-        wall, floor = statistics.mean(col[HALF_PX - 60:HALF_PX - 10]), statistics.mean(col[-40:])
-        cut = (wall + floor) / 2.0
-        r = next((y - HALF_PX for y in range(HALF_PX, h) if col[y] < cut), None)
+        # The wall-to-floor edge is the strongest drop below the image centre.
+        # A threshold on the bottom rows fails at 6 m, where the wall's shadow
+        # ends and the nearest floor is sunlit, as bright as the wall.
+        step = SMOOTH_ROWS
+        drops = [(col[y - step] - col[y + step], y) for y in range(HALF_PX + step, h - step)]
+        drop, y = max(drops)
         d = row["rig"]["d"]
-        if r is None:
-            lines.append("  d={0:.1f}: no floor line found (wall {1:.0f}, floor {2:.0f})".format(
-                d, wall, floor))
+        if drop < 10.0:
+            lines.append("  d={0:.1f}: no floor line found (largest drop {1:.0f})".format(d, drop))
             continue
+        r = y - HALF_PX
         eye = r / HALF_PX * HALF_FOV_TAN * d
         heights.append(eye)
         lines.append("  d={0:.1f}: line {1} px below centre -> eye {2:.2f} m".format(d, r, eye))
