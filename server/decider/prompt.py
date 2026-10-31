@@ -2006,11 +2006,41 @@ strip and where its floor ends. Then give the report.""",
     render=render_identifier_question,
 )
 
+# --- ld01: probe LD, metres to the wall per strip ---------------------------------
+# (eval/phase2/_probes/ld/README.md). A diagnostic read beside w01 on
+# pre-rendered frames: how far the model thinks the nearest obstacle in each
+# strip is, as a number, so lighting conditions can be compared on a
+# continuous error and not only on g05's four floor ends. g04 asked for metre
+# bands in flight and read 69% of strips open_very_far, walls under 1 m among
+# them; ld01 is never flown and is not gated.
+LD01 = Prompt(
+    version="ld01",
+    system="""You check one image from the front camera of a small indoor drone.
+Judge this image alone.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+For each strip, estimate the distance in metres from the camera to the nearest
+wall, door, pillar or object at the middle of that strip, measured along the
+floor. The camera is level, about 1.5 m above the floor, and the floor grid
+squares are 0.25 m. The nearer a surface, the lower the line where it meets
+the floor sits in the image, and a surface closer than about 1.5 m hides the
+floor at the bottom of its strip completely: a plain or dark surface filling
+the bottom of a strip is a wall close in front, under 1 m. If nothing blocks
+the strip within 15 m, answer 15.
+
+First say, for each strip from left to right, what fills the bottom of the
+strip and what cues give its distance. Then give the report.""",
+    user_template="Report on this image.",
+    render=render_identifier_question,
+)
+
 PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
                                                       Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09, Q10, Q11, Q12, Q13,
-                                                      G07, W01, K01, W02, W03)}
+                                                      G07, W01, K01, W02, W03, LD01)}
 
 
 def get(version: str) -> Prompt:

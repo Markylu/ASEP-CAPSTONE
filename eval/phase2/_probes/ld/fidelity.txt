@@ -1,0 +1,2 @@
+Fidelity: B/L0 renders against the recorded frames (|delta| < 2 per channel)
+  150 frames: median 100.0% close, min 74.0% (R27/s02c/final/11); 141 of 150 at or above 90%

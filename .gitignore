@@ -57,3 +57,8 @@ eval/phase2/**/frames/
 eval/phase2/**/steps.jsonl
 eval/phase2/**/replay/
 eval/phase2/**/godot.log
+
+# Probe LD renders: regenerable from manifest.jsonl with tools/ld_render.tscn.
+eval/phase2/_probes/ld/renders/
+# Stub runs of probe LD (no model): regenerable with `ld.py run --stub`.
+eval/phase2/_probes/ld/stub*
