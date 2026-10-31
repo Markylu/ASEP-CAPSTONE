@@ -1,0 +1,62 @@
+R28 probe, second attempt: k01, w02, w03, w04 against g05 (recorded reads), concurrency 1
+  w04 fitted on C1 only: threshold 0.119 ({"open_ends": 1165, "blocked_among_them": 40, "open_strips": 1314})
+
+## Set F: 576 frames; failed calls {'k01': 0, 'w02': 0, 'w03': 1}: 576 frames
+  read         missed wall  phantom wall  s03 phantom   doorway      goal
+  g05                16.5%          9.4%         9.7%     89.9%     93.8%
+  k01                 9.8%         25.8%        27.6%     89.9%     93.8%
+  w02                23.1%         22.0%        34.2%     89.9%     93.8%
+  w03                40.2%         10.4%         7.3%     89.9%     93.8%
+  w04                12.3%         10.7%        10.8%     89.9%     93.8%
+
+## Set P: 300 frames; failed calls {'k01': 0, 'w02': 0, 'w03': 0}: 300 frames
+  read         missed wall  phantom wall  s03 phantom   doorway      goal
+  g05                16.5%         11.7%        19.8%     83.7%     92.3%
+  k01                12.7%         26.9%        42.4%     83.7%     92.3%
+  w02                29.7%         21.6%        25.4%     83.7%     92.3%
+  w03                43.7%         10.0%         9.6%     83.7%     92.3%
+  w04                13.3%         12.8%        20.9%     83.7%     92.3%
+
+## Set C2: 300 frames; failed calls {'k01': 0, 'w02': 0, 'w03': 0}: 300 frames
+  read         missed wall  phantom wall  s03 phantom   doorway      goal
+  g05                17.0%         14.6%         9.1%     82.8%     90.0%
+  k01                11.7%         25.6%        18.9%     82.8%     90.0%
+  w02                24.0%         21.4%        24.4%     82.8%     90.0%
+  w03                53.8%         11.8%         6.1%     82.8%     90.0%
+  w04                11.1%         16.4%        10.4%     82.8%     90.0%
+
+  median latency (ms): k01 1186, w02 1938, w03 1576
+
+## Gate k01 (all five)
+  F missed <= half of g05's               9.8% vs 16.5%  FAIL
+  F phantom <= g05 + 2 pts                    +16.4 pts  FAIL
+  P missed <= half of g05's              12.7% vs 16.5%  FAIL
+  P phantom <= g05 + 2 pts                    +15.2 pts  FAIL
+  F s03 phantom <= g05 + 4 pts                +17.9 pts  FAIL
+  verdict: FAIL
+
+## Gate w02 (all five)
+  F missed <= half of g05's              23.1% vs 16.5%  FAIL
+  F phantom <= g05 + 2 pts                    +12.5 pts  FAIL
+  P missed <= half of g05's              29.7% vs 16.5%  FAIL
+  P phantom <= g05 + 2 pts                     +9.9 pts  FAIL
+  F s03 phantom <= g05 + 4 pts                +24.5 pts  FAIL
+  verdict: FAIL
+
+## Gate w03 (all five)
+  F missed <= half of g05's              40.2% vs 16.5%  FAIL
+  F phantom <= g05 + 2 pts                     +1.0 pts  pass
+  P missed <= half of g05's              43.7% vs 16.5%  FAIL
+  P phantom <= g05 + 2 pts                     -1.7 pts  pass
+  F s03 phantom <= g05 + 4 pts                 -2.4 pts  pass
+  verdict: FAIL
+
+## Gate w04 (all five)
+  F missed <= half of g05's              12.3% vs 16.5%  FAIL
+  F phantom <= g05 + 2 pts                     +1.2 pts  pass
+  P missed <= half of g05's              13.3% vs 16.5%  FAIL
+  P phantom <= g05 + 2 pts                     +1.1 pts  pass
+  F s03 phantom <= g05 + 4 pts                 +1.1 pts  pass
+  verdict: FAIL
+
+Winner (lowest F + P missed among those that pass): none

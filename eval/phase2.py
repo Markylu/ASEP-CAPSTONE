@@ -211,6 +211,9 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     "R27": {"folder": "R27_mirrored_nr_perceiver",
             "title": "R25D with the perceiver read twice, plain and mirrored (g07)",
             "agent": "a60", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R28": {"folder": "R28_wall_reader",
+            "title": "R25D with each strip's floor from a wall reader (w01)",
+            "agent": "a61", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

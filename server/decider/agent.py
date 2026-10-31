@@ -99,10 +99,12 @@ class Agent:
     @property
     def subagent_prompts(self) -> List[prompts.Prompt]:
         """The perceiver's and strategist's prompts (a13 on), in that order, then
-        the goal confirmer's (a27 on), then the doorway confirmer's (a37 on)."""
+        the goal confirmer's (a27 on), the doorway confirmer's (a37 on) and the
+        wall reader's (a61 on)."""
         orch = self.features.get("orchestrator") or {}
         return [prompts.get(orch[k])
-                for k in ("perceiver", "strategist", "confirmer", "door_confirmer")
+                for k in ("perceiver", "strategist", "confirmer", "door_confirmer",
+                          "wall_reader")
                 if orch.get(k)]
 
 
@@ -1020,6 +1022,23 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "a49 (R25D, 14/18) with perceiver g07 (g05 without describe-first) read twice, on "
           "the clean frame and on it mirrored; far_left and left from the mirrored read "
           "(probes F1, C2)."),
+    Agent("a61", "p17", {"orchestrator": {"perceiver": "g05", "wall_reader": "w01",
+                                          "strategist": "q03",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a49 (R25D, 14/18) with a wall reader (w01, g05's floor job alone) asked beside "
+          "g05; each strip's floor from w01, doorways and the goal from g05 "
+          "(what-we-learned, idea 1)."),
 )}
 
 DEFAULT_AGENT = "a00"

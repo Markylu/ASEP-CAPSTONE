@@ -22,6 +22,10 @@ Missed walls and phantom walls trade against each other through the prompt. A ph
 more in flight than a missed one. A gate built on frames from other agents' paths cannot see a
 change that alters where the drone goes.
 
+R28 (2026-10-31) tried the split's wall reader first: five readers (`w01`, `k01`, `w02`, `w03`,
+`w04`), none passed its gate, not flown ([R28](../../eval/phase2/R28_wall_reader/README.md)).
+Next idea: `w05`, a code reader with depth cues from higher in the frame.
+
 ## Lessons
 
 ### About measuring the perceiver

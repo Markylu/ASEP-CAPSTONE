@@ -1,0 +1,12 @@
+{
+  "round": "R28",
+  "title": "R25D with each strip's floor from a wall reader (w01)",
+  "citable": false,
+  "agent_version": "a61",
+  "status": "planned",
+  "git_sha": null,
+  "started": null,
+  "finished": null,
+  "operator": null,
+  "notes": "Not flown: both probe gates failed (w01, 2026-10-30; k01/w02/w03/w04, 2026-10-31). See README, Outcome."
+}
