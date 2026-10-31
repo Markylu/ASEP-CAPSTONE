@@ -264,6 +264,33 @@ def wall_reader_schema() -> Dict[str, Any]:
             "additionalProperties": False}
 
 
+DISTANCE_READER_SCHEMA_NAME = "distance_reader"
+
+
+def distance_reader_schema() -> Dict[str, Any]:
+    """ld01 (probe LD, never flown): metres to the nearest obstacle per strip,
+    after a description. Range checks live in the probe, not the schema."""
+    properties: Dict[str, Any] = {
+        "reason": {"type": "string",
+                   "description": "What fills the bottom of each strip and the cues that "
+                                  "give its distance."},
+    }
+    for strip in STRIPS:
+        properties[strip] = {
+            "type": "object",
+            "properties": {"metres": {"type": "number",
+                                      "description": "Metres from the camera to the nearest "
+                                                     "wall, door, pillar or object at the "
+                                                     "middle of this strip; 15 if nothing "
+                                                     "within 15 m."}},
+            "required": ["metres"],
+            "additionalProperties": False,
+            "description": "The {0} strip.".format(strip),
+        }
+    return {"type": "object", "properties": properties, "required": list(properties),
+            "additionalProperties": False}
+
+
 WALL_CONFIRMER_SCHEMA_NAME = "wall_confirmer"
 
 
