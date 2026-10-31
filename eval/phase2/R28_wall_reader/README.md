@@ -235,3 +235,7 @@ the token limit). Probe write-up: [_probes/w01](../_probes/w01/README.md).
 
 The best agent is still `a49` (R25D, 14/18). Probe write-up:
 [_probes/r28_walls](../_probes/r28_walls/README.md).
+
+Next idea (not planned): `w05`, w04 with depth features taken from higher in the frame, such as
+the wall/ceiling row. A wall nearer than 1.84 m hides all floor at the strip's bottom edge, so the
+bottom band alone can't tell near walls from far ones.

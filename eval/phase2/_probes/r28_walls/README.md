@@ -88,8 +88,11 @@ one trade-off:
 
 `w04` is the only reader that moves off that line, and only a little. Candidates for a later round,
 each a new version with its own gate:
-- `w04` with features that carry depth: where the floor/wall edge sits in the strip against where
-  floor 1 m away would appear. The camera height and FOV give that image row.
+- `w05`: `w04` with features that carry depth. The bottom band can't give it: the lowest floor in
+  view is 1.84 m away, so any wall nearer than that hides the floor at the bottom edge entirely.
+  Depth has to come from higher in the frame, such as the row where the wall meets the ceiling or
+  where floor meets wall in the next strip. The camera's height (1.75 m) and FOV (87°) turn that row
+  into a distance.
 - A smaller cut, flown. R25D flew with `g05`'s 16.5% missed walls and scored 14/18. A reader that
   cuts that by a quarter at +1 pt of phantom walls might still help in flight, though it fails a
   halve-it gate. Only the on-policy check and a flown round can test that, and it would need a new
