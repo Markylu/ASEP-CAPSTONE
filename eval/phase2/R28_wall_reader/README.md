@@ -139,6 +139,16 @@ Dry run (stub replies equal to `g05`, k01 all `floor`, random w04 features): k01
 reproduce `g05`'s rows exactly. w04 adds +1.4 to +1.5 pts of phantom walls, its fitted cap, and
 catches nothing.
 
+**Result (2026-10-31): all four fail; no winner.** Write-up: [_probes/r28_walls](../_probes/r28_walls/README.md).
+
+| Read | F missed | F phantom | F s03 phantom | P missed | P phantom | Checks passed |
+|---|---|---|---|---|---|---|
+| `g05` | 16.5% | 9.4% | 9.7% | 16.5% | 11.7% | |
+| `k01` | 9.8% | 25.8% | 27.6% | 12.7% | 26.9% | 0 of 5 |
+| `w02` | 23.1% | 22.0% | 34.2% | 29.7% | 21.6% | 0 of 5 |
+| `w03` | 40.2% | 10.4% | 7.3% | 43.7% | 10.0% | 3 of 5 |
+| `w04` | 12.3% | 10.7% | 10.8% | 13.3% | 12.8% | 3 of 5 |
+
 ## On-policy check
 
 Only if the probe gate passes. A gate on recorded frames is an open-loop test of a closed-loop
@@ -212,6 +222,16 @@ R25D (`a49`).
 P 19.6% vs 16.5%, C2 17.5% vs 17.0%), so taking the goal and doorway out of the question does not
 change the wall reading. The missed walls come with describe-first wording itself: only dropping it
 (`g07`) cut them, and that brought R27's phantom walls. 2.6% of `w01` calls also failed (reason past
-the token limit). The best agent is still `a49` (R25D, 14/18). Next: a wall reader that changes the
-question (narrower per-strip question, or per-strip crops), as a new version with its own gate.
-Probe write-up: [_probes/w01](../_probes/w01/README.md).
+the token limit). Probe write-up: [_probes/w01](../_probes/w01/README.md).
+
+**Second gate failed too: none of `k01`, `w02`, `w03`, `w04` passes**, so R28 is not flown.
+- `k01` (ask again about strips read open) cuts missed walls to 9.8% but adds 16 pts of phantom
+  walls, the `g07` pattern.
+- Crops (`w02`) make both errors worse.
+- Drawn boundaries (`w03`) miss 40% of walls.
+- The code detector `w04` is the only reader that trades well: missed 16.5 → 12.3% (F) and 13.3%
+  (P) at +1.1 to +1.2 pts phantom. That is a quarter, not half. On its fit set C1, halving the
+  missed walls would cost +3 pts of phantom walls, so no threshold passes.
+
+The best agent is still `a49` (R25D, 14/18). Probe write-up:
+[_probes/r28_walls](../_probes/r28_walls/README.md).
