@@ -182,10 +182,19 @@ def render_path(row) -> Path:
 
 # --- pixels ----------------------------------------------------------------------
 
+BAND_PX, SMOOTH_ROWS = 20, 6
+
+
 def luminance_column(png: bytes, x: int):
+    """Per-row mean luminance over a band of columns about x, smoothed over a
+    few rows. One column alone can sit on a grid line of the wall texture
+    (the world-triplanar grid has a line at z = 0, the image centre)."""
     from server.decider import strips
     w, h, bpp, px = strips.decode(png)
-    return [sum(px[(y * w + x) * bpp + c] for c in range(3)) / 3.0 for y in range(h)], h
+    xs = range(max(0, x - BAND_PX), min(w, x + BAND_PX), 2)
+    raw = [sum(px[(y * w + xx) * bpp + c] for xx in xs for c in range(3)) / (3.0 * len(xs))
+           for y in range(h)]
+    return [statistics.mean(raw[y:y + SMOOTH_ROWS]) for y in range(h - SMOOTH_ROWS)], h - SMOOTH_ROWS
 
 
 def render0() -> int:
