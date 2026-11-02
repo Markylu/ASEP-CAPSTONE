@@ -21,6 +21,7 @@ parameter is spatial.PARAMS_A15, hashed into a15's sha.
 """
 from __future__ import annotations
 
+import heapq
 import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
@@ -953,6 +954,213 @@ def staged_verify(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
         if ask == "lost" and why is not None:
             ask = why
     return _finish(mem, st, target, out_mode, ask, here, step, ev, events)
+
+
+# --- a63 (R30): the route planner ------------------------------------------------
+#
+# docs/research/pathfinder-plan.md. a49's planner asks one local question (is a
+# forward move within 55 degrees of the goal open?) and hands a menu to q03 when
+# it is not. In the s03 shut tine that read `open` on 78% of decisions (probe
+# B0), because a goal behind the drone counts as open; every a17b s03
+# final/dynamic failure stayed in the shut tine 34-46 steps (s03_tines_analysis).
+# a63 searches a route over the memory's cost map (spatial.CostMap) every step
+# and steers the drone at the next point on it. No strategist call. Unknown
+# cells are passable at a cost, so there is always a route unless the drone is
+# boxed in; then the perceiver's walls are softened, and failing that the
+# nearest unsearched edge is the target. Parameters: agent.PATHFINDER_A63.
+
+
+@dataclass
+class PathPlan:
+    """What the route planner decided this step: the target to steer at, the
+    route it lies on, and the stall cells added this step (recorded, so the
+    memory rebuilt from decisions.jsonl carries them)."""
+    target: Optional[spatial.Target]
+    waypoint: Optional[spatial.Point]
+    path: List[Tuple[int, int]]
+    path_m: Optional[float]
+    unknown_on_path: int
+    fallback: str
+    stall: List[List[int]]
+    costs: Dict[str, int]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {"way": "path", "path_m": self.path_m,
+                "path_cells": [[c[0], c[1]] for c in self.path],
+                "waypoint": ([round(self.waypoint[0], 2), round(self.waypoint[1], 2)]
+                             if self.waypoint else None),
+                "unknown_on_path": self.unknown_on_path, "fallback": self.fallback,
+                "stall": self.stall, "costs": self.costs}
+
+
+def astar(cm: spatial.CostMap, start: Tuple[int, int], goal: Tuple[int, int],
+          max_nodes: int = 40000) -> Optional[List[Tuple[int, int]]]:
+    """Cheapest 8-connected route from start to goal over the cost map, as a
+    list of cells from start to goal, or None. The start and goal cells are
+    always passable (the drone is on the one and the goal on the other)."""
+    diag = math.sqrt(2.0)
+
+    def h(c: Tuple[int, int]) -> float:
+        return math.hypot(c[0] - goal[0], c[1] - goal[1])
+
+    best: Dict[Tuple[int, int], float] = {start: 0.0}
+    parent: Dict[Tuple[int, int], Tuple[int, int]] = {}
+    todo = [(h(start), 0.0, start)]
+    seen = 0
+    while todo:
+        _, g, c = heapq.heappop(todo)
+        if g > best.get(c, math.inf):
+            continue
+        if c == goal:
+            out = [c]
+            while c in parent:
+                c = parent[c]
+                out.append(c)
+            return out[::-1]
+        seen += 1
+        if seen > max_nodes:
+            return None
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                if dx == 0 and dy == 0:
+                    continue
+                n = (c[0] + dx, c[1] + dy)
+                if not cm.inside(n):
+                    continue
+                cost = 1.0 if n == goal else cm.cost(n)
+                if cost is None:
+                    continue
+                step = (diag if dx and dy else 1.0) * cost
+                if dx and dy:
+                    # No cutting a corner between two impassable cells.
+                    if cm.cost((c[0] + dx, c[1])) is None and cm.cost((c[0], c[1] + dy)) is None:
+                        continue
+                ng = g + step
+                if ng < best.get(n, math.inf) - 1e-9:
+                    best[n] = ng
+                    parent[n] = c
+                    heapq.heappush(todo, (ng + h(n), ng, n))
+    return None
+
+
+def _centre(c: Tuple[int, int]) -> spatial.Point:
+    return (c[0] + 0.5) * spatial.CELL_M, (c[1] + 0.5) * spatial.CELL_M
+
+
+def waypoint_on(cm: spatial.CostMap, here: spatial.Point, path: List[Tuple[int, int]],
+                goal: spatial.Point, p: Dict[str, Any]) -> spatial.Point:
+    """The farthest point on the route within lookahead_m that a straight
+    flight from here reaches over passable cells, and at least min_m away
+    unless the goal itself is nearer (string pulling, so the bearing near a
+    door runs through the gap)."""
+    look, near = float(p["lookahead_m"]), float(p.get("waypoint_min_m", 1.0))
+    if spatial.dist(here, goal) <= look and cm.passable_segment(here, goal):
+        return goal
+    pick: Optional[spatial.Point] = None
+    for c in path[1:]:
+        q = _centre(c)
+        if spatial.dist(here, q) > look:
+            break
+        if cm.passable_segment(here, q):
+            pick = q
+    if pick is None:
+        pick = _centre(path[1]) if len(path) > 1 else goal
+    if spatial.dist(here, pick) < near:
+        # Too close to steer by: push along the same bearing to min_m.
+        pick = spatial.ahead(here, spatial.bearing(here, pick), near)
+    return pick
+
+
+def stall_cells_from(records: List[Dict[str, Any]], step: int) -> List[Tuple[int, int]]:
+    """Every stall cell earlier planner records added (replayable from the
+    record alone, as the memory is)."""
+    out = []
+    for r in records:
+        if "step" in r and r["step"] < step:
+            for c in (r.get("planner") or {}).get("stall") or []:
+                out.append((int(c[0]), int(c[1])))
+    return out
+
+
+def _stalled(records: List[Dict[str, Any]], step: int, p: Dict[str, Any]) -> bool:
+    """Whether the route has not shortened by stall_gain_m over the last
+    stall_steps planner records, with no stall cells added in that window."""
+    k = int(p["stall_steps"])
+    rows = sorted((r for r in records if "step" in r and r["step"] < step
+                   and (r.get("planner") or {}).get("path_m") is not None),
+                  key=lambda r: r["step"])[-k:]
+    if len(rows) < k or rows[-1]["step"] != step - 1:
+        return False
+    if any((r.get("planner") or {}).get("stall") for r in rows):
+        return False
+    gained = rows[0]["planner"]["path_m"] - rows[-1]["planner"]["path_m"]
+    return gained < float(p["stall_gain_m"])
+
+
+def _last_move(records: List[Dict[str, Any]], step: int) -> Optional[Tuple[float, bool]]:
+    """(heading of the last chosen move, whether it was a turn-around)."""
+    rows = sorted((r for r in records if "step" in r and r["step"] < step),
+                  key=lambda r: r["step"])
+    if not rows or rows[-1].get("index") is None:
+        return None
+    r = rows[-1]
+    here = spatial.pose_xyh((r.get("manifest") or {}).get("pose"))
+    chosen = next((a for a in (r.get("manifest") or {}).get("actions") or []
+                   if a.get("index") == r["index"]), None)
+    if here is None or chosen is None:
+        return None
+    return spatial.action_heading(chosen, here[2]), bool(chosen.get("turn_around"))
+
+
+def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
+             records: List[Dict[str, Any]], goal: spatial.Point,
+             p: Dict[str, Any]) -> PathPlan:
+    """a63's target for this step: the next point on the cheapest route to the
+    goal over the memory's cost map."""
+    step = int(manifest.get("step", 0))
+    here = spatial.pose_xyh(manifest.get("pose"))
+    if here is None:
+        return PathPlan(goal_target(goal, step), None, [], None, 0, "no_pose", [], {})
+    stall = stall_cells_from(records, step)
+    added: List[List[int]] = []
+    if _stalled(records, step, p):
+        last = _last_move(records, step)
+        blocked = any(b.step == step - 1 for b in mem.blocks)
+        if last is not None and not last[1] and not blocked:
+            heading = last[0]
+            for d in (spatial.CELL_M, 2.0 * spatial.CELL_M):
+                q = spatial.ahead(here[:2], heading, d)
+                for side in (None, heading + 90.0, heading - 90.0):
+                    c = spatial.cell(q if side is None
+                                     else spatial.ahead(q, side % 360.0, spatial.CELL_M))
+                    if c not in mem.visits and c != spatial.cell(goal):
+                        added.append([c[0], c[1]])
+            stall = stall + [(c[0], c[1]) for c in added]
+    start, end = spatial.cell(here[:2]), spatial.cell(goal)
+    fallback = "none"
+    cm = spatial.CostMap(mem, stall, p, include=(start, end))
+    path = astar(cm, start, end)
+    if path is None:
+        fallback = "soft"
+        cm = spatial.CostMap(mem, stall, p, soft=True, include=(start, end))
+        path = astar(cm, start, end)
+    if path is None:
+        fallback = "frontier"
+        fronts = mem.search_frontiers(here[:2])
+        if fronts:
+            fp = fronts[0][0]
+            path = astar(cm, start, spatial.cell(fp)) or [start, spatial.cell(fp)]
+            target_point = fp
+        else:
+            path = [start, end]
+            target_point = goal
+        wp = waypoint_on(cm, here[:2], path, target_point, p)
+    else:
+        wp = waypoint_on(cm, here[:2], path, goal, p)
+    path_m = round(sum(spatial.dist(_centre(a), _centre(b)) for a, b in zip(path, path[1:])), 2)
+    unknown = sum(1 for c in path[1:-1] if c not in cm.known)
+    target = spatial.Target("path", "path", wp[0], wp[1], p["words"]["path"], step)
+    return PathPlan(target, wp, path, path_m, unknown, fallback, added, cm.counts())
 
 
 def search_situation_a20(mem: spatial.SpatialMemory, manifest: Dict[str, Any],

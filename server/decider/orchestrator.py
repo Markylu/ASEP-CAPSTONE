@@ -131,9 +131,11 @@ def plan_line(target: Optional[spatial.Target], mode: Optional[str],
               here: Optional[spatial.Pose], goal_known: bool = False) -> str:
     if target is None or here is None:
         return "no fixed target; explore where the image shows open floor."
-    if goal_known and target.kind == "goal":
+    if goal_known and target.kind in ("goal", "path"):
         # a14: the goal's true position stays with the planner; the navigator
         # gets no distance or direction for it, only "toward your target".
+        # a63: the same for a point on the route to it, which near the goal
+        # is the goal (views.check would refuse its distance and direction).
         return spatial.WORDS_A14["plan_goal"].format(mode=mode or "approach")
     return "head for {0} ({1}).".format(target.words(here), mode or "explore")
 
@@ -579,6 +581,17 @@ async def route(s: Step) -> Optional[str]:
     return None
 
 
+async def pathfind_stage(s: Step) -> Optional[str]:
+    """a63 (R30): code searches a route to the goal over the memory's cost map
+    (planner.pathfind) and steers at the next point on it. No strategist."""
+    assert s.mem is not None and s.goal is not None
+    r = planner.pathfind(s.mem, s.manifest, s.records, s.goal, s.features["pathfinder"])
+    s.record["planner"] = r.to_dict()
+    s.target, s.mode = r.target, "approach"
+    _set_target(s)
+    return None
+
+
 async def stage_plan(s: Step) -> Optional[str]:
     """a17: the stage machine (planner.staged) sets the target from what the
     agent has seen, and asks q04 for a search target or a detour when it must.
@@ -667,6 +680,25 @@ async def turn_rule(s: Step) -> Optional[str]:
     return None
 
 
+def code_pick(s: Step, indices: List[int]) -> vlm.SubCall:
+    """a64: the action the map's notes say to take (spatial.project's tags),
+    with no model call."""
+    toward = spatial.WORDS["toward_target"]
+    shut = spatial._NOT_OPEN
+    actions = {int(a["index"]): a for a in s.offered.get("actions") or []}
+    pick = next((i for i in indices if toward in s.tags.get(i, [])), None)
+    why = "toward your target"
+    if pick is None:
+        pick = next((i for i in indices if not actions[i].get("turn_around")
+                     and not any(w.startswith(shut) for w in s.tags.get(i, []))), None)
+        why = "first open forward move"
+    if pick is None:
+        pick = next((i for i in indices if actions[i].get("turn_around")), indices[0])
+        why = "every forward move shut"
+    return vlm.SubCall(schema.SCHEMA_NAME, {"index": pick, "reason": "code: " + why},
+                       rung="code", model="none")
+
+
 async def navigate(s: Step) -> Optional[str]:
     indices = schema.visible_indices(s.offered)
     if not indices:
@@ -679,8 +711,15 @@ async def navigate(s: Step) -> Optional[str]:
                            s.frame_b64)
     s.nav_text = view.text
     s.record["navigator_text"] = view.text
-    s.nav = await ask(s, view, schema.SCHEMA_NAME, schema.action_schema(indices),
-                      _action(indices), config.MAX_TOKENS)
+    if s.features.get("navigator") == "code":
+        # a64: a diagnostic only, never a round. Code takes the action the map
+        # tags "toward your target", else the first forward move with no
+        # blocked, stopped-short or wall note, else the turn-around. The
+        # rung "code" fails the validity check (rungs_used), on purpose.
+        s.nav = code_pick(s, indices)
+    else:
+        s.nav = await ask(s, view, schema.SCHEMA_NAME, schema.action_schema(indices),
+                          _action(indices), config.MAX_TOKENS)
     if s.nav.result is None:
         s.record["navigator"] = s.nav.to_dict()
         s.record["step_latency_ms"] = round(s.latency, 1)
@@ -728,6 +767,8 @@ def pipeline(features: Dict[str, Any]) -> List[Stage]:
         planning = Stage("stages", verify_plan, features.get("strategist"),
                          "every step; the strategist when a search target or a detour "
                          "is needed")
+    elif policy == "pathfinder":
+        planning = Stage("pathfinder", pathfind_stage, None, "every step, code only")
     else:
         raise ValueError("unknown target_policy {0!r}".format(policy))
     stages = [Stage("perceiver", perceive, features.get("perceiver"))]

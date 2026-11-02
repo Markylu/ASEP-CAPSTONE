@@ -170,6 +170,30 @@ OTHER_WAY_A52: Dict[str, Any] = dict(OTHER_WAY_A50, only_dead_end=True,
 OTHER_WAY_A58: Dict[str, Any] = dict(OTHER_WAY_A52, closed_only_with_item=True)
 
 
+#: a63 (R30): the route planner (planner.pathfind over spatial.CostMap). In
+#: the features, so the sha. docs/research/pathfinder-plan.md §2.
+PATHFINDER_A63: Dict[str, Any] = {
+    # Cost per metre through a cell nothing has seen, and through a cell where
+    # a strip's floor was seen to end farther out (spatial.PARAMS_A17D).
+    "unknown_cost": 2.0,
+    "suspect_cost": 4.0,
+    # The waypoint: the farthest route point within lookahead_m that a straight
+    # flight reaches over passable cells, at least waypoint_min_m away.
+    "lookahead_m": 4.0,
+    "waypoint_min_m": 1.0,
+    # The route has not shortened by stall_gain_m over stall_steps decisions
+    # (and the last move was not a turn-around or blocked): the two cells ahead
+    # of the last move, one cell either side, are stall cells, impassable.
+    "stall_steps": 5,
+    "stall_gain_m": 1.0,
+    # A stop wall (a move stopped short) is this many cells wide either side.
+    "inflate_stop_walls": 1,
+    # The search box: this many cells beyond the known map.
+    "search_margin_cells": 12,
+    "words": {"path": "the next point on the planned route"},
+}
+
+
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
     Agent("a01", "p03", {}, "No goal hint: p03 drops the goal's distance and bearing "
@@ -1056,6 +1080,42 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "a49 (R25D, 14/18) with the perceiver's describe-first reason capped at 2,000 "
           "characters (schema.REASON_MAX_CHARS), so the 2% of calls whose reason loops past "
           "the token budget still return their strips (probe LD recall). Not flown yet."),
+    Agent("a63", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A63,
+                                          "memory": "a17d",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a49 (R25D, 14/18) with a code route planner (planner.pathfind: A* over the "
+          "memory's cost map, spatial.CostMap) in place of the goal-way test and the q03 "
+          "detour strategist; memory a17d (a17b plus walls at confirmed closed doors and "
+          "suspect cells at far floor ends). The navigator p17 and its tags are a49's. "
+          "docs/research/pathfinder-plan.md."),
+    Agent("a64", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A63,
+                                          "navigator": "code",
+                                          "memory": "a17d",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a63 with code taking the action the map tags \"toward your target\" "
+          "(orchestrator.code_pick), no navigator call. A diagnostic for the shakedown "
+          "only (the ceiling of perceiver plus planner); its rung \"code\" fails the "
+          "validity check, so it can never be a round."),
 )}
 
 DEFAULT_AGENT = "a00"
@@ -1106,8 +1166,10 @@ def describe(version: str) -> Dict[str, Any]:
             out["spatial_a15_sha"] = spatial.wording_sha_a15()
         if agent.spatial_config.name == "a16":
             out["spatial_a16_sha"] = spatial.wording_sha_a16()
-        if agent.spatial_config.name in ("a17", "a17b", "a17c"):
+        if agent.spatial_config.name in ("a17", "a17b", "a17c", "a17d"):
             out["spatial_a17_sha"] = spatial.wording_sha_a17()
+        if agent.spatial_config.door_walls or agent.spatial_config.suspects:
+            out["spatial_a17d_sha"] = spatial.wording_sha_a17d()
     if agent.staged:
         out["planner_a17_sha"] = planner_a17_sha()
     if agent.verifies:

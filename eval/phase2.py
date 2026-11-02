@@ -226,6 +226,14 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     "R29S": {"folder": "R29S_host_noise_solo",
              "title": "a49, one lane per vLLM instance (every call alone)",
              "agent": "a49", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R30: a code route planner (A* over the memory's cost map, planner.pathfind)
+    # in place of a49's local goal-way test and the q03 detour strategist. The
+    # s03 dead end and the s02 door wall are routing failures on a map that was
+    # right (probe B0, s03_tines_analysis, R19's s02 analysis). R30 README and
+    # docs/research/pathfinder-plan.md.
+    "R30": {"folder": "R30_pathfinder",
+            "title": "a49 with a code route planner in place of goal-way and q03",
+            "agent": "a63", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
