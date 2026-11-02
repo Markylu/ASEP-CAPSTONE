@@ -54,6 +54,16 @@ the crossbar (steps 32–34) on nothing: both tine mouths are equal frontiers. R
 these signs ([DE](../../eval/phase2/_probes/de/README.md)); the untried cues are the map's pocket
 geometry and an immediate turn-back at the first `d01`-confirmed closed door.
 
+Probe PG tried the geometry: to the memory, which is the drone's own trail, the strip along s02's
+door wall is as much a pocket as the tine (25% of s02 steps), and in the tine the cue fires with
+14–30 steps left. Refuted ([PG](../../eval/phase2/_probes/pg/README.md)). What both probes leave
+standing is a budget fact: in s03 `dynamic` the drone reaches the crossbar by step 9 and spends
+15–33 steps there asking q03 every few steps and getting `explore` or a frontier a cell away; two
+`final` runs lose 31 steps in the lobby first. A run that commits to a tine by step 12 can meet the
+shut door, turn back and still reach the other door by about step 44. The next s03 candidate is a
+code rule at the crossbar (pick a mouth at once, turn to the other on a confirmed closed door),
+not a dead-end detector.
+
 ## Lessons
 
 ### About measuring the perceiver

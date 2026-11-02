@@ -313,6 +313,8 @@ reads 6–19 pts more real walls as floor than the sites' own. Measured eye heig
 
 | DE | 2026-11-02 | Offline, a49's 54 runs (R25D, R29N, R29S), 228 strategist calls, 22 in the shut s03 tine. A way out (far frontier, ≥ 6 m) is listed on 22/22 dead-end calls, good on 20, picked 0 times. Closed door seen in the last 5 steps fires on 20/22 dead-end calls but on 72% of s02 calls (49% with no open doorway listed); dwell ≥ 7/10 within 4 m fires on 9–11% of s02 but on s03 only with 4–22 steps left (28 needed) | **Refuted.** The dead end is not separable from the s02 door wall by the closed-door sign, and the dwell sign comes too late. The decision point is the crossbar (steps 32–34), where the record holds nothing about which door is shut. No a63. Next cues untested: map-pocket geometry; turn back at the first d01-confirmed closed door. `eval/phase2/_probes/de/README.md` |
 
+| PG | 2026-11-02 | Offline, every step of a49's 54 runs with the memory rebuilt: a pocket cue (local reach leaves in ≤ 1 direction, goal walled, way out not toward the goal). Shut tine 64/136 steps, first fire with 14–30 steps left (≥ 28 on 1/5); s02 322/1,305 steps (25%), 18 runs over 5 fires; gated on a closed door still 11–18% of s02 | **Refuted.** The map is the drone's own trail: a wall-side strip and a tine are the same pocket to it. The surviving s03 finding is time: crossbar reached by step 9 in dynamic, then 15–33 steps spent there before a tine; two final runs lose 31 steps in the lobby first. Next candidate (not probed): code picks a tine at the crossbar at once and turns to the other on a d01-confirmed closed door. `eval/phase2/_probes/pg/README.md` |
+
 Details and readings: each probe's README under `eval/phase2/_probes/`.
 
 ## After the probes

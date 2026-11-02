@@ -1,0 +1,152 @@
+steps by place: s01 208, s02 1305, s03_dead 136, s03_else 271, s03_open 66
+shut-tine runs: R25D/s03/dynamic, R25D/s03/final, R29N/s03/dynamic, R29N/s03/final, R29S/s03/dynamic
+P pocket: s01 33/208; s02 322/1305; s03_dead 64/136; s03_else 66/271; s03_open 6/66
+   first fire in shut tine, steps left: R25D/s03/dynamic 18, R25D/s03/final 22, R29N/s03/dynamic 14, R29N/s03/final 26, R29S/s03/dynamic 30 -> >=28 on 1/5 [FAIL]
+   s02 322/1305 (24.7%), runs over 5 fires: R25D/s02a/final 6, R25D/s02c/final 13, R25D/s02va/dynamic 8, R25D/s02va/final 21, R25D/s02vc/final 7, R29N/s02a/dynamic 25, R29N/s02a/final 23, R29N/s02c/dynamic 13, R29N/s02c/final 21, R29N/s02va/dynamic 13, R29N/s02va/final 7, R29N/s02vc/dynamic 24, R29N/s02vc/final 27, R29S/s02a/final 7, R29S/s02c/final 15, R29S/s02va/dynamic 21, R29S/s02vc/dynamic 12, R29S/s02vc/final 27 [FAIL]; s03_open 6/66 [pass]; s01 33/208 [FAIL] -> fail
+   fires outside the shut tine by run: R25D/s01/dynamic 6, R25D/s01/final 7, R25D/s02a/dynamic 1, R25D/s02a/final 6, R25D/s02c/dynamic 4, R25D/s02c/final 13, R25D/s02va/dynamic 8, R25D/s02va/final 21, R25D/s02va/initial 2, R25D/s02vc/dynamic 3, R25D/s02vc/final 7, R25D/s02vc/initial 3, R25D/s03/dynamic 14, R25D/s03/final 8, R25D/s03/initial 4, R29N/s01/dynamic 4, R29N/s01/final 6, R29N/s02a/dynamic 25, R29N/s02a/final 23, R29N/s02c/dynamic 13, R29N/s02c/final 21, R29N/s02va/dynamic 13, R29N/s02va/final 7, R29N/s02va/initial 3, R29N/s02vc/dynamic 24, R29N/s02vc/final 27, R29N/s02vc/initial 4, R29N/s03/dynamic 12, R29N/s03/final 4, R29N/s03/initial 9, R29S/s01/dynamic 9, R29S/s01/final 1, R29S/s02a/dynamic 1, R29S/s02a/final 7, R29S/s02c/dynamic 4, R29S/s02c/final 15, R29S/s02va/dynamic 21, R29S/s02va/final 4, R29S/s02va/initial 1, R29S/s02vc/dynamic 12, R29S/s02vc/final 27, R29S/s02vc/initial 2, R29S/s03/dynamic 4, R29S/s03/final 13, R29S/s03/initial 4
+PC pocket & closed_perc: s01 0/208; s02 237/1305; s03_dead 55/136; s03_else 0/271; s03_open 3/66
+   first fire in shut tine, steps left: R25D/s03/dynamic 18, R25D/s03/final 22, R29N/s03/dynamic 14, R29N/s03/final 26, R29S/s03/dynamic 30 -> >=28 on 1/5 [FAIL]
+   s02 237/1305 (18.2%), runs over 5 fires: R25D/s02c/final 7, R25D/s02va/dynamic 6, R25D/s02va/final 11, R25D/s02vc/final 7, R29N/s02a/dynamic 23, R29N/s02a/final 22, R29N/s02c/dynamic 9, R29N/s02c/final 15, R29N/s02va/dynamic 13, R29N/s02vc/dynamic 16, R29N/s02vc/final 20, R29S/s02c/final 12, R29S/s02va/dynamic 19, R29S/s02vc/dynamic 10, R29S/s02vc/final 20 [FAIL]; s03_open 3/66 [pass]; s01 0/208 [pass] -> fail
+   fires outside the shut tine by run: R25D/s02a/dynamic 1, R25D/s02a/final 3, R25D/s02c/dynamic 1, R25D/s02c/final 7, R25D/s02va/dynamic 6, R25D/s02va/final 11, R25D/s02vc/dynamic 3, R25D/s02vc/final 7, R25D/s02vc/initial 2, R29N/s02a/dynamic 23, R29N/s02a/final 22, R29N/s02c/dynamic 9, R29N/s02c/final 15, R29N/s02va/dynamic 13, R29N/s02va/final 4, R29N/s02va/initial 1, R29N/s02vc/dynamic 16, R29N/s02vc/final 20, R29N/s02vc/initial 2, R29N/s03/initial 3, R29S/s02a/dynamic 1, R29S/s02a/final 5, R29S/s02c/dynamic 1, R29S/s02c/final 12, R29S/s02va/dynamic 19, R29S/s02va/final 3, R29S/s02vc/dynamic 10, R29S/s02vc/final 20
+PD pocket & closed_d01: s01 0/208; s02 148/1305; s03_dead 21/136; s03_else 0/271; s03_open 3/66
+   first fire in shut tine, steps left: R25D/s03/dynamic -, R25D/s03/final 22, R29N/s03/dynamic -, R29N/s03/final 20, R29S/s03/dynamic 22 -> >=28 on 0/5 [FAIL]
+   s02 148/1305 (11.3%), runs over 5 fires: R25D/s02va/final 8, R25D/s02vc/final 7, R29N/s02a/dynamic 9, R29N/s02a/final 18, R29N/s02c/dynamic 9, R29N/s02c/final 12, R29N/s02va/dynamic 6, R29N/s02vc/dynamic 9, R29N/s02vc/final 13, R29S/s02c/final 7, R29S/s02va/dynamic 12, R29S/s02vc/final 13 [FAIL]; s03_open 3/66 [pass]; s01 0/208 [pass] -> fail
+   fires outside the shut tine by run: R25D/s02c/final 5, R25D/s02va/dynamic 1, R25D/s02va/final 8, R25D/s02vc/dynamic 2, R25D/s02vc/final 7, R25D/s02vc/initial 1, R29N/s02a/dynamic 9, R29N/s02a/final 18, R29N/s02c/dynamic 9, R29N/s02c/final 12, R29N/s02va/dynamic 6, R29N/s02va/final 3, R29N/s02vc/dynamic 9, R29N/s02vc/final 13, R29N/s02vc/initial 2, R29N/s03/initial 3, R29S/s02a/dynamic 1, R29S/s02a/final 3, R29S/s02c/dynamic 1, R29S/s02c/final 7, R29S/s02va/dynamic 12, R29S/s02va/final 1, R29S/s02vc/dynamic 5, R29S/s02vc/final 13
+
+shut-tine steps (pocket fields):
+  R25D s03/dynamic s36 (4.7,4.6) local=30 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R25D s03/dynamic s37 (3.1,4.0) local=25 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R25D s03/dynamic s38 (1.4,4.1) local=11 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R25D s03/dynamic s39 (-0.3,4.1) local=23 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R25D s03/dynamic s40 (-2.0,4.2) local=37 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s41 (-3.7,4.3) local=26 exits=2 walled=0 exit_toward_goal=1 pocket=0 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s42 (-5.4,4.3) local=29 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s43 (-5.4,4.3) local=31 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s44 (-3.9,3.7) local=25 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s45 (-3.9,3.7) local=25 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s46 (-3.9,3.7) local=25 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=0 closed_d01=0
+  R25D s03/dynamic s47 (-3.9,3.7) local=29 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s48 (-4.0,5.4) local=16 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s49 (-4.0,5.4) local=16 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s50 (-5.1,4.2) local=15 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s51 (-5.1,4.2) local=21 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s52 (-3.4,4.3) local=34 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=0 closed_d01=0
+  R25D s03/dynamic s53 (-1.9,3.7) local=34 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=0 closed_d01=0
+  R25D s03/dynamic s54 (-1.9,3.7) local=41 exits=2 walled=1 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s55 (-2.1,5.4) local=29 exits=2 walled=1 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s56 (-2.1,5.4) local=29 exits=2 walled=1 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s57 (-3.1,4.0) local=28 exits=2 walled=1 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s58 (-4.7,3.7) local=23 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/dynamic s59 (-4.7,3.7) local=28 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=0 closed_d01=0
+  R25D s03/final s37 (4.6,-4.4) local=52 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R25D s03/final s38 (2.9,-4.7) local=25 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R25D s03/final s39 (1.2,-5.0) local=38 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R25D s03/final s40 (-0.4,-4.7) local=42 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R25D s03/final s41 (-2.1,-4.3) local=46 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R25D s03/final s42 (-3.6,-3.7) local=31 exits=2 walled=1 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R25D s03/final s43 (-5.3,-3.7) local=20 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R25D s03/final s44 (-5.3,-3.7) local=26 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R25D s03/final s45 (-3.9,-4.6) local=42 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R25D s03/final s46 (-3.5,-6.3) local=32 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R25D s03/final s47 (-3.5,-6.3) local=35 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R25D s03/final s48 (-4.9,-5.4) local=38 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R25D s03/final s49 (-6.0,-4.2) local=26 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R25D s03/final s50 (-6.0,-4.2) local=31 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R25D s03/final s51 (-5.7,-5.9) local=29 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R25D s03/final s52 (-5.7,-5.9) local=41 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R25D s03/final s53 (-6.0,-4.3) local=28 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=0 closed_d01=0
+  R25D s03/final s54 (-6.0,-4.3) local=43 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=0 closed_d01=0
+  R25D s03/final s55 (-5.7,-6.0) local=34 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=0 closed_d01=0
+  R25D s03/final s56 (-5.7,-6.0) local=34 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/final s57 (-5.4,-4.3) local=39 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/final s58 (-5.4,-4.3) local=40 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R25D s03/final s59 (-5.0,-6.0) local=42 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s42 (4.5,-4.3) local=68 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R29N s03/dynamic s43 (2.8,-3.9) local=53 exits=2 walled=0 exit_toward_goal=1 pocket=0 closed_perc=0 closed_d01=0
+  R29N s03/dynamic s44 (1.1,-3.7) local=41 exits=2 walled=0 exit_toward_goal=1 pocket=0 closed_perc=0 closed_d01=0
+  R29N s03/dynamic s45 (-0.6,-3.7) local=29 exits=2 walled=1 exit_toward_goal=1 pocket=0 closed_perc=0 closed_d01=0
+  R29N s03/dynamic s46 (-2.3,-3.7) local=20 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s47 (-3.9,-4.0) local=23 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s48 (-5.6,-4.3) local=16 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s49 (-5.6,-4.3) local=26 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s50 (-4.2,-5.2) local=33 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s51 (-2.5,-4.9) local=51 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s52 (-0.9,-4.6) local=42 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R29N s03/dynamic s53 (-0.9,-4.6) local=42 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s54 (-2.5,-4.3) local=45 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s55 (-4.0,-3.7) local=40 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s56 (-5.7,-3.7) local=27 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s57 (-5.7,-3.7) local=29 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s58 (-5.3,-5.4) local=22 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29N s03/dynamic s59 (-5.3,-5.4) local=36 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29N s03/final s25 (4.1,-4.7) local=33 exits=2 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s26 (2.5,-4.0) local=42 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s27 (0.9,-3.7) local=38 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s28 (-0.8,-3.7) local=28 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s29 (-2.5,-3.7) local=21 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s30 (-4.2,-3.7) local=12 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s31 (-5.5,-4.8) local=14 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s32 (-6.0,-6.0) local=8 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s33 (-6.0,-6.0) local=18 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s34 (-4.4,-6.1) local=32 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29N s03/final s35 (-2.7,-6.1) local=38 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R29N s03/final s36 (-1.0,-6.2) local=64 exits=2 walled=0 exit_toward_goal=1 pocket=0 closed_perc=0 closed_d01=0
+  R29N s03/final s37 (0.7,-6.3) local=51 exits=2 walled=0 exit_toward_goal=1 pocket=0 closed_perc=0 closed_d01=0
+  R29N s03/final s38 (0.7,-6.3) local=55 exits=2 walled=0 exit_toward_goal=1 pocket=0 closed_perc=1 closed_d01=0
+  R29N s03/final s39 (-0.8,-5.6) local=62 exits=2 walled=0 exit_toward_goal=1 pocket=0 closed_perc=1 closed_d01=0
+  R29N s03/final s40 (-2.0,-4.4) local=57 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29N s03/final s41 (-3.6,-3.7) local=60 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s42 (-5.3,-3.7) local=28 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29N s03/final s43 (-5.7,-3.7) local=28 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29N s03/final s44 (-5.7,-3.7) local=28 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29N s03/final s45 (-4.5,-4.9) local=45 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29N s03/final s46 (-4.5,-4.9) local=45 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29N s03/final s47 (-4.5,-4.9) local=45 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29N s03/final s48 (-3.3,-6.1) local=53 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s49 (-1.7,-6.3) local=57 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s50 (-1.7,-6.3) local=60 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s51 (-3.2,-5.6) local=54 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29N s03/final s52 (-4.8,-4.9) local=44 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29N s03/final s53 (-6.0,-4.9) local=31 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s54 (-6.0,-4.9) local=32 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29N s03/final s55 (-4.9,-6.1) local=38 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29N s03/final s56 (-3.2,-6.1) local=54 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R29N s03/final s57 (-1.5,-6.3) local=57 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R29N s03/final s58 (-1.5,-6.3) local=57 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29N s03/final s59 (-2.2,-4.7) local=60 exits=2 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s24 (4.4,-5.1) local=23 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R29S s03/dynamic s25 (4.8,-6.3) local=18 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R29S s03/dynamic s26 (4.8,-6.3) local=20 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R29S s03/dynamic s27 (3.4,-5.4) local=30 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R29S s03/dynamic s28 (1.9,-4.6) local=42 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R29S s03/dynamic s29 (0.2,-4.4) local=39 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=0 closed_d01=0
+  R29S s03/dynamic s30 (-1.3,-3.7) local=31 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s31 (-3.0,-4.1) local=45 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s32 (-4.6,-3.7) local=24 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s33 (-4.6,-3.7) local=32 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s34 (-3.1,-4.6) local=49 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s35 (-2.6,-6.2) local=35 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s36 (-2.6,-6.2) local=51 exits=2 walled=0 exit_toward_goal=1 pocket=0 closed_perc=1 closed_d01=1
+  R29S s03/dynamic s37 (-4.1,-5.3) local=54 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29S s03/dynamic s38 (-5.5,-4.5) local=33 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29S s03/dynamic s39 (-5.5,-4.5) local=37 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29S s03/dynamic s40 (-3.9,-4.1) local=50 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=1
+  R29S s03/dynamic s41 (-2.4,-3.7) local=53 exits=2 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=1
+  R29S s03/dynamic s42 (-2.4,-3.7) local=55 exits=2 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s43 (-4.0,-4.1) local=57 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s44 (-5.6,-3.7) local=41 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s45 (-5.6,-3.7) local=43 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s46 (-5.2,-5.3) local=32 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s47 (-5.2,-5.3) local=44 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s48 (-4.4,-3.8) local=38 exits=2 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s49 (-4.4,-3.8) local=50 exits=2 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s50 (-6.0,-4.4) local=25 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s51 (-6.0,-4.4) local=39 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s52 (-5.6,-3.7) local=31 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s53 (-5.6,-3.7) local=36 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s54 (-5.6,-3.7) local=36 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s55 (-5.6,-3.7) local=39 exits=1 walled=0 exit_toward_goal=0 pocket=0 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s56 (-6.0,-5.3) local=25 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s57 (-6.0,-6.0) local=22 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=1 closed_d01=0
+  R29S s03/dynamic s58 (-6.0,-6.0) local=23 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=0 closed_d01=0
+  R29S s03/dynamic s59 (-6.0,-4.3) local=27 exits=1 walled=1 exit_toward_goal=0 pocket=1 closed_perc=0 closed_d01=0
