@@ -311,6 +311,8 @@ reads 6–19 pts more real walls as floor than the sites' own. Measured eye heig
 
 | R29 | 2026-11-02 | a49 re-flown twice at 822f1d7: R29N 4 lanes on one vLLM 11/18, R29S one lane per instance 14/18 (R25D 14). In flight, missed walls 15.4% shared vs 14.9% alone (gate ≤ 10%: fail); phantoms 12.0 → 9.3%, s03 14.1 → 8.3%; perceiver p50 1.65 → 1.21 s. Step-0 reading differs between the two rounds in 11/18 cells; s02vc final ran 60 identical steps in both | **Check 1 failed.** The LD replay's gain was the warm prefix cache, not batching: a flight call is cold, and cold at temperature 0 is a draw. Host is not the lever for missed walls; phantom-wall drop and speed are a lead. a49 over three rounds: 14, 11, 14. `eval/phase2/R29S_host_noise_solo/summary.md` |
 
+| DE | 2026-11-02 | Offline, a49's 54 runs (R25D, R29N, R29S), 228 strategist calls, 22 in the shut s03 tine. A way out (far frontier, ≥ 6 m) is listed on 22/22 dead-end calls, good on 20, picked 0 times. Closed door seen in the last 5 steps fires on 20/22 dead-end calls but on 72% of s02 calls (49% with no open doorway listed); dwell ≥ 7/10 within 4 m fires on 9–11% of s02 but on s03 only with 4–22 steps left (28 needed) | **Refuted.** The dead end is not separable from the s02 door wall by the closed-door sign, and the dwell sign comes too late. The decision point is the crossbar (steps 32–34), where the record holds nothing about which door is shut. No a63. Next cues untested: map-pocket geometry; turn back at the first d01-confirmed closed door. `eval/phase2/_probes/de/README.md` |
+
 Details and readings: each probe's README under `eval/phase2/_probes/`.
 
 ## After the probes

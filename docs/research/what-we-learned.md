@@ -45,6 +45,15 @@ cache; a flight frame is cold, and a cold call at temperature 0 is still a draw 
 did cut phantom walls (12.0 → 9.3%) and latency (p50 1.65 → 1.21 s), one seed. `a49` over three
 rounds: 14, 11, 14 ([R29S summary](../../eval/phase2/R29S_host_noise_solo/summary.md)).
 
+Probe DE (same day, offline) then asked whether the s03 dead end can be read from a49's record in
+time to act. The way out is on q03's menu at 22 of 22 dead-end calls and picked 0 times, as on the
+a43 line. But the only early sign, a closed door in view, is in view at 72% of s02 detour calls too
+(door B shares the wall with the open door), and the clean sign, dwelling in the pocket, comes with
+4–22 steps left against the 28 the way out needs. The decision that loses s03 `final` is made at
+the crossbar (steps 32–34) on nothing: both tine mouths are equal frontiers. Refuted as a rule on
+these signs ([DE](../../eval/phase2/_probes/de/README.md)); the untried cues are the map's pocket
+geometry and an immediate turn-back at the first `d01`-confirmed closed door.
+
 ## Lessons
 
 ### About measuring the perceiver
