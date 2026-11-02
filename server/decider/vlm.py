@@ -533,6 +533,19 @@ async def _request(client: httpx.AsyncClient, url: str,
     return await _post_plain(client, url, headers, body, rtt_ms)
 
 
+#: How much of an unparseable reply a failed attempt keeps.
+FAILED_TEXT_CHARS = 1500
+
+
+def _reply_text(payload: Dict[str, Any]) -> str:
+    choice = (payload.get("choices") or [{}])[0]
+    message = choice.get("message") or {}
+    calls = message.get("tool_calls") or []
+    if calls:
+        return str(calls[0].get("function", {}).get("arguments") or "")
+    return str(message.get("content") or "")
+
+
 async def _ladder(build_body: Callable[[str], Dict[str, Any]],
                   extract: Callable[[str, Dict[str, Any]], Dict[str, Any]],
                   max_tokens: int) -> Dict[str, Any]:
@@ -568,6 +581,7 @@ async def _ladder(build_body: Callable[[str], Dict[str, Any]],
         attempt = 0
         transport_failures = 0
         while attempt < 2:
+            payload = None
             try:
                 body = build_body(rung)
                 body["max_tokens"] = budget
@@ -594,6 +608,10 @@ async def _ladder(build_body: Callable[[str], Dict[str, Any]],
                         continue
                     attempts.append(note)
                     break
+                # Keep what the model wrote: a reply that fails to parse is
+                # otherwise lost, and 2% of perceiver calls did (probe LD).
+                if payload is not None:
+                    note["text"] = _reply_text(payload)[:FAILED_TEXT_CHARS]
                 retry_worth_it = (attempt == 0 and isinstance(
                     exc, (json.JSONDecodeError, ValueError)))
                 if retry_worth_it:

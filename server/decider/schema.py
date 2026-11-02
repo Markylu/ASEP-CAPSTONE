@@ -15,6 +15,15 @@ SCHEMA_NAME = "vlmnav_action"
 #: (agent.py: memory fields include "goal"). Relative to the drone's heading.
 GOAL_REPORTS = ["ahead", "left", "right", "not_visible"]
 
+#: Cap on the describe-first `reason` of the perceiver, wall reader and distance
+#: reader. About 2% of their calls ran the reason past the token budget, twice
+#: (768 then 1536 tokens), and failed every rung with an unterminated string
+#: (W01 2.6%, LD 2.0%; the same image fails every time). The server's grammar
+#: closes the string at this length, so the report fields that follow always
+#: arrive. A normal reason is 850 characters, the 95th percentile 2,400. The
+#: navigator, strategist and confirmers keep an open reason: a49 flew with it.
+REASON_MAX_CHARS = 2000
+
 
 def visible_indices(manifest: Dict[str, Any]) -> List[int]:
     """The indices on this frame, straight from the manifest.
@@ -222,7 +231,7 @@ def perceiver_schema(version: str = "g03") -> Dict[str, Any]:
         "additionalProperties": False,
     }
     properties: Dict[str, Any] = {
-        "reason": {"type": "string",
+        "reason": {"type": "string", "maxLength": REASON_MAX_CHARS,
                    "description": "Walls, openings, obstacles and anything that could be "
                                   "the goal in this image."},
         "goal": {"type": "string", "enum": STRIPS + ["not_visible"],
@@ -244,7 +253,7 @@ WALL_READER_SCHEMA_NAME = "wall_reader"
 def wall_reader_schema() -> Dict[str, Any]:
     """w01 (a61 on): g05's floor per strip and nothing else, after a description."""
     properties: Dict[str, Any] = {
-        "reason": {"type": "string",
+        "reason": {"type": "string", "maxLength": REASON_MAX_CHARS,
                    "description": "What fills the bottom of each strip and where its floor "
                                   "ends; walls, openings and doors."},
     }
@@ -271,7 +280,7 @@ def distance_reader_schema() -> Dict[str, Any]:
     """ld01 (probe LD, never flown): metres to the nearest obstacle per strip,
     after a description. Range checks live in the probe, not the schema."""
     properties: Dict[str, Any] = {
-        "reason": {"type": "string",
+        "reason": {"type": "string", "maxLength": REASON_MAX_CHARS,
                    "description": "What fills the bottom of each strip and the cues that "
                                   "give its distance."},
     }
