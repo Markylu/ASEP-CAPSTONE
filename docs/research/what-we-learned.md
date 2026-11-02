@@ -26,6 +26,17 @@ R28 (2026-10-31) tried the split's wall reader first: five readers (`w01`, `k01`
 `w04`), none passed its gate, not flown ([R28](../../eval/phase2/R28_wall_reader/README.md)).
 Next idea: `w05`, a code reader with depth cues from higher in the frame.
 
+Probe LD (2026-11-01) then changed the image instead of the prompt: 1,680 re-lit renders, 10,080
+calls. Refuted: the sites' lighting is the best of seven for walls, and every brighter floor traded
+misses for phantoms as the prompts had ([LD](../../eval/phase2/_probes/ld/README.md)). Two side
+results matter more:
+- alone, with a warm prefix cache, the model is deterministic (3,359 of 3,360 repeats identical);
+- two thirds of the walls `g05` missed in flight are found when the same frame is read alone.
+So the wall-reading lever is exhausted on this model, and the next round changes the host, not the
+agent: R29N/R29S fly `a49` shared and alone
+([README](../../eval/phase2/R29N_host_noise_shared/README.md)). `w05` is set aside unless R29S
+still misses more than 10% of walls.
+
 ## Lessons
 
 ### About measuring the perceiver
@@ -42,6 +53,9 @@ Next idea: `w05`, a code reader with depth cues from higher in the frame.
    - Even alone, 18.6% of strip fields differ between repeat reads, and the first (cold) call is the
      odd one out.
    - Temperature 0 does not make a read deterministic on vLLM.
+   - It does when the call is alone and the prefix is cached: probe LD's three repeats at
+     concurrency 1 were identical on 3,359 of 3,360 image/read pairs. The noise is the server's
+     state, not sampling.
    - One seed-1 round cannot resolve ±1 run (`a17b` family: 11.3 ± 1.4).
 3. **Errors follow the image side.**
    - `g05` reads the image's left half worse (C1).

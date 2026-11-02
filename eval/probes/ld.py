@@ -308,8 +308,9 @@ def todo_rows(manifest):
     return [(rep, read, r) for rep in range(REPS) for read in READS for r in rows]
 
 
-def caller():
-    """One `w01` or `ld01` call on a rendered frame, as the run made them."""
+def caller(reason_cap=None):
+    """One `w01` or `ld01` call on a rendered frame, as the run made them: the
+    reason open (the run), or capped (`recall`, schema.REASON_MAX_CHARS)."""
     from server.decider import orchestrator, prompt as prompts, schema, views, vlm
     p_w01, p_ld01 = prompts.get("w01"), prompts.get("ld01")
 
@@ -317,13 +318,13 @@ def caller():
         b64 = base64.b64encode(render_path(row).read_bytes()).decode()
         if read == "w01":
             view = views.wall_reader(p_w01, {}, b64)
-            name, sch = schema.WALL_READER_SCHEMA_NAME, schema.wall_reader_schema()
+            name, sch = schema.WALL_READER_SCHEMA_NAME, schema.wall_reader_schema(reason_cap)
 
             def validate(parsed):
                 return orchestrator.walls_from(parsed, FLOOR_MAP)
         else:
             view = views.wall_reader(p_ld01, {}, b64)
-            name, sch = schema.DISTANCE_READER_SCHEMA_NAME, schema.distance_reader_schema()
+            name, sch = schema.DISTANCE_READER_SCHEMA_NAME, schema.distance_reader_schema(reason_cap)
             validate = distances_from
         sub = await vlm.call_structured(name, view.system, view.text, view.image_b64, sch,
                                         validate, orchestrator.PERCEIVER_MAX_TOKENS)
@@ -368,7 +369,7 @@ async def run_probe(shard: int, of: int, limit, stub: bool, flip: bool) -> None:
 
 async def recall_failed(limit) -> None:
     """Re-call every image/read whose run rows all failed, with the schema as it
-    now stands (`schema.REASON_MAX_CHARS` on the reason). Appends to recall.jsonl,
+    a62 flies it (`schema.REASON_MAX_CHARS` on the reason; the run itself was open). Appends to recall.jsonl,
     resumable; prints how many parse and how long their reasons are."""
     from server.decider import config
     calls = [json.loads(line) for p in sorted(OUT.glob("calls_*of*.jsonl"))
@@ -381,7 +382,8 @@ async def recall_failed(limit) -> None:
     if path.exists():
         done = {(c["set"], c["lighting"], c["id"], c["read"])
                 for c in map(json.loads, path.read_text().splitlines())}
-    call = caller()
+    from server.decider import schema
+    call = caller(reason_cap=schema.REASON_MAX_CHARS)
     todo = [k for k in failed if k not in done]
     if limit:
         todo = todo[:limit]

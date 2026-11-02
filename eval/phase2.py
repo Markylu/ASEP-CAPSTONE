@@ -214,6 +214,18 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     "R28": {"folder": "R28_wall_reader",
             "title": "R25D with each strip's floor from a wall reader (w01)",
             "agent": "a61", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R29: the host, not the agent (operator, 2026-11-02). Probe LD found the model
+    # deterministic when called alone with a warm prefix cache, and two thirds of
+    # the flight-time missed walls gone when the same frame is read alone. Every
+    # round so far ran 4 lanes on one vLLM (N1: 16-28% of strip fields change with
+    # neighbours in the batch). R29N re-flies a49 that way; R29S flies a49 with one
+    # lane per vLLM instance. Same agent, same sha, in both. R29 README.
+    "R29N": {"folder": "R29N_host_noise_shared",
+             "title": "a49 again, 4 lanes on one vLLM (host-noise control)",
+             "agent": "a49", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    "R29S": {"folder": "R29S_host_noise_solo",
+             "title": "a49, one lane per vLLM instance (every call alone)",
+             "agent": "a49", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

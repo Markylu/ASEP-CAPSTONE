@@ -1039,6 +1039,23 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "a49 (R25D, 14/18) with a wall reader (w01, g05's floor job alone) asked beside "
           "g05; each strip's floor from w01, doorways and the goal from g05 "
           "(what-we-learned, idea 1)."),
+    Agent("a62", "p17", {"orchestrator": {"perceiver": "g05", "strategist": "q03",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "goal_reach_detour",
+                                          "detour_stall": {"steps": 4, "gain_m": 0.5},
+                                          "memory": "a17b",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "reason_cap": 2000,
+                                          "spatial": "server/decider/spatial.py"}},
+          "a49 (R25D, 14/18) with the perceiver's describe-first reason capped at 2,000 "
+          "characters (schema.REASON_MAX_CHARS), so the 2% of calls whose reason loops past "
+          "the token budget still return their strips (probe LD recall). Not flown yet."),
 )}
 
 DEFAULT_AGENT = "a00"

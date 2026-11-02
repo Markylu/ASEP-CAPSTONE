@@ -1,0 +1,12 @@
+{
+  "round": "R29N",
+  "title": "a49 again, 4 lanes on one vLLM (host-noise control)",
+  "citable": false,
+  "agent_version": "a49",
+  "status": "planned",
+  "git_sha": null,
+  "started": null,
+  "finished": null,
+  "operator": null,
+  "notes": ""
+}

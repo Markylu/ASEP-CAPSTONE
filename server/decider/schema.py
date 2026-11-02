@@ -7,7 +7,7 @@ schema means an invalid pick is impossible rather than merely rejected.
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 SCHEMA_NAME = "vlmnav_action"
 
@@ -16,12 +16,15 @@ SCHEMA_NAME = "vlmnav_action"
 GOAL_REPORTS = ["ahead", "left", "right", "not_visible"]
 
 #: Cap on the describe-first `reason` of the perceiver, wall reader and distance
-#: reader. About 2% of their calls ran the reason past the token budget, twice
-#: (768 then 1536 tokens), and failed every rung with an unterminated string
-#: (W01 2.6%, LD 2.0%; the same image fails every time). The server's grammar
-#: closes the string at this length, so the report fields that follow always
-#: arrive. A normal reason is 850 characters, the 95th percentile 2,400. The
-#: navigator, strategist and confirmers keep an open reason: a49 flew with it.
+#: reader, applied only when the agent's `reason_cap` feature asks for it (a62 on;
+#: a49 flew with an open reason and keeps it). About 2% of these calls ran the
+#: reason past the token budget, twice (768 then 1536 tokens), and failed every
+#: rung with an unterminated string (W01 2.6%, LD 2.0%; the same image fails
+#: every time, and the capped text is one sentence repeated: a loop, not a long
+#: thought, so a larger budget would not help). The server's grammar closes the
+#: string at this length, so the report fields that follow always arrive. A
+#: normal reason is 850 characters, the 95th percentile 2,400. The navigator,
+#: strategist and confirmers keep an open reason.
 REASON_MAX_CHARS = 2000
 
 
@@ -188,7 +191,10 @@ def floor_classes(version: str = "g03") -> List[str]:
     return FLOOR_CLASSES_G04 if version == "g04" else FLOOR_CLASSES
 
 
-def perceiver_schema(version: str = "g03") -> Dict[str, Any]:
+def perceiver_schema(version: str = "g03",
+                     reason_cap: Optional[int] = None) -> Dict[str, Any]:
+    """The perceiver's reply. `reason_cap` (the agent's `reason_cap` feature) puts
+    a maxLength on the reason; None leaves it open, as every agent up to a61."""
     if version == "g06":
         lane_props: Dict[str, Any] = {
             "floor": {"type": "string", "enum": FLOOR_ENDS_G06,
@@ -231,7 +237,7 @@ def perceiver_schema(version: str = "g03") -> Dict[str, Any]:
         "additionalProperties": False,
     }
     properties: Dict[str, Any] = {
-        "reason": {"type": "string", "maxLength": REASON_MAX_CHARS,
+        "reason": {"type": "string",
                    "description": "Walls, openings, obstacles and anything that could be "
                                   "the goal in this image."},
         "goal": {"type": "string", "enum": STRIPS + ["not_visible"],
@@ -241,6 +247,8 @@ def perceiver_schema(version: str = "g03") -> Dict[str, Any]:
     }
     if version == "g07":  # g05 without the reason written first (probe F1)
         del properties["reason"]
+    elif reason_cap:
+        properties["reason"]["maxLength"] = reason_cap
     for strip in STRIPS:
         properties[strip] = dict(lane, description="The {0} strip.".format(strip))
     return {"type": "object", "properties": properties, "required": list(properties),
@@ -250,13 +258,16 @@ def perceiver_schema(version: str = "g03") -> Dict[str, Any]:
 WALL_READER_SCHEMA_NAME = "wall_reader"
 
 
-def wall_reader_schema() -> Dict[str, Any]:
-    """w01 (a61 on): g05's floor per strip and nothing else, after a description."""
+def wall_reader_schema(reason_cap: Optional[int] = None) -> Dict[str, Any]:
+    """w01 (a61 on): g05's floor per strip and nothing else, after a description.
+    `reason_cap` as perceiver_schema."""
     properties: Dict[str, Any] = {
-        "reason": {"type": "string", "maxLength": REASON_MAX_CHARS,
+        "reason": {"type": "string",
                    "description": "What fills the bottom of each strip and where its floor "
                                   "ends; walls, openings and doors."},
     }
+    if reason_cap:
+        properties["reason"]["maxLength"] = reason_cap
     for strip in STRIPS:
         properties[strip] = {
             "type": "object",
@@ -276,14 +287,17 @@ def wall_reader_schema() -> Dict[str, Any]:
 DISTANCE_READER_SCHEMA_NAME = "distance_reader"
 
 
-def distance_reader_schema() -> Dict[str, Any]:
+def distance_reader_schema(reason_cap: Optional[int] = None) -> Dict[str, Any]:
     """ld01 (probe LD, never flown): metres to the nearest obstacle per strip,
-    after a description. Range checks live in the probe, not the schema."""
+    after a description. Range checks live in the probe, not the schema.
+    `reason_cap` as perceiver_schema."""
     properties: Dict[str, Any] = {
-        "reason": {"type": "string", "maxLength": REASON_MAX_CHARS,
+        "reason": {"type": "string",
                    "description": "What fills the bottom of each strip and the cues that "
                                   "give its distance."},
     }
+    if reason_cap:
+        properties["reason"]["maxLength"] = reason_cap
     for strip in STRIPS:
         properties[strip] = {
             "type": "object",
