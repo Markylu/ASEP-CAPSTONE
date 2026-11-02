@@ -3,10 +3,11 @@
   "title": "a49 again, 4 lanes on one vLLM (host-noise control)",
   "citable": false,
   "agent_version": "a49",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "822f1d7",
+  "started": "2026-11-02T16:00:13+00:00",
+  "finished": "2026-11-02T16:32:45+00:00",
+  "operator": "Markylu",
+  "notes": "Flown 2026-11-02 at 822f1d7, R29N first, then R29S; the :8006-:8008 copies stopped after R29S.",
+  "lanes": "sctsvr6 lanes 1-4 (asep-r29n-l1..4), shared vLLM :8004, nothing else on it"
 }

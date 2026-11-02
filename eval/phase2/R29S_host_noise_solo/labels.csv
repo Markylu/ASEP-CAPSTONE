@@ -1,0 +1,19 @@
+run_id,site,arm,seed,auto_label,label,ack_step,tags,override_note,reviewer,date
+p2_R29S_s01_dynamic_seed1_a01,s01,dynamic,1,success,success,3,,label confirmed (goal reached at step 26).,Claude review,2026-11-02
+p2_R29S_s01_final_seed1_a01,s01,final,1,success,success,,,label confirmed (goal reached at step 23). static arm: ack_step cleared.,Claude review,2026-11-02
+p2_R29S_s01_initial_seed1_a01,s01,initial,1,success,success,,,label confirmed (goal reached at step 14). static arm: ack_step cleared.,Claude review,2026-11-02
+p2_R29S_s02a_dynamic_seed1_a01,s02a,dynamic,1,success,success,5,,label confirmed (goal reached at step 23).,Claude review,2026-11-02
+p2_R29S_s02a_final_seed1_a01,s02a,final,1,success,success,,,label confirmed (goal reached at step 49). static arm: ack_step cleared.,Claude review,2026-11-02
+p2_R29S_s02a_initial_seed1_a01,s02a,initial,1,success,success,,,label confirmed (goal reached at step 14). static arm: ack_step cleared.,Claude review,2026-11-02
+p2_R29S_s02c_dynamic_seed1_a01,s02c,dynamic,1,success,success,3,,label confirmed (goal reached at step 26).,Claude review,2026-11-02
+p2_R29S_s02c_final_seed1_a01,s02c,final,1,replan_failure,replan_failure,,,"label confirmed (never through (min x 0.5); door wall y -4..+11, 16.6 m out. R25D: replan_failure too; R29N: success at 58.) static arm: ack_step cleared.",Claude review,2026-11-02
+p2_R29S_s02c_initial_seed1_a01,s02c,initial,1,success,success,,,label confirmed (goal reached at step 14). static arm: ack_step cleared.,Claude review,2026-11-02
+p2_R29S_s02va_dynamic_seed1_a01,s02va,dynamic,1,replan_failure,replan_failure,4,,"label confirmed (never through (min x 0.5); door wall y -6..+11, 24 open-door strips, 17.1 m out. R25D and R29N: success.)",Claude review,2026-11-02
+p2_R29S_s02va_final_seed1_a01,s02va,final,1,success,success,,,label confirmed (goal reached at step 28). static arm: ack_step cleared.,Claude review,2026-11-02
+p2_R29S_s02va_initial_seed1_a01,s02va,initial,1,success,success,,,label confirmed (goal reached at step 19). static arm: ack_step cleared.,Claude review,2026-11-02
+p2_R29S_s02vc_dynamic_seed1_a01,s02vc,dynamic,1,success,success,3,,label confirmed (goal reached at step 49).,Claude review,2026-11-02
+p2_R29S_s02vc_final_seed1_a01,s02vc,final,1,replan_failure,replan_failure,,,"label confirmed (never through (min x 0.5); door wall, 19.1 m out. Same 60-step trajectory as R29N's cell. R25D: success.) static arm: ack_step cleared.",Claude review,2026-11-02
+p2_R29S_s02vc_initial_seed1_a01,s02vc,initial,1,success,success,,,label confirmed (goal reached at step 19). static arm: ack_step cleared.,Claude review,2026-11-02
+p2_R29S_s03_dynamic_seed1_a01,s03,dynamic,1,replan_failure,replan_failure,29,,"label confirmed (shut tine: x -4..-6, y -4..-5 from step 32 on, 7.3 m out; dead-end pattern. R25D and R29N: same.)",Claude review,2026-11-02
+p2_R29S_s03_final_seed1_a01,s03,final,1,success,success,,,"goal reached at step 59: same path as R25D's failed s03 final to step 33, then took tine R at the crossbar (R25D took L). The side choice, not a new reading. static arm: ack_step cleared.",Claude review,2026-11-02
+p2_R29S_s03_initial_seed1_a01,s03,initial,1,success,success,,,label confirmed (goal reached at step 25). static arm: ack_step cleared.,Claude review,2026-11-02

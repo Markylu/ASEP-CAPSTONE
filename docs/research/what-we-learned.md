@@ -37,6 +37,14 @@ agent: R29N/R29S fly `a49` shared and alone
 ([README](../../eval/phase2/R29N_host_noise_shared/README.md)). `w05` is set aside unless R29S
 still misses more than 10% of walls.
 
+R29 flew the same day: R29N 11/18, R29S 14/18, and alone the perceiver still missed 14.9% of walls
+(shared 15.4%). The LD replay had read each frame after its own first read, with a warm prefix
+cache; a flight frame is cold, and a cold call at temperature 0 is still a draw on this server
+(step-0 reading differs between the two rounds in 11 of 18 cells; where every reading matched, s02vc
+`final`, the two rounds ran the same 60 steps). The host is not the lever for missed walls. Alone
+did cut phantom walls (12.0 → 9.3%) and latency (p50 1.65 → 1.21 s), one seed. `a49` over three
+rounds: 14, 11, 14 ([R29S summary](../../eval/phase2/R29S_host_noise_solo/summary.md)).
+
 ## Lessons
 
 ### About measuring the perceiver

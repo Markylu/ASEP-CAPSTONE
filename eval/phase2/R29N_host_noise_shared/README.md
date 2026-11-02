@@ -1,7 +1,7 @@
 # R29: the host, not the agent. a49 on a shared vLLM (R29N) and alone (R29S)
 
 **Agent:** `a49` (`83f7a6a19b01`) in both rounds · **Prompt:** `p17` (`cb3578251cfe`) ·
-**Perceiver:** `g05` · **Memory:** `a17b` · **Status:** pre-registered 2026-11-02, not flown
+**Perceiver:** `g05` · **Memory:** `a17b` · **Status:** pre-registered 2026-11-02, flown the same day, 18/18 valid in each round
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. This README covers both R29N (this
 folder) and R29S ([R29S_host_noise_solo](../R29S_host_noise_solo/README.md)); they fly the same
@@ -144,4 +144,25 @@ A wording fix is a new prompt version; it waits for one.
 
 ## Outcome
 
-Not flown.
+Flown 2026-11-02 at `822f1d7`, R29N 16:00–16:33 UTC then R29S 16:34–16:55 UTC. 18/18 valid in each.
+**R29N 11/18, R29S 14/18 (R25D 14). Gate check 1 failed, checks 2–5 held.**
+
+| | Check | R25D | R29N | R29S | |
+|---|---|---|---|---|---|
+| 1 | R29S missed walls ≤ 10% | 17.3% | 15.4% | **14.9%** | **FAIL** |
+| 2 | R29S phantom walls ≤ 15% | 12.7% | 12.0% | 9.3% | pass |
+| 3 | R29S s03 phantom walls ≤ 20% | 16.2% | 14.1% | 8.3% | pass |
+| 4 | R29S success ≥ R29N | 14 | 11 | 14 | pass |
+| 5 | R29N missed walls within 17.3 ± 4 | 17.3% | 15.4% | | pass |
+
+Alone, the perceiver misses as many walls as shared: the LD replay's gain was a warm prefix cache
+(each frame read after its own first read), not batching; a flight frame is always cold. The host
+is not the lever for missed walls, so the host setting does not change. Phantom walls did fall
+(12.0 → 9.3%, s03 14.1 → 8.3%), and alone is 35% faster per call: a lead, one seed. The step-0
+reading differs between R29N and R29S in 11 of 18 cells, so a cold call at temperature 0 is still a
+draw on this server; where every reading matched (s02vc `final`) the two rounds ran the same 60
+steps pose for pose. R29S's s03 `final` win is the side choice at the crossbar at step 34 (R25D
+pose-identical to step 33, then tine L). `a49`'s three rounds: 14, 11, 14.
+
+Summaries: [R29N](summary.md), [R29S](../R29S_host_noise_solo/summary.md) (the gate reading and
+the cells table). Labels: Claude review, not yet confirmed by the operator.
