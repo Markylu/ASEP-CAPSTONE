@@ -1,7 +1,8 @@
 # R30: a49 with a code route planner in place of goal-way and q03
 
-**Agent:** `a63` (`64ddf8383c00`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
-**Memory:** `a17d` · **Status:** pre-registered 2026-11-02, not flown
+**Agent:** `a63` (`7e6b2f2a6d8c`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
+**Memory:** `a17d` · **Status:** pre-registered 2026-11-02; offline probe gate failed as
+registered (below); not flown
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design and evidence:
 [docs/research/pathfinder-plan.md](../../../docs/research/pathfinder-plan.md). Operator's
@@ -60,9 +61,9 @@ Parameters: `agent.PATHFINDER_A63`, in the features, so the sha.
   flew worse (R27, R28, LD); the host rounds R29N/R29S test the remaining lever, and this round
   flies on whatever host setting they decide.
 - **Smoke** (`eval/probes/a63_smoke.py`, no model, R25D's 627 recorded manifests, stub replies
-  equal to the recorded ones): 0 failed steps, a route on 627/627, fallback `none` on 623
-  (`soft` 2, `frontier` 2), stall cells added on 52 steps (open loop: a49 did not follow a63's
-  route), door walls written on 381 steps, suspects on 619. a64: 627/627 code picks.
+  equal to the recorded ones): 0 failed steps, a route on 627/627, fallback `none` on 624
+  (`soft` 3), stall cells added on 51 steps (open loop: a49 did not follow a63's route), door
+  walls written on 302 steps, suspects on 622. a64: 627/627 code picks.
 
 ## Hypothesis
 
@@ -111,6 +112,20 @@ Two gates, both before the 18 runs.
    ≥ 60% of near-door steps, seals a true route on ≤ 5% of steps outside the s03 tines, and
    tags a49's own pick on R25D's solved runs at least as often as a49's tag did (minus 5 points).
    Re-scored on R27 (and R29 when flown) as the held-out set after any tuning.
+
+   **Outcome (2026-11-02): failed as registered.** Tuning set R20–R26: shut tine 28.0%, lobby
+   75.4% (pass), door gap 44.9%, sealing harm 28.5%, initial safety 68.5% against a49's 83.9%.
+   Held out R27: shut tine 2/2, lobby 12/12, door gap 46.9%, sealing harm 25.0%. Two readouts
+   added after the first run pass on both sets: no true route left on a63's map 0.8% / 0.0%
+   (the question the registered "sealing harm" was meant to ask). Three of the four failing
+   rows measure a closed-loop behaviour on open-loop data: from where a49 stood the divider
+   and the door wall are unknown to the map (73% of routes rely on unknown ground that is
+   wall), and the route points out of the tine or through the gap only once bumps have
+   written stop walls. Four map bugs were found and fixed along the way (door walls across
+   the drone's front, `bottom` closed doors 14 m out, a17b's ray end popping the floor
+   straight ahead, near walls from `bottom` reads); the run-by-run record is in the probe
+   README. By the rule above the planner is not carried to a round on this probe; whether
+   the shakedown may stand in for it is the operator's call.
 2. **On-policy shakedown** (model, a quiet instance, operator's call): one unscored `dynamic` run
    per site, s03 first, for `a63` and for `a64`, outside this folder. Passes only if s03's
    shut-tine check holds, no turn-around streak reaches 10, and `eval/r28_flight.py` shows
@@ -125,7 +140,7 @@ R25D (`a49`). Branch `phase2/r30-pathfinder` from `phase2/r29n-host-noise`.
 - **Tests and smoke (no model):** `python -m pytest server/decider/tests -q`;
   `VLM_AGENT=a63 python eval/probes/a63_smoke.py` (and `a64`).
 - **Preflight.** `python -m server.decider --profile remote --agent a63`; `/health` should report
-  `64ddf8383c00`.
+  `7e6b2f2a6d8c`.
 - **a64** is never a round: its rung `code` fails the validity check by construction.
 
 ## Outcome

@@ -320,6 +320,12 @@ class SpatialConfig:
     #: memory keeps its sha and its snapshot.
     door_walls: bool = False
     suspects: bool = False
+    #: a17d: within one look, floor seen by one strip wins over another
+    #: strip's ray end in the same cell. At 0.85 m cells a side ray's end at
+    #: 0.9 m shares the centre ray's cell, and a17b let the last strip
+    #: written pop the floor the centre strip saw: a wall straight ahead that
+    #: only the tags read there, and that a route search cannot cross.
+    free_wins: bool = False
 
     def sha_segments(self) -> List[str]:
         out = ["spatial:" + wording_sha()]
@@ -335,8 +341,10 @@ class SpatialConfig:
             out.append("floor_ends:" + ",".join(self.floor_ends))
         if self.door_tags:
             out.append("door_tags:" + json.dumps(WORDS_A17C, sort_keys=True))
-        if self.door_walls or self.suspects:
+        if self.door_walls or self.suspects or self.free_wins:
             out.append("spatial_a17d:" + wording_sha_a17d())
+        if self.free_wins:
+            out.append("free_wins")
         return out
 
 
@@ -392,7 +400,11 @@ PARAMS_A17D: Dict[str, Any] = {
     # A closed door (d01 agreed) whose strip's floor ends this near is a wall
     # across that strip and its two neighbours (a door is 2.4 m, about three
     # cells): metres along the strip's centre ray, by floor end.
-    "door_wall_m": {"no_floor": 1.0, "bottom": 2.5},
+    # Only a door under 1 m (no_floor): a "bottom" closed door was read on
+    # doors 14 m away in R25D's s02vc dynamic s3 (probe pathfinder, run 3),
+    # and a wall 2.5 m out across three strips sealed the way. Seen floor
+    # erases a door wall as it erases any wall.
+    "door_wall_m": {"no_floor": 1.0},
     "door_wall_strips": 1,
     # A strip whose floor ends higher in the image ends at a wall farther out
     # (g05: "lower" 3-8 m, "middle" past 8 m; R14 against geometry). Written as
@@ -400,7 +412,19 @@ PARAMS_A17D: Dict[str, Any] = {
     # wall: the planner prefers another way but may go through, and a later
     # look that sees floor there, or a visit, erases it.
     "suspect_m": {"lower": 4.5, "middle": 8.0},
-    "door_suspect_m": {"lower": 4.5, "middle": 8.0},
+    "door_suspect_m": {"bottom": 2.5, "lower": 4.5, "middle": 8.0},
+    # Near walls at "bottom" floor ends, on a planner-only layer: tried in
+    # the probe's second run and dropped (empty table). The s03 divider,
+    # seen only from the side, stayed unknown anyway (its reads are lower /
+    # middle), and "bottom" is read on 31-50% of truly open strips (W01),
+    # so the near walls sealed every true route on 11% of steps. The
+    # mechanism stays for a later reader that earns it.
+    "near_wall_m": {},
+    # A strip the door confirmer called an open doorway shows floor through
+    # the gap: its rays are free this far (a stop wall still cuts them), and
+    # it gets no suspect. Otherwise the gap's cells stay unknown beside the
+    # seen jambs and the sealing rule closes the door the drone was shown.
+    "open_door_reach_m": 6.0,
     # Three or more adjacent strips filled by a wall under 1 m (no_floor) are
     # one flat wall, not three pillars: its cells are written across the span
     # and wall_extend_cells beyond each end, as perceiver walls (a later look
@@ -418,7 +442,7 @@ def wording_sha_a17d() -> str:
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
-A17D = replace(A17B, name="a17d", door_walls=True, suspects=True)
+A17D = replace(A17B, name="a17d", door_walls=True, suspects=True, free_wins=True)
 
 
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
@@ -611,6 +635,7 @@ class SpatialMemory:
     #: strip's floor was seen to end farther out (cost_map reads both).
     door_wall: Dict[Tuple[int, int], int] = field(default_factory=dict)
     suspect: Dict[Tuple[int, int], int] = field(default_factory=dict)
+    near_wall: Dict[Tuple[int, int], int] = field(default_factory=dict)
     cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
@@ -623,6 +648,7 @@ class SpatialMemory:
         self.stop_wall.pop(c, None)
         self.door_wall.pop(c, None)
         self.suspect.pop(c, None)
+        self.near_wall.pop(c, None)
 
     def move(self, step: int, before: Pose, after: Pose, action: Dict[str, Any]) -> None:
         """What a move did, from where it started and where the next decision was."""
@@ -700,6 +726,11 @@ class SpatialMemory:
         goal = perception.get("goal")
         rng = PARAMS_A17["floor_range_m"]
         covered = set()
+        # a17d free_wins: ray-end walls written last, each skipped where another
+        # strip of this look saw floor (a strip's own near floor cell never
+        # overrides its own ray end).
+        pending: List[Tuple[Tuple[int, int], str]] = []
+        seen_by: Dict[Tuple[int, int], set] = {}
         for lane in perception.get("lanes") or []:
             strip = lane.get("strip")
             floor = lane.get("floor")
@@ -721,17 +752,30 @@ class SpatialMemory:
                         break
                     self.free[c] = step
                     self.wall.pop(c, None)
-                    # a17d: floor seen here clears an older suspicion.
+                    # A no_floor strip's half-metre of "floor" is a17's
+                    # bookkeeping, not floor seen (the camera sees none under
+                    # 1.5 m): it never overrides another strip's ray end.
+                    if floor != "blocked_near":
+                        seen_by.setdefault(c, set()).add(strip)
+                    # a17d: floor seen here clears a suspicion, a near wall or
+                    # a door wall (from an earlier step, or another strip of
+                    # this look whose ray end fell in this cell).
+                    self.door_wall.pop(c, None)
                     if self.suspect.get(c, step) != step:
                         self.suspect.pop(c, None)
+                    if self.near_wall.get(c, step) != step:
+                        self.near_wall.pop(c, None)
                     if goal != strip:
                         covered.add(c)
                     d += CELL_M / 2.0
                 if ends and not cut and door != "open":
                     end = cell(ahead(here, heading, reach + CELL_M / 2.0))
                     if end not in self.visits:
-                        self.wall[end] = step
-                        self.free.pop(end, None)
+                        if self.cfg.free_wins:
+                            pending.append((end, strip))
+                        else:
+                            self.wall[end] = step
+                            self.free.pop(end, None)
             centre = (where[2] + strip_offset(strip)) % 360.0
             at = ahead(here, centre, PARAMS_A17["opening_at_m"][floor])
             if door == "open":
@@ -744,6 +788,14 @@ class SpatialMemory:
             self._close_openings(step, here, centre, reach)
             if self.cfg.door_walls or self.cfg.suspects:
                 self._observe_a17d(step, where, strip, lane.get("floor_end"), door)
+        for end, strip in pending:
+            if not (seen_by.get(end, set()) - {strip}):
+                self.wall[end] = step
+                self.free.pop(end, None)
+        if self.cfg.free_wins:
+            for c in [c for c, s in self.door_wall.items() if s == step]:
+                if self.free.get(c) == step:
+                    self.door_wall.pop(c, None)
         if self.cfg.door_walls:
             self._extend_walls(step, where, perception)
         new = sum(1 for c in covered if c not in self.seen)
@@ -777,6 +829,28 @@ class SpatialMemory:
                         self.free.pop(c, None)
             return
         if not self.cfg.suspects:
+            return
+        if door == "open":
+            for off in strip_ray_offsets(strip, PARAMS_A17["cone_rays"]):
+                heading = (where[2] + off) % 360.0
+                d = CELL_M / 2.0
+                while d <= P4["open_door_reach_m"]:
+                    c = cell(ahead(here, heading, d))
+                    if c in self.stop_wall:
+                        break
+                    if c not in self.visits:
+                        self.free[c] = step
+                        self.wall.pop(c, None)
+                        self.door_wall.pop(c, None)
+                        self.suspect.pop(c, None)
+                        self.near_wall.pop(c, None)
+                    d += CELL_M / 2.0
+            return
+        if floor_end in P4["near_wall_m"]:
+            for off in strip_ray_offsets(strip, PARAMS_A17["cone_rays"]):
+                c = cell(ahead(here, (where[2] + off) % 360.0, P4["near_wall_m"][floor_end]))
+                if c not in self.visits and self.free.get(c) != step:
+                    self.near_wall[c] = step
             return
         table = P4["door_suspect_m"] if door == "closed" else P4["suspect_m"]
         if floor_end not in table:
@@ -813,7 +887,11 @@ class SpatialMemory:
                     d = -ext
                     while d <= length + ext + 1e-9:
                         c = cell((a[0] + ux * d, a[1] + uy * d))
-                        if c not in self.visits:
+                        beyond = d < 0 or d > length
+                        # The cells beyond the seen span are inferred: never
+                        # over floor seen earlier (a door beside the wall), and
+                        # with free_wins never over floor seen in this look.
+                        if c not in self.visits and not (beyond and c in self.free):
                             self.wall[c] = step
                             self.free.pop(c, None)
                         d += CELL_M / 2.0
@@ -1163,6 +1241,7 @@ class SpatialMemory:
         if self.cfg.door_walls or self.cfg.suspects:
             out["cells_door_wall"] = len(self.door_wall)
             out["cells_suspect"] = len(self.suspect)
+            out["cells_near_wall"] = len(self.near_wall)
         return out
 
 
@@ -1588,17 +1667,22 @@ class CostMap:
         known = set(mem.visits) | set(mem.free)
         hard = set(mem.stop_wall) | set(mem.door_wall) | set(stall_cells)
         if not soft:
-            hard |= set(mem.wall)
+            hard |= set(mem.wall) | set(mem.near_wall)
         n = int(p.get("inflate_stop_walls", 1))
         if n > 0:
+            # A stop wall is wider than one cell, but never over floor the
+            # drone has seen or stood on: a bumped door jamb must not seal
+            # the door beside it.
             for b in mem.blocks:
                 c = cell(ahead((b.x, b.y), b.heading, CELL_M))
                 if c not in mem.stop_wall:
                     continue
                 for side in (b.heading + 90.0, b.heading - 90.0):
                     for k in range(1, n + 1):
-                        hard.add(cell(ahead(((c[0] + 0.5) * CELL_M, (c[1] + 0.5) * CELL_M),
-                                            side % 360.0, k * CELL_M)))
+                        w = cell(ahead(((c[0] + 0.5) * CELL_M, (c[1] + 0.5) * CELL_M),
+                                       side % 360.0, k * CELL_M))
+                        if w not in known:
+                            hard.add(w)
         self.hard = {c for c in hard if c not in mem.visits}
         sealed = set()
         for c in self.hard:
@@ -1607,7 +1691,7 @@ class CostMap:
                 if m not in known and m not in self.hard:
                     sealed.add(m)
         self.sealed = sealed
-        self.soft_walls = set(mem.wall) - self.hard if soft else set()
+        self.soft_walls = (set(mem.wall) | set(mem.near_wall)) - self.hard if soft else set()
         self.known = known
         # The search box: the known map, the goal and the drone (`include`),
         # and a margin, so a route may cross unknown ground to reach the goal.

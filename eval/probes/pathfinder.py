@@ -54,6 +54,21 @@ class TruthMap:
         return x0 <= c[0] <= x1 and y0 <= c[1] <= y1
 
 
+class Both:
+    """a63's cost map restricted to truly free cells: a route here is one the
+    drone's map allows and the site allows."""
+
+    def __init__(self, cm: spatial.CostMap, truth: TruthMap) -> None:
+        self.cm, self.truth = cm, truth
+
+    def cost(self, c: Tuple[int, int]) -> Optional[float]:
+        a = self.cm.cost(c)
+        return None if a is None or self.truth.cost(c) is None else a
+
+    def inside(self, c: Tuple[int, int]) -> bool:
+        return self.truth.inside(c)
+
+
 def open_door_y(site: str, changed: bool) -> Optional[float]:
     if not site.startswith("s02"):
         return None
@@ -98,6 +113,23 @@ def run_dir(run: Dict[str, Any]) -> Path:
             / run["arm"] / run["seed"])
 
 
+def all_runs(first: int, last: int) -> List[Dict[str, Any]]:
+    """The lane index's runs plus any round the index predates (R27 on),
+    found under the repo's eval/phase2."""
+    out = list(runs(first, last))
+    have = {(r["folder"], r["site"], r["arm"], r["seed"]) for r in out}
+    for d in sorted((common.REPO_ROOT / "eval" / "phase2").glob(
+            "R*/runs/*/*/seed*/decisions.jsonl")):
+        run = d.parent
+        row = {"folder": run.parts[-5], "round": common.round_id(run.parts[-5]),
+               "site": run.parts[-3], "arm": run.parts[-2], "seed": run.parts[-1], "path": run}
+        n = common.round_number(row["round"])
+        if n is not None and first <= n <= last and (
+                row["folder"], row["site"], row["arm"], row["seed"]) not in have:
+            out.append(row)
+    return sorted(out, key=lambda r: (r["folder"], r["site"], r["arm"]))
+
+
 def score_run(run: Dict[str, Any], tag: str) -> List[Dict[str, Any]]:
     path = run_dir(run)
     if not (path / "decisions.jsonl").exists():
@@ -132,6 +164,14 @@ def score_run(run: Dict[str, Any], tag: str) -> List[Dict[str, Any]]:
                              include=(start, end))
         sealed_true = (true_path is not None
                        and any(cm.cost(c) is None for c in true_path[1:-1]))
+        # Added after the first run (README, tuning log): the true shortest
+        # route hugs corners, so a corner cell next to a seen wall counts as
+        # "sealed" while a route a cell over is open. What matters: is there
+        # any true route left on a63's map, and does a63's route rely on
+        # unknown ground that is in truth wall.
+        both = Both(cm, truth)
+        no_route = true_path is not None and planner.astar(both, start, end, max_nodes=200000) is None
+        punches = any(truth.cost(c) is None for c in plan.path[1:-1])
         wp = plan.waypoint
         row: Dict[str, Any] = {
             "tag": tag, "round": run["round"], "site": site, "arm": arm, "step": step,
@@ -141,6 +181,7 @@ def score_run(run: Dict[str, Any], tag: str) -> List[Dict[str, Any]]:
                                       for a, b in zip(true_path, true_path[1:])), 2)
                             if true_path else None),
             "sealed_true_path": sealed_true,
+            "no_true_route": no_route, "punches": punches,
             "wp": [round(wp[0], 2), round(wp[1], 2)] if wp else None,
             "region": common.s03_region(here[:2]) if site == "s03" else None,
         }
@@ -156,6 +197,8 @@ def score_run(run: Dict[str, Any], tag: str) -> List[Dict[str, Any]]:
             row["shut_tine"] = in_shut
             if in_shut:
                 row["exits"] = wp[0] > here[0] + 0.3
+                # 1b (added after the first run): never toward the sealed exit.
+                row["not_to_exit"] = wp[0] >= here[0] - 0.3
             if region == "lobby":
                 row["lobby"] = True
                 row["to_mouth"] = ray_passes(here[:2], wp, STEM_MOUTH, 2.0) or (
@@ -185,7 +228,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     mode = "a" if args.append else "w"
     n = 0
     with out_path.open(mode) as fh:
-        for run in runs(args.first, args.last):
+        for run in all_runs(args.first, args.last):
             rows = score_run(run, args.tag)
             for row in rows:
                 fh.write(json.dumps(row) + "\n")
@@ -217,6 +260,8 @@ def cmd_score(args: argparse.Namespace) -> int:
     s03 = [r for r in rows if r["site"] == "s03"]
     k, n, pct = rate([r for r in s03 if r.get("shut_tine")], "exits")
     add("s03 shut tine: waypoint leads out (+x)", k, n, pct, pct >= 80.0, ">= 80%")
+    k, n, pct = rate([r for r in s03 if r.get("shut_tine")], "not_to_exit")
+    add("s03 shut tine: never toward the sealed exit (1b)", k, n, pct, pct >= 80.0, ">= 80%")
     k, n, pct = rate([r for r in s03 if r.get("lobby")], "to_mouth")
     add("s03 lobby: waypoint ray through the stem mouth", k, n, pct, pct >= 70.0, ">= 70%")
     s02 = [r for r in rows if r.get("near_door")]
@@ -226,6 +271,10 @@ def cmd_score(args: argparse.Namespace) -> int:
                 if not (r["site"] == "s03" and (r.get("region") or "").startswith("tine"))]
     k, n, pct = rate(not_tine, "sealed_true_path")
     add("sealing harm (outside the s03 tines)", k, n, pct, pct <= 5.0, "<= 5%")
+    k, n, pct = rate(rows, "no_true_route")
+    add("no true route left on a63's map (4b)", k, n, pct, pct <= 5.0, "<= 5%")
+    k, n, pct = rate(rows, "punches")
+    add("route relies on unknown that is wall (4c)", k, n, pct, None, "report")
     r25 = [r for r in rows if r["round"] == "R25D" and r.get("solved") and "pick" in r]
     f63 = sum(1 for r in r25 if r.get("toward_a63") is not None and r["toward_a63"] == r["pick"])
     o63 = sum(1 for r in r25 if r.get("toward_a63") is not None)

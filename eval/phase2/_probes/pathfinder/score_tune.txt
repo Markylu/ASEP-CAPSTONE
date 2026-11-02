@@ -1,0 +1,24 @@
+pathfinder probe: 7048 steps, tag 'tune'
+
+s03 shut tine: waypoint leads out (+x)            60/214     28.0%  gate >= 80%      FAIL
+s03 shut tine: never toward the sealed exit (1b)   100/214     46.7%  gate >= 80%      FAIL
+s03 lobby: waypoint ray through the stem mouth   236/313     75.4%  gate >= 70%      pass
+s02 near the open door: route crosses in the gap   178/396     44.9%  gate >= 60%      FAIL
+sealing harm (outside the s03 tines)            1841/6451    28.5%  gate <= 5%       FAIL
+no true route left on a63's map (4b)              59/7048     0.8%  gate <= 5%       pass
+route relies on unknown that is wall (4c)       5174/7048    73.4%  gate report      
+R25D solved runs: a49's pick = a63's toward      252/368     68.5%  gate >= a49-5pt  FAIL
+R25D solved runs: a49's pick = a49's toward      276/329     83.9%  (a49's own toward-follow rate)
+
+Reported, not gated:
+  fallbacks: {'none': 7043, 'soft': 5}
+  waypoint bearing within 30 deg of the true route's: 3571/7048 = 50.7%
+  sealing harm s01: 114/777 = 14.7%
+  sealing harm s02a: 419/1139 = 36.8%
+  sealing harm s02c: 457/1053 = 43.4%
+  sealing harm s02va: 299/1249 = 23.9%
+  sealing harm s02vc: 257/1275 = 20.2%
+  sealing harm s03: 612/1555 = 39.4%
+  s02 near the door: route crosses the wall outside the gap on 218/396
+
+GATE: FAIL

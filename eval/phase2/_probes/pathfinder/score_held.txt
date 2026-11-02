@@ -1,0 +1,22 @@
+pathfinder probe: 632 steps, tag 'held'
+
+s03 shut tine: waypoint leads out (+x)             2/2      100.0%  gate >= 80%      pass
+s03 shut tine: never toward the sealed exit (1b)     2/2      100.0%  gate >= 80%      pass
+s03 lobby: waypoint ray through the stem mouth    12/12     100.0%  gate >= 70%      pass
+s02 near the open door: route crosses in the gap    15/32      46.9%  gate >= 60%      FAIL
+sealing harm (outside the s03 tines)             145/579     25.0%  gate <= 5%       FAIL
+no true route left on a63's map (4b)               0/632      0.0%  gate <= 5%       pass
+route relies on unknown that is wall (4c)        466/632     73.7%  gate report      
+
+Reported, not gated:
+  fallbacks: {'none': 632}
+  waypoint bearing within 30 deg of the true route's: 332/632 = 52.5%
+  sealing harm s01: 6/56 = 10.7%
+  sealing harm s02a: 79/134 = 59.0%
+  sealing harm s02c: 11/68 = 16.2%
+  sealing harm s02va: 0/77 = 0.0%
+  sealing harm s02vc: 7/117 = 6.0%
+  sealing harm s03: 91/180 = 50.6%
+  s02 near the door: route crosses the wall outside the gap on 17/32
+
+GATE: FAIL

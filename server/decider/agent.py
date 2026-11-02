@@ -186,8 +186,11 @@ PATHFINDER_A63: Dict[str, Any] = {
     # of the last move, one cell either side, are stall cells, impassable.
     "stall_steps": 5,
     "stall_gain_m": 1.0,
-    # A stop wall (a move stopped short) is this many cells wide either side.
-    "inflate_stop_walls": 1,
+    # A stop wall (a move stopped short) is this many cells wide either side,
+    # never over seen floor. Two: the s03 divider and the s02 door wall are
+    # unknown to the map until bumped (probe pathfinder, first run), and each
+    # bump then seals about 4 m of it.
+    "inflate_stop_walls": 2,
     # The search box: this many cells beyond the known map.
     "search_margin_cells": 12,
     "words": {"path": "the next point on the planned route"},
