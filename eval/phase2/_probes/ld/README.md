@@ -111,6 +111,14 @@ first (`181705c`, `3b35ed9`); the renderer merged at `cd3b105`; two render-0 det
   543, `text` 372. Failed calls are counted in `fail` and left out of the rates. The copies and
   shard containers were removed afterwards; `renders.jsonl` is the renderer's index of the 1,684
   frames (the PNGs stay on sctsvr6, gitignored).
+- **Recall of the failed calls** (`recall.jsonl`, after the run, on `fix/reason-maxlength`): the
+  68 failed image/reads re-called on `:8004` with `maxLength` 2,000 on the schema's `reason`.
+  68 of 68 parse, all at the `json_schema` rung, median 2.9 s; 54 reasons sit at the cap, 14
+  stopped short (426–2,000 characters) on their own. The capped text is a loop: one sentence
+  ("The floor ends at the bottom of the image in the lower right, but not in the upper left.")
+  repeated to the limit. The cap rescues the parse, not the reading: on these 40 `w01` frames
+  the reads miss 17 of 28 blocked strips and call 30 of 172 open strips walls (the run's L0:
+  15.9% and 13.8%). The frames that loop are the frames the model cannot read.
 
 ## Result
 
