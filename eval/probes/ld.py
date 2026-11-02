@@ -308,10 +308,10 @@ def todo_rows(manifest):
     return [(rep, read, r) for rep in range(REPS) for read in READS for r in rows]
 
 
-async def run_probe(shard: int, of: int, limit, stub: bool, flip: bool) -> None:
-    from server.decider import config, orchestrator, prompt as prompts, schema, views, vlm
+def caller():
+    """One `w01` or `ld01` call on a rendered frame, as the run made them."""
+    from server.decider import orchestrator, prompt as prompts, schema, views, vlm
     p_w01, p_ld01 = prompts.get("w01"), prompts.get("ld01")
-    rng = random.Random("ld-stub-{0}".format(shard))
 
     async def call(read, row):
         b64 = base64.b64encode(render_path(row).read_bytes()).decode()
@@ -330,6 +330,13 @@ async def run_probe(shard: int, of: int, limit, stub: bool, flip: bool) -> None:
         return {"result": sub.result, "raw": sub.raw, "rung": sub.rung, "error": sub.error,
                 "latency_ms": sub.latency_ms}
 
+    return call
+
+
+async def run_probe(shard: int, of: int, limit, stub: bool, flip: bool) -> None:
+    from server.decider import config
+    rng = random.Random("ld-stub-{0}".format(shard))
+    call = caller()
     todo = todo_rows(load_manifest())[shard::of]
     if limit:
         todo = todo[:limit]
@@ -357,6 +364,46 @@ async def run_probe(shard: int, of: int, limit, stub: bool, flip: bool) -> None:
                 print("shard {0}/{1}: {2}/{3} calls".format(shard, of, n + 1, len(todo)),
                       flush=True)
     print("shard {0}/{1}: done on {2}".format(shard, of, config.LITELLM_BASE_URL))
+
+
+async def recall_failed(limit) -> None:
+    """Re-call every image/read whose run rows all failed, with the schema as it
+    now stands (`schema.REASON_MAX_CHARS` on the reason). Appends to recall.jsonl,
+    resumable; prints how many parse and how long their reasons are."""
+    from server.decider import config
+    calls = [json.loads(line) for p in sorted(OUT.glob("calls_*of*.jsonl"))
+             for line in p.read_text().splitlines()]
+    failed = sorted({(c["set"], c["lighting"], c["id"], c["read"]) for c in calls if c["error"]})
+    rows = {(r["set"], r["lighting"], r["id"]): r for r in load_manifest()
+            if r["set"] in ("A", "B")}
+    path = OUT / "recall.jsonl"
+    done = set()
+    if path.exists():
+        done = {(c["set"], c["lighting"], c["id"], c["read"])
+                for c in map(json.loads, path.read_text().splitlines())}
+    call = caller()
+    todo = [k for k in failed if k not in done]
+    if limit:
+        todo = todo[:limit]
+    with path.open("a") as fh:
+        for n, (set_name, lighting, rid, read) in enumerate(todo):
+            row = rows[(set_name, lighting, rid)]
+            got = await call(read, row)
+            fh.write(json.dumps({"set": set_name, "lighting": lighting, "id": rid, "read": read,
+                                 "rep": "recall", "key": row.get("key"),
+                                 "instance": config.LITELLM_BASE_URL, **got}) + "\n")
+            fh.flush()
+            print("recall {0}/{1}: {2} {3}".format(n + 1, len(todo), read,
+                                                  "ok" if got["result"] else "FAILED"), flush=True)
+    recalled = [json.loads(line) for line in path.read_text().splitlines()]
+    ok = [c for c in recalled if c["result"]]
+    lengths = sorted(len((json.loads(c["raw"]) if c["raw"] else {}).get("reason", "")) for c in ok)
+    print("recall: {0} image/reads failed in the run, {1} re-called, {2} parse now, {3} still fail"
+          .format(len(failed), len(recalled), len(ok), len(recalled) - len(ok)))
+    if lengths:
+        print("  reason length: min {0}, median {1}, max {2}; {3} at the cap"
+              .format(lengths[0], lengths[len(lengths) // 2], lengths[-1],
+                      sum(1 for n in lengths if n >= 2000)))
 
 
 # --- scoring -----------------------------------------------------------------------
@@ -537,7 +584,7 @@ def score(stub: bool = False, flip: bool = False) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=("poses", "render0", "fidelity", "run", "score"))
+    ap.add_argument("cmd", choices=("poses", "render0", "fidelity", "run", "score", "recall"))
     ap.add_argument("--shard", type=int, default=0)
     ap.add_argument("--of", type=int, default=1)
     ap.add_argument("--limit", type=int, default=0)
@@ -553,6 +600,9 @@ def main() -> int:
         return fidelity()
     if args.cmd == "run":
         asyncio.run(run_probe(args.shard, args.of, args.limit, args.stub, args.stub_flip))
+        return 0
+    if args.cmd == "recall":
+        asyncio.run(recall_failed(args.limit))
         return 0
     return score(stub=args.stub, flip=args.stub_flip)
 
