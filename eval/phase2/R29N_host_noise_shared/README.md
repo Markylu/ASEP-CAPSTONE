@@ -20,8 +20,9 @@ What changes is the host:
 R29S's extra instances are copies of `:8004` (same image `vllm/vllm-openai:v0.23.0`, same weights
 `Qwen3-VL-30B-A3B-Instruct-FP8`, same flags), one GPU each on GPUs 3–5, as probes N1, R28 and LD
 ran them. Four instances in all, the limit; they are stopped after the round. Each lane's decider
-is pointed at its instance with `REMOTE_LITELLM_BASE_URL=http://127.0.0.1:800N`
-(`server/decider/config.py`, remote profile). Nothing else runs on any of the four during R29S.
+is pointed at its instance with `LITELLM_BASE_URL=http://127.0.0.1:800N` in the lane's
+environment (`eval/docker/sweep.sh` passes it into the decider container; a bare var wins over
+the remote profile's default, `server/decider/config.py`). Nothing else runs on any of the four during R29S.
 
 The model, temperature, frame, action fan and sites are the phase lock's. The lock does not name
 the host layout; `phase.json` "lanes" records it, as every round has.
@@ -134,9 +135,8 @@ A wording fix is a new prompt version; it waits for one.
 - **Order.** Fly R29N first, alone on `:8004`, as R25D and R27 were (4 lanes, nothing else on the
   instance). Then start the three copies and fly R29S. Flying them at the same time would put
   R29N's calls beside R29S's `:8004` lane and spoil both.
-- **R29S lanes.** Lane k's decider: `REMOTE_LITELLM_BASE_URL=http://127.0.0.1:800{4,6,7,8}
-  python -m server.decider --profile remote --agent a49`; `/health` reports `83f7a6a19b01` on all
-  four. Stop `:8006`–`:8008` after the round (GPU limit: 4 instances including `:8004`).
+- **R29S lanes.** `LITELLM_BASE_URL=http://127.0.0.1:800{4,6,7,8} sh ~/round_lane.sh k 4 ~/asep-r29s-lk
+  a49 83f7a6a19b01 R29S R29S_host_noise_solo`; each lane's `/health` reports `83f7a6a19b01`. Stop `:8006`–`:8008` after the round (GPU limit: 4 instances including `:8004`).
 - **Preflight.** Clean tree, lock matches (`python eval/phase2.py init` says nothing), tunnel up
   (operator's).
 - **After.** `python eval/r28_flight.py <R29N runs> <R29S runs>`; labels; summary; the gate table
