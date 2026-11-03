@@ -135,8 +135,9 @@ true route: 0.8%, 0.0%). What failed, and why, as far as the record shows:
   straight (counted against both). The rest are steps where a49 wandered (s02vc `dynamic`
   s12–24) and a63's route from there differs from the goal bearing by design.
 
-**Reading.** By the rule set above, the planner is not carried to a round on this probe. The
-probe also cannot certify it: three of the four failing rows measure a closed-loop behaviour
+**Reading.** By the rule set above, the planner is not carried to a round on this probe.
+**Operator's decision (2026-11-02): the on-policy shakedown stands in for this gate** (R30
+README, "Probe gate"). The probe also cannot certify it: three of the four failing rows measure a closed-loop behaviour
 (bumping, then rerouting) on open-loop data. Whether the on-policy shakedown (six unscored
 `dynamic` runs, s03 first, a63 and a64) may stand in for this gate is the operator's decision,
 not the probe's. The planner's own invariants hold on every step: a route on 7,043 of 7,048

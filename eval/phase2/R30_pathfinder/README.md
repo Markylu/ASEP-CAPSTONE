@@ -91,7 +91,8 @@ Code only, from `decisions.jsonl` and the site geometry (`eval/probes/pathfinder
 on the flown runs, plus `eval/r28_flight.py` for the walls):
 - s03 `final`/`dynamic`: steps in the shut tine after the first confirmed closed door ≤ 8 (R25D
   `final` 17; R22K 34–46); steps in the open tine > 0 (R20–R25D: 0).
-- s03, every arm: steps in the lobby ≤ 12 (R25D `final` 30).
+- s03, every arm: steps in the lobby ≤ 12 (R25D `final`: 27 by `eval/r30_check.py`'s region
+  rule, x > 15; 30 counting the stem mouth).
 - The navigator takes the "toward your target" action on ≥ 70% of steps where it is on a forward
   move, and on ≥ 50% where it is on marker 0.
 - A route exists (`fallback: none`) on ≥ 95% of steps.
@@ -124,12 +125,18 @@ Two gates, both before the 18 runs.
    written stop walls. Four map bugs were found and fixed along the way (door walls across
    the drone's front, `bottom` closed doors 14 m out, a17b's ray end popping the floor
    straight ahead, near walls from `bottom` reads); the run-by-run record is in the probe
-   README. By the rule above the planner is not carried to a round on this probe; whether
-   the shakedown may stand in for it is the operator's call.
+   README. By the rule above the planner is not carried to a round on this probe.
+
+   **Operator's decision (2026-11-02): the on-policy shakedown stands in for this gate.** The
+   offline probe is kept as a record; R30 flies only if the shakedown below passes.
 2. **On-policy shakedown** (model, a quiet instance, operator's call): one unscored `dynamic` run
    per site, s03 first, for `a63` and for `a64`, outside this folder. Passes only if s03's
    shut-tine check holds, no turn-around streak reaches 10, and `eval/r28_flight.py` shows
-   missed and phantom walls within 4 points of R25D's (17.3%, 12.7%).
+   missed and phantom walls within 4 points of R25D's (17.3%, 12.7%). Scored by
+   `python eval/r30_check.py <runs dir>` (the manipulation check's readouts per run, with
+   these limits) and `python eval/r28_flight.py <runs dir>` (walls). `a64`'s runs are invalid
+   by construction (rung `code`): fly them with `--max-attempts 1` so the runner does not
+   rerun them, and read them for the ceiling only.
 
 ## Builds on
 
