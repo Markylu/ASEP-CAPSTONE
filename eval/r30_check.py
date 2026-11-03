@@ -51,7 +51,12 @@ def check_run(run: Path) -> Dict[str, Any]:
     # Navigator against the tags.
     fwd = fwd_taken = turn = turn_taken = 0
     streak = best = routed = stalls = 0
+    behind = fired = changed = 0  # a70: route-behind sentences, critic asks, picks changed
     for r in rows:
+        behind += bool(r.get("route_behind"))
+        crit = r.get("critic") or {}
+        fired += bool(crit)
+        changed += bool(crit.get("changed"))
         t = toward_of(r)
         if t is not None and r.get("index") is not None:
             actions = {a["index"]: a for a in r["manifest"].get("actions") or []}
@@ -71,7 +76,8 @@ def check_run(run: Path) -> Dict[str, Any]:
                 "toward_turn": "{0}/{1}".format(turn_taken, turn),
                 "toward_turn_rate": turn_taken / turn if turn else None,
                 "route_rate": routed / len(rows) if rows else None,
-                "stalls": stalls, "streak": best})
+                "stalls": stalls, "streak": best,
+                "behind": behind, "critic": "{0}/{1}".format(changed, fired)})
     # s03 regions.
     if site == "s03":
         shut = common.s03_shut_side(arm, rows, sw)
@@ -156,6 +162,8 @@ def main() -> int:
             extra = "crossed {0}".format(c["crossed"])
         bad = verdict(c)
         fails += bool(bad)
+        if c["behind"] or c["critic"] != "0/0":
+            extra += "; behind {0}, critic changed/asked {1}".format(c["behind"], c["critic"])
         print("{0:<22} {1:>5} {2:>6} {3:>7} {4:>9} {5:>9} {6:>5.0%} {7:>5} {8:>6}  {9}{10}".format(
             c["run"], c["steps"], "yes" if c["solved"] else "no", c["end_m"], c["toward_fwd"],
             c["toward_turn"], c["route_rate"] or 0.0, c["stalls"], c["streak"], extra,

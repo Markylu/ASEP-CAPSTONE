@@ -1677,6 +1677,30 @@ _NOT_OPEN = (WORDS["blocked"].split(" (")[0], WORDS["short"].split(" (")[0],
              WORDS["wall_seen"])
 
 
+def toward_on_turn_around(manifest: Dict[str, Any], tags: Dict[int, List[str]]) -> bool:
+    """a70: "toward your target" sits on a turn-around this step (the route's
+    next point is behind the drone)."""
+    return any(WORDS["toward_target"] in tags.get(int(a["index"]), [])
+               for a in manifest.get("actions") or [] if a.get("turn_around"))
+
+
+def critique_route(manifest: Dict[str, Any], tags: Dict[int, List[str]], pick: int,
+                   words: str) -> Optional[str]:
+    """a70: why the route disagrees with a pick, or None: the pick carries no
+    "toward your target" while an offered move does and carries no blocked,
+    stopped-short or wall note. Never removes an action: the orchestrator asks
+    once more and the second answer stands (a13's critic)."""
+    if WORDS["toward_target"] in tags.get(pick, []):
+        return None
+    for a in manifest.get("actions") or []:
+        j = int(a["index"])
+        words_j = tags.get(j, [])
+        if (j != pick and WORDS["toward_target"] in words_j
+                and not any(w.startswith(_NOT_OPEN) for w in words_j)):
+            return words.format(i=pick, j=j)
+    return None
+
+
 def _unsearched_ahead(mem: SpatialMemory, land: Point, heading: float) -> bool:
     """a17: whether the ground a move lands facing has some cell not yet
     searched within searched_ahead_m (a wall cell ends the look)."""

@@ -166,3 +166,41 @@ def test_earlier_agents_keep_their_sha():
     assert agent.get("a37").sha() == "a07b58847180"
     assert agent.get("a63").sha() != agent.get("a64").sha()
     assert "q03" not in agent.describe("a63")["subagent_prompts"]
+
+
+def test_a70_route_behind_sentence_only_when_toward_is_on_the_turn_around():
+    here = (0.0, 0.0, 0.0)
+    t = spatial.Target("path", "path", -3.0, 0.0, P["words"]["path"], 1)
+    notes = agent.NAVIGATOR_A70
+    manifest = {"actions": [{"index": 0, "turn_around": True}, {"index": 3}]}
+    assert spatial.toward_on_turn_around(manifest, {0: [spatial.WORDS["toward_target"]]})
+    assert not spatial.toward_on_turn_around(manifest, {3: [spatial.WORDS["toward_target"]]})
+    goal = spatial.WORDS_A14["plan_goal"].format(mode="approach")
+    assert orchestrator.plan_line(t, "approach", here, True, notes["route_behind"]) == \
+        goal + "\n" + notes["route_behind"]
+    assert orchestrator.plan_line(t, "approach", here, True, None) == goal
+
+
+def test_a70_route_critic_fires_only_against_an_open_toward_move():
+    words = agent.NAVIGATOR_A70["critic_route"]
+    toward, wall = spatial.WORDS["toward_target"], spatial.WORDS["wall_seen"]
+    manifest = {"actions": [{"index": 0, "turn_around": True}, {"index": 3}, {"index": 4}]}
+    # The pick ignores an open "toward" on the turn-around: a note naming it.
+    assert spatial.critique_route(manifest, {0: [toward], 3: ["new ground"]}, 3, words) == \
+        words.format(i=3, j=0)
+    # The pick is the "toward" move: nothing to say.
+    assert spatial.critique_route(manifest, {3: [toward]}, 3, words) is None
+    # The only "toward" move carries a wall note: nothing to say.
+    assert spatial.critique_route(manifest, {0: [toward, wall], 3: []}, 3, words) is None
+    # No "toward" anywhere: nothing to say.
+    assert spatial.critique_route(manifest, {3: ["new ground"], 4: []}, 3, words) is None
+
+
+def test_a70_is_a66_plus_the_navigator_notes():
+    assert agent.get("a66").sha() == "de7f23d07186"
+    assert agent.get("a70").sha() != agent.get("a66").sha()
+    a66 = agent.get("a66").features["orchestrator"]
+    a70 = agent.get("a70").features["orchestrator"]
+    assert {k: v for k, v in a70.items() if k not in ("critic", "navigator_notes")} == \
+        {k: v for k, v in a66.items() if k != "critic"}
+    assert a70["critic"] == "route" and a66["critic"] == "none"

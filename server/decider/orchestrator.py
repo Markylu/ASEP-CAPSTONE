@@ -128,7 +128,8 @@ def perceiver_line(perception: Optional[Dict[str, Any]]) -> str:
 
 
 def plan_line(target: Optional[spatial.Target], mode: Optional[str],
-              here: Optional[spatial.Pose], goal_known: bool = False) -> str:
+              here: Optional[spatial.Pose], goal_known: bool = False,
+              behind: Optional[str] = None) -> str:
     if target is None or here is None:
         return "no fixed target; explore where the image shows open floor."
     if goal_known and target.kind in ("goal", "path"):
@@ -136,7 +137,10 @@ def plan_line(target: Optional[spatial.Target], mode: Optional[str],
         # gets no distance or direction for it, only "toward your target".
         # a63: the same for a point on the route to it, which near the goal
         # is the goal (views.check would refuse its distance and direction).
-        return spatial.WORDS_A14["plan_goal"].format(mode=mode or "approach")
+        # a70: `behind` is the sentence added on its own line while "toward
+        # your target" sits on the turn-around (agent.NAVIGATOR_A70).
+        line = spatial.WORDS_A14["plan_goal"].format(mode=mode or "approach")
+        return line + "\n" + behind if behind else line
     return "head for {0} ({1}).".format(target.words(here), mode or "explore")
 
 
@@ -704,13 +708,19 @@ async def navigate(s: Step) -> Optional[str]:
     if not indices:
         return "manifest offers no actions"
     p = agent.current().prompt
+    notes = s.features.get("navigator_notes") or {}
+    behind = (notes["route_behind"]
+              if notes.get("route_behind") and spatial.toward_on_turn_around(s.offered, s.tags)
+              else None)
     view = views.navigator(p, s.offered, s.tags,
                            plan_line(s.target, s.mode, s.here,
-                                     s.features.get("goal_truth") == "planner"),
+                                     s.features.get("goal_truth") == "planner", behind),
                            perceiver_line(s.perception), recent_moves(s.records, s.manifest),
                            s.frame_b64)
     s.nav_text = view.text
     s.record["navigator_text"] = view.text
+    if notes:
+        s.record["route_behind"] = behind is not None
     if s.features.get("navigator") == "code":
         # a64: a diagnostic only, never a round. Code takes the action the map
         # tags "toward your target", else the first forward move with no
@@ -729,10 +739,16 @@ async def navigate(s: Step) -> Optional[str]:
 
 
 async def critic(s: Step) -> Optional[str]:
-    """a13: ask once more when the map disagrees; the second answer stands."""
+    """a13: ask once more when the map disagrees; the second answer stands.
+    a70 ("route"): once more when the pick carries no "toward your target"
+    while an offered open move does; the navigator may keep its pick."""
     assert s.mem is not None
     if s.features.get("critic") == "retry":
         s.why_not = spatial.critique(s.mem, s.manifest, s.tags, s.nav.result["index"])
+    elif s.features.get("critic") == "route":
+        s.why_not = spatial.critique_route(
+            s.offered, s.tags, s.nav.result["index"],
+            (s.features.get("navigator_notes") or {})["critic_route"])
     s.record["critic"] = None
     if s.why_not is not None:
         indices = schema.visible_indices(s.offered)

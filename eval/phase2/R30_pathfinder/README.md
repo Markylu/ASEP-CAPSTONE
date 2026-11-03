@@ -1,10 +1,11 @@
 # R30: a49 with a code route planner in place of goal-way and q03
 
-**Agent:** `a66` (`de7f23d07186`; `a63` `7e6b2f2a6d8c`, `a65` `ec86fb5072ec`, `a67`
-`c6b3e9877438` and `a68` `1036af9aed35` flew in the shakedown too, below; `a69` is defined,
-unflown) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` · **Memory:** `a17f` ·
-**Status:** pre-registered 2026-11-02; offline probe gate failed as registered; shakedown
-flown 2026-11-03, its s03 check not met by any version (below); not flown as a round
+**Agent:** `a70` (`cf82ad60b931`; `a63` `7e6b2f2a6d8c`, `a65` `ec86fb5072ec`, `a66`
+`de7f23d07186`, `a67` `c6b3e9877438` and `a68` `1036af9aed35` flew in the shakedown too,
+below; `a69` is defined, unflown) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05`
+· **Memory:** `a17f` · **Status:** pre-registered 2026-11-02; offline probe gate failed as
+registered; shakedown flown 2026-11-03, its s03 check not met by any planner-side version
+(below); operator 2026-11-03: change the navigator (`a70`, shakedown below)
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design and evidence:
 [docs/research/pathfinder-plan.md](../../../docs/research/pathfinder-plan.md). Operator's
@@ -255,6 +256,27 @@ Two gates, both before the 18 runs.
    4 steps every time). Whether to fly R30 on a66 against that rule, change the navigator
    (option B or C of the plan), or stop here, is the operator's call.
 
+   **Operator (2026-11-03): change the navigator.** `a70` = `a66` with two navigator-side
+   additions (`agent.NAVIGATOR_A70`, in the sha), both read off the lobby refusals' own
+   reasons (a68 s03 `dynamic` s5–s9: "the turn around is only for when the target is behind
+   you, but the planner says to head for the goal, so the target is ahead"):
+   1. **Route-behind sentence.** While "toward your target" sits on the turn-around, the
+      planner line gets a second line: "The next point on your route is behind you: the turn
+      around is the move toward it." No distance or direction (`views.check` unchanged);
+      recorded as `route_behind` per step.
+   2. **Route critic** (`critic: route`, a13's machinery, option B of the plan generalised):
+      when the pick carries no "toward your target" while an offered move does and carries no
+      blocked, stopped-short or wall note, the navigator is asked once more with "Memory
+      note: the planned route goes by [j] (toward your target), not by [i]. Choose again; you
+      may keep [i] if the image shows it is right." The second answer stands; the rung is
+      the model's (valid). Recorded in `critic` (`changed`). R9's critic changed 0 of 19
+      picks, so the sentence is expected to do the work and the critic to measure the rest.
+   Smoke (R25D's 627 recorded steps, stub picks): 0 failed; the sentence on 73 steps; the
+   critic would have asked on 233 (a49's picks against a63's route, an upper bound).
+   Pass rule unchanged: s03's shut-tine check, plus lobby ≤ 12 and "toward" on marker 0
+   taken on ≥ 50% of offers. Readouts: `eval/r30_check.py` now prints `behind` and critic
+   `changed/asked` per run.
+
 ## Builds on
 
 R25D (`a49`). Branch `phase2/r30-pathfinder` from `phase2/r29n-host-noise`.
@@ -263,8 +285,8 @@ R25D (`a49`). Branch `phase2/r30-pathfinder` from `phase2/r29n-host-noise`.
 
 - **Tests and smoke (no model):** `python -m pytest server/decider/tests -q`;
   `VLM_AGENT=a63 python eval/probes/a63_smoke.py` (and `a64`).
-- **Preflight.** `python -m server.decider --profile remote --agent a63`; `/health` should report
-  `7e6b2f2a6d8c`.
+- **Preflight.** `python -m server.decider --profile remote --agent a70`; `/health` should report
+  `cf82ad60b931`.
 - **a64** is never a round: its rung `code` fails the validity check by construction.
 
 ## Outcome

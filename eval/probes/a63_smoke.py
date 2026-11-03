@@ -66,7 +66,7 @@ def main() -> int:
     vlm.call_structured = stub
     steps = failed = planned = real = coded = 0
     fallbacks = collections.Counter()
-    stalls = door_walls = suspects = 0
+    stalls = door_walls = suspects = behind = critic = 0
     t0 = time.time()
     with tempfile.TemporaryDirectory() as tmp:
         for run in runs(25, 25):
@@ -104,15 +104,18 @@ def main() -> int:
                 suspects += snap.get("cells_suspect", 0) > 0
                 if out.get("rung") == "code":
                     coded += out["index"] in [a["index"] for a in out["manifest"]["actions"]]
+                behind += bool(out.get("route_behind"))
+                critic += bool(out.get("critic"))
     secs = time.time() - t0
     ok = failed == 0 and steps > 0 and planned == steps
     if version == "a64":
         ok = ok and coded == steps
     print("{0} smoke on {1}: {2} steps ({3} real frames), failed {4}; planned {5}/{2}; "
           "fallbacks {6}; stall steps {7}; steps with door walls {8}, with suspects {9}; "
-          "code picks {10}; {11:.2f} s per step -> {12}".format(
+          "code picks {10}; route-behind sentences {11}, critic asks {12}; "
+          "{13:.2f} s per step -> {14}".format(
               version, ROUND, steps, real, failed, planned, dict(fallbacks), stalls, door_walls,
-              suspects, coded, secs / max(1, steps), "pass" if ok else "FAIL"))
+              suspects, coded, behind, critic, secs / max(1, steps), "pass" if ok else "FAIL"))
     return 0 if ok else 1
 
 

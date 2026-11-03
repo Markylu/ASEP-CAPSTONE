@@ -227,6 +227,20 @@ PATHFINDER_A68: Dict[str, Any] = dict(
 PATHFINDER_A69: Dict[str, Any] = dict(
     PATHFINDER_A68, dead_end=dict(PATHFINDER_A68["dead_end"], one_side_cells=3))
 
+#: a70 (R30): what the navigator is told about the route beyond the tags.
+#: `route_behind` is added to the planner line when "toward your target" sits
+#: on the turn-around: R30's shakedown (a63, a67, a68 s03 dynamic) lost 18
+#: lobby steps each to the navigator reading "head for the goal" as "the goal
+#: is ahead" and declining marker 0 ("turn around is only for when the target
+#: is behind you"). `critic_route` is the critic's reason when the pick carries
+#: no "toward your target" while an open move does; the navigator is asked once
+#: more and may keep its pick (a13's critic machinery).
+NAVIGATOR_A70: Dict[str, str] = {
+    "route_behind": ("The next point on your route is behind you: the turn around is the "
+                     "move toward it."),
+    "critic_route": "the planned route goes by [{j}] (toward your target), not by [{i}]",
+}
+
 
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
@@ -1239,6 +1253,27 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "a68's shakedown: s03 dynamic left the shut tine and reached the crossbar (the "
           "seal worked in flight), but s02a and s02vc dynamic were boxed in the hall by "
           "the both-sides seal (route on 53% of steps, 32 m from the goal)."),
+    Agent("a70", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "route", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A65,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A70,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a66 with the navigator told when the route's next point is behind it (one "
+          "sentence after the planner line while 'toward your target' is on the "
+          "turn-around) and a critic that asks once more when the pick carries no 'toward "
+          "your target' while an open move does (the second answer stands, as a13). "
+          "R30 shakedown: a63, a67 and a68 s03 dynamic each spent 18 steps in the lobby "
+          "declining marker 0 while it carried 'toward your target', reasoning that "
+          "'head for the goal' meant the goal was ahead; a64 (code picks) left in 4."),
 )}
 
 DEFAULT_AGENT = "a00"
