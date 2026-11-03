@@ -64,6 +64,14 @@ shut door, turn back and still reach the other door by about step 44. The next s
 code rule at the crossbar (pick a mouth at once, turn to the other on a confirmed closed door),
 not a dead-end detector.
 
+Probe CR tried that rule's trigger: a two-sided fork is on q03's menu at a crossbar call in 1 of
+5 failed runs (3 with the sides allowed behind the drone), because at steps 9–20 the drone faces
+the x = 5 wall and the map knows nothing of the tine mouths; loosened to one side it fires at 72%
+of s02 divider calls. Refuted ([CR](../../eval/phase2/_probes/cr/README.md)). The three s03 probes
+end in one sentence: the drone loses s03 at blocking walls (crossbar, lobby) because it looks at
+the wall, not along it, and the along-the-wall machinery that would (R21/R22) cost `final` runs.
+`a49` stays the base; the s03 `final`/`dynamic` cells are a crossbar coin when reached in time.
+
 ## Lessons
 
 ### About measuring the perceiver

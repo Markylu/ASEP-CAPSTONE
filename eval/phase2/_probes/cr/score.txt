@@ -1,0 +1,43 @@
+calls by place (fires): s01 18 (0), s02_divider 114 (3), s02_else 30 (0), s03_crossbar 23 (2), s03_else 45 (2)
+s03 runs: round/run crossbar tine first_fork_fire d01_closed_after_entry perc_closed_after_entry
+  R25D s03/dynamic: crossbar 8 tine 36 fire None d01 None perc 40
+  R25D s03/final: crossbar 31 tine 37 fire 32 d01 38 perc 38
+  R25D s03/initial: crossbar 8 tine 17 fire None d01 None perc None
+  R29N s03/dynamic: crossbar 9 tine 42 fire None d01 None perc 46
+  R29N s03/final: crossbar 8 tine 25 fire None d01 25 perc 25
+  R29N s03/initial: crossbar 8 tine 23 fire None d01 28 perc 28
+  R29S s03/dynamic: crossbar 9 tine 24 fire None d01 36 perc 30
+  R29S s03/final: crossbar 31 tine 46 fire 32 d01 None perc None
+  R29S s03/initial: crossbar 8 tine 14 fire None d01 None perc None
+gate 1: fork fires at a crossbar call in 1/5 failed runs [FAIL]
+gate 2: first fire at step <= 24 in 0/5 [FAIL]
+gate 3: s02 away from divider 0/30 (0.0%), s01 0/18 [pass]
+gate 4: turn-back cue within 8 steps of tine entry: d01 2/5, perceiver 5/5 [pass]
+s02 divider fires (reported): 3/114; a side toward an open door listed on 3 of them; runs: R25D/s02va/final 1, R29N/s02a/final 1, R29S/s02va/dynamic 1
+variant first_wide: crossbar fire in 3/5 failed runs, <= 24 in 2/5; first fires R25D/s03/dynamic 10, R25D/s03/final 32, R29N/s03/dynamic 10, R29N/s03/final None, R29S/s03/dynamic None; s02 divider 17/114, s02 else 1/30, s01 1/18
+variant first_one: crossbar fire in 5/5 failed runs, <= 24 in 4/5; first fires R25D/s03/dynamic 10, R25D/s03/final 32, R29N/s03/dynamic 10, R29N/s03/final 9, R29S/s03/dynamic 10; s02 divider 82/114, s02 else 11/30, s01 14/18
+
+s03 crossbar calls:
+  R25D s03/dynamic s10 (5.2,0.8) ask=blocked fire=0 wide=1 one=1 sides=None pick=explore
+  R25D s03/dynamic s14 (5.2,-0.4) ask=blocked fire=0 wide=0 one=1 sides=None pick=explore
+  R25D s03/dynamic s19 (6.1,1.9) ask=walled fire=0 wide=0 one=1 sides=None pick=explore
+  R25D s03/dynamic s25 (5.9,1.4) ask=walled fire=0 wide=0 one=1 sides=None pick=explore
+  R25D s03/dynamic s31 (5.2,3.0) ask=blocked fire=0 wide=0 one=1 sides=None pick=explore
+  R25D s03/final s32 (5.8,-0.0) ask=walled fire=1 wide=1 one=1 sides=['unexplored_1', 'unexplored_3'] pick=unexplored_1
+  R25D s03/initial s 9 (5.7,0.8) ask=walled fire=0 wide=1 one=1 sides=None pick=explore
+  R25D s03/initial s15 (5.2,0.5) ask=walled fire=0 wide=0 one=0 sides=None pick=explore
+  R29N s03/dynamic s10 (6.0,-0.5) ask=walled fire=0 wide=1 one=1 sides=None pick=explore
+  R29N s03/dynamic s22 (5.2,0.1) ask=walled fire=0 wide=1 one=1 sides=None pick=unexplored_3
+  R29N s03/dynamic s27 (6.2,1.2) ask=walled fire=0 wide=0 one=0 sides=None pick=unexplored_1
+  R29N s03/dynamic s32 (5.2,-3.2) ask=walled fire=0 wide=0 one=1 sides=None pick=explore
+  R29N s03/dynamic s36 (5.2,-3.2) ask=walled fire=0 wide=0 one=0 sides=None pick=explore
+  R29N s03/final s 9 (5.9,1.4) ask=walled fire=0 wide=0 one=1 sides=None pick=explore
+  R29N s03/final s17 (6.2,2.2) ask=walled fire=0 wide=0 one=1 sides=None pick=unexplored_1
+  R29N s03/final s20 (5.2,-0.8) ask=walled fire=0 wide=0 one=0 sides=None pick=explore
+  R29N s03/initial s10 (5.2,0.8) ask=blocked fire=0 wide=0 one=1 sides=None pick=explore
+  R29N s03/initial s15 (6.2,2.5) ask=walled fire=0 wide=0 one=1 sides=None pick=explore
+  R29S s03/dynamic s10 (6.0,-0.5) ask=walled fire=0 wide=0 one=1 sides=None pick=explore
+  R29S s03/dynamic s23 (5.2,-3.6) ask=blocked fire=0 wide=0 one=0 sides=None pick=explore
+  R29S s03/final s32 (5.8,-0.0) ask=walled fire=1 wide=1 one=1 sides=['unexplored_1', 'unexplored_3'] pick=unexplored_1
+  R29S s03/final s38 (5.3,1.1) ask=walled fire=0 wide=1 one=1 sides=None pick=explore
+  R29S s03/initial s 9 (5.7,0.8) ask=walled fire=0 wide=0 one=1 sides=None pick=explore

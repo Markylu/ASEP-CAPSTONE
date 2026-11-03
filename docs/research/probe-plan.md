@@ -315,6 +315,8 @@ reads 6–19 pts more real walls as floor than the sites' own. Measured eye heig
 
 | PG | 2026-11-02 | Offline, every step of a49's 54 runs with the memory rebuilt: a pocket cue (local reach leaves in ≤ 1 direction, goal walled, way out not toward the goal). Shut tine 64/136 steps, first fire with 14–30 steps left (≥ 28 on 1/5); s02 322/1,305 steps (25%), 18 runs over 5 fires; gated on a closed door still 11–18% of s02 | **Refuted.** The map is the drone's own trail: a wall-side strip and a tine are the same pocket to it. The surviving s03 finding is time: crossbar reached by step 9 in dynamic, then 15–33 steps spent there before a tine; two final runs lose 31 steps in the lobby first. Next candidate (not probed): code picks a tine at the crossbar at once and turns to the other on a d01-confirmed closed door. `eval/phase2/_probes/pg/README.md` |
 
+| CR | 2026-11-02 | Offline, a49's 228 strategist calls, 23 at the s03 crossbar. A two-sided fork (walled, side frontiers each way, nothing toward the goal) is on the menu at a crossbar call in 1/5 failed runs (3/5 with the sides allowed behind), never by step 24 except once; one-sided it fires on 72% of s02 divider and 78% of s01 calls. Perceiver reports the closed door within 8 steps of tine entry in 5/5 | **Refuted.** At the crossbar the drone faces the x = 5 wall and the map holds no tine mouths: the frontiers are behind it. No early fork to commit at. DE, PG and CR agree: s03 is lost at blocking walls (crossbar 15–33 steps, lobby 31) with no look along them; along-wall detours were R21/R22, dropped. No a63. `eval/phase2/_probes/cr/README.md` |
+
 Details and readings: each probe's README under `eval/phase2/_probes/`.
 
 ## After the probes
