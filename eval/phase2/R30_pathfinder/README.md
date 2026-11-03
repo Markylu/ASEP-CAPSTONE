@@ -1,10 +1,10 @@
 # R30: a49 with a code route planner in place of goal-way and q03
 
-**Agent:** `a68` (`1036af9aed35`; `a63` `7e6b2f2a6d8c`, `a65` `ec86fb5072ec`, `a66`
-`de7f23d07186` and `a67` `c6b3e9877438` during the shakedown, below) · **Prompt:** `p17`
-(`cb3578251cfe`) · **Perceiver:** `g05` · **Memory:** `a17g` ·
-**Status:** pre-registered 2026-11-02; offline probe gate failed as registered (below);
-shakedown in progress; not flown
+**Agent:** `a66` (`de7f23d07186`; `a63` `7e6b2f2a6d8c`, `a65` `ec86fb5072ec`, `a67`
+`c6b3e9877438` and `a68` `1036af9aed35` flew in the shakedown too, below; `a69` is defined,
+unflown) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` · **Memory:** `a17f` ·
+**Status:** pre-registered 2026-11-02; offline probe gate failed as registered; shakedown
+flown 2026-11-03, its s03 check not met by any version (below); not flown as a round
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design and evidence:
 [docs/research/pathfinder-plan.md](../../../docs/research/pathfinder-plan.md). Operator's
