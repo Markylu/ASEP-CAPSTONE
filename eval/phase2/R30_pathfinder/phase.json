@@ -3,10 +3,10 @@
   "title": "a49 with a code route planner in place of goal-way and q03",
   "citable": false,
   "agent_version": "a63",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
+  "status": "running",
+  "git_sha": "2f9c171",
+  "started": "2026-11-03T22:46:22+00:00",
   "finished": null,
-  "operator": null,
+  "operator": "Markylu",
   "notes": ""
 }
