@@ -200,6 +200,16 @@ PATHFINDER_A63: Dict[str, Any] = {
 #: the drone are never stall cells or inflated stop walls.
 PATHFINDER_A65: Dict[str, Any] = dict(PATHFINDER_A63, local_mobility=True)
 
+#: a67: floor seen only beyond 2.5 m (memory a17g) costs this per metre, a
+#: little under unknown ground: a prior, not knowledge.
+PATHFINDER_A67: Dict[str, Any] = dict(
+    PATHFINDER_A65, far_free_cost=1.6,
+    # planner.dead_end_seal: at a confirmed closed door within door_within_m,
+    # the corridor the trail came down is sealed lateral_cells either side,
+    # back to a point where known ground opens past open_lateral_m on a side.
+    dead_end={"door_within_m": 2.0, "lateral_cells": 3, "open_lateral_m": 2.5,
+              "max_back_m": 15.0})
+
 
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
@@ -1158,6 +1168,24 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "walls, erased only by a visit. R30 shakedown, a63 s02c dynamic and a64 s03 "
           "dynamic: the walls seen nose-on at the divider and the exit wall were popped by "
           "the next grazing look along them, and the drone oscillated at the wall."),
+    Agent("a67", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A67,
+                                          "memory": "a17g",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a66 with memory a17g: floor seen only beyond 2.5 m is weak for the route (costs "
+          "1.6, sealable); floor within 2.5 m, visits and a confirmed open door's rays are "
+          "known ground. R30 shakedown, a66 s03 dynamic s21-34: the route ran through "
+          "floor the perceiver had read 4 m deep inside the solid beyond the tine's outer "
+          "wall, and the drone bumped it cell by cell."),
 )}
 
 DEFAULT_AGENT = "a00"

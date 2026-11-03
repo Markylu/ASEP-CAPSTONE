@@ -343,6 +343,13 @@ class SpatialConfig:
     #: grazing look along them (a17's "a newer look overwrites"), so the
     #: route kept finding an unsealed cell there and the drone oscillated.
     firm_walls: bool = False
+    #: a17g (a67): floor seen only beyond near_free_m along a ray is weak for
+    #: the route planner (it costs like unknown ground and a wall beside it
+    #: seals it); floor within near_free_m, a visit and a confirmed open
+    #: door's rays are strong. R30 shakedown, a66 s03 dynamic s21-s34: the
+    #: route ran through "floor" 4 m deep inside the solid beyond the tine's
+    #: outer wall, written by open_far rays the perceiver read through it.
+    near_free_m: Optional[float] = None
 
     def sha_segments(self) -> List[str]:
         out = ["spatial:" + wording_sha()]
@@ -367,6 +374,8 @@ class SpatialConfig:
                 {"m": self.near_walls, "strips": list(self.near_wall_strips)}, sort_keys=True))
         if self.firm_walls:
             out.append("firm_walls")
+        if self.near_free_m is not None:
+            out.append("near_free_m:{0}".format(self.near_free_m))
         return out
 
 
@@ -470,6 +479,8 @@ A17E = replace(A17D, name="a17e", near_walls={"bottom": 2.5},
                near_wall_strips=("far_left", "far_right"))
 #: a17f (a66): a17e with firm walls.
 A17F = replace(A17E, name="a17f", firm_walls=True)
+#: a17g (a67): a17f with far floor weak.
+A17G = replace(A17F, name="a17g", near_free_m=2.5)
 
 
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
@@ -486,6 +497,8 @@ def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
         return A17E
     if orchestrator.get("memory") == "a17f":
         return A17F
+    if orchestrator.get("memory") == "a17g":
+        return A17G
     if orchestrator.get("memory") == "a15":
         return A15
     if orchestrator.get("memory") == "a16":
@@ -669,6 +682,8 @@ class SpatialMemory:
     near_wall: Dict[Tuple[int, int], int] = field(default_factory=dict)
     #: a17f: walls seen nose-on across a run of strips; a visit alone erases.
     firm_wall: Dict[Tuple[int, int], int] = field(default_factory=dict)
+    #: a17g: floor seen within near_free_m, or through a confirmed open door.
+    free_near: Dict[Tuple[int, int], int] = field(default_factory=dict)
     cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
@@ -786,6 +801,9 @@ class SpatialMemory:
                         break
                     self.free[c] = step
                     self.wall.pop(c, None)
+                    if (self.cfg.near_free_m is not None and d <= self.cfg.near_free_m
+                            and floor != "blocked_near"):
+                        self.free_near[c] = step
                     # A no_floor strip's half-metre of "floor" is a17's
                     # bookkeeping, not floor seen (the camera sees none under
                     # 1.5 m): it never overrides another strip's ray end.
@@ -877,6 +895,7 @@ class SpatialMemory:
                         break
                     if c not in self.visits:
                         self.free[c] = step
+                        self.free_near[c] = step  # a confirmed door: strong
                         self.wall.pop(c, None)
                         self.door_wall.pop(c, None)
                         self.suspect.pop(c, None)
@@ -1286,6 +1305,8 @@ class SpatialMemory:
             out["cells_near_wall"] = len(self.near_wall)
         if self.cfg.firm_walls:
             out["cells_firm_wall"] = len(self.firm_wall)
+        if self.cfg.near_free_m is not None:
+            out["cells_free_near"] = len(self.free_near)
         return out
 
 
@@ -1715,7 +1736,11 @@ class CostMap:
         # inflation boxed the drone in its new cell, and the soft fallback
         # then routed through the shut door.
         self.start = start if p.get("local_mobility") else None
-        known = set(mem.visits) | set(mem.free)
+        # a17g: only near floor, visits and confirmed-door floor are known
+        # ground; far floor is a weak prior (cost(), and it can be sealed).
+        strong_free = set(mem.free_near) if mem.cfg.near_free_m is not None else set(mem.free)
+        known = set(mem.visits) | strong_free
+        self.strong_free = strong_free
         hard = set(mem.stop_wall) | set(mem.door_wall) | set(mem.firm_wall) | set(stall_cells)
         if not soft:
             hard |= set(mem.wall) | set(mem.near_wall)
@@ -1765,8 +1790,10 @@ class CostMap:
             return 1.0
         if c in self.soft_walls or c in self.mem.suspect:
             return float(self.p["suspect_cost"])
-        if c in self.mem.free:
+        if c in self.strong_free:
             return 1.0
+        if c in self.mem.free:
+            return float(self.p.get("far_free_cost", self.p["unknown_cost"]))
         return float(self.p["unknown_cost"])
 
     def inside(self, c: Cell) -> bool:

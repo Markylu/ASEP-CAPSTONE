@@ -1,7 +1,8 @@
 # R30: a49 with a code route planner in place of goal-way and q03
 
-**Agent:** `a66` (`de7f23d07186`; `a63` `7e6b2f2a6d8c` and `a65` `ec86fb5072ec` during the
-shakedown, below) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` · **Memory:** `a17f` ·
+**Agent:** `a67` (`c6b3e9877438`; `a63` `7e6b2f2a6d8c`, `a65` `ec86fb5072ec` and `a66`
+`de7f23d07186` during the shakedown, below) · **Prompt:** `p17` (`cb3578251cfe`) ·
+**Perceiver:** `g05` · **Memory:** `a17g` ·
 **Status:** pre-registered 2026-11-02; offline probe gate failed as registered (below);
 shakedown in progress; not flown
 
@@ -169,6 +170,27 @@ Two gates, both before the 18 runs.
    (probe README). a65's lane was stopped after its s03 run was already lost in the lobby
    (25 steps beside the stem mouth; its runs kept as `~/r30_shake_a65_runs`). The round moves
    to a66.
+
+   **a64, all six** (code follows a63's route, `~/r30_a64_runs`): `dynamic` 2/6 (s01 40
+   steps, s02vc 34); s02a, s02c, s02va and s03 ran out. The map, not the navigator, is the
+   limit at the divider and the exit wall.
+
+   **a66 s03 `dynamic`** (firm walls): the lobby cost nothing (crossbar at s14), the shut door
+   was met at s20, then s21–s34 at the exit wall again. Its cost map at s28: the route ran
+   through cells marked seen floor inside the solid beyond the tine's outer wall, written by
+   `open_far` rays the perceiver read through that wall (floor seen far along a ray is the
+   perceiver's weakest reading, R14), and nothing the drone sees marks the divider; the
+   navigator, rightly, will not fly at a wall it can see, so no bump ever writes it either.
+   **a67** = a66 with memory `a17g` (floor seen only beyond 2.5 m along a ray is weak: it
+   costs 1.6 per metre and a wall beside it seals it; floor within 2.5 m, a visit and a
+   confirmed open door's rays are known ground) and `planner.dead_end_seal`: at a `d01`-confirmed
+   closed door within 2 m, the corridor the trail came down is sealed three cells either
+   side, back to the first trail point where known ground opens past 2.5 m on a side (the
+   crossbar; in the s02 hall at door B the first point already opens, so nothing is sealed).
+   Sealed cells are recorded in `planner.sealed`, like stall cells. Replaying a66's own s03
+   frames under a67 with the seals carried forward: from s25 the route is the 40 m way back
+   and round, waypoint 3.5 m toward the crossbar, where a66's was 12–16 m into the divider.
+   The round moves to a67; a66's remaining runs finish for the s02 record.
 
 ## Builds on
 

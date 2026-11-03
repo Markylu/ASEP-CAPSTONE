@@ -983,14 +983,18 @@ class PathPlan:
     fallback: str
     stall: List[List[int]]
     costs: Dict[str, int]
+    sealed: List[List[int]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"way": "path", "path_m": self.path_m,
-                "path_cells": [[c[0], c[1]] for c in self.path],
-                "waypoint": ([round(self.waypoint[0], 2), round(self.waypoint[1], 2)]
-                             if self.waypoint else None),
-                "unknown_on_path": self.unknown_on_path, "fallback": self.fallback,
-                "stall": self.stall, "costs": self.costs}
+        out = {"way": "path", "path_m": self.path_m,
+               "path_cells": [[c[0], c[1]] for c in self.path],
+               "waypoint": ([round(self.waypoint[0], 2), round(self.waypoint[1], 2)]
+                            if self.waypoint else None),
+               "unknown_on_path": self.unknown_on_path, "fallback": self.fallback,
+               "stall": self.stall, "costs": self.costs}
+        if self.sealed:
+            out["sealed"] = self.sealed
+        return out
 
 
 def astar(cm: spatial.CostMap, start: Tuple[int, int], goal: Tuple[int, int],
@@ -1072,13 +1076,71 @@ def waypoint_on(cm: spatial.CostMap, here: spatial.Point, path: List[Tuple[int, 
 
 
 def stall_cells_from(records: List[Dict[str, Any]], step: int) -> List[Tuple[int, int]]:
-    """Every stall cell earlier planner records added (replayable from the
-    record alone, as the memory is)."""
+    """Every stall cell and dead-end seal earlier planner records added
+    (replayable from the record alone, as the memory is)."""
     out = []
     for r in records:
         if "step" in r and r["step"] < step:
-            for c in (r.get("planner") or {}).get("stall") or []:
+            plan = r.get("planner") or {}
+            for c in (plan.get("stall") or []) + (plan.get("sealed") or []):
                 out.append((int(c[0]), int(c[1])))
+    return out
+
+
+def dead_end_seal(mem: spatial.SpatialMemory, here: spatial.Pose,
+                  p: Dict[str, Any]) -> List[List[int]]:
+    """a67: at a confirmed closed door within door_within_m, the corridor the
+    trail came down is a dead end. Walk the trail back; at each point the
+    cells out to lateral_cells either side that are not known ground are
+    sealed, until a point where known ground reaches past open_lateral_m
+    on a side (a junction, as the s03 crossbar), or max_back_m of trail.
+    In an open room (the s02 hall at door B) the first point already opens
+    sideways, so nothing is sealed. s03_tines_analysis: the fix is "back to
+    the fork"; R26 tried it as a strategist's item and the stall hand-back
+    ended it; this makes the map say it."""
+    d = p.get("dead_end")
+    if not d or not mem.door_wall:
+        return []
+    if not any(spatial.dist(here[:2], ((c[0] + 0.5) * spatial.CELL_M,
+                                         (c[1] + 0.5) * spatial.CELL_M)) <= d["door_within_m"]
+               for c in mem.door_wall):
+        return []
+    strong = set(mem.visits) | (set(mem.free_near) if mem.cfg.near_free_m is not None
+                                else set(mem.free))
+    trail = [(x, y) for _, x, y, _ in mem.trail]
+    if len(trail) < 2:
+        return []
+    out: List[List[int]] = []
+    back = 0.0
+    for i in range(len(trail) - 1, 0, -1):
+        a, b = trail[i - 1], trail[i]
+        seg = spatial.dist(a, b)
+        if seg < 0.3:
+            continue
+        back += seg
+        if back > d["max_back_m"]:
+            break
+        ux, uy = (b[0] - a[0]) / seg, (b[1] - a[1]) / seg
+        nx, ny = -uy, ux
+        opening = False
+        for side in (1.0, -1.0):
+            reach = 0.0
+            for k in range(1, d["lateral_cells"] + 1):
+                q = (b[0] + side * nx * k * spatial.CELL_M, b[1] + side * ny * k * spatial.CELL_M)
+                if spatial.cell(q) in strong:
+                    reach = k * spatial.CELL_M
+                else:
+                    break
+            if reach > d["open_lateral_m"]:
+                opening = True
+        if opening:
+            break
+        for side in (1.0, -1.0):
+            for k in range(1, d["lateral_cells"] + 1):
+                q = (b[0] + side * nx * k * spatial.CELL_M, b[1] + side * ny * k * spatial.CELL_M)
+                c = spatial.cell(q)
+                if c not in strong and [c[0], c[1]] not in out:
+                    out.append([c[0], c[1]])
     return out
 
 
@@ -1136,6 +1198,8 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
                     if c not in mem.visits and c != spatial.cell(goal):
                         added.append([c[0], c[1]])
             stall = stall + [(c[0], c[1]) for c in added]
+    sealed_now = [c for c in dead_end_seal(mem, here, p) if (c[0], c[1]) not in stall]
+    stall = stall + [(c[0], c[1]) for c in sealed_now]
     start, end = spatial.cell(here[:2]), spatial.cell(goal)
     fallback = "none"
     cm = spatial.CostMap(mem, stall, p, include=(start, end), start=start)
@@ -1160,7 +1224,7 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     path_m = round(sum(spatial.dist(_centre(a), _centre(b)) for a, b in zip(path, path[1:])), 2)
     unknown = sum(1 for c in path[1:-1] if c not in cm.known)
     target = spatial.Target("path", "path", wp[0], wp[1], p["words"]["path"], step)
-    return PathPlan(target, wp, path, path_m, unknown, fallback, added, cm.counts())
+    return PathPlan(target, wp, path, path_m, unknown, fallback, added, cm.counts(), sealed_now)
 
 
 def search_situation_a20(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
