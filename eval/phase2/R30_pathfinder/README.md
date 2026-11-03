@@ -1,8 +1,8 @@
 # R30: a49 with a code route planner in place of goal-way and q03
 
-**Agent:** `a67` (`c6b3e9877438`; `a63` `7e6b2f2a6d8c`, `a65` `ec86fb5072ec` and `a66`
-`de7f23d07186` during the shakedown, below) · **Prompt:** `p17` (`cb3578251cfe`) ·
-**Perceiver:** `g05` · **Memory:** `a17g` ·
+**Agent:** `a68` (`1036af9aed35`; `a63` `7e6b2f2a6d8c`, `a65` `ec86fb5072ec`, `a66`
+`de7f23d07186` and `a67` `c6b3e9877438` during the shakedown, below) · **Prompt:** `p17`
+(`cb3578251cfe`) · **Perceiver:** `g05` · **Memory:** `a17g` ·
 **Status:** pre-registered 2026-11-02; offline probe gate failed as registered (below);
 shakedown in progress; not flown
 
