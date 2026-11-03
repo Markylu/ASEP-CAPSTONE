@@ -42,8 +42,8 @@
     "s02vc_doors_visible_c": 1,
     "s03_fork_deadend": 2
   },
-  "agent_version": "a70",
-  "agent_sha": "cf82ad60b931",
+  "agent_version": "a71",
+  "agent_sha": "da09e48510b0",
   "prompt_version": "p17",
   "prompt_sha": "cb3578251cfe",
   "subagent_prompts": {

@@ -1274,6 +1274,25 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "R30 shakedown: a63, a67 and a68 s03 dynamic each spent 18 steps in the lobby "
           "declining marker 0 while it carried 'toward your target', reasoning that "
           "'head for the goal' meant the goal was ahead; a64 (code picks) left in 4."),
+    Agent("a71", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "route", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A68,
+                                          "memory": "a17g",
+                                          "navigator_notes": NAVIGATOR_A70,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a70's navigator on a68's planner (memory a17g, the dead-end seal). a70's "
+          "shakedown: the navigator took every 'toward your target' on marker 0 (46/46) "
+          "and left the lobby in 11 steps, and s03 dynamic then oscillated 30 steps in the "
+          "shut tine as the route alternated between the shut door and the way out; a68's "
+          "seal had taken the drone out of that tine in flight."),
 )}
 
 DEFAULT_AGENT = "a00"

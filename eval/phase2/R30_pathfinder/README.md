@@ -1,11 +1,12 @@
 # R30: a49 with a code route planner in place of goal-way and q03
 
-**Agent:** `a70` (`cf82ad60b931`; `a63` `7e6b2f2a6d8c`, `a65` `ec86fb5072ec`, `a66`
-`de7f23d07186`, `a67` `c6b3e9877438` and `a68` `1036af9aed35` flew in the shakedown too,
-below; `a69` is defined, unflown) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05`
-· **Memory:** `a17f` · **Status:** pre-registered 2026-11-02; offline probe gate failed as
-registered; shakedown flown 2026-11-03, its s03 check not met by any planner-side version
-(below); operator 2026-11-03: change the navigator (`a70`, shakedown below)
+**Agent:** `a71` (`da09e48510b0`; `a63` `7e6b2f2a6d8c`, `a65` `ec86fb5072ec`, `a66`
+`de7f23d07186`, `a67` `c6b3e9877438`, `a68` `1036af9aed35` and `a70` `cf82ad60b931` flew in
+the shakedown too, below; `a69` is defined, unflown) · **Prompt:** `p17` (`cb3578251cfe`) ·
+**Perceiver:** `g05` · **Memory:** `a17g` · **Status:** pre-registered 2026-11-02; offline
+probe gate failed as registered; shakedown flown 2026-11-03, its s03 check not met by any
+planner-side version (below); operator 2026-11-03: change the navigator (`a70`, then `a71`,
+shakedown below)
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design and evidence:
 [docs/research/pathfinder-plan.md](../../../docs/research/pathfinder-plan.md). Operator's
@@ -285,8 +286,8 @@ R25D (`a49`). Branch `phase2/r30-pathfinder` from `phase2/r29n-host-noise`.
 
 - **Tests and smoke (no model):** `python -m pytest server/decider/tests -q`;
   `VLM_AGENT=a63 python eval/probes/a63_smoke.py` (and `a64`).
-- **Preflight.** `python -m server.decider --profile remote --agent a70`; `/health` should report
-  `cf82ad60b931`.
+- **Preflight.** `python -m server.decider --profile remote --agent a71`; `/health` should report
+  `da09e48510b0`.
 - **a64** is never a round: its rung `code` fails the validity check by construction.
 
 ## Outcome
