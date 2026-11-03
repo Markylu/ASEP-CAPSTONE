@@ -231,11 +231,12 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # s03 dead end and the s02 door wall are routing failures on a map that was
     # right (probe B0, s03_tines_analysis, R19's s02 analysis). R30 README and
     # docs/research/pathfinder-plan.md.
-    # a65 after the shakedown's first s03 dynamic run on a63 (R30 README, Probe
-    # gate 2): side-strip near walls and local mobility. a63 never flew as a round.
+    # a65 after the shakedown's first s03 dynamic run on a63, a66 after a63's
+    # s02c and a64's s03 traces (R30 README, Probe gate 2): side-strip near
+    # walls, local mobility, firm walls. Neither a63 nor a65 flew as a round.
     "R30": {"folder": "R30_pathfinder",
             "title": "a49 with a code route planner in place of goal-way and q03",
-            "agent": "a65", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+            "agent": "a66", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

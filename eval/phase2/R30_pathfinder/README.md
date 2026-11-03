@@ -1,7 +1,7 @@
 # R30: a49 with a code route planner in place of goal-way and q03
 
-**Agent:** `a65` (`ec86fb5072ec`; `a63` `7e6b2f2a6d8c` until the shakedown's first run, below) ·
-**Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` · **Memory:** `a17e` ·
+**Agent:** `a66` (`de7f23d07186`; `a63` `7e6b2f2a6d8c` and `a65` `ec86fb5072ec` during the
+shakedown, below) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` · **Memory:** `a17f` ·
 **Status:** pre-registered 2026-11-02; offline probe gate failed as registered (below);
 shakedown in progress; not flown
 
@@ -155,6 +155,20 @@ Two gates, both before the 18 runs.
    The round moves to a65 before any round flight; the a63 shakedown runs stay on the host
    as `~/r30_shake_a63_runs`, read for the record only. The navigator's marker-0 refusals are
    not addressed by a65 and are what `a64`'s runs measure.
+
+   **a63, all six** (`eval/r30_check.py`, `eval/r28_flight.py`): `dynamic` solved 3/6 (s01 35
+   steps, s02a 37, s02va 28); s02c and s02vc ran 60 steps without crossing the divider; s03
+   as above. Walls in flight as R25D's: missed 17.7%, phantom 13.2%, s03 phantom 10.8%;
+   longest turn-around streak 3; a route on 97–100% of steps. s02c's trace: the drone hugged
+   the divider at x ≈ 0.7 for 50 steps between z = −7 and +3 and never reached door C at
+   z = +9, because the walls it saw nose-on were popped by the next grazing look along the
+   wall (`cells_wall` oscillated 7–12); a64's s03 run (code follows the route) reached the
+   shut door at s28, not s41, then bounced at it for 30 steps for the same reason.
+   **a66** = a65 with memory `a17f`: a nose-on wall run and a confirmed closed door are firm
+   walls, erased only by a visit. Open loop on R25D's steps the shut-tine row moves 43% → 79%
+   (probe README). a65's lane was stopped after its s03 run was already lost in the lobby
+   (25 steps beside the stem mouth; its runs kept as `~/r30_shake_a65_runs`). The round moves
+   to a66.
 
 ## Builds on
 
