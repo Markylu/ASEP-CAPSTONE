@@ -221,6 +221,12 @@ PATHFINDER_A68: Dict[str, Any] = dict(
     dead_end={"door_within_m": 2.0, "closed_read_within_m": 5.0, "lateral_cells": 4,
               "seal_cells": 8, "open_cells": 4, "axis_m": 8.0, "max_back_m": 15.0})
 
+#: a69: both sides sealed only for a corridor seen walled on each side; a
+#: window walled on one side (the s02 hall along the divider) has that side
+#: alone sealed, one_side_cells deep.
+PATHFINDER_A69: Dict[str, Any] = dict(
+    PATHFINDER_A68, dead_end=dict(PATHFINDER_A68["dead_end"], one_side_cells=3))
+
 
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
@@ -1215,6 +1221,24 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "door leaf read no_floor with no doorway on every nose-on look, so no door wall "
           "was ever written and the seal never fired; the door read closed at s46 and s51 "
           "from 4.5 m out."),
+    Agent("a69", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A69,
+                                          "memory": "a17g",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a68 with the dead-end seal on both sides only for a corridor seen walled on "
+          "each side; a window walled on one side has that side alone sealed, three deep. "
+          "a68's shakedown: s03 dynamic left the shut tine and reached the crossbar (the "
+          "seal worked in flight), but s02a and s02vc dynamic were boxed in the hall by "
+          "the both-sides seal (route on 53% of steps, 32 m from the goal)."),
 )}
 
 DEFAULT_AGENT = "a00"

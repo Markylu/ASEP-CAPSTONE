@@ -214,6 +214,47 @@ Two gates, both before the 18 runs.
    s03 frames with the seals carried forward: a66's gives the 40 m way back from s23, a67's
    28–31 m pointing out. The round moves to a68.
 
+   **a68, all six** (`~/r30_shake_a68_runs`): `dynamic` 3/6 (s01 21 steps, s02c 43, s02va
+   49). s03: the seal fired at the exit wall (s37–39, route 18 → 29 m), the drone turned
+   back and reached the crossbar at s53–55, then with five steps left went back into tine R;
+   18 lobby steps at the start had spent the budget. **s02a and s02vc ran out 32–33 m from
+   the goal, boxed in the hall**: the both-sides seal fired there too, a route existed on
+   53% of s02a's steps, and the fallbacks wandered. Walls: missed 16.9%, phantom 9.2%.
+
+   **Why the corridor rule cannot be grounded (a69, defined, not flown).** a69 seals both
+   sides only when each side showed a wall somewhere in the window. Measured on the
+   trigger steps of the flown runs (walled trail points over window points, per side):
+   a66 s03 s20 1/8 and 0/8; a67 s03 s40 and s46: window empty (known floor already reaches
+   four cells sideways at the first point, inside the 3 m tine); a68 s03 s37 1/1 and 0/1;
+   a68 s02a s7 1/6 and 1/6, s13 6/8 and 3/8, s25 1/5 and 1/5. The hall shows *more* walls
+   beside the trail than the tine, from the far strips' phantom `no_floor` reads (the g05
+   side bias, probe C2), and inside the tine the perceiver's far floor through the side walls
+   makes the opening test fire at once. Nothing in g05's reads separates a 3 m corridor from
+   a hall, so a68's rule has no honest trigger, and a69 was not flown.
+
+   **Shakedown verdict (2026-11-03).** Six unscored `dynamic` runs per version, s03 first, alone
+   on `:8004` (a64 on a copy on GPU 3, stopped after):
+
+   | Version | dynamic solved | s03 shut tine after the closed door | s03 lobby | walls missed / phantom |
+   |---|---|---|---|---|
+   | a63 | 3/6 (s01, s02a, s02va) | 19 (never left) | 18 | 17.7 / 13.2 |
+   | a64 (code picks) | 2/6 (s01, s02vc) | 31 | 4 | 18.6 / 13.7 |
+   | a66 | **4/6** (s01, s02c, s02va, s02vc) | 35 | 4 | 10.1 / 10.0 |
+   | a67 | 3/6 (s01, s02c, s02va) | 11 | 18 | 16.6 / 8.3 |
+   | a68 | 3/6 (s01, s02c, s02va) | 10, left the tine, ran out at the crossbar | 18 | 16.9 / 9.2 |
+
+   R25D (`a49`) solved 5/6 `dynamic` on a draw the family repeats at about 3–4 of 6
+   (why_14). No turn-around streak above 3 in any version; walls in flight as R25D's or
+   better. **The shakedown's pass rule (s03's shut-tine check holds) was not met by any
+   version**, so by the rule set on 2026-11-02 R30 does not fly. The round's agent is set
+   back to `a66`, the best measured (4/6, no s02 regression, the lobby fixed in its run);
+   a67 and a68 are kept as flown experiments. What the s03 cell still needs is either a
+   corridor signal this perceiver does not give, or a navigator that takes the planner's
+   marker-0 turns (the 18 lobby steps in a63, a67 and a68 are the VLM declining "toward
+   your target" on marker 0, the R11 pattern; code following the route left the lobby in
+   4 steps every time). Whether to fly R30 on a66 against that rule, change the navigator
+   (option B or C of the plan), or stop here, is the operator's call.
+
 ## Builds on
 
 R25D (`a49`). Branch `phase2/r30-pathfinder` from `phase2/r29n-host-noise`.

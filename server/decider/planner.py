@@ -1172,14 +1172,22 @@ def dead_end_seal(mem: spatial.SpatialMemory, here: spatial.Pose,
                         for k in range(1, L + 1)) for side in (1.0, -1.0)}
     if not (walled[1.0] or walled[-1.0]):
         return []
-    # A corridor walled on one seen side is walled on both: the far floor
-    # the perceiver reads through the other side is the route's way round
-    # otherwise (a66 s03 dynamic replay: the divider side showed no wall
-    # within four cells and the route cut through it for 24 m). Sealed
-    # cells yield to known floor seen later (spatial.CostMap).
+    # a69: a corridor is a window with a wall seen on each side somewhere
+    # (the tine's side strips read no_floor on both sides on the way in):
+    # then both sides are sealed seal_cells deep, because the far floor the
+    # perceiver reads through a side is the route's way round otherwise
+    # (a66 s03 dynamic replay: 24 m through the divider against 40). A
+    # window walled on one side only is the s02 hall along the divider:
+    # that side alone is sealed, one_side_cells deep (a68 s02a and s02vc
+    # dynamic: sealing the hall boxed the drone, route on 53% of steps).
+    # Sealed cells yield to known floor seen later (spatial.CostMap).
+    both = walled[1.0] and walled[-1.0]
     for side in (1.0, -1.0):
+        if not both and not walled[side]:
+            continue
+        depth = deep if both else int(d.get("one_side_cells", L))
         for b in window:
-            for k in range(1, deep + 1):
+            for k in range(1, depth + 1):
                 c = lateral(b, side, k)
                 if c not in strong and c not in hardset and [c[0], c[1]] not in out:
                     out.append([c[0], c[1]])
