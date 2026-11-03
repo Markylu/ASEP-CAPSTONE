@@ -1,12 +1,13 @@
 # R30: a49 with a code route planner in place of goal-way and q03
 
-**Agent:** `a71` (`da09e48510b0`; `a63` `7e6b2f2a6d8c`, `a65` `ec86fb5072ec`, `a66`
-`de7f23d07186`, `a67` `c6b3e9877438`, `a68` `1036af9aed35` and `a70` `cf82ad60b931` flew in
+**Agent:** `a66` (`de7f23d07186`; `a63` `7e6b2f2a6d8c`, `a65` `ec86fb5072ec`, `a67`
+`c6b3e9877438`, `a68` `1036af9aed35`, `a70` `cf82ad60b931` and `a71` `da09e48510b0` flew in
 the shakedown too, below; `a69` is defined, unflown) · **Prompt:** `p17` (`cb3578251cfe`) ·
-**Perceiver:** `g05` · **Memory:** `a17g` · **Status:** pre-registered 2026-11-02; offline
+**Perceiver:** `g05` · **Memory:** `a17f` · **Status:** pre-registered 2026-11-02; offline
 probe gate failed as registered; shakedown flown 2026-11-03, its s03 check not met by any
-planner-side version (below); operator 2026-11-03: change the navigator (`a70`, then `a71`,
-shakedown below)
+of seven versions (below); **flown 2026-11-03 on `a66` against the shakedown rule, on the
+operator's instruction** ("Fly a66 round"): the best measured in the shakedown (4/6), and the
+only way to a number comparable to R25D's 14/18
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design and evidence:
 [docs/research/pathfinder-plan.md](../../../docs/research/pathfinder-plan.md). Operator's

@@ -236,7 +236,7 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # walls, local mobility, firm walls. Neither a63 nor a65 flew as a round.
     "R30": {"folder": "R30_pathfinder",
             "title": "a49 with a code route planner in place of goal-way and q03",
-            "agent": "a71", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+            "agent": "a66", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
