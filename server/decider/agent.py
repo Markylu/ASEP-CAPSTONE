@@ -196,6 +196,10 @@ PATHFINDER_A63: Dict[str, Any] = {
     "words": {"path": "the next point on the planned route"},
 }
 
+#: a65: a63's planner with local mobility (spatial.CostMap): the cells around
+#: the drone are never stall cells or inflated stop walls.
+PATHFINDER_A65: Dict[str, Any] = dict(PATHFINDER_A63, local_mobility=True)
+
 
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
@@ -1119,6 +1123,24 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "(orchestrator.code_pick), no navigator call. A diagnostic for the shakedown "
           "only (the ceiling of perceiver plus planner); its rung \"code\" fails the "
           "validity check, so it can never be a round."),
+    Agent("a65", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A65,
+                                          "memory": "a17e",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a63 after the R30 shakedown's s03 dynamic run: memory a17e (a17d plus near "
+          "walls from the two side strips, 2.5 m at a bottom floor end) so a corridor's "
+          "side walls are on the map as the drone flies it, and local mobility (stall "
+          "cells and inflated stop walls never within a cell of the drone). "
+          "eval/phase2/R30_pathfinder/README.md, Probe gate 2."),
 )}
 
 DEFAULT_AGENT = "a00"

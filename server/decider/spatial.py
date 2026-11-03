@@ -326,6 +326,16 @@ class SpatialConfig:
     #: written pop the floor the centre strip saw: a wall straight ahead that
     #: only the tags read there, and that a route search cannot cross.
     free_wins: bool = False
+    #: a17e (a65): near walls from these strips, at these ranges by floor
+    #: end; None keeps a17d's (none). In the R30 shakedown a63 met the shut
+    #: s03 door and then crabbed along the tine for 18 steps: its side walls,
+    #: read "bottom" by the side strips at 2-3 m, were unknown to the map, so
+    #: the route kept hopping to the next unsealed cell of the divider. On
+    #: R25D's recorded steps the two side strips alone seal a true route on
+    #: 0.6% of steps; the centre strips were the phantom-heavy ones (probe
+    #: pathfinder, run 2). Erased by seen floor or a visit.
+    near_walls: Optional[Dict[str, float]] = None
+    near_wall_strips: Tuple[str, ...] = ()
 
     def sha_segments(self) -> List[str]:
         out = ["spatial:" + wording_sha()]
@@ -345,6 +355,9 @@ class SpatialConfig:
             out.append("spatial_a17d:" + wording_sha_a17d())
         if self.free_wins:
             out.append("free_wins")
+        if self.near_walls is not None:
+            out.append("near_walls:" + json.dumps(
+                {"m": self.near_walls, "strips": list(self.near_wall_strips)}, sort_keys=True))
         return out
 
 
@@ -443,6 +456,9 @@ def wording_sha_a17d() -> str:
 
 
 A17D = replace(A17B, name="a17d", door_walls=True, suspects=True, free_wins=True)
+#: a17e (a65): a17d with near walls from the side strips.
+A17E = replace(A17D, name="a17e", near_walls={"bottom": 2.5},
+               near_wall_strips=("far_left", "far_right"))
 
 
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
@@ -455,6 +471,8 @@ def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
         return A17C
     if orchestrator.get("memory") == "a17d":
         return A17D
+    if orchestrator.get("memory") == "a17e":
+        return A17E
     if orchestrator.get("memory") == "a15":
         return A15
     if orchestrator.get("memory") == "a16":
@@ -846,9 +864,11 @@ class SpatialMemory:
                         self.near_wall.pop(c, None)
                     d += CELL_M / 2.0
             return
-        if floor_end in P4["near_wall_m"]:
+        near = self.cfg.near_walls or P4["near_wall_m"]
+        if floor_end in near and (not self.cfg.near_walls
+                                  or strip in self.cfg.near_wall_strips):
             for off in strip_ray_offsets(strip, PARAMS_A17["cone_rays"]):
-                c = cell(ahead(here, (where[2] + off) % 360.0, P4["near_wall_m"][floor_end]))
+                c = cell(ahead(here, (where[2] + off) % 360.0, near[floor_end]))
                 if c not in self.visits and self.free.get(c) != step:
                     self.near_wall[c] = step
             return
@@ -1660,10 +1680,17 @@ class CostMap:
     cells stay hard."""
 
     def __init__(self, mem: SpatialMemory, stall_cells: Iterable[Cell], p: Dict[str, Any],
-                 soft: bool = False, include: Iterable[Cell] = ()) -> None:
+                 soft: bool = False, include: Iterable[Cell] = (),
+                 start: Optional[Cell] = None) -> None:
         self.mem = mem
         self.p = p
         self.soft = soft
+        # a65 (`local_mobility`): the cells around the drone are never stall
+        # cells or inflated stop walls, only walls it has seen or hit. In the
+        # R30 shakedown (s03 dynamic s41) a stall block plus a diagonal bump's
+        # inflation boxed the drone in its new cell, and the soft fallback
+        # then routed through the shut door.
+        self.start = start if p.get("local_mobility") else None
         known = set(mem.visits) | set(mem.free)
         hard = set(mem.stop_wall) | set(mem.door_wall) | set(stall_cells)
         if not soft:
@@ -1683,6 +1710,11 @@ class CostMap:
                                        side % 360.0, k * CELL_M))
                         if w not in known:
                             hard.add(w)
+        if self.start is not None:
+            seen_walls = set(mem.wall) | set(mem.stop_wall) | set(mem.door_wall) | set(mem.near_wall)
+            sx, sy = self.start
+            hard = {c for c in hard
+                    if c in seen_walls or max(abs(c[0] - sx), abs(c[1] - sy)) > 1}
         self.hard = {c for c in hard if c not in mem.visits}
         sealed = set()
         for c in self.hard:

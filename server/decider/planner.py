@@ -1138,11 +1138,11 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
             stall = stall + [(c[0], c[1]) for c in added]
     start, end = spatial.cell(here[:2]), spatial.cell(goal)
     fallback = "none"
-    cm = spatial.CostMap(mem, stall, p, include=(start, end))
+    cm = spatial.CostMap(mem, stall, p, include=(start, end), start=start)
     path = astar(cm, start, end)
     if path is None:
         fallback = "soft"
-        cm = spatial.CostMap(mem, stall, p, soft=True, include=(start, end))
+        cm = spatial.CostMap(mem, stall, p, soft=True, include=(start, end), start=start)
         path = astar(cm, start, end)
     if path is None:
         fallback = "frontier"

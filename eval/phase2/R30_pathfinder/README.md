@@ -1,8 +1,9 @@
 # R30: a49 with a code route planner in place of goal-way and q03
 
-**Agent:** `a63` (`7e6b2f2a6d8c`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
-**Memory:** `a17d` · **Status:** pre-registered 2026-11-02; offline probe gate failed as
-registered (below); not flown
+**Agent:** `a65` (`ec86fb5072ec`; `a63` `7e6b2f2a6d8c` until the shakedown's first run, below) ·
+**Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` · **Memory:** `a17e` ·
+**Status:** pre-registered 2026-11-02; offline probe gate failed as registered (below);
+shakedown in progress; not flown
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design and evidence:
 [docs/research/pathfinder-plan.md](../../../docs/research/pathfinder-plan.md). Operator's
@@ -137,6 +138,23 @@ Two gates, both before the 18 runs.
    these limits) and `python eval/r28_flight.py <runs dir>` (walls). `a64`'s runs are invalid
    by construction (rung `code`): fly them with `--max-attempts 1` so the runner does not
    rerun them, and read them for the ceiling only.
+
+   **Shakedown, first pass (a63, 2026-11-03, sctsvr6 `~/r30_shake`, alone on `:8004`).**
+   s03 `dynamic`: 60 steps, 8+ m, not solved. The route was right where it mattered and
+   wrong in two ways a63 could not know: (1) s4–s17, beside the stem mouth, the planner put
+   "toward your target" on marker 0 for five steps and the navigator flew on along the lobby
+   wall to z = −11.5 (the R11 marker-0 pattern, p17 did not cure it); (2) s36–s41 it took tine
+   R, met the shut door at s41, then crabbed along the tine for 18 steps, reversing twice,
+   never back to the crossbar: the tine's side walls were unknown to the map (the side strips
+   read them `bottom` at 2–3 m, which a17d wrote nowhere), so the route hopped to the next
+   unsealed cell of the divider; and at s41 a stall block plus a diagonal bump's inflation
+   boxed the drone in its new cell, and the soft fallback routed through the shut door.
+   **a65** = a63 with memory `a17e` (near walls at 2.5 m from the two side strips, erased by
+   seen floor or a visit; on R25D's recorded steps they seal a true route on 0.6% of steps)
+   and local mobility (stall cells and inflated stop walls never within a cell of the drone).
+   The round moves to a65 before any round flight; the a63 shakedown runs stay on the host
+   as `~/r30_shake_a63_runs`, read for the record only. The navigator's marker-0 refusals are
+   not addressed by a65 and are what `a64`'s runs measure.
 
 ## Builds on
 
