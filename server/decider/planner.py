@@ -1099,18 +1099,49 @@ def dead_end_seal(mem: spatial.SpatialMemory, here: spatial.Pose,
     the fork"; R26 tried it as a strategist's item and the stall hand-back
     ended it; this makes the map say it."""
     d = p.get("dead_end")
-    if not d or not mem.door_wall:
+    if not d:
         return []
-    if not any(spatial.dist(here[:2], ((c[0] + 0.5) * spatial.CELL_M,
-                                         (c[1] + 0.5) * spatial.CELL_M)) <= d["door_within_m"]
-               for c in mem.door_wall):
+    near_door = any(spatial.dist(here[:2], ((c[0] + 0.5) * spatial.CELL_M,
+                                              (c[1] + 0.5) * spatial.CELL_M)) <= d["door_within_m"]
+                    for c in mem.door_wall)
+    # a68: a closed door read from 3-8 m out counts too (at 1 m a door leaf
+    # reads as plain wall); the point is kept at the strip's range estimate.
+    if not near_door and d.get("closed_read_within_m"):
+        near_door = any(spatial.dist(here[:2], (x, y)) <= d["closed_read_within_m"]
+                        for x, y, _ in mem.closed_doors)
+    if not near_door:
         return []
     strong = set(mem.visits) | (set(mem.free_near) if mem.cfg.near_free_m is not None
                                 else set(mem.free))
+    hardset = (set(mem.wall) | set(mem.near_wall) | set(mem.firm_wall) | set(mem.stop_wall)
+               | set(mem.door_wall))
     trail = [(x, y) for _, x, y, _ in mem.trail]
     if len(trail) < 2:
         return []
-    out: List[List[int]] = []
+    # One corridor axis for the walk: from the trail point axis_m back (by
+    # path) to the newest point. a68: at the wall the trail zig-zags, and a
+    # per-segment "sideways" there pointed along the corridor, so the walk
+    # saw an opening at once and sealed nothing (a67 s03 dynamic replay).
+    back = 0.0
+    j = len(trail) - 1
+    while j > 0 and back < d.get("axis_m", 8.0):
+        back += spatial.dist(trail[j - 1], trail[j])
+        j -= 1
+    span = spatial.dist(trail[j], trail[-1])
+    if span < 3.0:
+        return []
+    ux, uy = (trail[-1][0] - trail[j][0]) / span, (trail[-1][1] - trail[j][1]) / span
+    nx, ny = -uy, ux
+    L = d["lateral_cells"]
+
+    def lateral(b: spatial.Point, side: float, k: int) -> Tuple[int, int]:
+        return spatial.cell((b[0] + side * nx * k * spatial.CELL_M,
+                             b[1] + side * ny * k * spatial.CELL_M))
+
+    # The window: trail points back to the junction, the first point where
+    # known ground reaches open_cells sideways (the crossbar's own trail from
+    # a tine mouth; never inside a 3 m tine), or max_back_m of trail.
+    window: List[spatial.Point] = []
     back = 0.0
     for i in range(len(trail) - 1, 0, -1):
         a, b = trail[i - 1], trail[i]
@@ -1120,26 +1151,37 @@ def dead_end_seal(mem: spatial.SpatialMemory, here: spatial.Pose,
         back += seg
         if back > d["max_back_m"]:
             break
-        ux, uy = (b[0] - a[0]) / seg, (b[1] - a[1]) / seg
-        nx, ny = -uy, ux
-        opening = False
-        for side in (1.0, -1.0):
-            reach = 0.0
-            for k in range(1, d["lateral_cells"] + 1):
-                q = (b[0] + side * nx * k * spatial.CELL_M, b[1] + side * ny * k * spatial.CELL_M)
-                if spatial.cell(q) in strong:
-                    reach = k * spatial.CELL_M
-                else:
-                    break
-            if reach > d["open_lateral_m"]:
-                opening = True
+        opening = any(all(lateral(b, side, k) in strong for k in range(1, d["open_cells"] + 1))
+                      for side in (1.0, -1.0))
         if opening:
             break
-        for side in (1.0, -1.0):
-            for k in range(1, d["lateral_cells"] + 1):
-                q = (b[0] + side * nx * k * spatial.CELL_M, b[1] + side * ny * k * spatial.CELL_M)
-                c = spatial.cell(q)
-                if c not in strong and [c[0], c[1]] not in out:
+        window.append(b)
+    if not window:
+        return []
+    # a68: a side is a corridor wall when a seen wall lies within L cells of
+    # any window point on that side (the side strips read the tine's walls
+    # no_floor on the way in; the s02 hall at door B shows none): the gaps
+    # on that side, cells that are not known ground, are sealed along the
+    # whole window. Known floor alone cannot tell a 3 m corridor from a hall.
+    # The seal runs seal_cells deep: a band the route could skirt for less
+    # than the way back is no seal (a66 s03 dynamic replay: 4 deep, the
+    # route went round the band's end through the solid, 21 m against 40).
+    out: List[List[int]] = []
+    deep = int(d.get("seal_cells", L))
+    walled = {side: any(lateral(b, side, k) in hardset for b in window
+                        for k in range(1, L + 1)) for side in (1.0, -1.0)}
+    if not (walled[1.0] or walled[-1.0]):
+        return []
+    # A corridor walled on one seen side is walled on both: the far floor
+    # the perceiver reads through the other side is the route's way round
+    # otherwise (a66 s03 dynamic replay: the divider side showed no wall
+    # within four cells and the route cut through it for 24 m). Sealed
+    # cells yield to known floor seen later (spatial.CostMap).
+    for side in (1.0, -1.0):
+        for b in window:
+            for k in range(1, deep + 1):
+                c = lateral(b, side, k)
+                if c not in strong and c not in hardset and [c[0], c[1]] not in out:
                     out.append([c[0], c[1]])
     return out
 

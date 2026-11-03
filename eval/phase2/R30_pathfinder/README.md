@@ -192,6 +192,28 @@ Two gates, both before the 18 runs.
    and round, waypoint 3.5 m toward the crossbar, where a66's was 12–16 m into the divider.
    The round moves to a67; a66's remaining runs finish for the s02 record.
 
+   **a66, all six** (`~/r30_shake_a66_runs`): `dynamic` 4/6 (s01 31 steps, s02c 29, s02va
+   28, s02vc 55); s02a ran out (wrong side first, reached door A's position at s33 and
+   turned away); s03 as above (lobby 4 steps, shut tine 35). Walls: missed 10.1%, phantom
+   10.0%.
+
+   **a67, all six** (`~/r30_shake_a67_runs`): `dynamic` 3/6 (s01 21 steps, s02c 28, s02va
+   28); s02a, s02vc and s03 ran out. s03: 18 lobby steps (the navigator's marker-0 refusals
+   again), the door read `closed` first at s46 and the drone spun at the exit wall. Its
+   reads there: on every nose-on look the door leaf is `no_floor` with no doorway, so no
+   door wall was ever written and `dead_end_seal` never fired; the door reads `closed` only
+   from 3–8 m out (s40, s46, s51).
+   **a68** = a67 with the dead end fired by any closed-door read whose point lies within
+   5 m (the memory keeps closed-door points at the strip's range), and the corridor walk
+   redone: one axis over the last 8 m of trail; a side is a corridor wall when a seen wall
+   lies within four cells of any trail point in the window; a corridor walled on one seen
+   side is sealed on both, eight cells deep (a four-deep band was skirted through the solid
+   for 24 m against 40); the window ends where known floor reaches four cells sideways (the
+   crossbar's own trail from a tine mouth; never inside a 3 m tine). Sealed cells yield to
+   known floor seen later (a door looked through reopens). Replaying a66's and a67's own
+   s03 frames with the seals carried forward: a66's gives the 40 m way back from s23, a67's
+   28–31 m pointing out. The round moves to a68.
+
 ## Builds on
 
 R25D (`a49`). Branch `phase2/r30-pathfinder` from `phase2/r29n-host-noise`.

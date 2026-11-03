@@ -210,6 +210,17 @@ PATHFINDER_A67: Dict[str, Any] = dict(
     dead_end={"door_within_m": 2.0, "lateral_cells": 3, "open_lateral_m": 2.5,
               "max_back_m": 15.0})
 
+#: a68: the dead end also fires on a closed door read from 3-8 m out whose
+#: estimated point is within 5 m (a67 s03 dynamic: at the exit wall the door
+#: leaf read no_floor with no doorway, so door_within_m never fired).
+PATHFINDER_A68: Dict[str, Any] = dict(
+    PATHFINDER_A67,
+    # lateral_cells 4: a side is a corridor wall when a seen wall lies within
+    # four cells of the trail point; axis_m: the trail length the corridor
+    # axis is taken over.
+    dead_end={"door_within_m": 2.0, "closed_read_within_m": 5.0, "lateral_cells": 4,
+              "seal_cells": 8, "open_cells": 4, "axis_m": 8.0, "max_back_m": 15.0})
+
 
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
     Agent("a00", "p02", {}, "Phase 1 agent: p02, one frame per step, no memory."),
@@ -1186,6 +1197,24 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "known ground. R30 shakedown, a66 s03 dynamic s21-34: the route ran through "
           "floor the perceiver had read 4 m deep inside the solid beyond the tine's outer "
           "wall, and the drone bumped it cell by cell."),
+    Agent("a68", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A68,
+                                          "memory": "a17g",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a67 with the dead end also fired by a closed door read from 3-8 m out whose "
+          "point lies within 5 m. a67's s03 dynamic shakedown run: at the exit wall the "
+          "door leaf read no_floor with no doorway on every nose-on look, so no door wall "
+          "was ever written and the seal never fired; the door read closed at s46 and s51 "
+          "from 4.5 m out."),
 )}
 
 DEFAULT_AGENT = "a00"

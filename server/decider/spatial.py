@@ -684,6 +684,10 @@ class SpatialMemory:
     firm_wall: Dict[Tuple[int, int], int] = field(default_factory=dict)
     #: a17g: floor seen within near_free_m, or through a confirmed open door.
     free_near: Dict[Tuple[int, int], int] = field(default_factory=dict)
+    #: a17d on: where closed doors were read, (x, y, step), at the strip's
+    #: floor-end range. At 1 m a door leaf reads no_floor with no doorway, so
+    #: doors are known closed from 3-8 m out (a67 s03 dynamic s46, s51).
+    closed_doors: List[Tuple[float, float, int]] = field(default_factory=list)
     cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
@@ -872,6 +876,11 @@ class SpatialMemory:
         P4 = PARAMS_A17D
         here = where[:2]
         k = STRIPS.index(strip)
+        if door == "closed":
+            rng = dict(P4["door_suspect_m"], **P4["door_wall_m"]).get(floor_end)
+            if rng is not None:
+                q = ahead(here, (where[2] + strip_offset(strip)) % 360.0, rng)
+                self.closed_doors.append((q[0], q[1], step))
         if self.cfg.door_walls and door == "closed" and floor_end in P4["door_wall_m"]:
             reach = P4["door_wall_m"][floor_end]
             lo, hi = max(0, k - P4["door_wall_strips"]), min(len(STRIPS) - 1,
@@ -1741,7 +1750,10 @@ class CostMap:
         strong_free = set(mem.free_near) if mem.cfg.near_free_m is not None else set(mem.free)
         known = set(mem.visits) | strong_free
         self.strong_free = strong_free
-        hard = set(mem.stop_wall) | set(mem.door_wall) | set(mem.firm_wall) | set(stall_cells)
+        # Stall cells and dead-end seals are the planner's own inferences:
+        # known ground seen later (a door looked through) overrides them.
+        inferred = {c for c in stall_cells if c not in known}
+        hard = set(mem.stop_wall) | set(mem.door_wall) | set(mem.firm_wall) | inferred
         if not soft:
             hard |= set(mem.wall) | set(mem.near_wall)
         n = int(p.get("inflate_stop_walls", 1))
