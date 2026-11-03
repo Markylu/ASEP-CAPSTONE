@@ -336,6 +336,13 @@ class SpatialConfig:
     #: pathfinder, run 2). Erased by seen floor or a visit.
     near_walls: Optional[Dict[str, float]] = None
     near_wall_strips: Tuple[str, ...] = ()
+    #: a17f (a66): a nose-on wall run (three or more adjacent no_floor strips)
+    #: and a confirmed closed door are firm walls, erased only by a visit. In
+    #: the R30 shakedown (a63 s02c dynamic, a64 s03 dynamic) the walls seen
+    #: nose-on at the divider and the exit wall were popped by the next
+    #: grazing look along them (a17's "a newer look overwrites"), so the
+    #: route kept finding an unsealed cell there and the drone oscillated.
+    firm_walls: bool = False
 
     def sha_segments(self) -> List[str]:
         out = ["spatial:" + wording_sha()]
@@ -358,6 +365,8 @@ class SpatialConfig:
         if self.near_walls is not None:
             out.append("near_walls:" + json.dumps(
                 {"m": self.near_walls, "strips": list(self.near_wall_strips)}, sort_keys=True))
+        if self.firm_walls:
+            out.append("firm_walls")
         return out
 
 
@@ -459,6 +468,8 @@ A17D = replace(A17B, name="a17d", door_walls=True, suspects=True, free_wins=True
 #: a17e (a65): a17d with near walls from the side strips.
 A17E = replace(A17D, name="a17e", near_walls={"bottom": 2.5},
                near_wall_strips=("far_left", "far_right"))
+#: a17f (a66): a17e with firm walls.
+A17F = replace(A17E, name="a17f", firm_walls=True)
 
 
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
@@ -473,6 +484,8 @@ def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
         return A17D
     if orchestrator.get("memory") == "a17e":
         return A17E
+    if orchestrator.get("memory") == "a17f":
+        return A17F
     if orchestrator.get("memory") == "a15":
         return A15
     if orchestrator.get("memory") == "a16":
@@ -654,6 +667,8 @@ class SpatialMemory:
     door_wall: Dict[Tuple[int, int], int] = field(default_factory=dict)
     suspect: Dict[Tuple[int, int], int] = field(default_factory=dict)
     near_wall: Dict[Tuple[int, int], int] = field(default_factory=dict)
+    #: a17f: walls seen nose-on across a run of strips; a visit alone erases.
+    firm_wall: Dict[Tuple[int, int], int] = field(default_factory=dict)
     cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
@@ -667,6 +682,7 @@ class SpatialMemory:
         self.door_wall.pop(c, None)
         self.suspect.pop(c, None)
         self.near_wall.pop(c, None)
+        self.firm_wall.pop(c, None)
 
     def move(self, step: int, before: Pose, after: Pose, action: Dict[str, Any]) -> None:
         """What a move did, from where it started and where the next decision was."""
@@ -777,8 +793,11 @@ class SpatialMemory:
                         seen_by.setdefault(c, set()).add(strip)
                     # a17d: floor seen here clears a suspicion, a near wall or
                     # a door wall (from an earlier step, or another strip of
-                    # this look whose ray end fell in this cell).
-                    self.door_wall.pop(c, None)
+                    # this look whose ray end fell in this cell). a17f: a door
+                    # wall from an earlier look is firm (the free_wins pass
+                    # below still clears one from this look).
+                    if not self.cfg.firm_walls:
+                        self.door_wall.pop(c, None)
                     if self.suspect.get(c, step) != step:
                         self.suspect.pop(c, None)
                     if self.near_wall.get(c, step) != step:
@@ -912,7 +931,10 @@ class SpatialMemory:
                         # over floor seen earlier (a door beside the wall), and
                         # with free_wins never over floor seen in this look.
                         if c not in self.visits and not (beyond and c in self.free):
-                            self.wall[c] = step
+                            if self.cfg.firm_walls:
+                                self.firm_wall[c] = step
+                            else:
+                                self.wall[c] = step
                             self.free.pop(c, None)
                         d += CELL_M / 2.0
             run = []
@@ -1262,6 +1284,8 @@ class SpatialMemory:
             out["cells_door_wall"] = len(self.door_wall)
             out["cells_suspect"] = len(self.suspect)
             out["cells_near_wall"] = len(self.near_wall)
+        if self.cfg.firm_walls:
+            out["cells_firm_wall"] = len(self.firm_wall)
         return out
 
 
@@ -1692,7 +1716,7 @@ class CostMap:
         # then routed through the shut door.
         self.start = start if p.get("local_mobility") else None
         known = set(mem.visits) | set(mem.free)
-        hard = set(mem.stop_wall) | set(mem.door_wall) | set(stall_cells)
+        hard = set(mem.stop_wall) | set(mem.door_wall) | set(mem.firm_wall) | set(stall_cells)
         if not soft:
             hard |= set(mem.wall) | set(mem.near_wall)
         n = int(p.get("inflate_stop_walls", 1))
@@ -1711,7 +1735,8 @@ class CostMap:
                         if w not in known:
                             hard.add(w)
         if self.start is not None:
-            seen_walls = set(mem.wall) | set(mem.stop_wall) | set(mem.door_wall) | set(mem.near_wall)
+            seen_walls = (set(mem.wall) | set(mem.stop_wall) | set(mem.door_wall)
+                          | set(mem.near_wall) | set(mem.firm_wall))
             sx, sy = self.start
             hard = {c for c in hard
                     if c in seen_walls or max(abs(c[0] - sx), abs(c[1] - sy)) > 1}

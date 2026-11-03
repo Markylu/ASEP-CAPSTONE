@@ -1141,6 +1141,23 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "side walls are on the map as the drone flies it, and local mobility (stall "
           "cells and inflated stop walls never within a cell of the drone). "
           "eval/phase2/R30_pathfinder/README.md, Probe gate 2."),
+    Agent("a66", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A65,
+                                          "memory": "a17f",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a65 with memory a17f: a nose-on wall run and a confirmed closed door are firm "
+          "walls, erased only by a visit. R30 shakedown, a63 s02c dynamic and a64 s03 "
+          "dynamic: the walls seen nose-on at the divider and the exit wall were popped by "
+          "the next grazing look along them, and the drone oscillated at the wall."),
 )}
 
 DEFAULT_AGENT = "a00"
