@@ -26,6 +26,52 @@ R28 (2026-10-31) tried the split's wall reader first: five readers (`w01`, `k01`
 `w04`), none passed its gate, not flown ([R28](../../eval/phase2/R28_wall_reader/README.md)).
 Next idea: `w05`, a code reader with depth cues from higher in the frame.
 
+Probe LD (2026-11-01) then changed the image instead of the prompt: 1,680 re-lit renders, 10,080
+calls. Refuted: the sites' lighting is the best of seven for walls, and every brighter floor traded
+misses for phantoms as the prompts had ([LD](../../eval/phase2/_probes/ld/README.md)). Two side
+results matter more:
+- alone, with a warm prefix cache, the model is deterministic (3,359 of 3,360 repeats identical);
+- two thirds of the walls `g05` missed in flight are found when the same frame is read alone.
+So the wall-reading lever is exhausted on this model, and the next round changes the host, not the
+agent: R29N/R29S fly `a49` shared and alone
+([README](../../eval/phase2/R29N_host_noise_shared/README.md)). `w05` is set aside unless R29S
+still misses more than 10% of walls.
+
+R29 flew the same day: R29N 11/18, R29S 14/18, and alone the perceiver still missed 14.9% of walls
+(shared 15.4%). The LD replay had read each frame after its own first read, with a warm prefix
+cache; a flight frame is cold, and a cold call at temperature 0 is still a draw on this server
+(step-0 reading differs between the two rounds in 11 of 18 cells; where every reading matched, s02vc
+`final`, the two rounds ran the same 60 steps). The host is not the lever for missed walls. Alone
+did cut phantom walls (12.0 → 9.3%) and latency (p50 1.65 → 1.21 s), one seed. `a49` over three
+rounds: 14, 11, 14 ([R29S summary](../../eval/phase2/R29S_host_noise_solo/summary.md)).
+
+Probe DE (same day, offline) then asked whether the s03 dead end can be read from a49's record in
+time to act. The way out is on q03's menu at 22 of 22 dead-end calls and picked 0 times, as on the
+a43 line. But the only early sign, a closed door in view, is in view at 72% of s02 detour calls too
+(door B shares the wall with the open door), and the clean sign, dwelling in the pocket, comes with
+4–22 steps left against the 28 the way out needs. The decision that loses s03 `final` is made at
+the crossbar (steps 32–34) on nothing: both tine mouths are equal frontiers. Refuted as a rule on
+these signs ([DE](../../eval/phase2/_probes/de/README.md)); the untried cues are the map's pocket
+geometry and an immediate turn-back at the first `d01`-confirmed closed door.
+
+Probe PG tried the geometry: to the memory, which is the drone's own trail, the strip along s02's
+door wall is as much a pocket as the tine (25% of s02 steps), and in the tine the cue fires with
+14–30 steps left. Refuted ([PG](../../eval/phase2/_probes/pg/README.md)). What both probes leave
+standing is a budget fact: in s03 `dynamic` the drone reaches the crossbar by step 9 and spends
+15–33 steps there asking q03 every few steps and getting `explore` or a frontier a cell away; two
+`final` runs lose 31 steps in the lobby first. A run that commits to a tine by step 12 can meet the
+shut door, turn back and still reach the other door by about step 44. The next s03 candidate is a
+code rule at the crossbar (pick a mouth at once, turn to the other on a confirmed closed door),
+not a dead-end detector.
+
+Probe CR tried that rule's trigger: a two-sided fork is on q03's menu at a crossbar call in 1 of
+5 failed runs (3 with the sides allowed behind the drone), because at steps 9–20 the drone faces
+the x = 5 wall and the map knows nothing of the tine mouths; loosened to one side it fires at 72%
+of s02 divider calls. Refuted ([CR](../../eval/phase2/_probes/cr/README.md)). The three s03 probes
+end in one sentence: the drone loses s03 at blocking walls (crossbar, lobby) because it looks at
+the wall, not along it, and the along-the-wall machinery that would (R21/R22) cost `final` runs.
+`a49` stays the base; the s03 `final`/`dynamic` cells are a crossbar coin when reached in time.
+
 ## Lessons
 
 ### About measuring the perceiver
@@ -42,6 +88,9 @@ Next idea: `w05`, a code reader with depth cues from higher in the frame.
    - Even alone, 18.6% of strip fields differ between repeat reads, and the first (cold) call is the
      odd one out.
    - Temperature 0 does not make a read deterministic on vLLM.
+   - It does when the call is alone and the prefix is cached: probe LD's three repeats at
+     concurrency 1 were identical on 3,359 of 3,360 image/read pairs. The noise is the server's
+     state, not sampling.
    - One seed-1 round cannot resolve ±1 run (`a17b` family: 11.3 ± 1.4).
 3. **Errors follow the image side.**
    - `g05` reads the image's left half worse (C1).

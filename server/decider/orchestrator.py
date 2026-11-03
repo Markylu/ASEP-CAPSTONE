@@ -278,7 +278,8 @@ async def perceive(s: Step) -> Optional[str]:
 
     def read(b64: str):
         return ask(s, views.perceiver(p, s.manifest, b64),
-                   schema.PERCEIVER_SCHEMA_NAME, schema.perceiver_schema(p.version),
+                   schema.PERCEIVER_SCHEMA_NAME,
+                   schema.perceiver_schema(p.version, reason_cap=s.features.get("reason_cap")),
                    lambda parsed: perception_from(parsed, p.version,
                                                   s.features.get("floor_map")),
                    PERCEIVER_MAX_TOKENS)
@@ -400,7 +401,8 @@ async def perceive_walls(s: Step, read) -> Optional[str]:
     for a49. The step's latency counts both calls."""
     p = prompts.get(s.features["wall_reader"])
     walls = ask(s, views.wall_reader(p, s.manifest, s.clean_b64),
-                schema.WALL_READER_SCHEMA_NAME, schema.wall_reader_schema(),
+                schema.WALL_READER_SCHEMA_NAME,
+                schema.wall_reader_schema(reason_cap=s.features.get("reason_cap")),
                 lambda parsed: walls_from(parsed, s.features.get("floor_map")),
                 PERCEIVER_MAX_TOKENS)
     seen, seen_w = await asyncio.gather(read(s.clean_b64), walls)

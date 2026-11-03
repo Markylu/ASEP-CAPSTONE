@@ -23,6 +23,8 @@ REPO=$(cd "$(dirname "$0")/../.." && pwd)
 IMAGE=${PHASE1_IMAGE:-asep-phase1:latest}
 # PHASE1_DECIDER, DECIDER_PORT, PHASE1_STATE and XVFB_SERVERNUM set per lane
 # give parallel flights their own decider, Godot cache and X display.
+# LITELLM_BASE_URL, when set, points a lane's decider at another vLLM instance
+# (R29S: one instance per lane); unset, the remote profile's :8004.
 DECIDER=${PHASE1_DECIDER:-phase1-decider}
 STATE=${PHASE1_STATE:-$HOME/.cache/asep-phase1}
 # Not 8000: vLLM's text models hold :8000-:8003 on sctsvr6.
@@ -42,6 +44,7 @@ run() {
         -v "$REPO:/repo" -v "$STATE:/tmp/home" $gitconfig \
         -e USER="${USER:-operator}" -e LP_NUM_THREADS="${LP_NUM_THREADS:-16}" \
         ${XVFB_SERVERNUM:+-e XVFB_SERVERNUM="$XVFB_SERVERNUM"} \
+        ${LITELLM_BASE_URL:+-e LITELLM_BASE_URL="$LITELLM_BASE_URL"} \
         "$@"
 }
 

@@ -1,0 +1,13 @@
+{
+  "round": "R29S",
+  "title": "a49, one lane per vLLM instance (every call alone)",
+  "citable": false,
+  "agent_version": "a49",
+  "status": "complete",
+  "git_sha": "822f1d7",
+  "started": "2026-11-02T16:34:24+00:00",
+  "finished": "2026-11-02T16:55:18+00:00",
+  "operator": "Markylu",
+  "notes": "Flown 2026-11-02 at 822f1d7, R29N first, then R29S; the :8006-:8008 copies stopped after R29S.",
+  "lanes": "sctsvr6 lanes 1-4 (asep-r29s-l1..4), one vLLM each: :8004, :8006, :8007, :8008 (copies on GPUs 3-5), nothing else on any of them"
+}
