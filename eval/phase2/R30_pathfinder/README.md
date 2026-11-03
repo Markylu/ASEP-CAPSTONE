@@ -278,6 +278,29 @@ Two gates, both before the 18 runs.
    taken on ≥ 50% of offers. Readouts: `eval/r30_check.py` now prints `behind` and critic
    `changed/asked` per run.
 
+   **a70, all six** (2026-11-03, `~/r30_shake_a70_runs`): `dynamic` 2/6 (s01 28 steps,
+   s02vc 47); s02a, s02c, s02va and s03 ran out. **The navigator leak is closed:** "toward
+   your target" on marker 0 taken 46/46 (a68: about half), on a forward move 228/242; s03
+   lobby 11 steps; the sentence on 46 steps; the critic asked 39 times and changed the pick
+   25. Walls in flight: missed 18.3%, phantom 11.8%; longest streak 3. **The planner is
+   now the whole failure.** s03: the door read `closed` at s27, then 30 steps in the shut
+   tine, open tine 0: from s29 the route alternated between the shut door (9.4 m) and the
+   way out (14 m) every two or three steps as nose-on looks wrote walls and the next look
+   moved the route to another unsealed divider cell, and the navigator took every turn it
+   was given, so the drone turned in place. a68's dead-end seal is what took the drone out
+   of that tine in flight. s02c: the route pointed through the divider at z ≈ −3, where
+   g05 and d01 read an `open` doorway at s14 and s23 (there is none; door C is at z ≈ +9)
+   and the open-door free rays opened the map there; a66's s02c had the same route at
+   s8–s12 but its navigator left it and found the real door at s19. s02a and s02va the
+   same pattern (crossed the door line only at s55 and s54). So a66's 4/6 was partly its
+   navigator ignoring the route where the image knew better; a70 obeys a route that is
+   wrong at phantom doors.
+
+   **a71** = a70's navigator on a68's planner (memory `a17g`, dead-end seal
+   `PATHFINDER_A68`): the s03 oscillation is the case the seal cured in flight, and a68's
+   own s03 loss was the lobby (18 steps), which a70 fixes. Known risk, carried: a68's
+   both-sides seal boxed s02a and s02vc in the hall. Smoke: 627 steps, 0 failed.
+
 ## Builds on
 
 R25D (`a49`). Branch `phase2/r30-pathfinder` from `phase2/r29n-host-noise`.
