@@ -244,6 +244,8 @@ Two gates, both before the 18 runs.
    | a66 | **4/6** (s01, s02c, s02va, s02vc) | 35 | 4 | 10.1 / 10.0 |
    | a67 | 3/6 (s01, s02c, s02va) | 11 | 18 | 16.6 / 8.3 |
    | a68 | 3/6 (s01, s02c, s02va) | 10, left the tine, ran out at the crossbar | 18 | 16.9 / 9.2 |
+   | a70 (navigator) | 2/6 (s01, s02vc) | 30 | 11 | 18.3 / 11.8 |
+   | a71 (navigator + a68 planner) | 3/6 (s01, s02c, s02vc) | never reached the stem | 60 | 25.5 / 9.1 |
 
    R25D (`a49`) solved 5/6 `dynamic` on a draw the family repeats at about 3–4 of 6
    (why_14). No turn-around streak above 3 in any version; walls in flight as R25D's or
@@ -300,6 +302,35 @@ Two gates, both before the 18 runs.
    `PATHFINDER_A68`): the s03 oscillation is the case the seal cured in flight, and a68's
    own s03 loss was the lobby (18 steps), which a70 fixes. Known risk, carried: a68's
    both-sides seal boxed s02a and s02vc in the hall. Smoke: 627 steps, 0 failed.
+
+   **a71, all six** (2026-11-03, `~/r30_shake_a71_runs`): `dynamic` 3/6 (s01 21 steps,
+   s02c 54, s02vc 51); s02a, s02va and s03 ran out. Navigator as a70's: "toward" on marker
+   0 taken 31/31, forward 239/254, critic changed 23 of 38 asks; longest streak 3. Walls:
+   missed 25.5%, phantom 9.1%. **s03, a new failure: 60 steps in the lobby, the stem never
+   entered.** At s4 the drone stood in the stem mouth (x = 15.2, z = −1.6) looking down
+   the corridor and g05 read `no_floor` on all five strips; a17f wrote that as a firm wall
+   across the mouth, erased only by a visit, which the wall itself now forbids. The route
+   then searched the lobby for another way in (none exists; path 30–46 m) for 56 steps,
+   with two more nose-on `no_floor` reads (s11–s13, s18) adding firm walls along the lobby's
+   west side. a66's s03 run, on the same memory, got a floor read at the mouth and went
+   through. s02va: 40 steps turning at the divider around z ≈ 0, where g05 and d01 read an
+   `open` doorway on five steps (s9, s10, s16–s18, s25; the real door A is at z ≈ −9) and
+   the open-door free rays kept re-opening the map there. s02a: a dead-end seal fired at
+   s10–s16 (46 cells) and the route went around the hall (56–70 m) before coming back.
+
+   **Verdict after seven versions (a63, a64, a66, a67, a68, a70, a71), 42 runs.** The
+   navigator leak is closed (a70's sentence and critic: marker-0 "toward" taken 77/77 over
+   a70 and a71, against about half before). What remains is the perceiver: (1) a phantom
+   `open` doorway in s02's divider, confirmed by d01, that the route trusts and the map
+   re-opens; (2) a nose-on `no_floor` read looking into a 3 m corridor (s03's stem mouth,
+   the shut tine's end), which a17f makes a firm wall; (3) the shut tine's side walls, which
+   g05 cannot tell from a hall. Each planner-side fix moved the s03 failure from one of
+   these to another (a66 35 steps in the tine, a68 out of the tine but boxed in s02, a71
+   never in the stem). No version met the shakedown's s03 check; by the rule R30 does not
+   fly. The round's lock is on a71 (the last flown); the best measured is still a66 at 4/6,
+   a count one draw of the family can move by two. Whether to fly a round on a66 or a71
+   against the rule, which alone would give a number comparable to R25D's 14/18, or to
+   stop here, is the operator's call.
 
 ## Builds on
 
