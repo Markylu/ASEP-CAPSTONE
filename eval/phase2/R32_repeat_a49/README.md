@@ -1,8 +1,8 @@
 # R32 / R32P: a49 and a66 on the ten contested cells, three seeds each
 
 **Agents:** R32 `a49` (`83f7a6a19b01`), R32P `a66` (`de7f23d07186`) · **Prompt:** `p17`
-(`cb3578251cfe`) · **Status:** laid out 2026-11-04 on the operator's instruction ("Set up R32"),
-not flown
+(`cb3578251cfe`) · **Status:** laid out 2026-11-04 on the operator's instruction ("Set up R32"); flown
+2026-11-04 ("u fly it"), 60/60 valid
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Comes from
 [docs/research/r30-analysis-and-proposals.md](../../../docs/research/r30-analysis-and-proposals.md),
@@ -101,4 +101,4 @@ flown; R32 follows it on the same branch).
 
 ## Outcome
 
-Not flown.
+Flown 2026-11-04, both rounds together, eight lanes on `:8004`: 60/60 valid. **`a66` 15/30, `a49` 11/30**, gap 4 at the rule's threshold of 3: **the final 90 flies `a66`.** s03 `final` 3/3 against 1/3; s03 `dynamic` 0/6; s02 12/24 against 10/24. Fisher p = 0.44. [summary.md](summary.md).

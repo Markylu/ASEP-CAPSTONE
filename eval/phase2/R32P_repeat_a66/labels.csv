@@ -1,0 +1,31 @@
+run_id,site,arm,seed,auto_label,label,ack_step,tags,override_note,reviewer,date
+p2_R32P_s02a_dynamic_seed1_a01,s02a,dynamic,1,replan_failure,replan_failure,3,,"label confirmed (never through: min x 0.45, 5 post-change collisions, 14.0 m from the goal at 60 steps).",Claude review,2026-11-04
+p2_R32P_s02a_dynamic_seed2_a01,s02a,dynamic,2,success,success,3,,label confirmed (goal reached at step 25).,Claude review,2026-11-04
+p2_R32P_s02a_dynamic_seed3_a01,s02a,dynamic,3,success,success,4,,label confirmed (goal reached at step 46).,Claude review,2026-11-04
+p2_R32P_s02a_final_seed1_a01,s02a,final,1,success,success,,,label confirmed (goal reached at step 38). static arm: ack_step cleared.,Claude review,2026-11-04
+p2_R32P_s02a_final_seed2_a01,s02a,final,2,success,success,,,label confirmed (goal reached at step 22). static arm: ack_step cleared.,Claude review,2026-11-04
+p2_R32P_s02a_final_seed3_a01,s02a,final,3,replan_failure,replan_failure,,,"label confirmed (never through: min x 0.45, 6 post-change collisions, 14.2 m from the goal at 60 steps). static arm: ack_step cleared.",Claude review,2026-11-04
+p2_R32P_s02c_dynamic_seed1_a01,s02c,dynamic,1,replan_failure,replan_failure,5,,"label confirmed (never through: min x 0.45, 3 post-change collisions, 15.2 m from the goal at 60 steps).",Claude review,2026-11-04
+p2_R32P_s02c_dynamic_seed2_a01,s02c,dynamic,2,replan_failure,replan_failure,3,,"label confirmed (never through: min x 0.7, 3 post-change collisions, 13.2 m from the goal at 60 steps).",Claude review,2026-11-04
+p2_R32P_s02c_dynamic_seed3_a01,s02c,dynamic,3,replan_failure,replan_failure,5,,"label confirmed (never through: min x 0.7, 2 post-change collisions, 25.0 m from the goal at 60 steps).",Claude review,2026-11-04
+p2_R32P_s02c_final_seed1_a01,s02c,final,1,replan_failure,replan_failure,,,"label confirmed (never through: min x 0.7, 4 post-change collisions, 14.7 m from the goal at 60 steps). static arm: ack_step cleared.",Claude review,2026-11-04
+p2_R32P_s02c_final_seed2_a01,s02c,final,2,replan_failure,replan_failure,,,"label confirmed (never through: min x 0.45, 1 post-change collisions, 12.9 m from the goal at 60 steps). static arm: ack_step cleared.",Claude review,2026-11-04
+p2_R32P_s02c_final_seed3_a01,s02c,final,3,success,success,,,label confirmed (goal reached at step 52). static arm: ack_step cleared.,Claude review,2026-11-04
+p2_R32P_s02va_dynamic_seed1_a01,s02va,dynamic,1,success,success,5,,label confirmed (goal reached at step 28).,Claude review,2026-11-04
+p2_R32P_s02va_dynamic_seed2_a01,s02va,dynamic,2,replan_failure,replan_failure,3,,"label confirmed (never through: min x 0.7, 0 post-change collisions, 13.5 m from the goal at 60 steps).",Claude review,2026-11-04
+p2_R32P_s02va_dynamic_seed3_a01,s02va,dynamic,3,success,success,4,,label confirmed (goal reached at step 47).,Claude review,2026-11-04
+p2_R32P_s02va_final_seed1_a01,s02va,final,1,success,success,,,label confirmed (goal reached at step 36). static arm: ack_step cleared.,Claude review,2026-11-04
+p2_R32P_s02va_final_seed2_a01,s02va,final,2,replan_failure,replan_failure,,,"label confirmed (never through: min x 0.59, 4 post-change collisions, 12.6 m from the goal at 60 steps). static arm: ack_step cleared.",Claude review,2026-11-04
+p2_R32P_s02va_final_seed3_a01,s02va,final,3,success,success,,,label confirmed (goal reached at step 46). static arm: ack_step cleared.,Claude review,2026-11-04
+p2_R32P_s02vc_dynamic_seed1_a01,s02vc,dynamic,1,success,success,4,,label confirmed (goal reached at step 50).,Claude review,2026-11-04
+p2_R32P_s02vc_dynamic_seed2_a01,s02vc,dynamic,2,success,success,5,,label confirmed (goal reached at step 40).,Claude review,2026-11-04
+p2_R32P_s02vc_dynamic_seed3_a01,s02vc,dynamic,3,replan_failure,replan_failure,3,,"label confirmed (never through: min x 0.34, 6 post-change collisions, 15.6 m from the goal at 60 steps).",Claude review,2026-11-04
+p2_R32P_s02vc_final_seed1_a01,s02vc,final,1,replan_failure,replan_failure,,,"label confirmed (never through: min x 0.45, 8 post-change collisions, 15.2 m from the goal at 60 steps). static arm: ack_step cleared.",Claude review,2026-11-04
+p2_R32P_s02vc_final_seed2_a01,s02vc,final,2,replan_failure,replan_failure,,,"label confirmed (never through: min x 0.7, 3 post-change collisions, 13.1 m from the goal at 60 steps). static arm: ack_step cleared.",Claude review,2026-11-04
+p2_R32P_s02vc_final_seed3_a01,s02vc,final,3,success,success,,,label confirmed (goal reached at step 60). static arm: ack_step cleared.,Claude review,2026-11-04
+p2_R32P_s03_dynamic_seed1_a01,s03,dynamic,1,replan_failure,replan_failure,22,,"label confirmed (never through: min x -5.96, 1 post-change collisions, 11.0 m from the goal at 60 steps).",Claude review,2026-11-04
+p2_R32P_s03_dynamic_seed2_a01,s03,dynamic,2,replan_failure,replan_failure,24,,"label confirmed (never through: min x -5.77, 3 post-change collisions, 11.4 m from the goal at 60 steps).",Claude review,2026-11-04
+p2_R32P_s03_dynamic_seed3_a01,s03,dynamic,3,replan_failure,replan_failure,32,,"label confirmed (never through: min x -6.05, 3 post-change collisions, 11.7 m from the goal at 60 steps).",Claude review,2026-11-04
+p2_R32P_s03_final_seed1_a01,s03,final,1,success,success,,,label confirmed (goal reached at step 22). static arm: ack_step cleared.,Claude review,2026-11-04
+p2_R32P_s03_final_seed2_a01,s03,final,2,success,success,,,label confirmed (goal reached at step 56). static arm: ack_step cleared.,Claude review,2026-11-04
+p2_R32P_s03_final_seed3_a01,s03,final,3,success,success,,,label confirmed (goal reached at step 25). static arm: ack_step cleared.,Claude review,2026-11-04
