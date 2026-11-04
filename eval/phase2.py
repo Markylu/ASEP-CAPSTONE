@@ -264,6 +264,11 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
              "title": "a66 on the ten contested cells, seeds 1-3",
              "agent": "a66", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
              "seeds": REPEAT_SEEDS, "citable": False},
+    # F: the final round (spec §6), the full Phase 1 design on the agent the
+    # screening chose: a66 by R32's decision rule (15/30 against a49's 11/30,
+    # operator 2026-11-04, "Fly the final"). Order random.Random("phase2-F").
+    "F": {"folder": "final", "title": "Final: a66 (R30's route planner) on the full design",
+          "agent": "a66", "sites": ROUND_SITES, "seeds": list(SEEDS), "citable": True},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

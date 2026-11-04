@@ -3,10 +3,11 @@
   "title": "a66 on the ten contested cells, seeds 1-3",
   "citable": false,
   "agent_version": "a66",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "6ebcaf2",
+  "started": "2026-11-04T16:29:05+00:00",
+  "finished": "2026-11-04T17:39:00+00:00",
+  "operator": "Markylu",
+  "notes": "Flown 2026-11-04 beside R32 on the operator's instruction (\"u fly it\").",
+  "lanes": "sctsvr6 lanes 5-8 (asep-r32p-l5..8), shared vLLM :8004, both rounds at once"
 }

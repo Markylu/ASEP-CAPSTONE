@@ -170,6 +170,8 @@ run per site in the shakedown as the "not broken" check. Same host time as 18 + 
 - *Cost:* a `ROUNDS` entry type with a cell list and `repeats`; the runner already takes a cell
   matrix. The test plan's §3 "why all three arms" argument moves to the shakedown.
 
+**Flown 2026-11-04 as R32/R32P** (`eval/phase2/R32_repeat_a49/summary.md`): a66 15/30, a49 11/30, s03 `final` 3/3 against 1/3, s03 `dynamic` 0/6. The final 90 flies a66.
+
 ### P6. Calibrate the memory's range table from probe LD (no flight)
 
 *Memory params only.* LD measured the eye at 1.48 m (prompt says 1.84) and the model's metres

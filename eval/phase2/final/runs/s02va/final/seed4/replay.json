@@ -1,0 +1,11 @@
+{
+  "max_pos_drift": 1.5258789060723643e-05,
+  "max_yaw_drift": 7.152557399692228e-07,
+  "steps_original": 29,
+  "steps_replay": 29,
+  "ok": true,
+  "problems": 0,
+  "events_match": true,
+  "tolerance": 0.001,
+  "replay_dir": "eval/phase2/final/runs/s02va/final/seed4/replay"
+}

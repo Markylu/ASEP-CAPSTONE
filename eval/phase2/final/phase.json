@@ -1,0 +1,13 @@
+{
+  "round": "F",
+  "title": "Final: a66 (R30's route planner) on the full design",
+  "citable": true,
+  "agent_version": "a66",
+  "status": "complete",
+  "git_sha": "8d50901",
+  "started": "2026-11-04T17:48:29+00:00",
+  "finished": "2026-11-04T19:02:08+00:00",
+  "operator": "Markylu",
+  "notes": "Flown 2026-11-04 on the operator's instruction (\"Fly the final\"). Agent chosen by the R32/R32P repeat screen (a66 15/30 vs a49 11/30).",
+  "lanes": "sctsvr6 lanes 1-8 (asep-final-l1..8), shared vLLM :8004"
+}
