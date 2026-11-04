@@ -389,3 +389,26 @@ had failed the s03 check, above).
   half) but also that an obedient navigator follows the route into phantom doors (a70 2/6,
   a71 3/6 `dynamic`); `a66`'s partial disobedience is part of its 14. The next lever is the
   perceiver's doorway and corridor reads, not the planner or the navigator.
+
+### Luck or mechanism, cell by cell (2026-11-04, records only)
+
+Each run's decisive moment against R25D's same cell (side first at the s02 divider, the
+crossing move's tag, the s03 tine sequence, the closed-door read):
+
+| cells | count | read |
+|---|---|---|
+| s01 ×3, s02 `initial` ×5 | 8 solved | **baseline**: solved in both rounds at the same crossing steps (7, 7, 11, 11); nothing for the planner to decide |
+| s02a `final`, s02va `dynamic` | 2 solved | **planner**: route straight to the door, crossed on "toward" (R25D: 26 steps and the wrong side first) |
+| s02c `final`, s03 `final` | 2 solved, R25D lost both | **planner on a draw**: the route took the right side and pointed at door C, the crossing pick was a goal sighting; in s03 d01 read tine L's door `closed` from the crossbar at s15 and the route went to R (R25D's closed read came at s38, from inside L) |
+| s02vc `dynamic` | 1 solved | **planner, barely**: crossed on "toward" at s45 after 32 steps at the divider, solved at 55 of 60 |
+| s03 `initial`, s02c `dynamic` | 2 solved | **draw**: 37 lobby steps of marker-0 refusals, solved at 58 of 60; wrong side first with door B straight ahead, the navigator crossed on a non-"toward" pick at s19 |
+| s02a `dynamic`, s02vc `final` | 2 lost, R25D won both | **planner**: after the switch a nose-on read of the shut door B became a firm wall and the route went the wrong side, came back to door A's position at s33 and never crossed; d01 read doors `closed` both sides at s9 and the route chose the wrong side for 48 steps |
+| s03 `dynamic` | 1 lost, R25D lost | **planner**: 31 steps in the shut tine after the closed read, the one case it was built for |
+| s02va `final` | 1 lost, R25D lost | family-hard cell (44 steps at the divider in both rounds) |
+
+So of the 14: 8 baseline, 4 the planner's (two of them resting on a perception draw or the step
+budget), 2 the draw's; against R25D the planner gained two cells and lost two. The step-0
+perceiver reading differs from R25D's at the same pose and frame in 16 of 18 cells, on one
+lane alone on `:8004`: a run is a fresh draw from step 0 even without batching (why_14 §4
+blamed the shared vLLM; the solo lane shows the same). On the `a17b` family's 11.3 ± 1.4, R30's
+14 is R25D's draw again, with the planner moving which cells are won, not how many.
