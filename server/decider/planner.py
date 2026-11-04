@@ -1058,10 +1058,12 @@ def committed_route(cm: spatial.CostMap, start: Tuple[int, int], prev: List[Tupl
 
 
 def astar(cm: spatial.CostMap, start: Tuple[int, int], goal: Tuple[int, int],
-          max_nodes: int = 40000) -> Optional[List[Tuple[int, int]]]:
+          max_nodes: int = 40000, strict_corners: bool = False) -> Optional[List[Tuple[int, int]]]:
     """Cheapest 8-connected route from start to goal over the cost map, as a
     list of cells from start to goal, or None. The start and goal cells are
-    always passable (the drone is on the one and the goal on the other)."""
+    always passable (the drone is on the one and the goal on the other).
+    `strict_corners` (a73): a diagonal move needs both cells it passes between
+    passable, not one; a 1.7 m flight cannot thread a 0.85 m diagonal gap."""
     diag = math.sqrt(2.0)
 
     def h(c: Tuple[int, int]) -> float:
@@ -1096,8 +1098,11 @@ def astar(cm: spatial.CostMap, start: Tuple[int, int], goal: Tuple[int, int],
                     continue
                 step = (diag if dx and dy else 1.0) * cost
                 if dx and dy:
-                    # No cutting a corner between two impassable cells.
-                    if cm.cost((c[0] + dx, c[1])) is None and cm.cost((c[0], c[1] + dy)) is None:
+                    # No cutting a corner between two impassable cells (a73
+                    # strict_corners: past one impassable cell either).
+                    side_a = cm.cost((c[0] + dx, c[1])) is None
+                    side_b = cm.cost((c[0], c[1] + dy)) is None
+                    if (side_a and side_b) or (strict_corners and (side_a or side_b)):
                         continue
                 ng = g + step
                 if ng < best.get(n, math.inf) - 1e-9:
@@ -1313,7 +1318,7 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     start, end = spatial.cell(here[:2]), spatial.cell(goal)
     fallback = "none"
     cm = spatial.CostMap(mem, stall, p, include=(start, end), start=start)
-    path = astar(cm, start, end)
+    path = astar(cm, start, end, strict_corners=bool(p.get("strict_corners")))
     kept: Optional[bool] = None
     fresh_m: Optional[float] = None
     commit = p.get("commit")
@@ -1340,13 +1345,14 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     if path is None:
         fallback = "soft"
         cm = spatial.CostMap(mem, stall, p, soft=True, include=(start, end), start=start)
-        path = astar(cm, start, end)
+        path = astar(cm, start, end, strict_corners=bool(p.get("strict_corners")))
     if path is None:
         fallback = "frontier"
         fronts = mem.search_frontiers(here[:2])
         if fronts:
             fp = fronts[0][0]
-            path = astar(cm, start, spatial.cell(fp)) or [start, spatial.cell(fp)]
+            path = (astar(cm, start, spatial.cell(fp), strict_corners=bool(p.get("strict_corners")))
+                    or [start, spatial.cell(fp)])
             target_point = fp
         else:
             path = [start, end]

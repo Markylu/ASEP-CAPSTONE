@@ -234,6 +234,16 @@ PATHFINDER_A69: Dict[str, Any] = dict(
 PATHFINDER_A72: Dict[str, Any] = dict(
     PATHFINDER_A65, commit={"gain": 0.25, "leave_cells": 2})
 
+#: a73 (R33): a65's planner with the cost map read against Round F's 90 runs.
+#: unknown_cost 2 let the route beeline to the goal through unknown divider
+#: cells beside the real door (R31 probe: the route crossed the s02 divider
+#: through the true gap on 10% of near-side steps); seal_diagonal closes the
+#: diagonal gaps in a one-cell wall line; strict_corners stops the route
+#: threading them. docs/research/round-f-analysis.md.
+PATHFINDER_A73: Dict[str, Any] = dict(
+    PATHFINDER_A65, unknown_cost=4.0, suspect_cost=6.0, far_free_cost=3.0,
+    seal_diagonal=True, strict_corners=True)
+
 #: a70 (R30): what the navigator is told about the route beyond the tags.
 #: `route_behind` is added to the planner line when "toward your target" sits
 #: on the turn-around: R30's shakedown (a63, a67, a68 s03 dynamic) lost 18
@@ -1321,6 +1331,29 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "shakedown: a70/a71 lost s02 runs to one confirmed phantom doorway the route "
           "trusted, a71 lost s03 to one nose-on no_floor read down the stem made firm, "
           "and s03 dynamic oscillated at the shut door as single cells sealed."),
+    Agent("a73", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A73,
+                                          "memory": "a17i",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a66 with the wall-turn rule (memory a17i: the step after a turn-around taken "
+          "facing a wall, 'toward your target' goes to the open move nearest the target "
+          "instead of the turn-around, so the turn rule hides it; a move onto ground the "
+          "drone has stood on is open whatever the look says; memory a17g's weak far floor) "
+          "and a73's cost map (unknown cells cost 4 not 2, far floor 3, suspects 6; walls "
+          "seal their diagonal neighbours; no diagonal past an impassable cell). Round F, "
+          "64/90: 373 nose-on frames and "
+          "61 back-to-back turn-arounds, 13-21 wasted steps per s03 dynamic run; 10 of 20 "
+          "s02 losses stood within 2 m of the open door while the route crossed the "
+          "divider beside it. docs/research/round-f-analysis.md."),
 )}
 
 DEFAULT_AGENT = "a00"

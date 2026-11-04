@@ -269,6 +269,13 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     # operator 2026-11-04, "Fly the final"). Order random.Random("phase2-F").
     "F": {"folder": "final", "title": "Final: a66 (R30's route planner) on the full design",
           "agent": "a66", "sites": ROUND_SITES, "seeds": list(SEEDS), "citable": True},
+    # R33: a73 (a66 with the wall-turn rule and the Round F cost map) on the
+    # ten contested cells, seeds 1-3, read against R32P (a66, 15/30). Laid out
+    # from Round F's 90 recorded runs (docs/research/round-f-analysis.md).
+    "R33": {"folder": "R33_wall_turn_costmap",
+            "title": "a66 with the wall-turn rule and the Round F cost map, contested cells",
+            "agent": "a73", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

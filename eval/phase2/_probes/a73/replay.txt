@@ -1,0 +1,97 @@
+a73 replay on final (open loop; eval/probes/a73_replay.py)
+
+run                   | deadlock: wall-turns a66 toward-on-turn a73-breaks | turned-again a73-hides | TA pairs | s02 gap crossing a66 a73 | s03 route out a66 a73
+s01/dynamic/seed1     |   1   0   0 |   0   0 |   0 |                 |                
+s01/dynamic/seed2     |   1   0   0 |   0   0 |   0 |                 |                
+s01/dynamic/seed3     |   3   1   0 |   2   1 |   2 |                 |                
+s01/dynamic/seed4     |   1   0   0 |   0   0 |   0 |                 |                
+s01/dynamic/seed5     |   0   0   0 |   0   0 |   0 |                 |                
+s01/final/seed1       |   4   0   0 |   0   0 |   0 |                 |                
+s01/final/seed2       |   4   1   1 |   0   0 |   0 |                 |                
+s01/final/seed3       |   1   0   0 |   0   0 |   1 |                 |                
+s01/final/seed4       |   1   0   0 |   0   0 |   0 |                 |                
+s01/final/seed5       |   1   0   0 |   0   0 |   0 |                 |                
+s01/initial/seed1     |   0   0   0 |   0   0 |   0 |                 |                
+s01/initial/seed2     |   0   0   0 |   0   0 |   0 |                 |                
+s01/initial/seed3     |   0   0   0 |   0   0 |   0 |                 |                
+s01/initial/seed4     |   0   0   0 |   0   0 |   0 |                 |                
+s01/initial/seed5     |   0   0   0 |   0   0 |   0 |                 |                
+s02a/dynamic/seed1    |   6   0   0 |   0   0 |   0 |   1   2 of  46  |                
+s02a/dynamic/seed2    |   2   0   0 |   0   0 |   0 |   0   0 of  22  |                
+s02a/dynamic/seed3    |   2   0   0 |   0   0 |   0 |   3   3 of  29  |                
+s02a/dynamic/seed4    |   9   1   1 |   2   1 |   2 |   0   0 of  49  |                
+s02a/dynamic/seed5    |   6   0   0 |   0   0 |   0 |   3   3 of  39  |                
+s02a/final/seed1      |   6   0   0 |   0   0 |   0 |   0   2 of  60  |                
+s02a/final/seed2      |   7   0   0 |   0   0 |   0 |   3   0 of  60  |                
+s02a/final/seed3      |   2   0   0 |   0   0 |   0 |   5   6 of  32  |                
+s02a/final/seed4      |   6   0   0 |   0   0 |   1 |   6   7 of  59  |                
+s02a/final/seed5      |   6   0   0 |   0   0 |   0 |   0  12 of  57  |                
+s02a/initial/seed1    |   0   0   0 |   0   0 |   0 |                 |                
+s02a/initial/seed2    |   0   0   0 |   0   0 |   0 |                 |                
+s02a/initial/seed3    |   0   0   0 |   0   0 |   0 |                 |                
+s02a/initial/seed4    |   0   0   0 |   0   0 |   0 |                 |                
+s02a/initial/seed5    |   0   0   0 |   0   0 |   0 |                 |                
+s02c/dynamic/seed1    |  13   4   0 |   8   4 |   8 |   0   1 of  55  |                
+s02c/dynamic/seed2    |   5   1   1 |   1   1 |   3 |   0   0 of  57  |                
+s02c/dynamic/seed3    |   3   0   0 |   0   0 |   0 |   6   5 of  19  |                
+s02c/dynamic/seed4    |   7   0   0 |   0   0 |   0 |   0   7 of  57  |                
+s02c/dynamic/seed5    |   8   1   1 |   1   1 |   2 |   0   0 of  51  |                
+s02c/final/seed1      |   3   0   0 |   0   0 |   1 |   1   1 of  39  |                
+s02c/final/seed2      |   8   1   0 |   2   1 |   2 |   0   0 of  58  |                
+s02c/final/seed3      |   6   0   0 |   0   0 |   1 |   0   0 of  56  |                
+s02c/final/seed4      |   2   0   0 |   0   0 |   0 |   9   9 of  18  |                
+s02c/final/seed5      |   7   2   2 |   2   2 |   4 |   0   0 of  56  |                
+s02c/initial/seed1    |   0   0   0 |   0   0 |   0 |                 |                
+s02c/initial/seed2    |   0   0   0 |   0   0 |   0 |                 |                
+s02c/initial/seed3    |   0   0   0 |   0   0 |   0 |                 |                
+s02c/initial/seed4    |   0   0   0 |   0   0 |   0 |                 |                
+s02c/initial/seed5    |   0   0   0 |   0   0 |   0 |                 |                
+s02va/dynamic/seed1   |   0   0   0 |   0   0 |   0 |   0   0 of  14  |                
+s02va/dynamic/seed2   |   7   3   3 |   3   3 |   5 |   6   1 of  57  |                
+s02va/dynamic/seed3   |   2   0   0 |   0   0 |   0 |   0   0 of  19  |                
+s02va/dynamic/seed4   |   5   1   1 |   1   1 |   2 |   6   0 of  27  |                
+s02va/dynamic/seed5   |   2   0   0 |   0   0 |   0 |   0   0 of  34  |                
+s02va/final/seed1     |   1   0   0 |   0   0 |   0 |   1   1 of  19  |                
+s02va/final/seed2     |   6   0   0 |   0   0 |   0 |   1   0 of  60  |                
+s02va/final/seed3     |   1   0   0 |   0   0 |   0 |   1   1 of  21  |                
+s02va/final/seed4     |   1   0   0 |   0   0 |   0 |   2   3 of  18  |                
+s02va/final/seed5     |   2   0   0 |   0   0 |   0 |   1   1 of  19  |                
+s02va/initial/seed1   |   0   0   0 |   0   0 |   0 |                 |                
+s02va/initial/seed2   |   0   0   0 |   0   0 |   0 |                 |                
+s02va/initial/seed3   |   0   0   0 |   0   0 |   0 |                 |                
+s02va/initial/seed4   |   0   0   0 |   0   0 |   0 |                 |                
+s02va/initial/seed5   |   0   0   0 |   0   0 |   0 |                 |                
+s02vc/dynamic/seed1   |   2   0   0 |   0   0 |   0 |   1   6 of  21  |                
+s02vc/dynamic/seed2   |   2   0   0 |   0   0 |   1 |   2   2 of  40  |                
+s02vc/dynamic/seed3   |   5   1   1 |   0   0 |   0 |   0   5 of  54  |                
+s02vc/dynamic/seed4   |   4   0   0 |   0   0 |   1 |   8   9 of  36  |                
+s02vc/dynamic/seed5   |   2   0   0 |   0   0 |   0 |   1  11 of  25  |                
+s02vc/final/seed1     |   4   0   0 |   0   0 |   0 |   0   0 of  57  |                
+s02vc/final/seed2     |   7   0   0 |   0   0 |   0 |   2  19 of  58  |                
+s02vc/final/seed3     |   5   0   0 |   0   0 |   0 |   0   0 of  60  |                
+s02vc/final/seed4     |   2   0   0 |   0   0 |   0 |  16  17 of  35  |                
+s02vc/final/seed5     |  11   5   3 |   6   4 |   8 |   0   0 of  45  |                
+s02vc/initial/seed1   |   0   0   0 |   0   0 |   0 |                 |                
+s02vc/initial/seed2   |   0   0   0 |   0   0 |   0 |                 |                
+s02vc/initial/seed3   |   0   0   0 |   0   0 |   0 |                 |                
+s02vc/initial/seed4   |   0   0   0 |   0   0 |   0 |                 |                
+s02vc/initial/seed5   |   0   0   0 |   0   0 |   0 |                 |                
+s03/dynamic/seed1     |  13   0   0 |   0   0 |   0 |                 |   0   4 of  36 
+s03/dynamic/seed2     |  13   0   0 |   0   0 |   0 |                 |   0   0 of  30 
+s03/dynamic/seed3     |  20   7   7 |   8   8 |  12 |                 |   0   0 of  33 
+s03/dynamic/seed4     |  14   1   1 |   2   1 |   2 |                 |   0   0 of  42 
+s03/dynamic/seed5     |  20   1   0 |   2   1 |   2 |                 |   0   0 of  32 
+s03/final/seed1       |  17   1   1 |   1   1 |   1 |                 |   0   0 of  37 
+s03/final/seed2       |   1   0   0 |   0   0 |   0 |                 |   0   0 of   0 
+s03/final/seed3       |   3   0   0 |   0   0 |   0 |                 |   0   0 of  13 
+s03/final/seed4       |   9   0   0 |   0   0 |   0 |                 |   0   0 of   0 
+s03/final/seed5       |   2   1   1 |   0   0 |   0 |                 |   0   0 of   0 
+s03/initial/seed1     |   1   0   0 |   0   0 |   0 |                 |                
+s03/initial/seed2     |   1   0   0 |   0   0 |   0 |                 |                
+s03/initial/seed3     |   2   0   0 |   0   0 |   0 |                 |                
+s03/initial/seed4     |   4   0   0 |   0   0 |   0 |                 |                
+s03/initial/seed5     |   5   0   0 |   0   0 |   0 |                 |                
+
+Deadlock: 327 steps after a wall turn; a66 offered toward on the turn-around on 33, a73 breaks 24 of those. a66 turned again on 41; a73 hides that turn-around on 30. Recorded back-to-back turn-around pairs: 61.
+s02 near-side steps after the switch whose route crosses the divider inside the open door's gap: a66 85/1638 (5%), a73 134/1638 (8%).
+s03 shut-tine steps after the closed read whose route leaves by the crossbar: a66 0/223 (0%), a73 4/223 (2%).

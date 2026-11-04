@@ -361,6 +361,13 @@ class SpatialConfig:
     #: and a71 lost s03 to one nose-on no_floor read down the stem that a17f
     #: made a firm wall. PARAMS_A17H.
     two_pose: bool = False
+    #: a17i (a73, R33): the step after a turn-around taken facing a wall (every
+    #: strip blocked_near), "toward your target" never sits on the turn-around:
+    #: it goes to the open move nearest the target's bearing, so the turn rule
+    #: hides the turn-around and the drone moves along the wall. Round F: 373
+    #: nose-on frames, 332 turn-arounds after them, 61 back-to-back pairs, the
+    #: route unchanged for 13 steps in s03 dynamic seed 3 (s35-s47).
+    wall_turn: bool = False
 
     def sha_segments(self) -> List[str]:
         out = ["spatial:" + wording_sha()]
@@ -389,6 +396,8 @@ class SpatialConfig:
             out.append("near_free_m:{0}".format(self.near_free_m))
         if self.two_pose:
             out.append("two_pose:" + wording_sha_a17h())
+        if self.wall_turn:
+            out.append("wall_turn")
         return out
 
 
@@ -517,6 +526,10 @@ def wording_sha_a17h() -> str:
 #: look) with the two-pose rules.
 A17H = replace(A17E, name="a17h", two_pose=True)
 
+#: a17i (a73, R33): a17g (firm walls, far floor weak for the route) with the
+#: wall-turn rule (SpatialConfig.wall_turn).
+A17I = replace(A17G, name="a17i", wall_turn=True)
+
 
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
     """The memory an orchestrated agent's features name (agent.py)."""
@@ -536,6 +549,8 @@ def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
         return A17G
     if orchestrator.get("memory") == "a17h":
         return A17H
+    if orchestrator.get("memory") == "a17i":
+        return A17I
     if orchestrator.get("memory") == "a15":
         return A15
     if orchestrator.get("memory") == "a16":
@@ -739,6 +754,9 @@ class SpatialMemory:
     wall_runs: List[Tuple[int, Tuple[float, float], frozenset]] = field(default_factory=list)
     door_runs: List[Tuple[int, Tuple[float, float], frozenset]] = field(default_factory=list)
     soft_door: Dict[str, set] = field(default_factory=dict)
+    #: a17i: the steps whose perceiver read every strip blocked_near (a wall
+    #: filling the frame), for the wall-turn rule.
+    nose_on: List[int] = field(default_factory=list)
     cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
@@ -789,6 +807,10 @@ class SpatialMemory:
         overwrites an older one."""
         if not perception:
             return
+        lanes_now = [l for l in perception.get("lanes") or [] if l.get("strip") in STRIPS]
+        if len(lanes_now) == len(STRIPS) and all(l.get("floor") == "blocked_near"
+                                                 for l in lanes_now):
+            self.nose_on.append(step)
         if self.cfg.coverage:
             self._observe_cone(step, where, perception)
             return
@@ -1640,6 +1662,17 @@ def project(mem: SpatialMemory, manifest: Dict[str, Any],
     goal_strip = (perception or {}).get("goal")
     goal_range = (perception or {}).get("goal_range") or "mid"
 
+    # a17i: the step after a turn-around taken facing a wall. A move onto
+    # ground the drone has stood on is open whatever this look says (the
+    # memory's own rule: a visit beats a wall mark); Round F s02c dynamic
+    # seed 1 s47-s50 read every strip blocked_near facing both ways and turned
+    # in place four times on cells it had flown.
+    wall_turn = mem.cfg.wall_turn and after_wall_turn(mem, step)
+
+    def stood_on(a: Dict[str, Any]) -> bool:
+        return wall_turn and bool(mem.visits_at(
+            ahead(here[:2], action_heading(a, here[2]), float(a.get("r") or 1.7))))
+
     toward = None
     if target is not None:
         want = bearing(here[:2], (target.x, target.y))
@@ -1647,7 +1680,7 @@ def project(mem: SpatialMemory, manifest: Dict[str, Any],
         if mem.cfg.toward == "open":
             # a15: only an action the map does not call blocked, stopped short
             # or walled may be "toward your target" (R10: 36 walled picks).
-            flying = [a for a in flying if not not_open(mem, here, a, lanes)]
+            flying = [a for a in flying if stood_on(a) or not not_open(mem, here, a, lanes)]
         best = min(flying, key=lambda a: abs(wrap(action_heading(a, here[2]) - want)),
                    default=None)
         side = [a for a in flying
@@ -1662,6 +1695,13 @@ def project(mem: SpatialMemory, manifest: Dict[str, Any],
             toward = int(max(side, key=lambda a: abs(float(a.get("theta_deg") or 0.0)))["index"])
         elif abs(wrap(want - here[2])) > 90.0:
             toward = next((int(a["index"]) for a in actions if a.get("turn_around")), None)
+        if (toward is not None and wall_turn and flying
+                and any(a.get("turn_around") and int(a["index"]) == toward for a in actions)):
+            # a17i: the drone just turned its back on a wall; turning again
+            # would face it again (Round F: the loop cost 13-21 steps per s03
+            # dynamic run). The open move nearest the target's bearing instead,
+            # so the turn rule hides the turn-around.
+            toward = int(best["index"]) if best is not None else toward
 
     for a in actions:
         i = int(a["index"])
@@ -1682,10 +1722,11 @@ def project(mem: SpatialMemory, manifest: Dict[str, Any],
                 out.append(WORDS["goal_seen"].format(
                     range=WORDS["range"].get(goal_range, "distance unknown")))
         b = mem.block_for(here[:2], heading)
-        if b is not None:
+        stood = stood_on(a)
+        if b is not None and not stood:
             out.append(WORDS[b.kind].format(step=b.step))
         lane = lanes.get(strip) or {}
-        if lane.get("floor") == "blocked_near":
+        if lane.get("floor") == "blocked_near" and not stood:
             out.append(WORDS["wall_seen"])
         if toward == i:
             out.append(WORDS["toward_target"])
@@ -1879,6 +1920,16 @@ def _unsearched_ahead(mem: SpatialMemory, land: Point, heading: float) -> bool:
     return False
 
 
+def after_wall_turn(mem: SpatialMemory, step: int) -> bool:
+    """a17i: the previous decision was a turn-around taken with every strip
+    reading blocked_near (the drone faced a wall, now has its back to it)."""
+    previous = [s for s, _, _, _ in mem.trail if s < step]
+    if not previous or not mem.turn_arounds:
+        return False
+    last = max(previous)
+    return mem.turn_arounds[-1] == last and last in mem.nose_on
+
+
 def hide_turn_around(mem: SpatialMemory, manifest: Dict[str, Any],
                      tags: Dict[int, List[str]]) -> List[int]:
     """The turn-around indices to leave off this step (a14, operator 2026-10-24):
@@ -1971,8 +2022,14 @@ class CostMap:
         # nothing itself: not known ground.
         self.soft_door = mem.soft_door_cells() if mem.cfg.two_pose else set()
         sealed = set()
+        # a73 (seal_diagonal): also the diagonal neighbours, so a wall line
+        # one cell thick leaves no diagonal gaps for the route (Round F s02:
+        # routes slipped between two diagonally touching wall cells).
+        around = ((1, 0), (-1, 0), (0, 1), (0, -1))
+        if p.get("seal_diagonal"):
+            around = around + ((1, 1), (1, -1), (-1, 1), (-1, -1))
         for c in self.hard:
-            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            for dx, dy in around:
                 m = (c[0] + dx, c[1] + dy)
                 if m not in known and m not in self.hard and m not in self.soft_door:
                     sealed.add(m)

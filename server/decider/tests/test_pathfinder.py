@@ -397,3 +397,98 @@ def test_a72_is_a66_plus_a17h_and_commit():
     assert a72["memory"] == "a17h" and a72["pathfinder"]["commit"]
     assert spatial.A17H.two_pose and not spatial.A17H.firm_walls
     assert "two_pose:" in " ".join(spatial.A17H.sha_segments())
+
+
+# --- a73 (R33): wall-turn rule and the cost map read against Round F ---------------
+
+def test_strict_corners_refuse_a_diagonal_gap_in_a_wall_line():
+    """A wall line y = 2 with cells (3, 2) and (5, 2) hard and (4, 2) unknown
+    but sealed: without strict corners the 8-connected search may step
+    diagonally past a hard cell; with them it must go round the line's end."""
+    mem = spatial.SpatialMemory(cfg=spatial.A17I)
+    for x in range(-2, 9):
+        mem.visits[(x, 0)] = [1]
+    for x in range(0, 8):
+        if x != 4:
+            mem.stop_wall[(x, 2)] = 1
+    start, goal = (4, 0), (4, 4)
+    cm = spatial.CostMap(mem, [], agent.PATHFINDER_A65)
+    loose = planner.astar(cm, start, goal)
+    cm73 = spatial.CostMap(mem, [], agent.PATHFINDER_A73)
+    strict = planner.astar(cm73, start, goal, strict_corners=True)
+    assert loose is not None and strict is not None
+    # a73 seals (4, 2) (4-adjacent to hard cells) and its diagonal neighbours
+    # on row 3 over the gap, so the strict route leaves the line by an end.
+    assert cm73.cost((4, 2)) is None
+    assert all(c[1] != 2 or c[0] in (-1, 8) or c[0] > 8 or c[0] < -1 for c in strict)
+    for a, b in zip(strict, strict[1:]):
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        if dx and dy:
+            assert cm73.cost((a[0] + dx, a[1])) is not None
+            assert cm73.cost((a[0], a[1] + dy)) is not None
+
+
+def test_seal_diagonal_closes_the_diagonal_neighbours_of_a_wall():
+    mem = spatial.SpatialMemory(cfg=spatial.A17I)
+    mem.visits[(0, 0)] = [1]
+    mem.stop_wall[(3, 3)] = 1
+    cm65 = spatial.CostMap(mem, [], agent.PATHFINDER_A65)
+    cm73 = spatial.CostMap(mem, [], agent.PATHFINDER_A73)
+    assert cm65.cost((4, 4)) == agent.PATHFINDER_A65["unknown_cost"] == 2.0
+    assert cm73.cost((4, 4)) is None and cm73.cost((4, 3)) is None
+    assert cm73.cost((5, 5)) == agent.PATHFINDER_A73["unknown_cost"] == 4.0
+
+
+def _wall_turn_memory(cfg):
+    """Two decisions: step 0 faced a wall (every strip blocked_near) at (0, 0)
+    heading +x and turned around; step 1 is decided at the same spot heading
+    -x, with the route's next point back through the wall at (3, 0)."""
+    records = [{"step": 0, "index": 0, "manifest": manifest_at((0, 0), 0, 0.0) | {
+        "actions": [{"index": 0, "turn_around": True, "theta_deg": 180.0}]},
+        "perceiver": {"result": all_walls()}}]
+    man = manifest_at((0, 0), 1, 180.0)
+    man["actions"] = [{"index": 0, "turn_around": True, "theta_deg": 180.0, "r": 0.0}] + [
+        {"index": i, "turn_around": False, "theta_deg": th, "r": 1.7}
+        for i, th in ((1, 43.5), (2, 21.75), (3, 0.0), (4, -21.75), (5, -43.5))]
+    # The wall the drone turned from runs on along its left (the target's
+    # side): the left strips read it, the right ones open floor. Round F s03
+    # dynamic seed 3 s36: the target-side moves carried wall or stopped-short
+    # notes, so a17's side rule had nothing to tag and the turn-around got it.
+    lanes = {"far_left": "blocked_near", "left": "blocked_near", "centre": "blocked_near",
+             "right": "open_near", "far_right": "open_near"}
+    floor = {"reason": "", "goal": "not_visible", "goal_range": None,
+             "lanes": [{"strip": s, "floor": lanes[s],
+                        "floor_end": "no_floor" if lanes[s] == "blocked_near" else "bottom",
+                        "doorway": False} for s in spatial.STRIPS]}
+    mem = spatial.rebuild(records, man, floor, cfg)
+    # The route's next point lies back through the wall, on the walled side.
+    target = spatial.Target("path", "path", *centre((3, -1)), "the next point", 1)
+    return mem, man, target, floor
+
+
+def test_wall_turn_moves_toward_off_the_turn_around_and_the_turn_rule_hides_it():
+    mem, man, target, floor = _wall_turn_memory(spatial.A17I)
+    assert mem.nose_on == [0] and mem.turn_arounds == [0]
+    assert spatial.after_wall_turn(mem, 1)
+    tags = spatial.project(mem, man, floor, target)
+    assert spatial.WORDS["toward_target"] not in tags[0]
+    assert spatial.WORDS["toward_target"] in tags[4] or spatial.WORDS["toward_target"] in tags[5]
+    assert spatial.hide_turn_around(mem, man, tags) == [0]
+    # a66's memory: the same step keeps the loop open.
+    mem66, man66, target66, floor66 = _wall_turn_memory(spatial.A17F)
+    tags66 = spatial.project(mem66, man66, floor66, target66)
+    assert spatial.WORDS["toward_target"] in tags66[0]
+    assert spatial.hide_turn_around(mem66, man66, tags66) == []
+
+
+def test_a73_is_a66_plus_a17i_and_the_cost_map():
+    assert agent.get("a66").sha() == "de7f23d07186"
+    assert agent.get("a73").sha() not in (agent.get("a66").sha(), agent.get("a72").sha())
+    a66 = agent.get("a66").features["orchestrator"]
+    a73 = agent.get("a73").features["orchestrator"]
+    assert {k: v for k, v in a73.items() if k not in ("memory", "pathfinder")} == \
+        {k: v for k, v in a66.items() if k not in ("memory", "pathfinder")}
+    assert a73["memory"] == "a17i" and spatial.A17I.wall_turn and spatial.A17I.firm_walls
+    assert spatial.A17I.near_free_m == spatial.A17G.near_free_m == 2.5
+    assert a73["pathfinder"]["unknown_cost"] == 4.0 and a73["pathfinder"]["strict_corners"]
+    assert "wall_turn" in spatial.A17I.sha_segments()
