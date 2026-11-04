@@ -204,3 +204,196 @@ def test_a70_is_a66_plus_the_navigator_notes():
     assert {k: v for k, v in a70.items() if k not in ("critic", "navigator_notes")} == \
         {k: v for k, v in a66.items() if k != "critic"}
     assert a70["critic"] == "route" and a66["critic"] == "none"
+
+
+# --- a72 (R31): a17h, one look is soft; route commitment ---------------------------
+
+H = spatial.A17H
+P72 = agent.PATHFINDER_A72
+
+
+def door_look(door="open", floor="open_far", end="lower"):
+    """Every strip open, the centre strip with a doorway verdict."""
+    return {"reason": "", "goal": "not_visible", "goal_range": None,
+            "lanes": [{"strip": s, "floor": floor, "floor_end": end,
+                       "doorway": door if s == "centre" else False} for s in spatial.STRIPS]}
+
+
+def open_field(cfg, x0=0, x1=4, half=3):
+    mem = spatial.SpatialMemory(cfg=cfg)
+    for x in range(x0, x1 + 1):
+        for y in range(-half, half + 1):
+            mem.free[(x, y)] = 0
+    return mem
+
+
+def test_a17h_one_doorway_look_is_soft_and_two_poses_make_it_strong():
+    mem = open_field(H)
+    mem.visits[(2, 0)] = [1]
+    mem.observe(1, pose((2, 0)), door_look())
+    o = mem.openings[0]
+    assert len(o.sight_poses) == 1 and not mem.opening_confirmed(o)
+    # Floor beyond open_far's 4 m reach is claimed by the doorway alone: soft.
+    far = spatial.cell(spatial.ahead(centre((2, 0)), 0.0, 5.5))
+    assert far in mem.soft_door_cells() and far not in mem.free and far not in mem.free_near
+    cm = spatial.CostMap(mem, [], P72)
+    assert cm.cost(far) == P72["unknown_cost"] and "soft_door" in cm.counts()
+    # Under a17f the same look wrote strong floor there.
+    mem_f = open_field(spatial.A17F)
+    mem_f.visits[(2, 0)] = [1]
+    mem_f.observe(1, pose((2, 0)), door_look())
+    assert far in mem_f.free_near
+    # A second look from the same spot (a turn-around) does not confirm.
+    mem.visits[(2, 0)].append(2)
+    mem.observe(2, pose((2, 0)), door_look())
+    assert not mem.opening_confirmed(mem.openings[0])
+    # From a pose 1 m away it does, and the floor through the gap is strong.
+    mem.visits[(4, 0)] = [3]
+    mem.observe(3, pose((4, 0)), door_look())
+    o = mem.openings[0]
+    assert mem.opening_confirmed(o) and o.seen == 3
+    near = spatial.cell(spatial.ahead(centre((4, 0)), 0.0, 5.0))
+    assert near in mem.free_near and not mem.soft_door_cells()
+
+
+def test_a17h_soft_doorway_floor_is_never_sealed_but_seals_nothing():
+    mem = open_field(H, x1=4)
+    mem.visits[(2, 0)] = [1]
+    # Jambs either side of the gap, two cells past the open_far reach.
+    gap = spatial.cell(spatial.ahead(centre((2, 0)), 0.0, 5.5))
+    mem.wall[(gap[0], gap[1] + 1)] = 0
+    mem.wall[(gap[0], gap[1] - 1)] = 0
+    cm = spatial.CostMap(mem, [], P72)
+    assert cm.cost(gap) is None, "unknown beside two walls is sealed"
+    mem.observe(1, pose((2, 0)), door_look())
+    cm = spatial.CostMap(mem, [], P72)
+    assert cm.cost(gap) == P72["unknown_cost"], "the reported gap stays passable"
+    # The soft cells are not known ground: a wall beyond them still seals.
+    beyond = (gap[0] + 4, gap[1] + 1)
+    mem.wall[beyond] = 0
+    cm = spatial.CostMap(mem, [], P72)
+    assert cm.cost((beyond[0], beyond[1] - 1)) is None
+
+
+def test_a17h_nose_on_wall_is_firm_only_after_a_second_pose():
+    mem = corridor(0, 3, side_walls=False)
+    mem.cfg = H
+    mem.observe(4, pose((3, 0)), all_walls())
+    assert mem.wall and not mem.firm_wall, "one read: a perceiver wall"
+    mem.observe(5, pose((3, 0)), all_walls())
+    assert not mem.firm_wall, "the same spot again is the same look"
+    mem.visits[(3, 2)] = [6]
+    mem.observe(6, pose((3, 2)), all_walls())
+    assert mem.firm_wall, "a second read from 1.7 m away makes it firm"
+    assert all(c[0] == 4 for c in mem.firm_wall), sorted(mem.firm_wall)
+    # Firm cells left the perceiver layer; a visit alone erases them.
+    assert not (set(mem.firm_wall) & set(mem.wall))
+    c = next(iter(mem.firm_wall))
+    mem.visit(7, pose(c))
+    assert c not in mem.firm_wall
+
+
+def test_a17h_single_read_wall_is_popped_by_seen_floor_as_a17b():
+    mem = corridor(0, 3, side_walls=False)
+    mem.cfg = H
+    mem.observe(4, pose((3, 0)), all_walls())
+    assert (4, 0) in mem.wall
+    mem.observe(5, pose((3, 0)), door_look(door=False))   # floor seen straight ahead
+    assert (4, 0) not in mem.wall, "a17b: a newer look overwrites"
+    mem_f = corridor(0, 3, side_walls=False)
+    mem_f.cfg = spatial.A17F
+    mem_f.observe(4, pose((3, 0)), all_walls())
+    assert (4, 0) in mem_f.firm_wall
+    mem_f.observe(5, pose((3, 0)), door_look(door=False))
+    assert (4, 0) in mem_f.firm_wall, "a17f kept it"
+
+
+def test_a17h_two_strong_closes_kill_an_opening():
+    mem = open_field(H, x1=6)
+    mem.visits[(2, 0)] = [1]
+    mem.observe(1, pose((2, 0)), door_look())
+    o = mem.openings[0]
+    assert mem.soft_door_cells()
+    mem.observe(2, pose((2, 0)), door_look(door="closed"))
+    assert o.closed and not o.dead and not mem.soft_door_cells()
+    mem.visits[(3, 0)] = [3]
+    mem.observe(3, pose((3, 0)), door_look())
+    assert not o.closed and o.seen == 2 and mem.soft_door_cells(), "one close: reopens"
+    mem.visits[(4, 0)] = [4]
+    mem.observe(4, pose((4, 0)), door_look(door="closed"))
+    assert o.dead and o.closed, "closed from two poses 1 m apart: dead"
+    mem.visits[(5, 0)] = [5]
+    mem.observe(5, pose((5, 0)), door_look())
+    assert o.dead and o.closed and o.seen == 2 and not mem.soft_door_cells()
+    assert o not in mem.listed_openings(5)
+    snap = mem.snapshot()
+    assert snap["openings"][0]["dead"] and snap["cells_soft_door"] == 0
+
+
+def test_a17h_nose_on_wall_over_the_opening_is_a_strong_close():
+    mem = open_field(H, x1=8)
+    mem.visits[(2, 0)] = [1]
+    mem.observe(1, pose((2, 0)), door_look())
+    o = mem.openings[0]
+    at = (o.x, o.y)
+    # Walk up to it and read a wall nose-on where the doorway was reported.
+    near = spatial.cell(spatial.ahead(at, 180.0, 1.2))
+    mem.visits[near] = [2]
+    mem.observe(2, pose(near), all_walls())
+    assert o.closed and len(o.close_poses) == 1
+
+
+def flat_records(step, cells, start=(0, 0)):
+    action = {"index": 3, "r": 1.7, "theta_deg": 0.0, "turn_around": False}
+    return [{"step": step - 1, "index": 3,
+             "manifest": dict(manifest_at(start, step - 1), actions=[action]),
+             "planner": {"path_m": 9.0, "fallback": "none", "stall": [],
+                         "path_cells": [[c[0], c[1]] for c in cells]}}]
+
+
+def test_commit_keeps_the_previous_route_unless_much_cheaper_or_left():
+    goal = centre((9, 0))
+    mem = open_field(H, x0=0, x1=9, half=3)
+    mem.visits[(0, 0)] = [0]
+    detour = [(0, 0), (1, 1), (2, 2), (3, 2), (4, 2), (5, 2), (6, 1), (7, 0), (8, 0), (9, 0)]
+    plan = planner.pathfind(mem, manifest_at((0, 0), 1), flat_records(1, detour), goal, P72)
+    assert plan.kept is True and plan.path == detour and plan.fresh_m is not None
+    assert plan.to_dict()["kept"] is True
+    # A fresh route a quarter cheaper wins.
+    long = [(0, 0), (1, 1), (2, 2), (3, 3), (4, 3), (5, 3), (6, 3), (7, 3), (8, 3),
+            (9, 3), (9, 2), (9, 1), (9, 0)]
+    plan = planner.pathfind(mem, manifest_at((0, 0), 1), flat_records(1, long), goal, P72)
+    assert plan.kept is False and plan.path != long
+    # The previous route sealed on this step's map: not kept.
+    mem.stop_wall[(4, 2)] = 1
+    mem.free.pop((4, 2))
+    plan = planner.pathfind(mem, manifest_at((0, 0), 1), flat_records(1, detour), goal, P72)
+    assert plan.kept is False
+    # The drone a cell beside the route is still on it: the rest is kept from
+    # the nearest route cell on.
+    mem.stop_wall.clear()
+    mem.free[(4, 2)] = 0
+    mem.visits[(3, 1)] = [0]
+    plan = planner.pathfind(mem, manifest_at((3, 1), 1), flat_records(1, detour, (3, 1)),
+                            goal, P72)
+    assert plan.kept is True and plan.path[:2] == [(3, 1), (4, 2)], plan.path
+    # Three cells off the route: left it.
+    cm = spatial.CostMap(mem, [], P72, include=((0, 5), (9, 0)), start=(0, 5))
+    assert planner.committed_route(cm, (0, 5), detour, (9, 0), P72["commit"]) is None
+    assert planner.committed_route(cm, (0, 2), detour, (9, 0), P72["commit"]) is not None
+    # No previous route (or commitment off): nothing recorded.
+    assert planner.pathfind(mem, manifest_at((0, 0), 1), [], goal, P72).kept is None
+    assert "kept" not in planner.pathfind(mem, manifest_at((0, 0), 1), flat_records(1, detour),
+                                          goal, P).to_dict()
+
+
+def test_a72_is_a66_plus_a17h_and_commit():
+    assert agent.get("a66").sha() == "de7f23d07186"
+    assert agent.get("a72").sha() != agent.get("a66").sha()
+    a66 = agent.get("a66").features["orchestrator"]
+    a72 = agent.get("a72").features["orchestrator"]
+    assert {k: v for k, v in a72.items() if k not in ("memory", "pathfinder")} == \
+        {k: v for k, v in a66.items() if k not in ("memory", "pathfinder")}
+    assert a72["memory"] == "a17h" and a72["pathfinder"]["commit"]
+    assert spatial.A17H.two_pose and not spatial.A17H.firm_walls
+    assert "two_pose:" in " ".join(spatial.A17H.sha_segments())

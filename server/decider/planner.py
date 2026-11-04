@@ -984,6 +984,11 @@ class PathPlan:
     stall: List[List[int]]
     costs: Dict[str, int]
     sealed: List[List[int]] = field(default_factory=list)
+    #: a72 (`commit`): whether this step kept the previous step's route, and
+    #: the fresh route's length it was held against (None: no previous route
+    #: to keep, or commitment off).
+    kept: Optional[bool] = None
+    fresh_m: Optional[float] = None
 
     def to_dict(self) -> Dict[str, Any]:
         out = {"way": "path", "path_m": self.path_m,
@@ -994,7 +999,62 @@ class PathPlan:
                "stall": self.stall, "costs": self.costs}
         if self.sealed:
             out["sealed"] = self.sealed
+        if self.kept is not None:
+            out["kept"] = self.kept
+            out["fresh_m"] = self.fresh_m
         return out
+
+
+def path_cost(cm: spatial.CostMap, path: List[Tuple[int, int]]) -> Optional[float]:
+    """What astar charges for this route on this map (the first cell is free,
+    the last is the goal and always passable), or None if a cell is impassable."""
+    total = 0.0
+    for a, b in zip(path, path[1:]):
+        c = 1.0 if b == path[-1] else cm.cost(b)
+        if c is None:
+            return None
+        dx, dy = abs(b[0] - a[0]), abs(b[1] - a[1])
+        total += (math.sqrt(2.0) if dx and dy else 1.0) * max(dx, dy, 1) * c
+    return total
+
+
+def _previous_route(records: List[Dict[str, Any]], step: int) -> Optional[List[Tuple[int, int]]]:
+    """The route the previous step's planner record steered by, if that step
+    is step - 1 and had a route of its own (fallback none)."""
+    rows = sorted((r for r in records if "step" in r and r["step"] < step),
+                  key=lambda r: r["step"])
+    if not rows or rows[-1]["step"] != step - 1:
+        return None
+    plan = rows[-1].get("planner") or {}
+    cells = plan.get("path_cells") or []
+    if plan.get("fallback") != "none" or len(cells) < 2:
+        return None
+    return [(int(c[0]), int(c[1])) for c in cells]
+
+
+def committed_route(cm: spatial.CostMap, start: Tuple[int, int], prev: List[Tuple[int, int]],
+                    goal: Tuple[int, int], p: Dict[str, Any]) -> Optional[List[Tuple[int, int]]]:
+    """a72: the previous route from where the drone now is, if the drone is
+    still on or beside it (within leave_cells) and the rest of it is passable
+    on this step's map; else None."""
+    if prev[-1] != goal:
+        return None
+    # Where the drone is along the route: the nearest route cell (the later
+    # one on a tie, so the drone is not sent back along it).
+    best = None
+    for i, c in enumerate(prev):
+        d = math.hypot(c[0] - start[0], c[1] - start[1])
+        if best is None or d <= best[0] + 1e-9:
+            best = (d, i)
+    i = best[1]
+    if max(abs(prev[i][0] - start[0]), abs(prev[i][1] - start[1])) > int(p["leave_cells"]):
+        return None
+    rest = prev[i:] if prev[i] == start else [start] + prev[i + 1:]
+    if len(rest) < 2:
+        return None
+    if prev[i] != start and not cm.passable_segment(_centre(start), _centre(rest[1])):
+        return None
+    return rest if path_cost(cm, rest) is not None else None
 
 
 def astar(cm: spatial.CostMap, start: Tuple[int, int], goal: Tuple[int, int],
@@ -1254,6 +1314,29 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     fallback = "none"
     cm = spatial.CostMap(mem, stall, p, include=(start, end), start=start)
     path = astar(cm, start, end)
+    kept: Optional[bool] = None
+    fresh_m: Optional[float] = None
+    commit = p.get("commit")
+    if commit:
+        # a72: keep the previous step's route unless the drone has left it,
+        # it is now impassable, or a fresh route is at least `gain` cheaper.
+        # R30 s03 dynamic: the route alternated every two or three steps
+        # between the shut door and the way out as single cells sealed, and
+        # the drone turned in place.
+        prev = _previous_route(records, step)
+        held = committed_route(cm, start, prev, end, commit) if prev else None
+        if held is not None:
+            kept = True
+            if path is not None:
+                fresh_m = round(sum(spatial.dist(_centre(a), _centre(b))
+                                    for a, b in zip(path, path[1:])), 2)
+                fresh, old = path_cost(cm, path), path_cost(cm, held)
+                if fresh is not None and old is not None and fresh < (1.0 - float(commit["gain"])) * old:
+                    kept = False
+            if kept:
+                path = held
+        elif path is not None and prev:
+            kept = False
     if path is None:
         fallback = "soft"
         cm = spatial.CostMap(mem, stall, p, soft=True, include=(start, end), start=start)
@@ -1274,7 +1357,8 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     path_m = round(sum(spatial.dist(_centre(a), _centre(b)) for a, b in zip(path, path[1:])), 2)
     unknown = sum(1 for c in path[1:-1] if c not in cm.known)
     target = spatial.Target("path", "path", wp[0], wp[1], p["words"]["path"], step)
-    return PathPlan(target, wp, path, path_m, unknown, fallback, added, cm.counts(), sealed_now)
+    return PathPlan(target, wp, path, path_m, unknown, fallback, added, cm.counts(), sealed_now,
+                    kept, fresh_m)
 
 
 def search_situation_a20(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
