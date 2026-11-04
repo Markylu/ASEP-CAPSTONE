@@ -2,11 +2,11 @@
   "round": "R30",
   "title": "a49 with a code route planner in place of goal-way and q03",
   "citable": false,
-  "agent_version": "a63",
-  "status": "running",
+  "agent_version": "a66",
+  "status": "complete",
   "git_sha": "2f9c171",
   "started": "2026-11-03T22:46:22+00:00",
-  "finished": null,
+  "finished": "2026-11-03T23:50:50+00:00",
   "operator": "Markylu",
   "notes": ""
 }

@@ -347,4 +347,45 @@ R25D (`a49`). Branch `phase2/r30-pathfinder` from `phase2/r29n-host-noise`.
 
 ## Outcome
 
-Not flown.
+Flown 2026-11-03 on `a66`, one lane alone on `:8004` (R25D flew four lanes beside R25; the
+host-setting rounds R29N/R29S are unflown): 18/18 valid. **14/18** (initial 6, final 4,
+dynamic 4) against R25D's 14/18: **the total holds at 14 and gains nothing**; equal to the best
+Phase 2 score. Flown against the shakedown rule on the operator's instruction (seven versions
+had failed the s03 check, above).
+
+| site | initial | final | dynamic |
+|---|---|---|---|
+| s01 | 1 | 1 | 1 |
+| s02a | 1 | 1 | . |
+| s02c | 1 | 1 | 1 |
+| s02va | 1 | . | 1 |
+| s02vc | 1 | . | 1 |
+| s03 | 1 | 1 | . |
+
+- **s03 2/3 (R25D 1/3).** `final` solved in 28 steps: the drone took the open tine first, the
+  closed door read at s15 cost 0 steps in the shut tine and 6 in the open one, lobby 4; the
+  planner did the one thing it was built for. `initial` solved at step 58 after 37 steps in the
+  lobby (the navigator's marker-0 refusals; the a70 fix is not in `a66`). `dynamic` lost as in
+  the shakedown: tine R first, the door read `closed` at s24, 31 steps in the shut tine, 0 in
+  the open one, 13.6 m from the goal.
+- **s02 9/12 (R25D 10/12).** s02a `dynamic`, s02va `final` and s02vc `final` ran out circling
+  the divider at x ≈ 0.7–4 m without crossing (13–14 m from the goal): the route through
+  divider cells the map had not sealed, including phantom doorways g05 and d01 read `open`
+  (the a70/a71 shakedown analysis above). The other nine s02 runs crossed the open door's gap.
+- **Manipulation check.** "Toward your target" taken on 431/525 forward offers (82%; three
+  solved runs of 14–28 steps fall below 70%) and on 52/74 marker-0 offers (70%); a route on
+  100% of steps; longest turn-around streak 3; walls missed 18.5%, phantom 11.1%
+  (`eval/r30_check.py`, `eval/r28_flight.py`). s03: the shut-tine check holds in `final`
+  (0 after the closed door, open tine 6, lobby 4) and fails in `dynamic` (31, open tine 0);
+  `initial` lobby 37.
+- **Drop criterion:** not met (14/18; the shut-tine check held in `final`). **Predictions:**
+  initial 6 (as predicted), final 4 (predicted 4–5), dynamic 4 (predicted 4–6); total 14 at the
+  predicted floor.
+- **Noise.** One seed; the `a17b` family expects 11.3 ± 1.4, so 14 is again a good draw, and the
+  s03 gain and s02 loss are each one run. What R30 shows beyond the total: the route planner
+  takes the s03 tines right when the first tine is the open one or the navigator follows it out
+  (`final`), and the s02 divider is where the map's unsealed cells and phantom doors cost runs.
+- **Navigator.** The shakedown measured a70's fix (marker-0 "toward" taken 77/77 against about
+  half) but also that an obedient navigator follows the route into phantom doors (a70 2/6,
+  a71 3/6 `dynamic`); `a66`'s partial disobedience is part of its 14. The next lever is the
+  perceiver's doorway and corridor reads, not the planner or the navigator.
