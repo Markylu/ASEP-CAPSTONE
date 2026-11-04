@@ -2,8 +2,8 @@
 
 **Agent:** `a66` (`de7f23d07186`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Planner:** `planner.pathfind`
-(`PATHFINDER_A65`) · **Status:** laid out 2026-11-04 on the operator's instruction ("Fly the
-final"), not flown
+(`PATHFINDER_A65`) · **Status:** flown 2026-11-04 at `8d50901`, 90/90 valid, **64/90**
+([summary](summary.md))
 
 Written before flying. Spec: `docs/phase2-test-plan.md` §6 and P1 §5–§7. **Citable.**
 
@@ -83,4 +83,10 @@ R30 (`a66`), chosen over R25D (`a49`) by R32. Branch `phase2/final` from `phase2
 
 ## Outcome
 
-Not flown.
+**64/90: `initial` 30/30, `final` 17/30, `dynamic` 17/30** (Phase 1: 25/90, 25/0/0). Predicted
+59–68, landed 64; `final` one under its 18–21, `dynamic` at the top of its 13–17. Stretch goal
+(≥ 50% per layout) met on all six: s01 15/15, s02a 9/15, s02c 8/15, s02va 13/15, s02vc 10/15,
+s03 9/15. s03 `dynamic` 0/5 (0/52 in Phase 2). Manipulation check held: one SHA on all 90, s03
+`final_closed` L/R/L/R/L, walls 16.7% / 12.4% inside the window. 90/90 valid, 0 attempts beyond
+the first. Flown 17:48–19:02 UTC on eight sctsvr6 lanes. Labels Claude review, operator to confirm.
+Details: [summary.md](summary.md); tables and contrasts: [results](../results/results.md).
