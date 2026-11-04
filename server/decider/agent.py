@@ -227,6 +227,13 @@ PATHFINDER_A68: Dict[str, Any] = dict(
 PATHFINDER_A69: Dict[str, Any] = dict(
     PATHFINDER_A68, dead_end=dict(PATHFINDER_A68["dead_end"], one_side_cells=3))
 
+#: a72 (R31): a65's planner with route commitment (planner.committed_route):
+#: the previous step's route is kept unless the drone has left it by more
+#: than leave_cells, it is impassable on this step's map, or a fresh route is
+#: at least `gain` cheaper. docs/research/r30-analysis-and-proposals.md P2.
+PATHFINDER_A72: Dict[str, Any] = dict(
+    PATHFINDER_A65, commit={"gain": 0.25, "leave_cells": 2})
+
 #: a70 (R30): what the navigator is told about the route beyond the tags.
 #: `route_behind` is added to the planner line when "toward your target" sits
 #: on the turn-around: R30's shakedown (a63, a67, a68 s03 dynamic) lost 18
@@ -1293,6 +1300,27 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "and left the lobby in 11 steps, and s03 dynamic then oscillated 30 steps in the "
           "shut tine as the route alternated between the shut door and the way out; a68's "
           "seal had taken the drone out of that tine in flight."),
+    Agent("a72", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A72,
+                                          "memory": "a17h",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a66 with memory a17h (one look is soft: an open doorway's floor through the "
+          "gap is a soft claim until seen open from two poses 1 m apart; a nose-on wall "
+          "run or a closed-door wall is firm only after a second read from 1 m away; two "
+          "strong closes kill an opening) and route commitment (the previous route is "
+          "kept unless left, impassable or a fresh one is 25% cheaper). R30 and its "
+          "shakedown: a70/a71 lost s02 runs to one confirmed phantom doorway the route "
+          "trusted, a71 lost s03 to one nose-on no_floor read down the stem made firm, "
+          "and s03 dynamic oscillated at the shut door as single cells sealed."),
 )}
 
 DEFAULT_AGENT = "a00"

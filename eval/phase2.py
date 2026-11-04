@@ -237,6 +237,14 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
     "R30": {"folder": "R30_pathfinder",
             "title": "a49 with a code route planner in place of goal-way and q03",
             "agent": "a66", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
+    # R31: a72 = a66 with memory a17h (one look is soft: two-pose confirmation
+    # of doorways and firm walls, two strong closes kill an opening) and route
+    # commitment. Offline gate on R30's records failed (R31 README, Probe
+    # gate): the route crosses the s02 divider through phantom floor on 90%+
+    # of near-side steps under every map variant tried. Not flown.
+    "R31": {"folder": "R31_two_pose_commit",
+            "title": "a66 with one-look-is-soft memory (a17h) and route commitment",
+            "agent": "a72", "sites": ROUND_SITES, "seeds": ROUND_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

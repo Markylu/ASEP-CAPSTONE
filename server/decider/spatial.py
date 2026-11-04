@@ -350,6 +350,17 @@ class SpatialConfig:
     #: route ran through "floor" 4 m deep inside the solid beyond the tine's
     #: outer wall, written by open_far rays the perceiver read through it.
     near_free_m: Optional[float] = None
+    #: a17h (a72): one look is soft. An open doorway's floor through the gap
+    #: is a soft claim (passable at unknown cost, never sealed, pops nothing
+    #: hard) until the opening is seen open from two poses confirm_m apart;
+    #: a nose-on wall run or a closed-door wall is a perceiver wall (seen
+    #: floor pops it) until read again from a pose confirm_m away, then firm
+    #: (a visit alone erases); two strong closes from poses confirm_m apart
+    #: kill an opening for good. R30 shakedown: a70/a71 lost s02 runs to one
+    #: confirmed phantom doorway whose 6 m of strong floor the route trusted,
+    #: and a71 lost s03 to one nose-on no_floor read down the stem that a17f
+    #: made a firm wall. PARAMS_A17H.
+    two_pose: bool = False
 
     def sha_segments(self) -> List[str]:
         out = ["spatial:" + wording_sha()]
@@ -376,6 +387,8 @@ class SpatialConfig:
             out.append("firm_walls")
         if self.near_free_m is not None:
             out.append("near_free_m:{0}".format(self.near_free_m))
+        if self.two_pose:
+            out.append("two_pose:" + wording_sha_a17h())
         return out
 
 
@@ -482,6 +495,28 @@ A17F = replace(A17E, name="a17f", firm_walls=True)
 #: a17g (a67): a17f with far floor weak.
 A17G = replace(A17F, name="a17g", near_free_m=2.5)
 
+#: a17h (a72, R31): one look is soft (SpatialConfig.two_pose). In the sha.
+PARAMS_A17H: Dict[str, Any] = {
+    # Two sightings (or two strong closes) count as two only from poses this
+    # far apart: a repeat read from the same spot, as after a turn-around, is
+    # the same look again (probe LD: alone, repeat reads are deterministic).
+    "confirm_m": 1.0,
+    # A nose-on wall run whose cells come this near an opening's point is a
+    # strong close of it: the wall was read where the door was reported.
+    "veto_m": 1.5,
+}
+
+
+def wording_sha_a17h() -> str:
+    """Identity of a17h's parameters, for agent.sha()."""
+    blob = json.dumps({"params_a17h": PARAMS_A17H}, sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+
+#: a17h (a72): a17e (near walls from the side strips, no firm walls from one
+#: look) with the two-pose rules.
+A17H = replace(A17E, name="a17h", two_pose=True)
+
 
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
     """The memory an orchestrated agent's features name (agent.py)."""
@@ -499,6 +534,8 @@ def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
         return A17F
     if orchestrator.get("memory") == "a17g":
         return A17G
+    if orchestrator.get("memory") == "a17h":
+        return A17H
     if orchestrator.get("memory") == "a15":
         return A15
     if orchestrator.get("memory") == "a16":
@@ -608,6 +645,13 @@ class Opening:
     closed: bool = False
     label: str = ""
     last_seen: int = -1
+    #: a17h: the poses each open sighting and each strong close (a d01
+    #: `closed`, or a nose-on wall run over the opening) were made from, and
+    #: whether two strong closes from poses confirm_m apart have killed it
+    #: (a door that is shut stays shut; a later open sighting is a misread).
+    sight_poses: List[Tuple[float, float]] = field(default_factory=list)
+    close_poses: List[Tuple[float, float]] = field(default_factory=list)
+    dead: bool = False
 
 
 @dataclass
@@ -688,6 +732,13 @@ class SpatialMemory:
     #: floor-end range. At 1 m a door leaf reads no_floor with no doorway, so
     #: doors are known closed from 3-8 m out (a67 s03 dynamic s46, s51).
     closed_doors: List[Tuple[float, float, int]] = field(default_factory=list)
+    #: a17h: each nose-on wall run and each closed-door wall as (step, pose,
+    #: cells written), for the second-pose promotion to firm_wall; and the
+    #: soft floor each not-yet-confirmed opening claims through its gap, by
+    #: the opening's label (CostMap reads it; a strong close erases it).
+    wall_runs: List[Tuple[int, Tuple[float, float], frozenset]] = field(default_factory=list)
+    door_runs: List[Tuple[int, Tuple[float, float], frozenset]] = field(default_factory=list)
+    soft_door: Dict[str, set] = field(default_factory=dict)
     cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
@@ -838,15 +889,15 @@ class SpatialMemory:
             centre = (where[2] + strip_offset(strip)) % 360.0
             at = ahead(here, centre, PARAMS_A17["opening_at_m"][floor])
             if door == "open":
-                self._add_opening(step, at)
+                self._add_opening(step, at, here)
                 self.door_rays.append(Ray(here[0], here[1], centre, step, floor))
             elif door == "closed":
                 for o in self.openings:
                     if dist((o.x, o.y), at) < OPENING_MERGE_M:
-                        o.closed = True
+                        self._strong_close(o, step, here)
             self._close_openings(step, here, centre, reach)
             if self.cfg.door_walls or self.cfg.suspects:
-                self._observe_a17d(step, where, strip, lane.get("floor_end"), door)
+                self._observe_a17d(step, where, strip, lane.get("floor_end"), door, at)
         for end, strip in pending:
             if not (seen_by.get(end, set()) - {strip}):
                 self.wall[end] = step
@@ -867,7 +918,7 @@ class SpatialMemory:
                                       perception.get("goal_range") or "mid"))
 
     def _observe_a17d(self, step: int, where: Pose, strip: str, floor_end: Any,
-                      door: Any) -> None:
+                      door: Any, at: Optional[Point] = None) -> None:
         """a17d: what one strip adds for the route planner. A confirmed closed
         door whose floor ends within door_wall_m is a wall across the strip and
         its neighbours at that range; a floor end farther out (lower, middle)
@@ -885,16 +936,41 @@ class SpatialMemory:
             reach = P4["door_wall_m"][floor_end]
             lo, hi = max(0, k - P4["door_wall_strips"]), min(len(STRIPS) - 1,
                                                              k + P4["door_wall_strips"])
+            written = set()
             for s in STRIPS[lo:hi + 1]:
                 for off in strip_ray_offsets(s, PARAMS_A17["cone_rays"]):
                     c = cell(ahead(here, (where[2] + off) % 360.0, reach))
                     if c not in self.visits:
                         self.door_wall[c] = step
                         self.free.pop(c, None)
+                        written.add(c)
+            if self.cfg.two_pose:
+                self._promote(step, here, written, self.door_runs)
             return
         if not self.cfg.suspects:
             return
         if door == "open":
+            opening = None
+            if self.cfg.two_pose and at is not None:
+                opening = self._opening_at(at)
+                if opening is not None and opening.dead:
+                    return  # a door read shut twice: this sighting is a misread
+                if opening is not None and not self.opening_confirmed(opening):
+                    # One look: the floor through the gap is a soft claim.
+                    soft = self.soft_door.setdefault(opening.label, set())
+                    for off in strip_ray_offsets(strip, PARAMS_A17["cone_rays"]):
+                        heading = (where[2] + off) % 360.0
+                        d = CELL_M / 2.0
+                        while d <= P4["open_door_reach_m"]:
+                            c = cell(ahead(here, heading, d))
+                            if c in self.stop_wall:
+                                break
+                            if c not in self.visits:
+                                soft.add(c)
+                                self.suspect.pop(c, None)
+                                self.near_wall.pop(c, None)
+                            d += CELL_M / 2.0
+                    return
             for off in strip_ray_offsets(strip, PARAMS_A17["cone_rays"]):
                 heading = (where[2] + off) % 360.0
                 d = CELL_M / 2.0
@@ -942,6 +1018,7 @@ class SpatialMemory:
             if strip is not None and floors.get(strip) == "blocked_near":
                 run.append(strip)
                 continue
+            written = set()
             if len(run) >= P4["wall_run_min"]:
                 left = strip_ray_offsets(run[0], [du])[0]
                 right = strip_ray_offsets(run[-1], [-du])[0]
@@ -964,21 +1041,103 @@ class SpatialMemory:
                             else:
                                 self.wall[c] = step
                             self.free.pop(c, None)
+                            written.add(c)
                         d += CELL_M / 2.0
+            if written and self.cfg.two_pose:
+                # a17h: the second nose-on read of this wall from a pose
+                # confirm_m away makes it firm; and a wall read where an
+                # opening was reported is a strong close of that opening.
+                self._promote(step, here, written, self.wall_runs)
+                veto = PARAMS_A17H["veto_m"]
+                for o in self.openings:
+                    if o.passed:
+                        continue
+                    if any(dist(((c[0] + 0.5) * CELL_M, (c[1] + 0.5) * CELL_M), (o.x, o.y)) < veto
+                           for c in written):
+                        self._strong_close(o, step, here)
             run = []
 
-    def _add_opening(self, step: int, p: Point) -> None:
+    def _add_opening(self, step: int, p: Point, seen_from: Optional[Point] = None) -> None:
         for o in self.openings:
             if dist((o.x, o.y), p) < OPENING_MERGE_M:
+                if self.cfg.two_pose and o.dead:
+                    return  # read shut from two poses: stays shut
                 n = o.seen
                 o.x, o.y = (o.x * n + p[0]) / (n + 1), (o.y * n + p[1]) / (n + 1)
                 o.seen += 1
                 o.closed = False
                 o.last_seen = step
+                if seen_from is not None:
+                    o.sight_poses.append((seen_from[0], seen_from[1]))
                 return
-        self.openings.append(Opening(p[0], p[1], step,
-                                     label="ABCDEFGHJKLMNPQRSTUVWXYZ"[len(self.openings) % 24],
-                                     last_seen=step))
+        o = Opening(p[0], p[1], step, label="ABCDEFGHJKLMNPQRSTUVWXYZ"[len(self.openings) % 24],
+                    last_seen=step)
+        if seen_from is not None:
+            o.sight_poses.append((seen_from[0], seen_from[1]))
+        self.openings.append(o)
+
+    # -- a17h: one look is soft ------------------------------------------------
+
+    def _opening_at(self, p: Point) -> Optional[Opening]:
+        """The opening a doorway reported at `p` merges into, if any."""
+        best = None
+        for o in self.openings:
+            d = dist((o.x, o.y), p)
+            if d < OPENING_MERGE_M and (best is None or d < best[0]):
+                best = (d, o)
+        return best[1] if best else None
+
+    @staticmethod
+    def _two_apart(poses: List[Tuple[float, float]]) -> bool:
+        m = PARAMS_A17H["confirm_m"]
+        return any(dist(a, b) >= m for i, a in enumerate(poses) for b in poses[i + 1:])
+
+    def opening_confirmed(self, o: Opening) -> bool:
+        """a17h: seen open from two poses confirm_m apart, and not dead."""
+        return not o.dead and self._two_apart(o.sight_poses)
+
+    def _strong_close(self, o: Opening, step: int, here: Point) -> None:
+        """A d01 `closed` at the opening, or a nose-on wall run over it. Once
+        is a close (a later open sighting reopens it, as before); twice from
+        poses confirm_m apart kills it. Its soft floor goes either way."""
+        o.closed = True
+        if not self.cfg.two_pose:
+            return
+        o.close_poses.append((here[0], here[1]))
+        self.soft_door.pop(o.label, None)
+        if self._two_apart(o.close_poses):
+            o.dead = True
+
+    def _promote(self, step: int, here: Point, written: set, runs: List) -> None:
+        """A wall cell read again from a pose confirm_m away from an earlier
+        read of a cell within one cell of it becomes firm (erased by a visit
+        only). The earlier run's matching cells still standing become firm too."""
+        m = PARAMS_A17H["confirm_m"]
+        for _, pose, cells in runs:
+            if dist(pose, here) < m:
+                continue
+            for c in written:
+                near = [k for k in cells if max(abs(k[0] - c[0]), abs(k[1] - c[1])) <= 1]
+                if not near:
+                    continue
+                for k in [c] + near:
+                    if k in self.visits:
+                        continue
+                    if k == c or k in self.wall or k in self.door_wall:
+                        self.firm_wall[k] = step
+                        self.wall.pop(k, None)
+                        self.door_wall.pop(k, None)
+                        self.free.pop(k, None)
+        runs.append((step, (here[0], here[1]), frozenset(written)))
+
+    def soft_door_cells(self) -> set:
+        """a17h: cells an open opening claims floor through on one look only."""
+        out: set = set()
+        for o in self.openings:
+            if o.closed or o.dead or o.passed or self.opening_confirmed(o):
+                continue
+            out |= self.soft_door.get(o.label, set())
+        return {c for c in out if c not in self.visits}
 
     def _close_openings(self, step: int, here: Point, heading: float, reach: float) -> None:
         """An opening is closed when a later look straight at it sees the floor
@@ -1312,10 +1471,15 @@ class SpatialMemory:
             out["cells_door_wall"] = len(self.door_wall)
             out["cells_suspect"] = len(self.suspect)
             out["cells_near_wall"] = len(self.near_wall)
-        if self.cfg.firm_walls:
+        if self.cfg.firm_walls or self.cfg.two_pose:
             out["cells_firm_wall"] = len(self.firm_wall)
         if self.cfg.near_free_m is not None:
             out["cells_free_near"] = len(self.free_near)
+        if self.cfg.two_pose:
+            out["cells_soft_door"] = len(self.soft_door_cells())
+            for d, o in zip(out["openings"], self.openings):
+                d["confirmed"] = self.opening_confirmed(o)
+                d["dead"] = o.dead
         return out
 
 
@@ -1802,11 +1966,15 @@ class CostMap:
             hard = {c for c in hard
                     if c in seen_walls or max(abs(c[0] - sx), abs(c[1] - sy)) > 1}
         self.hard = {c for c in hard if c not in mem.visits}
+        # a17h: floor an opening claims on one look is passable at unknown
+        # cost and never sealed (the gap sits beside seen jambs), but seals
+        # nothing itself: not known ground.
+        self.soft_door = mem.soft_door_cells() if mem.cfg.two_pose else set()
         sealed = set()
         for c in self.hard:
             for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 m = (c[0] + dx, c[1] + dy)
-                if m not in known and m not in self.hard:
+                if m not in known and m not in self.hard and m not in self.soft_door:
                     sealed.add(m)
         self.sealed = sealed
         self.soft_walls = (set(mem.wall) | set(mem.near_wall)) - self.hard if soft else set()
@@ -1846,5 +2014,8 @@ class CostMap:
         return True
 
     def counts(self) -> Dict[str, int]:
-        return {"hard": len(self.hard), "sealed": len(self.sealed),
-                "soft_walls": len(self.soft_walls)}
+        out = {"hard": len(self.hard), "sealed": len(self.sealed),
+               "soft_walls": len(self.soft_walls)}
+        if self.mem.cfg.two_pose:
+            out["soft_door"] = len(self.soft_door)
+        return out

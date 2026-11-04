@@ -1,0 +1,14 @@
+run           | a66rec gap/phantom/none |   a72 gap/phantom/none |  a72g gap/phantom/none |  a17g gap/phantom/none
+s02a/dynamic  |          7/ 53/  0 f 2 |          4/ 56/  0 f 2 |          4/ 56/  0 f 3 |          7/ 53/  0 f 4
+s02a/final    |          1/  9/  0 f 1 |          1/  9/  0 f 2 |          1/  9/  0 f 1 |          1/  9/  0 f 1
+s02c/dynamic  |          6/ 12/  0 f 2 |          5/ 13/  0 f 4 |          5/ 13/  0 f 4 |          6/ 12/  0 f 3
+s02c/final    |          1/ 37/  0 f 4 |          0/ 38/  0 f 3 |          0/ 38/  0 f 6 |          1/ 37/  0 f 4
+s02va/dynamic |          5/ 14/  0 f 1 |          5/ 14/  0 f 1 |          5/ 14/  0 f 1 |          6/ 13/  0 f 1
+s02va/final   |          0/ 58/  0 f 1 |          0/ 58/  0 f 1 |          0/ 58/  0 f 0 |          0/ 58/  0 f 0
+s02vc/dynamic |          9/ 37/  0 f 3 |          5/ 41/  0 f 3 |          6/ 40/  0 f 5 |         17/ 29/  0 f 3
+s02vc/final   |          0/ 56/  0 f 5 |          0/ 56/  0 f 7 |          0/ 56/  0 f 6 |          0/ 56/  0 f 6
+
+a66rec : route through the true gap on 29/305 near-side steps (10%), phantom 276, none 0; flips 19
+a72    : route through the true gap on 20/305 near-side steps (7%), phantom 285, none 0; flips 23
+a72g   : route through the true gap on 21/305 near-side steps (7%), phantom 284, none 0; flips 26
+a17g   : route through the true gap on 38/305 near-side steps (12%), phantom 267, none 0; flips 22
