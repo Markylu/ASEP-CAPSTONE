@@ -69,7 +69,9 @@ Not needed: no change to the agent.
 ## Builds on
 
 R30 (`a66`), chosen over R25D (`a49`) by R32. Branch `phase2/final` from `phase2/r31-two-pose-commit`
-(`988036a`); PR against it, never merged; tip tagged `phase2-complete` after the round.
+(`988036a`); PR against it, never merged. The tip was tagged `phase2-complete` after the round and the
+tag removed: the operator said after the flight that a66 was not meant as the final agent, so this
+round is a citable 90-run measurement of a66, not Phase 2's closing round.
 
 ## Notes for the operator
 
