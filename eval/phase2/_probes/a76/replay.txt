@@ -1,0 +1,168 @@
+a76 replay (open loop; eval/probes/a76_replay.py) on final,R32P_repeat_a66,R35_wall_turn_only
+
+final                s02a  dynamic seed1 lost near  45 fires real  0 divider  0 off  2 | at door  3: toward rec  0 a76  0
+final                s02a  dynamic seed2 won  near  21 fires real  0 divider  0 off  1 | at door  2: toward rec  0 a76  0
+final                s02a  dynamic seed3 won  near  28 fires real  4 divider  0 off  2 | at door  3: toward rec  1 a76  1
+final                s02a  dynamic seed4 lost near  48 fires real  0 divider  5 off  1 | at door  0: toward rec  0 a76  0
+final                s02a  dynamic seed5 won  near  38 fires real  2 divider  1 off  5 | at door  2: toward rec  2 a76  1
+final                s02a  final   seed1 lost near  60 fires real  0 divider  4 off  5 | at door  8: toward rec  0 a76  0
+final                s02a  final   seed2 lost near  60 fires real  1 divider  3 off  6 | at door 12: toward rec  2 a76  2
+final                s02a  final   seed3 won  near  32 fires real  1 divider  0 off  0 | at door  8: toward rec  5 a76  4
+final                s02a  final   seed4 lost near  59 fires real  0 divider  2 off  4 | at door 10: toward rec  4 a76  4
+final                s02a  final   seed5 lost near  57 fires real  0 divider  5 off  8 | at door  0: toward rec  0 a76  0
+final                s02c  dynamic seed1 lost near  54 fires real  0 divider  6 off  3 | at door  2: toward rec  0 a76  0
+final                s02c  dynamic seed2 lost near  56 fires real  0 divider  1 off  1 | at door  2: toward rec  0 a76  0
+final                s02c  dynamic seed3 won  near  18 fires real  6 divider  0 off  0 | at door 11: toward rec  6 a76  6
+final                s02c  dynamic seed4 lost near  56 fires real  0 divider  2 off  0 | at door  4: toward rec  0 a76  0
+final                s02c  dynamic seed5 lost near  50 fires real  0 divider  0 off  0 | at door  0: toward rec  0 a76  0
+final                s02c  final   seed1 won  near  39 fires real  0 divider  4 off  1 | at door  4: toward rec  0 a76  0
+final                s02c  final   seed2 lost near  58 fires real  0 divider  0 off  6 | at door  0: toward rec  0 a76  0
+final                s02c  final   seed3 lost near  56 fires real  0 divider  0 off  0 | at door  0: toward rec  0 a76  0
+final                s02c  final   seed4 won  near  18 fires real  0 divider  0 off  3 | at door  8: toward rec  3 a76  3
+final                s02c  final   seed5 lost near  56 fires real  0 divider  7 off  1 | at door  4: toward rec  1 a76  1
+final                s02va dynamic seed1 won  near  13 fires real  0 divider  3 off  3 | at door  2: toward rec  0 a76  0
+final                s02va dynamic seed2 lost near  56 fires real  0 divider  3 off  6 | at door 17: toward rec  5 a76  4
+final                s02va dynamic seed3 won  near  18 fires real  0 divider  0 off  3 | at door  2: toward rec  0 a76  0
+final                s02va dynamic seed4 won  near  26 fires real  0 divider  0 off  2 | at door  7: toward rec  4 a76  4
+final                s02va dynamic seed5 won  near  33 fires real  0 divider  0 off  3 | at door 14: toward rec  0 a76  0
+final                s02va final   seed1 won  near  19 fires real  2 divider  0 off  8 | at door  3: toward rec  2 a76  2
+final                s02va final   seed2 lost near  60 fires real  0 divider  6 off  9 | at door  9: toward rec  2 a76  2
+final                s02va final   seed3 won  near  21 fires real  0 divider  0 off  7 | at door  2: toward rec  1 a76  1
+final                s02va final   seed4 won  near  18 fires real  1 divider  0 off 11 | at door  2: toward rec  2 a76  2
+final                s02va final   seed5 won  near  19 fires real  0 divider  0 off  6 | at door  2: toward rec  0 a76  0
+final                s02vc dynamic seed1 won  near  20 fires real  5 divider  0 off  5 | at door  5: toward rec  2 a76  1
+final                s02vc dynamic seed2 won  near  39 fires real  2 divider  6 off  0 | at door  8: toward rec  2 a76  0
+final                s02vc dynamic seed3 lost near  53 fires real  0 divider  1 off  2 | at door  4: toward rec  0 a76  0
+final                s02vc dynamic seed4 won  near  35 fires real  1 divider  0 off  2 | at door  9: toward rec  2 a76  2
+final                s02vc dynamic seed5 won  near  24 fires real  3 divider  0 off  1 | at door  3: toward rec  2 a76  2
+final                s02vc final   seed1 lost near  57 fires real  0 divider  3 off  0 | at door  0: toward rec  0 a76  0
+final                s02vc final   seed2 lost near  58 fires real  0 divider  0 off  4 | at door 11: toward rec  4 a76  4
+final                s02vc final   seed3 lost near  60 fires real  0 divider  0 off  4 | at door  0: toward rec  0 a76  0
+final                s02vc final   seed4 won  near  35 fires real  3 divider  0 off  3 | at door  7: toward rec  4 a76  3
+final                s02vc final   seed5 lost near  45 fires real  0 divider  1 off  1 | at door  1: toward rec  0 a76  1
+final                s03   dynamic seed1 lost steps  60 fires open door  0 shut door  0 neither  5
+final                s03   dynamic seed2 lost steps  60 fires open door  0 shut door  0 neither  3
+final                s03   dynamic seed3 lost steps  60 fires open door  0 shut door  0 neither  3
+final                s03   dynamic seed4 lost steps  60 fires open door  0 shut door  0 neither  4
+final                s03   dynamic seed5 lost steps  60 fires open door  0 shut door  0 neither  4
+final                s03   final   seed1 lost steps  60 fires open door  0 shut door  0 neither  0
+final                s03   final   seed2 won  steps  26 fires open door  0 shut door  2 neither  5
+final                s03   final   seed3 won  steps  51 fires open door  0 shut door  0 neither  8
+final                s03   final   seed4 won  steps  55 fires open door  0 shut door  0 neither  5
+final                s03   final   seed5 won  steps  29 fires open door  2 shut door  0 neither  4
+R32P_repeat_a66      s02a  dynamic seed1 lost near  51 fires real  0 divider  0 off  6 | at door  0: toward rec  0 a76  0
+R32P_repeat_a66      s02a  dynamic seed2 won  near  12 fires real  0 divider  0 off  2 | at door  4: toward rec  1 a76  1
+R32P_repeat_a66      s02a  dynamic seed3 won  near  31 fires real  6 divider  0 off  0 | at door 13: toward rec  7 a76  6
+R32P_repeat_a66      s02a  final   seed1 won  near  28 fires real  0 divider  0 off  3 | at door  2: toward rec  1 a76  1
+R32P_repeat_a66      s02a  final   seed2 won  near  13 fires real  0 divider  0 off  5 | at door  2: toward rec  1 a76  1
+R32P_repeat_a66      s02a  final   seed3 lost near  55 fires real  0 divider  0 off  4 | at door  5: toward rec  2 a76  2
+R32P_repeat_a66      s02c  dynamic seed1 lost near  53 fires real  0 divider  0 off  0 | at door  0: toward rec  0 a76  0
+R32P_repeat_a66      s02c  dynamic seed2 lost near  56 fires real  6 divider  0 off  7 | at door 10: toward rec  0 a76  0
+R32P_repeat_a66      s02c  dynamic seed3 lost near  56 fires real  0 divider  0 off  0 | at door  7: toward rec  0 a76  0
+R32P_repeat_a66      s02c  final   seed1 lost near  60 fires real  0 divider  0 off  1 | at door  0: toward rec  0 a76  0
+R32P_repeat_a66      s02c  final   seed2 lost near  58 fires real  0 divider  0 off  1 | at door  5: toward rec  0 a76  0
+R32P_repeat_a66      s02c  final   seed3 won  near  43 fires real  0 divider  0 off  7 | at door  1: toward rec  0 a76  0
+R32P_repeat_a66      s02va dynamic seed1 won  near  15 fires real  0 divider  0 off  5 | at door  2: toward rec  1 a76  1
+R32P_repeat_a66      s02va dynamic seed2 lost near  56 fires real  0 divider  0 off  4 | at door  5: toward rec  0 a76  0
+R32P_repeat_a66      s02va dynamic seed3 won  near  34 fires real  0 divider  0 off  4 | at door  4: toward rec  2 a76  2
+R32P_repeat_a66      s02va final   seed1 won  near  26 fires real  0 divider  0 off  5 | at door  2: toward rec  0 a76  0
+R32P_repeat_a66      s02va final   seed2 lost near  60 fires real  0 divider  0 off  5 | at door  0: toward rec  0 a76  0
+R32P_repeat_a66      s02va final   seed3 won  near  36 fires real  0 divider  0 off  4 | at door  2: toward rec  1 a76  1
+R32P_repeat_a66      s02vc dynamic seed1 won  near  38 fires real  6 divider  0 off  1 | at door  6: toward rec  4 a76  4
+R32P_repeat_a66      s02vc dynamic seed2 won  near  24 fires real  0 divider  0 off  5 | at door  3: toward rec  0 a76  0
+R32P_repeat_a66      s02vc dynamic seed3 lost near  52 fires real  4 divider  0 off  1 | at door 13: toward rec  3 a76  3
+R32P_repeat_a66      s02vc final   seed1 lost near  50 fires real  0 divider  2 off  0 | at door  0: toward rec  0 a76  0
+R32P_repeat_a66      s02vc final   seed2 lost near  60 fires real  0 divider  0 off  1 | at door  0: toward rec  0 a76  0
+R32P_repeat_a66      s02vc final   seed3 won  near  51 fires real  0 divider  0 off  1 | at door 18: toward rec  7 a76  7
+R32P_repeat_a66      s03   dynamic seed1 lost steps  60 fires open door  0 shut door  0 neither  3
+R32P_repeat_a66      s03   dynamic seed2 lost steps  60 fires open door  0 shut door  0 neither  2
+R32P_repeat_a66      s03   dynamic seed3 lost steps  60 fires open door  0 shut door  0 neither  6
+R32P_repeat_a66      s03   final   seed1 won  steps  22 fires open door  2 shut door  0 neither  3
+R32P_repeat_a66      s03   final   seed2 won  steps  56 fires open door  0 shut door  0 neither  9
+R32P_repeat_a66      s03   final   seed3 won  steps  25 fires open door  2 shut door  0 neither  3
+R35_wall_turn_only   s02a  dynamic seed1 won  near  10 fires real  0 divider  0 off  0 | at door  2: toward rec  1 a76  1
+R35_wall_turn_only   s02a  dynamic seed2 won  near  21 fires real  0 divider  0 off  0 | at door  7: toward rec  1 a76  1
+R35_wall_turn_only   s02a  dynamic seed3 won  near  24 fires real  5 divider  0 off  0 | at door  7: toward rec  3 a76  2
+R35_wall_turn_only   s02a  final   seed1 won  near  14 fires real  0 divider  0 off  5 | at door  3: toward rec  1 a76  1
+R35_wall_turn_only   s02a  final   seed2 won  near  12 fires real  0 divider  0 off  2 | at door  2: toward rec  0 a76  0
+R35_wall_turn_only   s02a  final   seed3 won  near   9 fires real  0 divider  0 off  3 | at door  2: toward rec  0 a76  0
+R35_wall_turn_only   s02c  dynamic seed1 lost near  52 fires real  4 divider  2 off  0 | at door  2: toward rec  0 a76  0
+R35_wall_turn_only   s02c  dynamic seed2 lost near  54 fires real  0 divider  0 off  0 | at door  0: toward rec  0 a76  0
+R35_wall_turn_only   s02c  dynamic seed3 lost near  56 fires real  0 divider  5 off  0 | at door 10: toward rec  0 a76  0
+R35_wall_turn_only   s02c  final   seed1 lost near  60 fires real  0 divider  1 off  1 | at door  0: toward rec  0 a76  0
+R35_wall_turn_only   s02c  final   seed2 lost near  56 fires real  0 divider  0 off  1 | at door  0: toward rec  0 a76  0
+R35_wall_turn_only   s02c  final   seed3 won  near  18 fires real  0 divider  6 off  0 | at door  3: toward rec  1 a76  1
+R35_wall_turn_only   s02va dynamic seed1 won  near  17 fires real  1 divider  0 off  2 | at door  2: toward rec  1 a76  0
+R35_wall_turn_only   s02va dynamic seed2 lost near  54 fires real  0 divider  0 off  2 | at door  0: toward rec  0 a76  0
+R35_wall_turn_only   s02va dynamic seed3 won  near  22 fires real  0 divider  0 off  8 | at door  2: toward rec  0 a76  0
+R35_wall_turn_only   s02va final   seed1 lost near  60 fires real  0 divider  3 off  9 | at door  6: toward rec  0 a76  0
+R35_wall_turn_only   s02va final   seed2 lost near  60 fires real  0 divider  0 off  8 | at door 11: toward rec  7 a76  7
+R35_wall_turn_only   s02va final   seed3 won  near  37 fires real  1 divider  0 off  4 | at door 10: toward rec  1 a76  1
+R35_wall_turn_only   s02vc dynamic seed1 lost near  34 fires real  0 divider  1 off  0 | at door  0: toward rec  0 a76  0
+R35_wall_turn_only   s02vc dynamic seed2 lost near  52 fires real  0 divider  6 off  2 | at door  2: toward rec  0 a76  0
+R35_wall_turn_only   s02vc dynamic seed3 won  near  17 fires real  0 divider  0 off  2 | at door  3: toward rec  0 a76  0
+R35_wall_turn_only   s02vc final   seed1 lost near  58 fires real  0 divider  0 off  4 | at door  5: toward rec  0 a76  0
+R35_wall_turn_only   s02vc final   seed2 lost near  57 fires real  0 divider  0 off  0 | at door  7: toward rec  0 a76  0
+R35_wall_turn_only   s02vc final   seed3 lost near  56 fires real  0 divider  0 off  1 | at door  0: toward rec  0 a76  0
+R35_wall_turn_only   s03   dynamic seed1 lost steps  60 fires open door  0 shut door  0 neither  5
+R35_wall_turn_only   s03   dynamic seed2 lost steps  60 fires open door  0 shut door  0 neither  2
+R35_wall_turn_only   s03   dynamic seed3 lost steps  60 fires open door  0 shut door  0 neither  7
+R35_wall_turn_only   s03   final   seed1 lost steps  60 fires open door  0 shut door  0 neither  0
+R35_wall_turn_only   s03   final   seed2 won  steps  26 fires open door  0 shut door  4 neither  3
+R35_wall_turn_only   s03   final   seed3 won  steps  31 fires open door  0 shut door  0 neither  7
+
+s02   lost  at_door                          175
+s02   lost  at_door_a76_toward               30
+s02   lost  at_door_fire_real                7
+s02   lost  at_door_rec_toward               30
+s02   lost  fire_divider                     69
+s02   lost  fire_off_divider                 121
+s02   lost  fire_real                        15
+s02   lost  near                             2480
+s02   lost  phase_divider_line_up            45
+s02   lost  phase_divider_through            24
+s02   lost  phase_off_divider_line_up        96
+s02   lost  phase_off_divider_through        25
+s02   lost  phase_real_line_up               12
+s02   lost  phase_real_through               3
+s02   lost  runs                             45
+s02   lost  runs_fire_divider                21
+s02   lost  runs_fire_off_divider            33
+s02   lost  runs_fire_real                   4
+s02   won   at_door                          206
+s02   won   at_door_a76_toward               63
+s02   won   at_door_fire_real                39
+s02   won   at_door_rec_toward               72
+s02   won   fire_divider                     20
+s02   won   fire_off_divider                 134
+s02   won   fire_real                        49
+s02   won   near                             1066
+s02   won   phase_divider_line_up            11
+s02   won   phase_divider_through            9
+s02   won   phase_off_divider_line_up        76
+s02   won   phase_off_divider_through        58
+s02   won   phase_real_line_up               27
+s02   won   phase_real_through               22
+s02   won   runs                             43
+s02   won   runs_fire_divider                5
+s02   won   runs_fire_off_divider            35
+s02   won   runs_fire_real                   16
+s03   lost  fire_neither                     44
+s03   lost  region_crossbar                  1
+s03   lost  region_lobby                     4
+s03   lost  region_tine_L                    15
+s03   lost  region_tine_R                    24
+s03   lost  runs                             13
+s03   lost  steps                            780
+s03   won   fire_neither                     47
+s03   won   fire_open_door                   6
+s03   won   fire_shut_door                   6
+s03   won   region_chamber                   5
+s03   won   region_crossbar                  1
+s03   won   region_exit_wall                 2
+s03   won   region_lobby                     2
+s03   won   region_stem                      1
+s03   won   region_tine_L                    24
+s03   won   region_tine_R                    24
+s03   won   runs                             9
+s03   won   steps                            321

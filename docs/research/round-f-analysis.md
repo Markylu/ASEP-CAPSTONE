@@ -163,3 +163,45 @@ the 90 runs).
 What is left standing from §5: proposals 3 (door approach pose) and 5 (the reading at 2–4 m)
 address where the route crosses, which is where every R35 loss was decided. Nothing on the
 planner or tag side tried here moved the score.
+
+## 8. a76 (R36): the door approach pose
+
+Built on the operator's instruction ("Build it"), proposal 3 of §5. One change on `a66`
+(`planner.door_approach`, `agent.PATHFINDER_A76`): a remembered open doorway seen twice, within
+8 m of the drone and 2.5 m of the route, takes the waypoint; 2.5 m out on the doorway's line
+until the drone is within a cell of it, then 1.7 m beyond the doorway; six steps per doorway.
+The line is the route's direction past the doorway, because the map holds no wall there to fit
+one to. 29 unit tests pass; `a66` and `a75` keep their shas.
+
+Measured first, on the s02 change arms of Round F, R32P and R35 (88 runs, memory rebuilt from
+the records, near side after the switch):
+
+| | Lost (45 runs) | Won (43 runs) |
+|---|---|---|
+| Runs that came within 4 m of the true open door | 26 | 43 |
+| Steps within 4 m of it | 175 | 206 |
+| of those, more than 30° off the door's line | 148 | 161 |
+| of those, door within 45° of the heading | 59 | 103 |
+| of those in view, `g05` and `d01` reported an open doorway | 19 | 34 |
+| of those, waypoint within 30° of the door | 30 | 72 |
+| Near-side steps with a live doorway within 2 m of the door | 192 of 2480 | 148 of 1066 |
+| Live doorways elsewhere, per near-side step | 0.62 | 0.76 |
+
+Replayed open loop (`eval/probes/a76_replay.py`): in lost runs the rule fires on the door on 15
+steps in 4 runs and on other doorways on 190; in won runs 49 against 154. At the door the
+waypoint points at it on 30 of 175 steps with or without the rule. The gate of §5 (the losses
+that stood at the door) fails.
+
+Three things this adds to §3:
+
+1. 19 of 45 lost s02 runs never came within 4 m of the open door. No rule at the door reaches
+   them.
+2. The door is not in the memory to approach: live on 8% of lost runs' near-side steps, and at
+   the door itself struck as closed or passed on 126 of 381 steps and never recorded on 125.
+3. In view, inside 4 m, the open door is reported open one time in three, in lost and won runs
+   alike (19 of 59, 34 of 103). The approach pose bets that a square look does better than
+   that; the records hold too few square looks to say (72 of 381 steps within 30° of the line).
+
+Not flown. Write-up: `eval/phase2/R36_door_approach/README.md`. What is left of §5 is proposal
+5, the reading itself, and item 3 above is its measure: a probe of `g05` and `d01` on frames
+taken square to an open door at 2–4 m costs no round.

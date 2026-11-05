@@ -251,6 +251,18 @@ PATHFINDER_A73: Dict[str, Any] = dict(
 #: the perceiver had painted through them. docs/research/round-f-analysis.md §6.
 PATHFINDER_A74: Dict[str, Any] = dict(PATHFINDER_A73, ray_floor_known=False, far_free_cost=2.0)
 
+#: a76 (R36): a65's planner with the door approach pose (planner.door_approach).
+#: A remembered open doorway seen min_seen times, within range_m of the drone
+#: and route_m of the route, takes the waypoint: pre_m out on the doorway's
+#: line (the route's direction past it, over tangent_cells either side) until
+#: the drone is within align_m of that line, then through_m beyond the doorway.
+#: budget_steps per doorway over the run. docs/research/round-f-analysis.md §8.
+PATHFINDER_A76: Dict[str, Any] = dict(
+    PATHFINDER_A65, door_approach={"min_seen": 2, "range_m": 8.0, "route_m": 2.5,
+                                   "pre_m": 2.5, "through_m": 1.7, "align_m": 0.85,
+                                   "pre_reached_m": 1.0, "tangent_cells": 2,
+                                   "budget_steps": 6})
+
 #: a70 (R30): what the navigator is told about the route beyond the tags.
 #: `route_behind` is added to the planner line when "toward your target" sits
 #: on the turn-around: R30's shakedown (a63, a67, a68 s03 dynamic) lost 18
@@ -1400,6 +1412,26 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "a66's planner and cost map unchanged. R33's shakedown of a73: 10 wall turns, no "
           "repeat turn, s02c dynamic solved at 30; s03 dynamic lost to a73's cost map "
           "(seal_diagonal closed the stem)."),
+    Agent("a76", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A76,
+                                          "memory": "a17f",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a66 with the door approach pose: a remembered open doorway seen twice, within "
+          "8 m of the drone and 2.5 m of the route, takes the waypoint. Off the doorway's "
+          "line (the route's direction past it) the waypoint is 2.5 m out on that line; "
+          "within one cell of the line it is 1.7 m beyond the doorway. Six steps per "
+          "doorway over the run. Round F, R32P and R35: within 4 m of the true open door "
+          "the drone stood more than 30 degrees off its line on 309 of 381 steps and the "
+          "waypoint pointed at the door on 102. docs/research/round-f-analysis.md §8."),
 )}
 
 DEFAULT_AGENT = "a00"

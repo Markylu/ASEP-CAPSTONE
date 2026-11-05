@@ -544,3 +544,77 @@ def test_a75_is_a66_plus_the_wall_turn_rule_only():
     tags = spatial.project(mem, man, floor, target)
     assert spatial.WORDS["toward_target"] not in tags[0]
     assert spatial.hide_turn_around(mem, man, tags) == [0]
+
+
+# --- a76 (R36): a66 with the door approach pose -------------------------------------
+
+def _door_memory(seen=2):
+    """Open floor the drone has crossed along y = 0 from x = 0 to 2, with a
+    remembered open doorway at cell (6, 2): ahead, and off the straight line."""
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    for x in range(0, 3):
+        mem.visits[(x, 0)] = [x]
+        mem.trail.append((x,) + centre((x, 0)) + (0.0,))
+    for x in range(-1, 12):
+        for y in range(-4, 5):
+            mem.free[(x, y)] = 0
+            mem.free_near[(x, y)] = 0
+    ox, oy = centre((6, 2))
+    mem.openings.append(spatial.Opening(ox, oy, 1, seen=seen, label="A", last_seen=2))
+    return mem
+
+
+def test_door_approach_lines_up_then_goes_through():
+    p = agent.PATHFINDER_A76
+    d = p["door_approach"]
+    mem = _door_memory()
+    goal = centre((11, 2))
+    # Off the doorway's line: the waypoint is pre_m out on it.
+    plan = planner.pathfind(mem, manifest_at((2, 0), 3), [], goal, p)
+    assert plan.door is not None and plan.door["label"] == "A", plan.to_dict()
+    assert plan.door["phase"] == "line_up"
+    ox, oy = centre((6, 2))
+    assert abs(spatial.dist(plan.waypoint, (ox, oy)) - d["pre_m"]) < 0.9, plan.waypoint
+    assert plan.waypoint[0] < ox                      # on the drone's side of it
+    assert plan.to_dict()["door"]["label"] == "A"
+    # On the line, three cells out: the waypoint is beyond the doorway.
+    mem.visits[(3, 2)] = [3]
+    plan = planner.pathfind(mem, manifest_at((3, 2), 4), [], goal, p)
+    assert plan.door is not None and plan.door["phase"] == "through", plan.to_dict()
+    assert plan.waypoint[0] > ox and abs(plan.waypoint[1] - oy) < 0.5, plan.waypoint
+    # a66's planner never lays the waypoint on a doorway.
+    plan = planner.pathfind(mem, manifest_at((2, 0), 3), [], goal, agent.PATHFINDER_A65)
+    assert plan.door is None and "door" not in plan.to_dict()
+
+
+def test_door_approach_gates_seen_twice_route_closed_and_budget():
+    p = agent.PATHFINDER_A76
+    goal = centre((11, 2))
+    at = manifest_at((2, 0), 9)
+    assert planner.pathfind(_door_memory(seen=1), at, [], goal, p).door is None   # one look
+    mem = _door_memory()
+    mem.openings[0].closed = True
+    assert planner.pathfind(mem, at, [], goal, p).door is None                     # read shut
+    mem = _door_memory()
+    mem.openings[0].y -= 6 * C                        # 4 cells off the route
+    assert planner.pathfind(mem, at, [], goal, p).door is None
+    mem = _door_memory()
+    spent = [{"step": s, "planner": {"door": {"label": "A"}}}
+             for s in range(p["door_approach"]["budget_steps"])]
+    assert planner.pathfind(mem, at, spent[:-1], goal, p).door is not None
+    assert planner.pathfind(mem, at, spent, goal, p).door is None                  # budget spent
+    # Beyond the doorway's plane: nothing to line up on.
+    mem = _door_memory()
+    assert planner.pathfind(mem, manifest_at((8, 2), 9), [], goal, p).door is None
+
+
+def test_a76_is_a66_plus_the_door_approach():
+    assert agent.get("a66").sha() == "de7f23d07186"
+    assert agent.get("a75").sha() == "81d682c1424b"
+    a66 = agent.get("a66").features["orchestrator"]
+    a76 = agent.get("a76").features["orchestrator"]
+    assert {k: v for k, v in a76.items() if k != "pathfinder"} == \
+        {k: v for k, v in a66.items() if k != "pathfinder"}
+    assert {k: v for k, v in a76["pathfinder"].items() if k != "door_approach"} == \
+        agent.PATHFINDER_A65
+    assert agent.get("a76").sha() not in {agent.get(a).sha() for a in ("a66", "a73", "a74", "a75")}

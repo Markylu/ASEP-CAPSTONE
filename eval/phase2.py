@@ -288,6 +288,12 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a66 with the wall-turn rule alone, contested cells",
             "agent": "a75", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R36: a76 (a66 with the door approach pose), the same screen. Read against
+    # R32P (a66, 15/30) and R35 (a75, 13/30).
+    "R36": {"folder": "R36_door_approach",
+            "title": "a66 with the door approach pose, contested cells",
+            "agent": "a76", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

@@ -989,6 +989,9 @@ class PathPlan:
     #: to keep, or commitment off).
     kept: Optional[bool] = None
     fresh_m: Optional[float] = None
+    #: a76 (`door_approach`): the remembered opening this step's waypoint was
+    #: laid on, {label, phase, x, y}; None when the rule did not fire.
+    door: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         out = {"way": "path", "path_m": self.path_m,
@@ -1002,6 +1005,8 @@ class PathPlan:
         if self.kept is not None:
             out["kept"] = self.kept
             out["fresh_m"] = self.fresh_m
+        if self.door is not None:
+            out["door"] = self.door
         return out
 
 
@@ -1289,6 +1294,86 @@ def _last_move(records: List[Dict[str, Any]], step: int) -> Optional[Tuple[float
     return spatial.action_heading(chosen, here[2]), bool(chosen.get("turn_around"))
 
 
+def _door_steps(records: List[Dict[str, Any]], step: int) -> Dict[str, int]:
+    """Steps earlier planner records spent approaching each opening, by label."""
+    out: Dict[str, int] = {}
+    for r in records:
+        if "step" in r and r["step"] < step:
+            label = ((r.get("planner") or {}).get("door") or {}).get("label")
+            if label:
+                out[label] = out.get(label, 0) + 1
+    return out
+
+
+def door_approach(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.Pose,
+                  path: List[Tuple[int, int]], records: List[Dict[str, Any]], step: int,
+                  p: Dict[str, Any]) -> Optional[Tuple[spatial.Point, Dict[str, Any]]]:
+    """a76: the waypoint that squares the drone up on a remembered open doorway
+    the route runs past, and its record; None when no doorway qualifies.
+
+    Round F, R32P and R35 (s02 change arms, near side): within 4 m of the
+    true open door the drone stood more than 30
+    degrees off the door's line on 309 of 381 steps, the door was in view on
+    162 and the route's waypoint pointed at it on 102. The doorway's line is
+    taken from the route itself (its direction where it passes the doorway:
+    the map holds no wall there to fit, the wall is painted as floor). Off
+    the line the waypoint is `pre_m` out on it; on the line (within `align_m`)
+    it is `through_m` beyond the doorway. A doorway gets `budget_steps` steps
+    over the run (most remembered doorways are phantoms: a square look from
+    `pre_m` closes one)."""
+    if len(path) < 2:
+        return None
+    spent = _door_steps(records, step)
+    pts = [_centre(c) for c in path]
+    best = None
+    for o in mem.openings:
+        if o.passed or o.closed or o.dead or o.seen < int(p["min_seen"]):
+            continue
+        if spent.get(o.label, 0) >= int(p["budget_steps"]):
+            continue
+        at = (o.x, o.y)
+        d = spatial.dist(here[:2], at)
+        if d > float(p["range_m"]):
+            continue
+        # Nearest point of the route to the doorway, and the route's direction there.
+        near = None
+        for i, (a, b) in enumerate(zip(pts, pts[1:])):
+            vx, vy = b[0] - a[0], b[1] - a[1]
+            n2 = vx * vx + vy * vy
+            t = max(0.0, min(1.0, ((at[0] - a[0]) * vx + (at[1] - a[1]) * vy) / n2)) if n2 > 1e-9 else 0.0
+            gap = spatial.dist(at, (a[0] + t * vx, a[1] + t * vy))
+            if near is None or gap < near[0]:
+                near = (gap, i)
+        if near is None or near[0] > float(p["route_m"]):
+            continue
+        if best is None or d < best[0]:
+            best = (d, o, near[1])
+    if best is None:
+        return None
+    _, o, i = best
+    span = int(p["tangent_cells"])
+    a, b = pts[max(0, i - span)], pts[min(len(pts) - 1, i + 1 + span)]
+    length = spatial.dist(a, b)
+    if length < 1e-6:
+        return None
+    ux, uy = (b[0] - a[0]) / length, (b[1] - a[1]) / length   # the way through
+    rx, ry = here[0] - o.x, here[1] - o.y
+    along = -(rx * ux + ry * uy)        # metres still to go to the doorway's plane
+    lateral = abs(rx * uy - ry * ux)    # metres off the doorway's line
+    if along <= 0.0:
+        return None  # already beyond it
+    pre = (o.x - float(p["pre_m"]) * ux, o.y - float(p["pre_m"]) * uy)
+    through = (o.x + float(p["through_m"]) * ux, o.y + float(p["through_m"]) * uy)
+    if lateral <= float(p["align_m"]) or spatial.dist(here[:2], pre) < float(p["pre_reached_m"]):
+        phase, wp = "through", through
+    else:
+        phase, wp = "line_up", pre
+        if cm.cost(spatial.cell(pre)) is None:
+            return None  # the line-up point is walled on the map
+    return wp, {"label": o.label, "phase": phase, "x": round(o.x, 2), "y": round(o.y, 2),
+                "along_m": round(along, 2), "lateral_m": round(lateral, 2)}
+
+
 def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
              records: List[Dict[str, Any]], goal: spatial.Point,
              p: Dict[str, Any]) -> PathPlan:
@@ -1360,11 +1445,19 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
         wp = waypoint_on(cm, here[:2], path, target_point, p)
     else:
         wp = waypoint_on(cm, here[:2], path, goal, p)
+    door: Optional[Dict[str, Any]] = None
+    if p.get("door_approach") and fallback != "frontier":
+        hit = door_approach(mem, cm, here, path, records, step, p["door_approach"])
+        if hit is not None:
+            wp, door = hit
+            near = float(p.get("waypoint_min_m", 1.0))
+            if spatial.dist(here[:2], wp) < near:
+                wp = spatial.ahead(here[:2], spatial.bearing(here[:2], wp), near)
     path_m = round(sum(spatial.dist(_centre(a), _centre(b)) for a, b in zip(path, path[1:])), 2)
     unknown = sum(1 for c in path[1:-1] if c not in cm.known)
     target = spatial.Target("path", "path", wp[0], wp[1], p["words"]["path"], step)
     return PathPlan(target, wp, path, path_m, unknown, fallback, added, cm.counts(), sealed_now,
-                    kept, fresh_m)
+                    kept, fresh_m, door)
 
 
 def search_situation_a20(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
