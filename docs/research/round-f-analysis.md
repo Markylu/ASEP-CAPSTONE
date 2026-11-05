@@ -147,3 +147,19 @@ Where this leaves the map side: `a73`'s wall-turn rule is the one change with a 
 effect (30 of 41 loops). `a74`'s map is a trade the replay cannot settle; it needs a shakedown.
 The crossing itself is still decided by what `g05` reads at 2–4 m (R30's verdict, unchanged by
 the 90 runs).
+
+## 7. Flown: a73's shakedown, a75's shakedown and R35 (2026-11-05)
+
+- **a73 shakedown** (2 runs): the wall-turn rule held (10 wall turns, no repeat); s02c `dynamic`
+  solved at 30; s03 `dynamic` lost in the lobby because `seal_diagonal` closed the 3 m stem from
+  one nose-on read at its mouth (stem passable on 25 of 60 steps as flown, 60 of 60 without it).
+  The cost map is dropped, and `a74` with it (it carries the same sealing).
+- **a75** = `a66` + the wall-turn rule alone. Shakedown (4 runs): gate passed, 3 of 4 solved.
+- **R35** (`a75`, 30 runs, contested cells): **13/30 against `a66`'s 15/30, a draw, not
+  carried.** 148 wall turns, none repeated; turn-arounds and all-wall frames per step unchanged;
+  17 never-through losses. The loop of §3.1 was a symptom: closing it gives the steps back to a
+  drone that still has no route through the wall.
+
+What is left standing from §5: proposals 3 (door approach pose) and 5 (the reading at 2–4 m)
+address where the route crosses, which is where every R35 loss was decided. Nothing on the
+planner or tag side tried here moved the score.

@@ -3,10 +3,11 @@
   "title": "a66 with the wall-turn rule alone, contested cells",
   "citable": false,
   "agent_version": "a75",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "155ce17",
+  "started": "2026-11-05T12:23:18+00:00",
+  "finished": "2026-11-05T13:07:00+00:00",
+  "operator": "Markylu",
+  "notes": "Flown 2026-11-05 on the operator's instruction (\"Fly R35\").",
+  "lanes": "sctsvr6 lanes 1-4 (asep-r35-l1..4), shared vLLM :8004, four lanes alone (R32P: four of eight)"
 }

@@ -2,8 +2,7 @@
 
 **Agent:** `a75` (`81d682c1424b`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17j` · **Planner:** `PATHFINDER_A65` (a66's) ·
-**Status:** laid out 2026-11-05 on the operator's instruction ("Yes, a75"); shakedown flown 2026-11-05, gate passed ([Outcome](#outcome));
-**round not flown**
+**Status:** laid out 2026-11-05 on the operator's instruction ("Yes, a75"); shakedown flown 2026-11-05, gate passed; **round flown 2026-11-05: 13/30, a draw against `a66`'s 15/30, not carried** ([summary](summary.md))
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Analysis:
 [docs/research/round-f-analysis.md](../../../docs/research/round-f-analysis.md) §3.1. Design: the
@@ -83,7 +82,14 @@ steps (the failure `a73` showed).
 
 ## Outcome
 
-Round not flown. **Shakedown (2026-11-05, 01:18–01:31 UTC): four unscored seed-1 runs, one lane
+**Flown 2026-11-05, 12:23–13:07 UTC, 30/30 valid: 13/30 against `a66`'s 15/30 (R32P). Gap −2:
+a draw by R32's rule, and under the drop criterion (15). Not carried forward.** The hypothesis
+held on the manipulation (148 wall turns, the turn-around hidden on all 148, no repeat; longest
+streak 2) and failed on the score: turn-arounds and all-wall frames per step are `a66`'s, and
+all 17 losses are never-through `replan_failure`s. s02a 6/6 (R32P 4/6) is the only cell group
+above `a66`; s03 `dynamic` 0/3. Details: [summary.md](summary.md).
+
+**Shakedown (2026-11-05, 01:18–01:31 UTC): four unscored seed-1 runs, one lane
 alone on `:8004`, sctsvr6 `~/asep-r33-shake` at `e687199`; runs kept on the host as
 `~/r35_shake_a75_runs`, log `~/r35_shake_a75.log`. All four valid. Gate passed.**
 

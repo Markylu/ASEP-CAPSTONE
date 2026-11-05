@@ -1,0 +1,11 @@
+{
+  "max_pos_drift": 0.0,
+  "max_yaw_drift": 0.0,
+  "steps_original": 21,
+  "steps_replay": 21,
+  "ok": true,
+  "problems": 0,
+  "events_match": true,
+  "tolerance": 0.001,
+  "replay_dir": "eval/phase2/R35_wall_turn_only/runs/s02a/final/seed3/replay"
+}
