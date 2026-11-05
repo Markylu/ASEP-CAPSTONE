@@ -26,7 +26,7 @@ from . import prompt as prompts, spatial
 
 #: The roles whose texts must never carry the goal's true position.
 NO_GOAL_TRUTH = ("perceiver", "navigator", "confirmer", "door_confirmer", "wall_reader",
-                 "wall_confirmer")
+                 "wall_confirmer", "dead_end_confirmer")
 
 
 @dataclass(frozen=True)
@@ -61,6 +61,12 @@ def confirmer(prompt: prompts.Prompt, report: Dict[str, Any], clean_b64: str) ->
 
 def door_confirmer(prompt: prompts.Prompt, strips: List[str], clean_b64: str) -> View:
     return View("door_confirmer", prompt.system, prompt.render(prompt, strips), clean_b64)
+
+
+def dead_end_confirmer(prompt: prompts.Prompt, strips: List[str], clean_b64: str) -> View:
+    """e01 (R38): the clean frame and the strips a closed door was read in, as
+    d01's view."""
+    return View("dead_end_confirmer", prompt.system, prompt.render(prompt, strips), clean_b64)
 
 
 def strategist(prompt: prompts.Prompt, situation: str) -> View:

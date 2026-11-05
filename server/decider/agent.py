@@ -104,7 +104,7 @@ class Agent:
         orch = self.features.get("orchestrator") or {}
         return [prompts.get(orch[k])
                 for k in ("perceiver", "strategist", "confirmer", "door_confirmer",
-                          "wall_reader")
+                          "wall_reader", "dead_end_confirmer")
                 if orch.get(k)]
 
 
@@ -285,6 +285,35 @@ NAVIGATOR_A70: Dict[str, str] = {
     "route_behind": ("The next point on your route is behind you: the turn around is the "
                      "move toward it."),
     "critic_route": "the planned route goes by [{j}] (toward your target), not by [{i}]",
+}
+
+#: a78 (R38): a65's planner with the dead-end latch (planner.dead_end_latch).
+#: Fires when the dead-end confirmer said yes on this step and on yes_reads of
+#: its last of_reads answers, none older than recent_steps (it is asked only on
+#: a closed-door read: in Round F's shut tine two such reads lay up to 12 steps
+#: apart). The corridor is the longest straight run of trail ending within
+#: look_back_steps before the first of those answers whose lane the drone is
+#: still in (segments within off_axis_deg of its axis, found from the last
+#: axis_m; at least min_run_m, at most max_back_m), from mouth_m down the run
+#: to ahead_m beyond the farthest the drone has been,
+#: seal_cells either side; a lane lane_m either side of the axis (the tine is
+#: 3 m wide) stays open back to the mouth until the drone is out. seal_cells 8
+#: is a68's measured depth (a band four deep was skirted through the solid).
+#: eval/phase2/R38_dead_end_latch/README.md.
+PATHFINDER_A78: Dict[str, Any] = dict(
+    PATHFINDER_A65, dead_end_latch={"yes_reads": 2, "of_reads": 3, "recent_steps": 15,
+                                    "look_back_steps": 12,
+                                    "axis_m": 3.4, "off_axis_deg": 30.0, "min_run_m": 3.0,
+                                    "max_back_m": 15.0, "mouth_m": 2.0, "ahead_m": 2.0,
+                                    "lane_m": 1.5, "seal_cells": 8})
+
+#: a78: a70's route-behind sentence, said only inside a latched corridor and
+#: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
+#: declined marker 0 on about half its "toward your target" offers, and a68
+#: took 16 steps from its seal to the crossbar, 9 m away.
+NAVIGATOR_A78: Dict[str, str] = {
+    "route_behind": NAVIGATOR_A70["route_behind"],
+    "dead_end": "This corridor ends at a closed door: it is a dead end.",
 }
 
 
@@ -1463,6 +1492,31 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "2-9 m a square look read the open door on 157 of 158 looks and a wall strip as "
           "open on 1 of 366; beyond 60 degrees, 112 of 231 and 76 of 393. "
           "docs/research/round-f-analysis.md §9, §10."),
+    Agent("a78", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "dead_end_confirmer": "e01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A78,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a66 with a dead-end latch. On a closed-door read in the centre three strips a "
+          "confirmer (e01) is asked whether the drone is in a corridor that ends at that "
+          "door; two yes in three asked steps latch the straight run of trail behind the "
+          "drone as a dead end for the rest of the run: shut on the route's map whatever "
+          "the perceiver painted in it, a lane left open back to its mouth, and that shut "
+          "too once the drone is out. While latched and inside, the navigator is told the "
+          "corridor is a dead end when the route's next point is behind it. s03 dynamic is "
+          "0/52 in Phase 2; a68's seal left the tine in flight but yielded to later floor "
+          "reads and fired in the s02 hall. Not flown before probe DE passes "
+          "(eval/phase2/R38_dead_end_latch/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"

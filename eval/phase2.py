@@ -300,6 +300,13 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a66 with doorway reads trusted by the look, contested cells",
             "agent": "a77", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R38: a78 (a66 with a dead-end latch: confirmer e01, the corridor shut on
+    # the route's map, the sentence while latched), the same screen. Read
+    # against R32P (a66, 15/30). Not flown before probe DE passes.
+    "R38": {"folder": "R38_dead_end_latch",
+            "title": "a66 with a dead-end latch, contested cells",
+            "agent": "a78", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

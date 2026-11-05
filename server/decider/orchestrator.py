@@ -485,6 +485,39 @@ async def confirm_doors(s: Step) -> Optional[str]:
     return None
 
 
+def _dead_end_checked(parsed: Dict[str, Any]) -> Dict[str, Any]:
+    if parsed.get("dead_end") not in ("yes", "no"):
+        raise vlm.VLMError("dead-end confirmer gave no yes or no")
+    return {"reason": str(parsed.get("reason", "")), "dead_end": parsed["dead_end"]}
+
+
+def dead_end_strips(perception: Optional[Dict[str, Any]]) -> List[str]:
+    """The centre three strips a closed door was read in (after d01): the
+    steps the dead-end confirmer is asked on."""
+    return [l["strip"] for l in (perception or {}).get("lanes") or []
+            if l.get("doorway") == "closed" and l.get("strip") in spatial.CENTRAL_STRIPS]
+
+
+async def confirm_dead_end(s: Step) -> Optional[str]:
+    """a78: on a closed-door read in the centre three strips, one more look
+    (e01) at the same clean frame: is this a corridor that ends at that door?
+    The answer is kept in the perceiver's result as `dead_end`, where the
+    memory reads it (SpatialMemory.dead_end_reads) and the planner's latch
+    after it. Not asked once a latch holds. A failed call adds nothing."""
+    strips = dead_end_strips(s.perception)
+    if not strips or s.perception is None or planner.latch_from(s.records, s.step) is not None:
+        return None
+    p = prompts.get(s.features["dead_end_confirmer"])
+    seen = await ask(s, views.dead_end_confirmer(p, strips, s.clean_b64),
+                     schema.DEAD_END_CONFIRMER_SCHEMA_NAME, schema.dead_end_confirmer_schema(),
+                     _dead_end_checked, PERCEIVER_MAX_TOKENS)
+    s.record["dead_end_confirmer"] = seen.to_dict()
+    if seen.result is not None:
+        s.perception = dict(s.perception, dead_end=seen.result["dead_end"])
+        s.record["perceiver"] = dict(s.record["perceiver"], result=s.perception)
+    return None
+
+
 async def build_map(s: Step) -> Optional[str]:
     s.mem = spatial.rebuild(s.records, s.manifest, s.perception, s.cfg)
     s.here = spatial.pose_xyh(s.manifest.get("pose"))
@@ -703,15 +736,29 @@ def code_pick(s: Step, indices: List[int]) -> vlm.SubCall:
                        rung="code", model="none")
 
 
+def behind_note(notes: Dict[str, str], offered: Dict[str, Any], tags: Dict[int, List[str]],
+                plan: Optional[Dict[str, Any]]) -> Optional[str]:
+    """The sentence added under the planner line, or None. a70: the
+    route-behind sentence, while "toward your target" sits on the turn-around.
+    a78 (`dead_end` in the notes): that sentence only inside a latched
+    corridor, with the reason before it; anywhere else the navigator is a66's."""
+    if not notes.get("route_behind") or not spatial.toward_on_turn_around(offered, tags):
+        return None
+    if not notes.get("dead_end"):
+        return notes["route_behind"]
+    latch = (plan or {}).get("latch")
+    if not latch or latch["out"]:
+        return None
+    return notes["dead_end"] + " " + notes["route_behind"]
+
+
 async def navigate(s: Step) -> Optional[str]:
     indices = schema.visible_indices(s.offered)
     if not indices:
         return "manifest offers no actions"
     p = agent.current().prompt
     notes = s.features.get("navigator_notes") or {}
-    behind = (notes["route_behind"]
-              if notes.get("route_behind") and spatial.toward_on_turn_around(s.offered, s.tags)
-              else None)
+    behind = behind_note(notes, s.offered, s.tags, s.record.get("planner"))
     view = views.navigator(p, s.offered, s.tags,
                            plan_line(s.target, s.mode, s.here,
                                      s.features.get("goal_truth") == "planner", behind),
@@ -794,6 +841,11 @@ def pipeline(features: Dict[str, Any]) -> List[Stage]:
     if features.get("door_confirmer"):
         stages.append(Stage("door_confirmer", confirm_doors, features.get("door_confirmer"),
                             "when the perceiver reports an open doorway"))
+    if features.get("dead_end_confirmer"):
+        stages.append(Stage("dead_end_confirmer", confirm_dead_end,
+                            features.get("dead_end_confirmer"),
+                            "on a closed-door read in the centre three strips, until the "
+                            "latch fires"))
     stages += [Stage("mapper", build_map),
               planning,
               Stage("projector", project)]

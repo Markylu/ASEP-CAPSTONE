@@ -1,0 +1,46 @@
+Closed-door reads as a dead-end trigger: 120 change-arm runs of final,R32P_repeat_a66,R35_wall_turn_only
+
+1. Runs a trigger fired in, before the drone crossed (s02: x < 0; s03: x < -7)
+group                  runs    asked   strict    trail  closed reads   asked steps
+s02 dynamic lost         20       20       17       20         11-21         10-20
+s02 dynamic won          29       24       17       13          0-16          0-16
+s02 final lost           25       25       20       25         14-24         12-22
+s02 final won            24       19       13       15          0-15          0-15
+s03 dynamic lost         11       11        2        9          6-13          5-10
+s03 final lost            2        2        2        2          7-13          7-12
+s03 final won             9        3        1        1           0-5           0-5
+
+s02 change arms, 98 runs: strict fired in 67, trail in 73
+s03 dynamic, 11 runs: strict fired in 2, trail in 9
+
+2. Asked steps (probe DE's frame set) by where the drone stood
+s03, in the shut tine facing its door: 90
+s03, anywhere else: 24
+s02: 1126
+
+3. s03 run by run (steps; '-' never)
+round   arm      seed   won    switch  closed   asked   right n right  strict   trail left@right
+R32P    dynamic  seed1  no         22       7      22      22      10      23      22         38
+R32P    dynamic  seed2  no         24       4      24      24       9       -      37         36
+R32P    dynamic  seed3  no         32      38      38      54       3       -       -          6
+R35     dynamic  seed1  no         22      23      23      23       9      48      23         37
+R35     dynamic  seed2  no         25      25      25      25       8       -      25         35
+R35     dynamic  seed3  no         35       3       3      36       4       -      36         24
+final   dynamic  seed1  no         19      15      15      20       5       -      20         40
+final   dynamic  seed2  no         15      27      27      29       8       -      44         31
+final   dynamic  seed3  no         18      14      19      19       2       -      19         41
+final   dynamic  seed4  no         18      18      18      18       8       -      18         42
+final   dynamic  seed5  no         17      22      22      23       3       -       -         37
+R32P    final    seed1  yes         -       -       -       -       0       -       -          -
+R32P    final    seed2  yes         -      15      15       -       0       -       -          -
+R32P    final    seed3  yes         -       -       -       -       0       -       -          -
+R35     final    seed1  no          -      16      16      16       7      18      18         44
+R35     final    seed2  yes         -       -       -       -       0       -       -          -
+R35     final    seed3  yes         -       4       4       -       0       -       -          -
+final   final    seed1  no          -      15      15      15      10      17      15         45
+final   final    seed2  yes         -       -       -       -       0       -       -          -
+final   final    seed3  yes         -       3       3      16       4      19      16         44
+final   final    seed4  yes         -      53      53       -       0       -       -          -
+final   final    seed5  yes         -       -       -       -       0       -       -          -
+
+s03 dynamic losses: a right asked step in 11 of 11, first at median step 23; 9 with 25 or more steps left

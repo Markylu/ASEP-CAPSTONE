@@ -992,6 +992,10 @@ class PathPlan:
     #: a76 (`door_approach`): the remembered opening this step's waypoint was
     #: laid on, {label, phase, x, y}; None when the rule did not fire.
     door: Optional[Dict[str, Any]] = None
+    #: a78 (`dead_end_latch`): the corridor latched as a dead end, carried on
+    #: every step from the one it fired on: {step, origin, axis_deg, lane_m,
+    #: half_width_m, ahead_m, reach_m, out}. None before it fires.
+    latch: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         out = {"way": "path", "path_m": self.path_m,
@@ -1007,6 +1011,8 @@ class PathPlan:
             out["fresh_m"] = self.fresh_m
         if self.door is not None:
             out["door"] = self.door
+        if self.latch is not None:
+            out["latch"] = self.latch
         return out
 
 
@@ -1264,6 +1270,180 @@ def dead_end_seal(mem: spatial.SpatialMemory, here: spatial.Pose,
     return out
 
 
+# --- a78 (R38): the dead-end latch ----------------------------------------------
+#
+# s03 dynamic, 0/52 in Phase 2: the drone reads the tine's door closed and
+# stays in the tine. a68's seal (dead_end_seal above) took it out in flight;
+# it lost the cell to a seal that yielded to floor seen later (the drone flew
+# back in) and lost s02 to a trigger that fired in the hall (a69: g05's reads
+# cannot tell a corridor from a hall). The latch differs in three ways:
+#   - the trigger is the dead-end confirmer's own answer (e01, asked on a
+#     closed-door read in the centre three strips), twice in three asked steps;
+#   - the corridor is the straight run of trail the drone had flown when the
+#     confirmer said yes, not a walk over wall reads; it is shut as one
+#     rectangle, whatever the perceiver painted inside it, except a lane back
+#     along the run;
+#   - it holds for the rest of the run, and once the drone is out past the
+#     run's start the lane is shut too.
+# The latch is carried in the planner record, so a memory and a route rebuilt
+# from decisions.jsonl have it. eval/phase2/R38_dead_end_latch/README.md.
+
+
+def latch_from(records: List[Dict[str, Any]], step: int) -> Optional[Dict[str, Any]]:
+    """The latch the newest earlier planner record carries, or None."""
+    best: Optional[Dict[str, Any]] = None
+    at = -1
+    for r in records:
+        if "step" in r and at < r["step"] < step:
+            latch = (r.get("planner") or {}).get("latch")
+            if latch:
+                best, at = latch, r["step"]
+    return dict(best) if best else None
+
+
+def latch_frame(latch: Dict[str, Any], at: spatial.Point) -> Tuple[float, float]:
+    """(metres along the latched corridor from its mouth, metres left of its
+    axis) for a point on the map."""
+    rad = math.radians(float(latch["axis_deg"]))
+    ux, uy = math.cos(rad), math.sin(rad)
+    rx, ry = at[0] - float(latch["origin"][0]), at[1] - float(latch["origin"][1])
+    return rx * ux + ry * uy, -rx * uy + ry * ux
+
+
+def latch_cells(latch: Dict[str, Any]) -> List[Tuple[int, int]]:
+    """The cells the latch shuts: the rectangle from the corridor's mouth to
+    ahead_m beyond the farthest the drone has been down it (reach_m),
+    half_width_m either side of its axis. While the drone is in it, the lane
+    (lane_m either side of the axis, as far as the drone has been) is left
+    open as the way back, so the only route is back down the lane; once the
+    drone is out, nothing is left open."""
+    rad = math.radians(float(latch["axis_deg"]))
+    ux, uy = math.cos(rad), math.sin(rad)
+    ox, oy = float(latch["origin"][0]), float(latch["origin"][1])
+    reach, half = float(latch["reach_m"]), float(latch["half_width_m"])
+    length = reach + float(latch["ahead_m"])
+    corners = [(ox + a * ux - b * uy, oy + a * uy + b * ux)
+               for a in (0.0, length) for b in (-half, half)]
+    lo = spatial.cell((min(c[0] for c in corners), min(c[1] for c in corners)))
+    hi = spatial.cell((max(c[0] for c in corners), max(c[1] for c in corners)))
+    out = []
+    for cx in range(lo[0], hi[0] + 1):
+        for cy in range(lo[1], hi[1] + 1):
+            along, left = latch_frame(latch, _centre((cx, cy)))
+            if not (0.0 <= along <= length and abs(left) <= half):
+                continue
+            if (not latch.get("out") and along <= reach + spatial.CELL_M / 2.0
+                    and abs(left) <= float(latch["lane_m"])):
+                continue
+            out.append((cx, cy))
+    return out
+
+
+def latch_yes_steps(reads: List[Tuple[int, str]], step: int, d: Dict[str, Any]) -> List[int]:
+    """The steps of the yes answers that call a dead end at this step, or []:
+    the dead-end confirmer [(step, "yes" or "no")] said yes on this step, and
+    yes on `yes_reads` of its last `of_reads` answers, none of them older
+    than `recent_steps`."""
+    if not reads or tuple(reads[-1]) != (step, "yes"):
+        return []
+    recent = [r for r in reads[-int(d["of_reads"]):] if step - r[0] <= int(d["recent_steps"])]
+    yes = [r[0] for r in recent if r[1] == "yes"]
+    return yes if len(yes) >= int(d["yes_reads"]) else []
+
+
+def latch_reads_agree(reads: List[Tuple[int, str]], step: int, d: Dict[str, Any]) -> bool:
+    return bool(latch_yes_steps(reads, step, d))
+
+
+def straight_run(trail: List[Tuple[int, float, float, float]], upto: int,
+                 d: Dict[str, Any]) -> Optional[Tuple[spatial.Point, int, float, float]]:
+    """The straight run of trail that ends at step `upto`: (where it began,
+    the step it began at, its axis in degrees, its length in metres), or None
+    when it is shorter
+    than min_run_m. Segments within off_axis_deg of the axis, at most
+    max_back_m. The axis is first taken over the last axis_m of trail (two
+    moves), then over the run that axis finds, until the run stops changing:
+    one long window (a68's 8 m) reaches back round the corner the corridor was
+    turned into from and skews the axis of a run shorter than it."""
+    pts: List[spatial.Point] = []
+    steps: List[int] = []
+    for step, x, y, _ in trail:
+        if step > upto:
+            break
+        if not pts or spatial.dist(pts[-1], (x, y)) >= 0.3:
+            pts.append((x, y))
+            steps.append(step)
+    if len(pts) < 2:
+        return None
+    j, back = len(pts) - 1, 0.0
+    while j > 0 and back < float(d["axis_m"]):
+        back += spatial.dist(pts[j - 1], pts[j])
+        j -= 1
+    i, run, axis = j, 0.0, 0.0
+    for _ in range(4):
+        if spatial.dist(pts[j], pts[-1]) < 1e-6:
+            return None
+        axis = spatial.bearing(pts[j], pts[-1])
+        i, run = len(pts) - 1, 0.0
+        while (i > 0 and run < float(d["max_back_m"])
+               and abs(spatial.wrap(spatial.bearing(pts[i - 1], pts[i]) - axis))
+               <= float(d["off_axis_deg"])):
+            run += spatial.dist(pts[i - 1], pts[i])
+            i -= 1
+        if i == j or i == len(pts) - 1:
+            break
+        j = i
+    if run < float(d["min_run_m"]):
+        return None
+    return pts[i], steps[i], axis, run
+
+
+def dead_end_latch(mem: spatial.SpatialMemory, here: spatial.Pose, step: int,
+                   p: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """a78: the latch this step fires, or None. Fires when the dead-end
+    confirmer's answers agree (latch_yes_steps) and the trail holds a straight
+    run of at least min_run_m whose lane the drone is still in.
+
+    The corridor is the longest such run ending at any step from look_back_steps
+    before the first agreeing yes to now. The confirmer is asked only on a
+    closed-door read, and in the shut tine those come late and steps apart: by
+    then the drone has turned about at the door, and the run that brought it
+    down the tine ended up to 12 steps before the first yes (Round F s03
+    dynamic: seed 1 yes at 20 and 25, run ended at 20; seed 2 first yes at 29,
+    run ended at 17; seed 5 yes at 23 and 35, run ended at 18). A run the drone
+    is no longer in the lane of (the stem, flown before the tine and longer
+    than it) is not the corridor. It starts mouth_m down the run."""
+    d = p.get("dead_end_latch")
+    if not d:
+        return None
+    yes = latch_yes_steps(mem.dead_end_reads, step, d)
+    if not yes:
+        return None
+    best: Optional[Tuple[float, Dict[str, Any], int]] = None
+    for upto in range(max(0, min(yes) - int(d["look_back_steps"])), step + 1):
+        found = straight_run(mem.trail, upto, d)
+        if found is None:
+            continue
+        began, since, axis, run = found
+        origin = spatial.ahead(began, axis, float(d["mouth_m"]))
+        latch: Dict[str, Any] = {
+            "step": step, "origin": [round(origin[0], 2), round(origin[1], 2)],
+            "axis_deg": round(axis, 1), "lane_m": float(d["lane_m"]),
+            "half_width_m": round(int(d["seal_cells"]) * spatial.CELL_M, 2),
+            "ahead_m": float(d["ahead_m"]), "reach_m": 0.0, "out": False}
+        along, left = latch_frame(latch, here[:2])
+        if along <= 0.0 or abs(left) > float(d["lane_m"]) + spatial.CELL_M:
+            continue  # the drone is not in this run's corridor
+        if best is None or run >= best[0]:
+            best = (run, latch, since)
+    if best is None:
+        return None
+    _, latch, since = best
+    latch["reach_m"] = round(max(latch_frame(latch, (x, y))[0]
+                                 for s, x, y, _ in mem.trail if s >= since), 2)
+    return latch
+
+
 def _stalled(records: List[Dict[str, Any]], step: int, p: Dict[str, Any]) -> bool:
     """Whether the route has not shortened by stall_gain_m over the last
     stall_steps planner records, with no stall cells added in that window."""
@@ -1441,7 +1621,21 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     stall = stall + [(c[0], c[1]) for c in sealed_now]
     start, end = spatial.cell(here[:2]), spatial.cell(goal)
     fallback = "none"
-    cm = spatial.CostMap(mem, stall, p, include=(start, end), start=start)
+    latch: Optional[Dict[str, Any]] = None
+    latched: List[Tuple[int, int]] = []
+    if p.get("dead_end_latch"):
+        # a78: a latch holds from the step it fires to the end of the run;
+        # the first step the drone is back out past its mouth shuts the lane.
+        latch = latch_from(records, step) or dead_end_latch(mem, here, step, p)
+        if latch is not None:
+            along = latch_frame(latch, here[:2])[0]
+            if not latch["out"] and along < 0.0:
+                latch["out"] = True
+            elif not latch["out"]:
+                latch["reach_m"] = round(max(float(latch["reach_m"]), along), 2)
+            latched = [c for c in latch_cells(latch) if c != end]
+    shut = {"latched": latched, "plugged": bool(latch and latch["out"])}
+    cm = spatial.CostMap(mem, stall, p, include=(start, end), start=start, **shut)
     path = astar(cm, start, end, strict_corners=bool(p.get("strict_corners")))
     kept: Optional[bool] = None
     fresh_m: Optional[float] = None
@@ -1468,7 +1662,7 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
             kept = False
     if path is None:
         fallback = "soft"
-        cm = spatial.CostMap(mem, stall, p, soft=True, include=(start, end), start=start)
+        cm = spatial.CostMap(mem, stall, p, soft=True, include=(start, end), start=start, **shut)
         path = astar(cm, start, end, strict_corners=bool(p.get("strict_corners")))
     if path is None:
         fallback = "frontier"
@@ -1498,7 +1692,7 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     unknown = sum(1 for c in path[1:-1] if c not in cm.known)
     target = spatial.Target("path", "path", wp[0], wp[1], p["words"]["path"], step)
     return PathPlan(target, wp, path, path_m, unknown, fallback, added, cm.counts(), sealed_now,
-                    kept, fresh_m, door)
+                    kept, fresh_m, door, latch)
 
 
 def search_situation_a20(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
