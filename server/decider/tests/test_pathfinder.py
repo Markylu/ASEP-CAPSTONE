@@ -618,3 +618,87 @@ def test_a76_is_a66_plus_the_door_approach():
     assert {k: v for k, v in a76["pathfinder"].items() if k != "door_approach"} == \
         agent.PATHFINDER_A65
     assert agent.get("a76").sha() not in {agent.get(a).sha() for a in ("a66", "a73", "a74", "a75")}
+
+
+# --- a77 (R37): doorway reads trusted by the look ------------------------------------
+
+def _look(ends, doors):
+    """A perceiver report: floor ends and doorway reads, far_left to far_right."""
+    floors = {"no_floor": "blocked_near", "bottom": "open_near", "lower": "open_far",
+              "middle": "open_far"}
+    return {"reason": "", "goal": "not_visible", "goal_range": None,
+            "lanes": [{"strip": s, "floor": floors[e], "floor_end": e, "doorway": d}
+                      for s, e, d in zip(spatial.STRIPS, ends, doors)]}
+
+
+SQUARE = _look(["lower"] * 5, [False, False, "open", False, False])
+ALONG = _look(["middle", "middle", "lower", "bottom", "no_floor"], [False, False, "open", False, False])
+EDGE = _look(["lower"] * 5, ["open", False, False, False, False])
+
+
+def test_look_angle_is_small_square_on_and_large_along_a_wall():
+    assert spatial.look_angle(SQUARE["lanes"], "centre") < 5.0
+    assert spatial.look_angle(ALONG["lanes"], "centre") > 20.0
+    assert spatial.look_angle(EDGE["lanes"], "far_left") is None      # no strip beyond it
+    assert spatial.strong_door_read(SQUARE["lanes"], "centre")
+    assert not spatial.strong_door_read(ALONG["lanes"], "centre")
+    assert not spatial.strong_door_read(EDGE["lanes"], "far_left")
+    # A neighbour that is itself an open doorway gives no wall point: the next strip out does.
+    two = _look(["lower"] * 5, [False, "open", "open", False, False])
+    assert spatial.strong_door_read(two["lanes"], "centre")
+
+
+def test_a17k_weak_doorway_read_writes_nothing_and_a_strong_one_paints_the_gap():
+    for look, strong in ((EDGE, False), (ALONG, False), (SQUARE, True)):
+        mem = spatial.SpatialMemory(cfg=spatial.A17K)
+        mem.visit(0, pose((0, 0)))
+        mem.observe(0, pose((0, 0)), look)
+        assert len(mem.openings) == 1, look
+        assert bool(mem.openings[0].strong) is strong, look
+        assert bool(mem.door_free) is strong, look
+        # a66's memory paints the gap on any open read.
+        old = spatial.SpatialMemory(cfg=spatial.A17F)
+        old.visit(0, pose((0, 0)))
+        old.observe(0, pose((0, 0)), look)
+        assert old.door_free, look
+    # A weak read does not reopen a doorway read closed, a strong one does.
+    mem = spatial.SpatialMemory(cfg=spatial.A17K)
+    mem.visit(0, pose((0, 0)))
+    mem.observe(0, pose((0, 0)), SQUARE)
+    mem.openings[0].closed = True
+    mem.observe(1, pose((0, 0)), ALONG)
+    assert mem.openings[0].closed and mem.openings[0].seen == 2
+    mem.observe(2, pose((0, 0)), SQUARE)
+    assert not mem.openings[0].closed and mem.openings[0].strong == 2
+
+
+def test_a77_looks_at_a_weak_doorway_and_approaches_a_strong_one():
+    p = agent.PATHFINDER_A77
+    goal = centre((11, 2))
+    at = manifest_at((2, 0), 9)
+    mem = _door_memory()                               # seen twice, never on a square look
+    plan = planner.pathfind(mem, at, [], goal, p)
+    assert plan.door is not None and plan.door["phase"] == "look", plan.to_dict()
+    assert spatial.dist(plan.waypoint, (mem.openings[0].x, mem.openings[0].y)) < 0.01
+    looks = [{"step": s, "planner": {"door": {"label": "A", "phase": "look"}}} for s in range(2)]
+    assert planner.pathfind(mem, at, looks[:1], goal, p).door["phase"] == "look"
+    assert planner.pathfind(mem, at, looks, goal, p).door is None           # two looks spent
+    assert planner.pathfind(_door_memory(seen=1), at, [], goal, p).door is None
+    mem.openings[0].strong = 1
+    plan = planner.pathfind(mem, at, looks, goal, p)   # looks do not spend the approach budget
+    assert plan.door is not None and plan.door["phase"] == "line_up", plan.to_dict()
+    # a76 approaches the weak doorway outright.
+    assert planner.pathfind(_door_memory(), at, [], goal, agent.PATHFINDER_A76).door["phase"] == "line_up"
+
+
+def test_a77_is_a66_plus_a17k_and_the_trusted_approach():
+    assert agent.get("a66").sha() == "de7f23d07186"
+    assert agent.get("a76").sha() == "32498e44d94d"
+    a66 = agent.get("a66").features["orchestrator"]
+    a77 = agent.get("a77").features["orchestrator"]
+    assert {k: v for k, v in a77.items() if k not in ("pathfinder", "memory")} == \
+        {k: v for k, v in a66.items() if k not in ("pathfinder", "memory")}
+    assert spatial.config_for(a77) == replace_cfg(spatial.A17F, name="a17k", door_trust=True)
+    assert {k: v for k, v in a77["pathfinder"].items() if k != "door_approach"} == \
+        agent.PATHFINDER_A65
+    assert agent.get("a77").sha() not in {agent.get(a).sha() for a in ("a66", "a75", "a76")}

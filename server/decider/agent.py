@@ -263,6 +263,16 @@ PATHFINDER_A76: Dict[str, Any] = dict(
                                    "pre_reached_m": 1.0, "tangent_cells": 2,
                                    "budget_steps": 6})
 
+#: a77 (R37): a76's door approach on doorways a square look has read
+#: (Opening.strong, memory a17k), one such read being enough; a doorway known
+#: from weak reads only, seen twice, 2-8 m off and within route_m of the route,
+#: takes the waypoint for `look.budget_steps` steps so the drone faces it.
+#: docs/research/round-f-analysis.md §9, §10.
+PATHFINDER_A77: Dict[str, Any] = dict(
+    PATHFINDER_A65, door_approach=dict(
+        PATHFINDER_A76["door_approach"], min_seen=1, strong_only=True,
+        look={"min_seen": 2, "min_m": 2.0, "range_m": 8.0, "route_m": 2.5, "budget_steps": 2}))
+
 #: a70 (R30): what the navigator is told about the route beyond the tags.
 #: `route_behind` is added to the planner line when "toward your target" sits
 #: on the turn-around: R30's shakedown (a63, a67, a68 s03 dynamic) lost 18
@@ -1432,6 +1442,27 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "doorway over the run. Round F, R32P and R35: within 4 m of the true open door "
           "the drone stood more than 30 degrees off its line on 309 of 381 steps and the "
           "waypoint pointed at the door on 102. docs/research/round-f-analysis.md §8."),
+    Agent("a77", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A77,
+                                          "memory": "a17k",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a66 with doorway reads trusted by the look they came from (memory a17k). A "
+          "strong read sits in the centre strip with the floor ending level either side; "
+          "only a strong read paints floor through the gap, and only a doorway with a "
+          "strong read gets a76's approach pose. A doorway known from weak reads alone "
+          "takes the waypoint for two steps so the drone faces it. Probe door_read: at "
+          "2-9 m a square look read the open door on 157 of 158 looks and a wall strip as "
+          "open on 1 of 366; beyond 60 degrees, 112 of 231 and 76 of 393. "
+          "docs/research/round-f-analysis.md §9, §10."),
 )}
 
 DEFAULT_AGENT = "a00"

@@ -294,6 +294,12 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a66 with the door approach pose, contested cells",
             "agent": "a76", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R37: a77 (a66 with doorway reads trusted by the look, and a76's approach
+    # on trusted doorways), the same screen. Read against R32P (a66, 15/30).
+    "R37": {"folder": "R37_trusted_doorways",
+            "title": "a66 with doorway reads trusted by the look, contested cells",
+            "agent": "a77", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

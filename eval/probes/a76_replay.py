@@ -15,7 +15,12 @@ on these poses.
 3. s03. Steps the rule fires, by the drone's region and by what the doorway
    is: the open exit door, the shut one, or neither (within 2 m of a door).
 
-    python eval/probes/a76_replay.py [--folders final,R32P_repeat_a66,R35_wall_turn_only]
+4. (--agent a77) The doorways the memory trusts: near-side steps with a strong
+   doorway (read on a square look) within 2 m of the true open door, and strong
+   doorways elsewhere per step; and the route's crossing of the divider inside
+   the open door's gap, as recorded and under the agent.
+
+    python eval/probes/a76_replay.py [--agent a76|a77] [--folders final,R32P_repeat_a66,R35_wall_turn_only]
 """
 from __future__ import annotations
 
@@ -27,13 +32,14 @@ from typing import Any, Dict, List
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import common  # noqa: E402
-from a73_replay import REPO_ROOT, agents, geo, load, metrics, planner, run_dirs, spatial, switch_step, xy  # noqa: E402
+from a73_replay import crossing_y, REPO_ROOT, agents, geo, load, metrics, planner, run_dirs, spatial, switch_step, xy  # noqa: E402
 
 P76 = agents.PATHFINDER_A76
 S03_DOORS = {"L": (-6.5, -5.0), "R": (-6.5, 5.0)}
 
 
-def chain(rows: List[Dict[str, Any]], cfg: spatial.SpatialConfig) -> List[Dict[str, Any]]:
+def chain(rows: List[Dict[str, Any]], cfg: spatial.SpatialConfig,
+          P76: Dict[str, Any] = P76) -> List[Dict[str, Any]]:
     out, recs = [], []
     for r in rows:
         man = r.get("manifest") or {}
@@ -45,7 +51,9 @@ def chain(rows: List[Dict[str, Any]], cfg: spatial.SpatialConfig) -> List[Dict[s
             g = spatial.pose_xyh({"position": gp, "yaw": 0.0})
             plan = planner.pathfind(mem, man, recs, (g[0], g[1]), P76).to_dict()
         recs.append(dict(r, planner=plan))
-        out.append({"step": r["step"], "here": here, "plan": plan, "rec": r.get("planner")})
+        out.append({"step": r["step"], "here": here, "plan": plan, "rec": r.get("planner"),
+                    "strong": [(o.x, o.y) for o in mem.openings
+                               if o.strong and not o.passed and not o.closed]})
     return out
 
 
@@ -58,10 +66,14 @@ def toward(here, plan, point) -> bool:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--folders", default="final,R32P_repeat_a66,R35_wall_turn_only")
-    ap.add_argument("--out", default=str(REPO_ROOT / "eval/phase2/_probes/a76/replay.txt"))
+    ap.add_argument("--agent", default="a76")
+    ap.add_argument("--out", default=None)
     args = ap.parse_args()
+    feats = agents.get(args.agent).features["orchestrator"]
+    own_memory = feats["memory"] != agents.get("a66").features["orchestrator"]["memory"]
+    args.out = args.out or str(REPO_ROOT / "eval/phase2/_probes/{0}/replay.txt".format(args.agent))
     tot: Dict[Any, int] = collections.Counter()
-    lines = ["a76 replay (open loop; eval/probes/a76_replay.py) on " + args.folders, ""]
+    lines = ["{0} replay (open loop; eval/probes/a76_replay.py) on {1}".format(args.agent, args.folders), ""]
     for folder in args.folders.split(","):
         for run in run_dirs(folder):
             site, arm, seed = run.parts[-3], run.parts[-2], run.parts[-1]
@@ -70,7 +82,8 @@ def main() -> int:
             rows = [r for r in load(run) if "step" in r]
             met = metrics(run)
             won = "won" if met.get("goal_reached") else "lost"
-            steps = chain(rows, common.memory_config(rows))
+            steps = chain(rows, spatial.config_for(feats) if own_memory else common.memory_config(rows),
+                          feats["pathfinder"])
             sw = switch_step(met) if arm == "dynamic" else -1
             c: Dict[str, int] = collections.Counter()
             if site.startswith("s02"):
@@ -80,6 +93,12 @@ def main() -> int:
                     if here is None or sw is None or row["step"] <= sw or here[0] <= 0.5:
                         continue
                     c["near"] += 1
+                    c["strong_real"] += any(spatial.dist(q, door) < 2.0 for q in row["strong"])
+                    c["strong_else"] += sum(1 for q in row["strong"] if spatial.dist(q, door) >= 2.0)
+                    for who in ("rec", "plan"):
+                        cy = crossing_y((row[who] or {}).get("path_cells") or [])
+                        c["cross_" + who] += cy is not None
+                        c["cross_in_gap_" + who] += cy is not None and abs(cy - door[1]) < geo.DOOR_HALF
                     d = (row["plan"] or {}).get("door")
                     if d:
                         at = (d["x"], d["y"])

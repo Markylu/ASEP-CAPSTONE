@@ -368,6 +368,15 @@ class SpatialConfig:
     #: nose-on frames, 332 turn-arounds after them, 61 back-to-back pairs, the
     #: route unchanged for 13 steps in s03 dynamic seed 3 (s35-s47).
     wall_turn: bool = False
+    #: a17k (a77, R37): a doorway read is trusted by the look it came from. A
+    #: strong read sits in the centre strip with the floor ending level either
+    #: side (look_angle under square_deg); only a strong read paints floor
+    #: through the gap and marks the opening strong. Any other open read is
+    #: weak: it is remembered as somewhere to look, and writes nothing on the
+    #: map. Probe door_read: at 2-9 m a square look read the open door on 157
+    #: of 158 looks and a wall strip as open on 1 of 366; beyond 60 degrees,
+    #: 112 of 231 and 76 of 393.
+    door_trust: bool = False
 
     def sha_segments(self) -> List[str]:
         out = ["spatial:" + wording_sha()]
@@ -398,6 +407,8 @@ class SpatialConfig:
             out.append("two_pose:" + wording_sha_a17h())
         if self.wall_turn:
             out.append("wall_turn")
+        if self.door_trust:
+            out.append("door_trust:" + json.dumps(PARAMS_A17K, sort_keys=True))
         return out
 
 
@@ -532,6 +543,14 @@ A17I = replace(A17G, name="a17i", wall_turn=True)
 #: a17j (a75, R35): a17f (a66's memory) with the wall-turn rule and nothing
 #: else. R33's shakedown: the rule held in flight, a73's cost map did not.
 A17J = replace(A17F, name="a17j", wall_turn=True)
+#: a17k (a77, R37): a17f with doorway reads trusted by the look (door_trust).
+PARAMS_A17K: Dict[str, Any] = {
+    "strips": ["centre"],
+    "square_deg": 20.0,
+    # Metres to the floor's end by class, for the wall's line across a look.
+    "end_m": {"no_floor": 0.8, "bottom": 2.5, "lower": 4.5, "middle": 8.0},
+}
+A17K = replace(A17F, name="a17k", door_trust=True)
 
 
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
@@ -556,6 +575,8 @@ def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
         return A17I
     if orchestrator.get("memory") == "a17j":
         return A17J
+    if orchestrator.get("memory") == "a17k":
+        return A17K
     if orchestrator.get("memory") == "a15":
         return A15
     if orchestrator.get("memory") == "a16":
@@ -622,6 +643,38 @@ def strip_ray_offsets(strip: str, du: Iterable[float]) -> List[float]:
     return [math.degrees(math.atan((u0 + d) * t)) for d in du]
 
 
+def look_angle(lanes: List[Dict[str, Any]], strip: str) -> Optional[float]:
+    """a17k: degrees off square of the look along `strip` at the wall it meets,
+    from the frame alone: the wall's line runs through the floor ends of the
+    nearest strip on each side that is not itself an open doorway. None when a
+    side has no such strip (an edge strip, or no floor end read)."""
+    by = {l.get("strip"): l for l in lanes or []}
+    k = STRIPS.index(strip)
+
+    def end(j: int) -> Optional[Point]:
+        lane = by.get(STRIPS[j]) or {}
+        r = PARAMS_A17K["end_m"].get(lane.get("floor_end"))
+        if r is None or lane.get("doorway") in ("open", True):
+            return None
+        th = math.radians(strip_offset(STRIPS[j]))
+        return r * math.cos(th), r * math.sin(th)
+
+    a = next((q for q in (end(j) for j in range(k - 1, -1, -1)) if q), None)
+    b = next((q for q in (end(j) for j in range(k + 1, len(STRIPS))) if q), None)
+    if a is None or b is None:
+        return None
+    line = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+    return abs(abs(wrap(line - strip_offset(strip))) % 180.0 - 90.0)
+
+
+def strong_door_read(lanes: List[Dict[str, Any]], strip: str) -> bool:
+    """a17k: an open doorway read in `strip` made on a look square enough to trust."""
+    if strip not in PARAMS_A17K["strips"]:
+        return False
+    angle = look_angle(lanes, strip)
+    return angle is not None and angle < PARAMS_A17K["square_deg"]
+
+
 def relative_word(rel_deg: float) -> str:
     """One of eight words for a direction relative to the drone's heading."""
     return WORDS["rel"][int(((wrap(rel_deg) + 22.5) % 360.0) // 45.0)]
@@ -672,6 +725,8 @@ class Opening:
     sight_poses: List[Tuple[float, float]] = field(default_factory=list)
     close_poses: List[Tuple[float, float]] = field(default_factory=list)
     dead: bool = False
+    #: a17k: strong open reads of it (centre strip, square look).
+    strong: int = 0
 
 
 @dataclass
@@ -918,15 +973,21 @@ class SpatialMemory:
                             self.free.pop(end, None)
             centre = (where[2] + strip_offset(strip)) % 360.0
             at = ahead(here, centre, PARAMS_A17["opening_at_m"][floor])
+            weak = (self.cfg.door_trust and door == "open"
+                    and not strong_door_read(perception.get("lanes") or [], strip))
             if door == "open":
-                self._add_opening(step, at, here)
+                self._add_opening(step, at, here, weak=weak)
+                if self.cfg.door_trust and not weak:
+                    o = self._opening_at(at)
+                    if o is not None:
+                        o.strong += 1
                 self.door_rays.append(Ray(here[0], here[1], centre, step, floor))
             elif door == "closed":
                 for o in self.openings:
                     if dist((o.x, o.y), at) < OPENING_MERGE_M:
                         self._strong_close(o, step, here)
             self._close_openings(step, here, centre, reach)
-            if self.cfg.door_walls or self.cfg.suspects:
+            if (self.cfg.door_walls or self.cfg.suspects) and not weak:
                 self._observe_a17d(step, where, strip, lane.get("floor_end"), door, at)
         for end, strip in pending:
             if not (seen_by.get(end, set()) - {strip}):
@@ -1088,11 +1149,18 @@ class SpatialMemory:
                         self._strong_close(o, step, here)
             run = []
 
-    def _add_opening(self, step: int, p: Point, seen_from: Optional[Point] = None) -> None:
+    def _add_opening(self, step: int, p: Point, seen_from: Optional[Point] = None,
+                     weak: bool = False) -> None:
         for o in self.openings:
             if dist((o.x, o.y), p) < OPENING_MERGE_M:
                 if self.cfg.two_pose and o.dead:
                     return  # read shut from two poses: stays shut
+                if weak:
+                    # a17k: a weak read is counted; it neither moves the
+                    # opening nor reopens one read closed.
+                    o.seen += 1
+                    o.last_seen = step
+                    return
                 n = o.seen
                 o.x, o.y = (o.x * n + p[0]) / (n + 1), (o.y * n + p[1]) / (n + 1)
                 o.seen += 1

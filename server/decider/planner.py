@@ -1294,15 +1294,59 @@ def _last_move(records: List[Dict[str, Any]], step: int) -> Optional[Tuple[float
     return spatial.action_heading(chosen, here[2]), bool(chosen.get("turn_around"))
 
 
-def _door_steps(records: List[Dict[str, Any]], step: int) -> Dict[str, int]:
-    """Steps earlier planner records spent approaching each opening, by label."""
+def _door_steps(records: List[Dict[str, Any]], step: int, look: bool = False) -> Dict[str, int]:
+    """Steps earlier planner records spent approaching each opening, by label
+    (`look`: the steps spent turning to look at it instead)."""
     out: Dict[str, int] = {}
     for r in records:
         if "step" in r and r["step"] < step:
-            label = ((r.get("planner") or {}).get("door") or {}).get("label")
-            if label:
+            door = (r.get("planner") or {}).get("door") or {}
+            label = door.get("label")
+            if label and (door.get("phase") == "look") == look:
                 out[label] = out.get(label, 0) + 1
     return out
+
+
+def _route_gap(at: spatial.Point, pts: List[spatial.Point]) -> Optional[Tuple[float, int]]:
+    """Metres from `at` to the route, and the index of the nearest segment."""
+    near = None
+    for i, (a, b) in enumerate(zip(pts, pts[1:])):
+        vx, vy = b[0] - a[0], b[1] - a[1]
+        n2 = vx * vx + vy * vy
+        t = max(0.0, min(1.0, ((at[0] - a[0]) * vx + (at[1] - a[1]) * vy) / n2)) if n2 > 1e-9 else 0.0
+        gap = spatial.dist(at, (a[0] + t * vx, a[1] + t * vy))
+        if near is None or gap < near[0]:
+            near = (gap, i)
+    return near
+
+
+def door_look(mem: spatial.SpatialMemory, here: spatial.Pose, path: List[Tuple[int, int]],
+              records: List[Dict[str, Any]], step: int,
+              p: Dict[str, Any]) -> Optional[Tuple[spatial.Point, Dict[str, Any]]]:
+    """a77: the waypoint that turns the drone to face a doorway known from weak
+    reads only (never read on a square look), so the next frame holds it in the
+    centre strip; None when none qualifies. `budget_steps` looks per doorway."""
+    spent = _door_steps(records, step, look=True)
+    pts = [_centre(c) for c in path]
+    best = None
+    for o in mem.openings:
+        if o.passed or o.closed or o.dead or o.strong or o.seen < int(p["min_seen"]):
+            continue
+        if spent.get(o.label, 0) >= int(p["budget_steps"]):
+            continue
+        at = (o.x, o.y)
+        d = spatial.dist(here[:2], at)
+        if not float(p["min_m"]) <= d <= float(p["range_m"]):
+            continue
+        near = _route_gap(at, pts)
+        if near is None or near[0] > float(p["route_m"]):
+            continue
+        if best is None or d < best[0]:
+            best = (d, o)
+    if best is None:
+        return None
+    o = best[1]
+    return (o.x, o.y), {"label": o.label, "phase": "look", "x": round(o.x, 2), "y": round(o.y, 2)}
 
 
 def door_approach(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.Pose,
@@ -1329,6 +1373,8 @@ def door_approach(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial
     for o in mem.openings:
         if o.passed or o.closed or o.dead or o.seen < int(p["min_seen"]):
             continue
+        if p.get("strong_only") and not o.strong:
+            continue
         if spent.get(o.label, 0) >= int(p["budget_steps"]):
             continue
         at = (o.x, o.y)
@@ -1336,14 +1382,7 @@ def door_approach(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial
         if d > float(p["range_m"]):
             continue
         # Nearest point of the route to the doorway, and the route's direction there.
-        near = None
-        for i, (a, b) in enumerate(zip(pts, pts[1:])):
-            vx, vy = b[0] - a[0], b[1] - a[1]
-            n2 = vx * vx + vy * vy
-            t = max(0.0, min(1.0, ((at[0] - a[0]) * vx + (at[1] - a[1]) * vy) / n2)) if n2 > 1e-9 else 0.0
-            gap = spatial.dist(at, (a[0] + t * vx, a[1] + t * vy))
-            if near is None or gap < near[0]:
-                near = (gap, i)
+        near = _route_gap(at, pts)
         if near is None or near[0] > float(p["route_m"]):
             continue
         if best is None or d < best[0]:
@@ -1448,6 +1487,8 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     door: Optional[Dict[str, Any]] = None
     if p.get("door_approach") and fallback != "frontier":
         hit = door_approach(mem, cm, here, path, records, step, p["door_approach"])
+        if hit is None and p["door_approach"].get("look"):
+            hit = door_look(mem, here, path, records, step, p["door_approach"]["look"])
         if hit is not None:
             wp, door = hit
             near = float(p.get("waypoint_min_m", 1.0))

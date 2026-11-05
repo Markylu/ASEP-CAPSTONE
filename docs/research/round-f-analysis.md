@@ -229,3 +229,32 @@ upstream, the doorways it is handed come from oblique looks. What follows is a m
 weighs a doorway read by the angle of the look (the divider's line is known once two stop
 walls or nose-on reads lie on it), and a look taken square to a wall the route keeps meeting.
 
+
+## 10. a77 (R37): doorway reads trusted by the look
+
+Built on the operator's instruction ("Build it"), from §9. The agent cannot use the site's
+geometry, so the look's angle is taken from the frame: the wall's line runs through the floor
+ends of the strips either side of the doorway's strip (`spatial.look_angle`). On the frames of
+§9, 1675 strip reads of an open doorway after `d01`, 856 on the open door:
+
+| Rule | On the door | Off it | Share on the door | Share of the door's reads kept |
+|---|---|---|---|---|
+| every read (`a66`) | 856 | 819 | 51% | 100% |
+| centre strip | 491 | 140 | 78% | 57% |
+| level look (under 20°) | 499 | 190 | 72% | 58% |
+| centre strip and level look | 415 | 54 | 88% | 48% |
+
+`a77` = `a66` with the last rule (memory `a17k`): only such a read paints floor through the
+gap and makes the doorway strong; `a76`'s approach pose runs on strong doorways only; a
+doorway known from weak reads alone takes the waypoint for two steps so the drone faces it.
+33 unit tests pass; earlier agents keep their shas.
+
+Replayed open loop on the 110 change-arm runs (`eval/probes/a76_replay.py --agent a77`), lost
+s02 runs: approach steps on the door 15 (`a76`) → 22, on other doorways 190 → 28, look steps
+63; strong doorways in the memory about half at the door, against a tenth of `a66`'s live
+ones. The waypoint at the door is unchanged (29 of 175), so §5's gate fails again in open
+loop, and in won runs the route crosses inside the gap less often (63 steps against 85): a
+door seen at an angle no longer paints its gap. The look, which is what should turn a weak
+doorway into a strong or a closed one, cannot be replayed.
+
+Not flown. Write-up: `eval/phase2/R37_trusted_doorways/README.md`.
