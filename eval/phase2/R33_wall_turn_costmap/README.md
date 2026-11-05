@@ -2,7 +2,7 @@
 
 **Agent:** `a73` (`7ce95fcbea92`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17i` · **Planner:** `PATHFINDER_A73` · **Status:**
-laid out 2026-11-04 from Round F's 90 recorded runs; offline readouts measured (below); **not flown**
+laid out 2026-11-04 from Round F's 90 recorded runs; offline readouts measured (below); shakedown flown 2026-11-05, s03 lost to the cost map ([Outcome](#outcome)); **round not flown**
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Analysis of Round F:
 [docs/research/round-f-analysis.md](../../../docs/research/round-f-analysis.md). A bundle of two
@@ -129,4 +129,27 @@ Round F (`a66`, 64/90). Branch `phase2/r33-deadlock-costmap` from `phase2/final`
 
 ## Outcome
 
-Not flown.
+Round not flown. **Shakedown (2026-11-05, 01:03–01:12 UTC, operator: "a73 first"): two unscored
+`dynamic` runs, one lane alone on `:8004`, sctsvr6 `~/asep-r33-shake` at `17eb5a8`; runs kept
+on the host as `~/r33_shake_a73_runs`, log `~/r33_shake_a73.log`. Both valid.**
+
+| Cell | Result | Wall turns | Turned again | Turn-around hidden | No route |
+|---|---|---|---|---|---|
+| s02c `dynamic` seed 1 | **solved, 30 steps** (Round F: lost, spin streak 9 from s46) | 2 | 0 | 2 | 0 |
+| s03 `dynamic` seed 1 | **lost in the lobby**, 60 steps, 27.3 m from the goal (Round F: lost in the shut tine, 15.1 m) | 8 | 0 | 8 | 0 |
+
+- **The wall-turn rule did what it was built for:** 10 turn-arounds taken facing a wall, the
+  turn-around hidden on all 10 next steps, no repeat turn (Round F: 41 of 327, 12.5%).
+- **The cost map lost s03.** The drone never entered the stem. s02 a pick off the route
+  (far-left strip read blocked), s04–s09 along the lobby wall with "toward your target" on the
+  turn-around not taken (the R11 marker-0 pattern; a70's fix is not in `a73`), s23 at the stem
+  mouth's edge (13.9, 1.3) a frame read every strip blocked, and from s24 the stem was
+  impassable on the map: route 32 m → 51 m, the rest of the run spent searching the lobby.
+  Replaying the flown records (`eval/probes/a73_replay.py`'s chain) the stem is passable on
+  25 of 60 steps as flown, **60 of 60 with `seal_diagonal` off**, 60 of 60 on `a66`'s map with
+  the wall-turn rule alone. A wall cell sealing its eight neighbours closes a 3 m corridor
+  (3.5 cells) from one nose-on read at its mouth: a71's stem-mouth failure, made by the planner
+  this time.
+- **Drop criterion:** met for the bundle by the shakedown rule (s03 lost to the change itself).
+  `a73` is not carried to the 30 runs. The wall-turn rule alone, on `a66`'s map and planner, is
+  the candidate the shakedown supports.
