@@ -757,6 +757,9 @@ class SpatialMemory:
     #: a17i: the steps whose perceiver read every strip blocked_near (a wall
     #: filling the frame), for the wall-turn rule.
     nose_on: List[int] = field(default_factory=list)
+    #: a74: the floor a confirmed open doorway's rays claim through its gap
+    #: (also in free_near). Read only by a cost map with ray_floor_known off.
+    door_free: Dict[Tuple[int, int], int] = field(default_factory=dict)
     cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
@@ -1003,6 +1006,7 @@ class SpatialMemory:
                     if c not in self.visits:
                         self.free[c] = step
                         self.free_near[c] = step  # a confirmed door: strong
+                        self.door_free[c] = step
                         self.wall.pop(c, None)
                         self.door_wall.pop(c, None)
                         self.suspect.pop(c, None)
@@ -1987,6 +1991,17 @@ class CostMap:
         # a17g: only near floor, visits and confirmed-door floor are known
         # ground; far floor is a weak prior (cost(), and it can be sealed).
         strong_free = set(mem.free_near) if mem.cfg.near_free_m is not None else set(mem.free)
+        # a74 (ray_floor_known False): only ground the drone has stood on is
+        # known. Floor read along a ray, near or far, is a claim: it costs
+        # far_free_cost and a wall beside it seals it. Round F: 1106 of 1634
+        # s02 route crossings of the divider and 205 of 223 s03 shut-tine
+        # exits ran over floor the perceiver had painted through a wall. A
+        # confirmed open doorway's floor is a claim too, but never sealed (the
+        # gap sits beside seen jambs).
+        self.door_free: set = set()
+        if not p.get("ray_floor_known", True):
+            strong_free = set()
+            self.door_free = set(mem.door_free)
         known = set(mem.visits) | strong_free
         self.strong_free = strong_free
         # Stall cells and dead-end seals are the planner's own inferences:
@@ -2031,7 +2046,8 @@ class CostMap:
         for c in self.hard:
             for dx, dy in around:
                 m = (c[0] + dx, c[1] + dy)
-                if m not in known and m not in self.hard and m not in self.soft_door:
+                if (m not in known and m not in self.hard and m not in self.soft_door
+                        and m not in self.door_free):
                     sealed.add(m)
         self.sealed = sealed
         self.soft_walls = (set(mem.wall) | set(mem.near_wall)) - self.hard if soft else set()

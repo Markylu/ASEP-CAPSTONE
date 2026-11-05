@@ -244,6 +244,13 @@ PATHFINDER_A73: Dict[str, Any] = dict(
     PATHFINDER_A65, unknown_cost=4.0, suspect_cost=6.0, far_free_cost=3.0,
     seal_diagonal=True, strict_corners=True)
 
+#: a74 (R34): a73's planner on a map where only ground the drone has stood on
+#: is known (spatial.CostMap, ray_floor_known). Floor read along a ray, near or
+#: far, costs far_free_cost and a wall beside it seals it; a confirmed open
+#: doorway's floor is never sealed. Round F: the route crossed walls over floor
+#: the perceiver had painted through them. docs/research/round-f-analysis.md §6.
+PATHFINDER_A74: Dict[str, Any] = dict(PATHFINDER_A73, ray_floor_known=False, far_free_cost=2.0)
+
 #: a70 (R30): what the navigator is told about the route beyond the tags.
 #: `route_behind` is added to the planner line when "toward your target" sits
 #: on the turn-around: R30's shakedown (a63, a67, a68 s03 dynamic) lost 18
@@ -1354,6 +1361,25 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "61 back-to-back turn-arounds, 13-21 wasted steps per s03 dynamic run; 10 of 20 "
           "s02 losses stood within 2 m of the open door while the route crossed the "
           "divider beside it. docs/research/round-f-analysis.md."),
+    Agent("a74", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A74,
+                                          "memory": "a17i",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a73 on a cost map where only ground the drone has stood on is known: floor "
+          "read along a ray costs 2 per metre and a wall beside it seals it; a confirmed "
+          "open doorway's floor is never sealed. Round F replayed under a73: 1106 of 1634 "
+          "s02 route crossings of the divider and 205 of 223 s03 shut-tine exits ran over "
+          "floor the perceiver had painted through a wall. "
+          "docs/research/round-f-analysis.md §6."),
 )}
 
 DEFAULT_AGENT = "a00"

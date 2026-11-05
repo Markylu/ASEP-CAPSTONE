@@ -118,3 +118,32 @@ map, it is painted as floor. A memory in which ray floor beyond the near field i
 ground (only visits and near floor are), with the route paying for every ray cell it crosses,
 is the untested map-side idea; `a17g` at 2.5 m moved the readout 3 points, so the near field
 would have to be short (1.5 m moved s03 to 5%) and the price high.
+
+## 6. a74 (R34): only visited ground is known
+
+Built on the operator's instruction ("Build a74"), the idea at the end of §5. One change on
+`a73`: in the cost map, floor read along a ray, near or far, is a claim (2 per metre, sealed by
+a wall beside it); only visits are known ground; a `d01`-confirmed doorway's floor is never
+sealed (`PATHFINDER_A74`, `spatial.CostMap`, `SpatialMemory.door_free`; 25 tests).
+
+Round F replayed (`eval/probes/a74_replay.py`), `a66` / `a73` / `a74`:
+
+| Readout | `a66` | `a73` | `a74` |
+|---|---|---|---|
+| s02 routes through the true gap | 5% | 8% | 9% |
+| s03 routes out of the shut tine | 0% | 2% | 10% |
+| Failed s02 runs: divider walled on the map at the end | 58% | 65% | 73% |
+| s02 steps with the true gap impassable | 3% | 6% | 11% |
+| Steps with no route | 0% | 0% | 5% |
+
+The §5 gates fail again. Maps drawn at late steps of failed runs show why the crossing readout
+does not move: the divider is on the map as a staggered line of wall cells and the rest of it is
+simply unseen; from where `a66` stood the cheapest route is always through the nearest stretch
+nothing has looked at. A stricter map makes each probe at a wall stick (73% against 58%), which
+is what a closed-loop search needs and what an open-loop replay cannot fly. Closing small holes
+in wall lines was tried and changed nothing.
+
+Where this leaves the map side: `a73`'s wall-turn rule is the one change with a clear offline
+effect (30 of 41 loops). `a74`'s map is a trade the replay cannot settle; it needs a shakedown.
+The crossing itself is still decided by what `g05` reads at 2–4 m (R30's verdict, unchanged by
+the 90 runs).

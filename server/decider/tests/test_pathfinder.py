@@ -492,3 +492,36 @@ def test_a73_is_a66_plus_a17i_and_the_cost_map():
     assert spatial.A17I.near_free_m == spatial.A17G.near_free_m == 2.5
     assert a73["pathfinder"]["unknown_cost"] == 4.0 and a73["pathfinder"]["strict_corners"]
     assert "wall_turn" in spatial.A17I.sha_segments()
+
+
+# --- a74 (R34): only ground the drone has stood on is known ----------------------
+
+def test_a74_ray_floor_is_a_claim_a_wall_seals_and_door_floor_is_not():
+    mem = spatial.SpatialMemory(cfg=spatial.A17I)
+    mem.visits[(0, 0)] = [1]
+    mem.stop_wall[(3, 1)] = 1
+    for c in ((3, 0), (2, 1), (6, 6)):
+        mem.free[c] = 1
+        mem.free_near[c] = 1
+    mem.door_free[(2, 1)] = 1
+    cm73 = spatial.CostMap(mem, [], agent.PATHFINDER_A73)
+    cm74 = spatial.CostMap(mem, [], agent.PATHFINDER_A74)
+    # a73: near floor is known ground, cost 1, never sealed.
+    assert cm73.cost((3, 0)) == 1.0 and cm73.cost((6, 6)) == 1.0
+    # a74: floor beside a wall is sealed; elsewhere it costs far_free_cost;
+    # a confirmed doorway's floor beside the wall stays passable; a visit is known.
+    assert cm74.cost((3, 0)) is None
+    assert cm74.cost((6, 6)) == agent.PATHFINDER_A74["far_free_cost"] == 2.0
+    assert cm74.cost((2, 1)) == 2.0
+    assert cm74.cost((0, 0)) == 1.0
+
+
+def test_a74_is_a73_plus_the_visits_only_map():
+    assert agent.get("a66").sha() == "de7f23d07186"
+    assert agent.get("a73").sha() == "7ce95fcbea92"
+    a73 = agent.get("a73").features["orchestrator"]
+    a74 = agent.get("a74").features["orchestrator"]
+    assert {k: v for k, v in a74.items() if k != "pathfinder"} == \
+        {k: v for k, v in a73.items() if k != "pathfinder"}
+    assert a74["pathfinder"]["ray_floor_known"] is False
+    assert agent.get("a74").sha() != agent.get("a73").sha()

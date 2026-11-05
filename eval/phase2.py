@@ -276,6 +276,12 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a66 with the wall-turn rule and the Round F cost map, contested cells",
             "agent": "a73", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R34: a74 (a73 on a map where only visited ground is known), the same
+    # screen, read against R32P and R33.
+    "R34": {"folder": "R34_visits_only_map",
+            "title": "a73 with only visited ground known to the route, contested cells",
+            "agent": "a74", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
