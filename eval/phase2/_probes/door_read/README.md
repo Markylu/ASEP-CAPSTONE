@@ -20,5 +20,6 @@ At 2–9 m:
   wall strips and a seventh of shut doors come back open after `d01`.
 - `d01` costs the open door from 40° on: it closed the door's own strip on 46 of 323 looks
   there, against 3 of 199 inside 40°.
-- Under 2 m the door is read open on 14 of 21 square looks and 9 of 68 beyond 20°.
-- The drone seldom looks square: 58 of 4256 frames are within 20° of square at 2–6 m.
+- Under 2 m the door is read open on 14 of 21 square looks and 7 of 68 beyond 20°.
+- The drone seldom looks square: the open door was in view within 20° of square at 2–6 m on
+  58 of 4256 frames.

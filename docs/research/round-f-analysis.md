@@ -222,7 +222,7 @@ taken square to an open door at 2–4 m costs no round.
 This corrects §3.4, §5 item 5 and R30's verdict: the reading at 2–4 m is sound when the drone
 faces the wall, and breaks when it looks along it. The phantom doorways and the missed door
 are both oblique looks. `d01` adds to the misses from 40° on (46 of 323 open-door looks closed
-in the door's own strip). The drone looks square at 2–6 m on 58 of 4256 frames.
+in the door's own strip). The open door was in view within 20° of square at 2–6 m on 58 of 4256 frames.
 
 For `a76` (§8): its bet holds, a square look from 2.5 m reads the door. Its trouble is
 upstream, the doorways it is handed come from oblique looks. What follows is a memory that
