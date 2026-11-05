@@ -2,7 +2,7 @@
 
 **Agent:** `a75` (`81d682c1424b`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17j` · **Planner:** `PATHFINDER_A65` (a66's) ·
-**Status:** laid out 2026-11-05 on the operator's instruction ("Yes, a75"); shakedown below;
+**Status:** laid out 2026-11-05 on the operator's instruction ("Yes, a75"); shakedown flown 2026-11-05, gate passed ([Outcome](#outcome));
 **round not flown**
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Analysis:
@@ -83,4 +83,22 @@ steps (the failure `a73` showed).
 
 ## Outcome
 
-Not flown.
+Round not flown. **Shakedown (2026-11-05, 01:18–01:31 UTC): four unscored seed-1 runs, one lane
+alone on `:8004`, sctsvr6 `~/asep-r33-shake` at `e687199`; runs kept on the host as
+`~/r35_shake_a75_runs`, log `~/r35_shake_a75.log`. All four valid. Gate passed.**
+
+| Cell (seed 1) | `a75` | Round F `a66`, same cell and seed | Wall turns | Repeat turns | Hidden | Route on |
+|---|---|---|---|---|---|---|
+| s03 `dynamic` | lost, 11.9 m (stem at s4, tine R at s14, switch s17, 46 steps in the shut tine, open tine 0) | lost, 15.1 m | 16 | 0 | 16 | 60/60 |
+| s03 `final` | **solved, 26** | lost, 9.3 m | 1 | 0 | 1 | 26/26 |
+| s02c `dynamic` | **solved, 29** | lost (timeout, spin streak 9) | 2 | 0 | 2 | 29/29 |
+| s02a `final` | **solved, 18** | lost, 14.7 m | 0 | 0 | 0 | 18/18 |
+
+- **Gate:** no repeat turn-around after a wall turn in any run (19 wall turns, the turn-around
+  hidden on all 19 next steps; longest turn-around streak 1); a route on 100% of steps; both
+  s03 runs in the stem at step 4. Passed.
+- **s03 `dynamic` is still lost where `a66` loses it:** the rule turned 16 wasted repeats into
+  moves, and the route still never left the shut tine (as predicted: the planner is `a66`'s).
+- **Three cells `a66` lost at this seed in Round F were solved.** One seed each: by R32's rule
+  these are draws until the 30 runs say otherwise (s03 `final` is 4/5 for `a66` in F, s02a
+  `final` 1/5, s02c `dynamic` 1/5). Only the s02c run shows the rule in the trace (2 wall turns).
