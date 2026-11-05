@@ -258,3 +258,27 @@ door seen at an angle no longer paints its gap. The look, which is what should t
 doorway into a strong or a closed one, cannot be replayed.
 
 Not flown. Write-up: `eval/phase2/R37_trusted_doorways/README.md`.
+
+## 11. a77's shakedown (2026-11-05)
+
+Four runs, seed 1, alone on `:8004`: s03 `final` solved (25), s02c `dynamic` solved (50), s02a
+`final` lost, s03 `dynamic` lost. `a75`'s shakedown solved three of the same four. The
+manipulation check failed (no approach step on a doorway within 2 m of the open door, strong
+doorways elsewhere 0.18 per step, the open door never strong); `a77` is dropped and R37 not
+flown. Detail: `eval/phase2/R37_trusted_doorways/README.md`.
+
+Three things the flight adds:
+
+1. The frame's four floor classes do not carry the wall's line: when every strip ends in the
+   same class the look reads as square at any angle. §10's rule held on recorded frames (88%)
+   mostly through the centre-strip half of it.
+2. A doorway's position is written short of its wall (the open door at x = 2.7 against 0), so
+   an approach pose built on it lines up in open floor. Any rule that flies to a remembered
+   doorway needs the doorway's range first.
+3. Inside 2 m, heading along the wall, the door is not read at all.
+
+Standing after R33–R37: `a66` is still the best agent (Round F 64/90, R32P 15/30). Tried and
+not carried: the cost map (`a73`, `a74`), the wall-turn rule (`a75`, a draw), the door approach
+(`a76`, unflown), trusted doorway reads (`a77`). The reading is sound square on at 2–9 m (§9);
+what the agent lacks is where the wall is: its line and its range.
+

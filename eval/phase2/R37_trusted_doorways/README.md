@@ -2,8 +2,8 @@
 
 **Agent:** `a77` (`6744446339b0`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17k` · **Planner:** `PATHFINDER_A77` · **Status:**
-laid out 2026-11-05 on the operator's instruction ("Build it"); offline readouts measured
-(below); **not flown**
+laid out 2026-11-05 on the operator's instruction ("Build it"); shakedown flown the same day
+("Shake down a77"): **gate failed, dropped, round not flown**
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Analysis:
 [docs/research/round-f-analysis.md](../../../docs/research/round-f-analysis.md) §9 and §10.
@@ -116,4 +116,42 @@ scored by the manipulation check.
 
 ## Outcome
 
-Not flown.
+**Shakedown, 2026-11-05 15:34–15:53 UTC**, one lane alone on `:8004`, commit `3547293`, decider
+reporting `a77` `6744446339b0`. Unscored; records on the host in `~/r37_shake_a77_runs`, scored
+with `eval/probes/a77_check.py`.
+
+| Run (seed 1) | `a77` | `a75` shakedown | Door steps |
+|---|---|---|---|
+| s03 `dynamic` | lost, 60 | lost | 5 approach |
+| s03 `final` | solved, 25 | solved | 7 approach, 2 look |
+| s02c `dynamic` | solved, 50 | solved, 30 | 8 approach, 1 look |
+| s02a `final` | **lost, 60** | solved | 1 approach, 5 look |
+
+Manipulation check, the two s02 runs (88 near-side steps):
+
+| Check | Wanted | Flown |
+|---|---|---|
+| Approach steps on a doorway within 2 m of the open door | ≥ 50% | 0 of 9 |
+| Most steps on one doorway: look, approach | ≤ 2, ≤ 6 | 2, 6 |
+| Doorways looked at, settled within two steps | ≥ 60% | 2 of 5 |
+| Strong doorways elsewhere, per near-side step | ≤ 0.1 | 0.18 (16) |
+| Near-side steps with a strong doorway at the door | | 0 |
+
+**Gate failed; the drop criterion is met** (s02a `final` lost, the open door never strong in
+the memory). `a77` is not carried and R37 is not flown.
+
+What the flight showed that the replay could not:
+
+1. **The level-look test saturates.** With every strip's floor ending in the same class
+   (`middle` at long range, `bottom` close in) the wall's line comes out square whatever the
+   angle: s02c s2, 47° off square, centre strip read open, angle 0, a strong doorway written
+   3.6 m short of the divider. Four floor classes do not carry the wall's line.
+2. **A doorway is placed short of its wall.** The s02c approach ran on the open door's own
+   estimate at x = 2.7 (the door is at x = 0): the drone lined up on a point in open floor,
+   flew "through" it at s14–s15 and turned away, the doorway struck as passed. It crossed at
+   s41 from 1 m, without the rule.
+3. **Under 2 m the door is not read.** s02a s37–s40: the drone stood 0.7–2.1 m from the open
+   door, heading along the wall, no strip read a doorway, and the look had been spent on a
+   doorway estimated 1.5 m beyond the wall.
+4. The waypoint did point at the door more often inside 4 m (12 of 21 steps; `a66` and `a75`
+   as flown 102 of 381), and the door was within 45° of the heading on 7 of 21.
