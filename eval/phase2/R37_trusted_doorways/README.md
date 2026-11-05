@@ -124,7 +124,7 @@ with `eval/probes/a77_check.py`.
 |---|---|---|---|
 | s03 `dynamic` | lost, 60 | lost | 5 approach |
 | s03 `final` | solved, 25 | solved | 7 approach, 2 look |
-| s02c `dynamic` | solved, 50 | solved, 30 | 8 approach, 1 look |
+| s02c `dynamic` | solved, 50 | solved | 8 approach, 1 look |
 | s02a `final` | **lost, 60** | solved | 1 approach, 5 look |
 
 Manipulation check, the two s02 runs (88 near-side steps):
