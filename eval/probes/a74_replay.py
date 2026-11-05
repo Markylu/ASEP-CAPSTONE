@@ -40,6 +40,7 @@ VARIANTS: Dict[str, Tuple[spatial.SpatialConfig, Dict[str, Any]]] = {
     "a66": (spatial.config_for(_A66), _A66["pathfinder"]),
     "a73": (A17I, P73),
     "a74": (spatial.config_for(_A74), _A74["pathfinder"]),
+    "a75": (spatial.A17J, agents.PATHFINDER_A65),
     # Tried and not carried (R34 README): ray floor at 3 per metre.
     "a74_ray3": (A17I, dict(_A74["pathfinder"], far_free_cost=3.0)),
 }

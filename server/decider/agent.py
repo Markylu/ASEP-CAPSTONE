@@ -1380,6 +1380,26 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "s02 route crossings of the divider and 205 of 223 s03 shut-tine exits ran over "
           "floor the perceiver had painted through a wall. "
           "docs/research/round-f-analysis.md §6."),
+    Agent("a75", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A65,
+                                          "memory": "a17j",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a66 with the wall-turn rule alone (memory a17j = a17f + wall_turn): the step "
+          "after a turn-around taken facing a wall, 'toward your target' goes to the open "
+          "move nearest the target instead of the turn-around, so the turn rule hides it, "
+          "and a move onto ground the drone has stood on carries no wall or block note. "
+          "a66's planner and cost map unchanged. R33's shakedown of a73: 10 wall turns, no "
+          "repeat turn, s02c dynamic solved at 30; s03 dynamic lost to a73's cost map "
+          "(seal_diagonal closed the stem)."),
 )}
 
 DEFAULT_AGENT = "a00"

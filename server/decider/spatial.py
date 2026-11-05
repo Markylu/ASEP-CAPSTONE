@@ -529,6 +529,9 @@ A17H = replace(A17E, name="a17h", two_pose=True)
 #: a17i (a73, R33): a17g (firm walls, far floor weak for the route) with the
 #: wall-turn rule (SpatialConfig.wall_turn).
 A17I = replace(A17G, name="a17i", wall_turn=True)
+#: a17j (a75, R35): a17f (a66's memory) with the wall-turn rule and nothing
+#: else. R33's shakedown: the rule held in flight, a73's cost map did not.
+A17J = replace(A17F, name="a17j", wall_turn=True)
 
 
 def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
@@ -551,6 +554,8 @@ def config_for(orchestrator: Dict[str, Any]) -> SpatialConfig:
         return A17H
     if orchestrator.get("memory") == "a17i":
         return A17I
+    if orchestrator.get("memory") == "a17j":
+        return A17J
     if orchestrator.get("memory") == "a15":
         return A15
     if orchestrator.get("memory") == "a16":

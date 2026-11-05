@@ -282,6 +282,12 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a73 with only visited ground known to the route, contested cells",
             "agent": "a74", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R35: a75 (a66 with the wall-turn rule alone), the same screen, after
+    # R33's shakedown split the bundle. Read against R32P (a66, 15/30).
+    "R35": {"folder": "R35_wall_turn_only",
+            "title": "a66 with the wall-turn rule alone, contested cells",
+            "agent": "a75", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

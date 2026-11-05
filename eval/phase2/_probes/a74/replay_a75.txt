@@ -1,0 +1,5 @@
+a74 replay on final (open loop; eval/probes/a74_replay.py)
+
+variant         | repeat turns hidden | s02 route in true gap | s03 route out of shut tine | s02 true gap blocked | s03 open door blocked | no route, all steps | no route, solved runs | failed s02: divider walled at end, rows re-opened per step
+a66             | 0/41 (0%)           | 85/1638 (5%)          | 0/223 (0%)                 | 54/1638 (3%)         | 0/223 (0%)            | 3/3304 (0%)        | 0/1744 (0%) | 58%, 0.13
+a75             | 30/41 (73%)         | 85/1638 (5%)          | 0/223 (0%)                 | 54/1638 (3%)         | 0/223 (0%)            | 3/3304 (0%)        | 0/1744 (0%) | 58%, 0.13

@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import math
+from dataclasses import replace as replace_cfg
 
 from server.decider import agent, orchestrator, planner, spatial
 
@@ -525,3 +526,21 @@ def test_a74_is_a73_plus_the_visits_only_map():
         {k: v for k, v in a73.items() if k != "pathfinder"}
     assert a74["pathfinder"]["ray_floor_known"] is False
     assert agent.get("a74").sha() != agent.get("a73").sha()
+
+
+# --- a75 (R35): a66 with the wall-turn rule alone ---------------------------------
+
+def test_a75_is_a66_plus_the_wall_turn_rule_only():
+    assert agent.get("a66").sha() == "de7f23d07186"
+    a66 = agent.get("a66").features["orchestrator"]
+    a75 = agent.get("a75").features["orchestrator"]
+    assert {k: v for k, v in a75.items() if k != "memory"} == \
+        {k: v for k, v in a66.items() if k != "memory"}
+    assert a75["pathfinder"] is agent.PATHFINDER_A65
+    assert spatial.A17J == replace_cfg(spatial.A17F, name="a17j", wall_turn=True)
+    assert agent.get("a75").sha() not in {agent.get(a).sha() for a in ("a66", "a73", "a74")}
+    # The rule itself, on a17j: the fixture of the a17i test.
+    mem, man, target, floor = _wall_turn_memory(spatial.A17J)
+    tags = spatial.project(mem, man, floor, target)
+    assert spatial.WORDS["toward_target"] not in tags[0]
+    assert spatial.hide_turn_around(mem, man, tags) == [0]
