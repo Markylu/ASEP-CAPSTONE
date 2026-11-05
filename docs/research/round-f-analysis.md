@@ -205,3 +205,27 @@ Three things this adds to §3:
 Not flown. Write-up: `eval/phase2/R36_door_approach/README.md`. What is left of §5 is proposal
 5, the reading itself, and item 3 above is its measure: a probe of `g05` and `d01` on frames
 taken square to an open door at 2–4 m costs no round.
+
+## 9. The reading by range and angle (probe door_read, 2026-11-05)
+
+`eval/probes/door_read.py`, on the reads recorded in the s02 runs of Round F, R30, R32P and R35
+(4256 near-side frames), against the site's geometry. Tables:
+`eval/phase2/_probes/door_read/`.
+
+| Angle off square, 2–9 m | Open door read open after `d01` | Shut door read open | Blank wall strip read open |
+|---|---|---|---|
+| 0–20° | 157/158 | 1/283 | 1/366 |
+| 20–40° | 36/41 | 1/89 | 17/939 |
+| 40–60° | 67/92 | 3/131 | 33/346 |
+| 60–90° | 112/231 | 79/522 | 76/393 |
+
+This corrects §3.4, §5 item 5 and R30's verdict: the reading at 2–4 m is sound when the drone
+faces the wall, and breaks when it looks along it. The phantom doorways and the missed door
+are both oblique looks. `d01` adds to the misses from 40° on (46 of 323 open-door looks closed
+in the door's own strip). The drone looks square at 2–6 m on 58 of 4256 frames.
+
+For `a76` (§8): its bet holds, a square look from 2.5 m reads the door. Its trouble is
+upstream, the doorways it is handed come from oblique looks. What follows is a memory that
+weighs a doorway read by the angle of the look (the divider's line is known once two stop
+walls or nose-on reads lie on it), and a look taken square to a wall the route keeps meeting.
+
