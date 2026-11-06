@@ -6,13 +6,15 @@
 #   GODOT_VK=nvidia  an H100 through the NVIDIA ICD. GODOT_GPU is Godot's Vulkan
 #                    device index, which need not match nvidia-smi's: confirm
 #                    the device in the startup line is an idle card (0-2 hold
-#                    vLLM on sctsvr6)
+#                    vLLM on sctsvr6). In Docker, eval/docker/sweep.sh passes
+#                    one card in (GODOT_RENDER_GPU) and sets GODOT_GPU=0.
 #
 # Flights run under a virtual X server, because Godot needs a window to render
 # a frame. `--headless` (replays) skips Xvfb: a replay captures no frames.
 #
 # Check the renderer line Godot prints at startup, e.g.
 #   Vulkan 1.3.x - Forward+ - Using Device #0: ... llvmpipe ...
+#   Vulkan 1.4.x - Forward+ - Using Device #0: NVIDIA - NVIDIA H100 PCIe
 # If it says OpenGL / Compatibility, Vulkan failed and Godot fell back to a
 # different renderer: the frames are not comparable, stop.
 set -eu

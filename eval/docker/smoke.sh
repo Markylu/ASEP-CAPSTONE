@@ -31,4 +31,4 @@ echo "flight: $(( $(date +%s) - start ))s"
 grep -E "Vulkan|OpenGL|RUN ENDED" "$S/godot.log" || echo "smoke: no renderer/RUN ENDED line; see $S/godot.log"
 echo "frames: $(ls "$S/smoke/frames" 2>/dev/null | wc -l) (want 60)"
 python eval/replay.py "$S/smoke" --decider-url http://127.0.0.1:8110 --headless | tail -1
-echo "Renderer must read Vulkan ... Forward+ ... llvmpipe. OpenGL/Compatibility means Vulkan failed: stop."
+echo "Renderer must read Vulkan ... Forward+ ... llvmpipe (NVIDIA H100 under GODOT_VK=nvidia). OpenGL/Compatibility means Vulkan failed: stop."
