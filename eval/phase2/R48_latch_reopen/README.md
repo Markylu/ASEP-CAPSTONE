@@ -5,7 +5,8 @@
 **Navigator notes:** `NAVIGATOR_A86` ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) from R45's flight, while R46 was in the air and R47 queued
-behind it; shakedown and flight below
+behind it; shakedown flown 2026-11-06 (two of four solved, gate passed, the change not
+exercised); round flight below
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R45 (`a85`, 23/30, the bar) and R46 and R47 as they land.
@@ -75,4 +76,30 @@ required.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+
+**Shakedown (2026-11-06, 07:08–07:36 UTC): four unscored runs, slot 5 (port 8105) as a fifth
+client beside R46's and R47's lanes, sctsvr6 `~/asep-r33-shake` at `07e3674`, log
+`~/r48_shake_a88.log`. All valid. Gate passed; the change itself was not exercised.**
+(`eval/probes/a79_check.py`.)
+
+| Cell (seed) | `a88` | Door shut | Latch | Out | Sentence taken / said | Route on |
+|---|---|---|---|---|---|---|
+| s03 `dynamic` (1) | lost | step 41 | 48 | 55 | 8 / 8 | 60/60 |
+| s03 `dynamic` (2) | **solved, 50** | 18 | 24 | 30 | 3 / 3 | 50/50 |
+| s03 `dynamic` (3) | **solved, 48** | 17 | 23 | 30 | 1 / 1 | 48/48 |
+| s03 `final` (1) | lost | — | none | — | 13 / 13 | 60/60 |
+
+- **Gate:** a route on at least 90% of steps in every run: held (all steps). No run lost
+  inside a latched corridor it had left: held. Passed.
+- **No drone flew back into its corridor**, so the reopening was not seen at work. The lane
+  was reopened once where it should not have been: in seed 3 at step 47, with the drone
+  already through the other tine's door, beyond the far end of the rectangle (the rule checks
+  how far down and how far to the side the drone is, not that it is short of the far end).
+  It changed nothing in that run, which was solved a step later. Noted as a fault of the rule.
+- **Both losses are before any latch.** Seed 1 `dynamic` reached the tine late (door shut at
+  41). `final` seed 1 never left the lobby: after one sharp right at step 2 the drone stood
+  at the lobby wall 0.1 m beside the stem's mouth, and the route's waypoint then ran through
+  that wall for the rest of the run; the navigator took the tagged move on nearly every step,
+  13 turn-arounds of 13 among them. Told when the route is behind it, the drone follows a
+  wrong route faithfully: that loss is the planner's, not the navigator's.
