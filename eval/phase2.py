@@ -357,6 +357,14 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a84 with the survey lining up on the door, contested cells",
             "agent": "a85", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R46: a86 (a85 with a70's route-behind sentence always, the latch kept
+    # off the survey's ground, and the survey's through-by-distance rule
+    # replaced by a short second look). The same screen, read against R32P
+    # (a66, 15/30), R44 (a84) and R45 (a85).
+    "R46": {"folder": "R46_behind_always",
+            "title": "a85 with the route-behind sentence always and the latch off the survey's ground, contested cells",
+            "agent": "a86", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

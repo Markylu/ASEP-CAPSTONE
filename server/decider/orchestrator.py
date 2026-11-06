@@ -741,14 +741,17 @@ def behind_note(notes: Dict[str, str], offered: Dict[str, Any], tags: Dict[int, 
     """The sentence added under the planner line, or None. a70: the
     route-behind sentence, while "toward your target" sits on the turn-around.
     a78 (`dead_end` in the notes): that sentence only inside a latched
-    corridor, with the reason before it; anywhere else the navigator is a66's."""
+    corridor, with the reason before it; anywhere else the navigator is a66's.
+    a86 (`always`): a70's sentence outside a latched corridor too."""
     if not notes.get("route_behind") or not spatial.toward_on_turn_around(offered, tags):
         return None
     if not notes.get("dead_end"):
         return notes["route_behind"]
     latch = (plan or {}).get("latch")
     if not latch or latch["out"]:
-        return None
+        # a86 (`always`): a70's sentence on its own whenever the tag sits on
+        # the turn-around, latched or not; a78's reason only while latched.
+        return notes["route_behind"] if notes.get("always") else None
     return notes["dead_end"] + " " + notes["route_behind"]
 
 

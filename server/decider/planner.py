@@ -1415,8 +1415,9 @@ def _turned_into(trail: List[Tuple[int, float, float, float]], began: spatial.Po
 
 
 def confined_run(trail: List[Tuple[int, float, float, float]], closed: List[int],
-                 here: spatial.Pose, step: int,
-                 d: Dict[str, Any]) -> Optional[Tuple[spatial.Point, int, float, float]]:
+                 here: spatial.Pose, step: int, d: Dict[str, Any],
+                 goal: Optional[spatial.Point] = None
+                 ) -> Optional[Tuple[spatial.Point, int, float, float]]:
     """a79: the straight run of trail the drone has been confined to, as
     straight_run gives it (where it began, the step it began at, its axis, its
     length), or None. The trigger of the dead-end latch, from the trail alone.
@@ -1456,6 +1457,17 @@ def confined_run(trail: List[Tuple[int, float, float, float]], closed: List[int]
         began, since, axis, run = found
         if not _turned_into(trail, began, since, axis, float(d["off_axis_deg"])):
             continue  # the run from the spawn, or one cut short by max_back_m
+        if c.get("off_line_m") and goal is not None and trail:
+            # a86: a lane along the direct line from the spawn to the goal is
+            # the drone's way in, not a corridor it turned into, however it
+            # wobbled on it (R44 s02va dynamic seed 2: a sidestep at x = 10 on
+            # the way to the shut door made the rest of the approach a "run
+            # turned into", and the latch shut the hall in front of the door).
+            direct = spatial.bearing(trail[0][1:3], goal)
+            line = {"origin": trail[0][1:3], "axis_deg": direct}
+            if (abs(spatial.wrap(axis - direct)) <= float(d["off_axis_deg"])
+                    and abs(latch_frame(line, began)[1]) < float(c["off_line_m"])):
+                continue
         key = (since, round(axis, 1))
         if key in tried:
             if best is not None and best[1] == since and run > best[3]:
@@ -1508,7 +1520,8 @@ def confined_run(trail: List[Tuple[int, float, float, float]], closed: List[int]
 
 
 def dead_end_latch(mem: spatial.SpatialMemory, here: spatial.Pose, step: int,
-                   p: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+                   p: Dict[str, Any], goal: Optional[spatial.Point] = None
+                   ) -> Optional[Dict[str, Any]]:
     """a78: the latch this step fires, or None. Fires when the dead-end
     confirmer's answers agree (latch_yes_steps) and the trail holds a straight
     run of at least min_run_m whose lane the drone is still in.
@@ -1527,7 +1540,7 @@ def dead_end_latch(mem: spatial.SpatialMemory, here: spatial.Pose, step: int,
         return None
     if d.get("confined"):
         # a79: the trail is the trigger (confined_run); no confirmer.
-        found = confined_run(mem.trail, mem.closed_reads, here, step, d)
+        found = confined_run(mem.trail, mem.closed_reads, here, step, d, goal)
         if found is None:
             return None
         began, since, axis, _ = found
@@ -1853,6 +1866,7 @@ def survey_start(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.
 
 def _survey_next(sv: Dict[str, Any], step: int) -> None:
     sv.update(i=int(sv["i"]) + 1, phase="transit", since=step, best=None, rays=[])
+    sv.pop("again", None)
 
 
 def survey_rays_cross(sv: Dict[str, Any], c: Dict[str, Any]) -> bool:
@@ -2076,8 +2090,9 @@ def wall_survey(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.P
             return None, sv
         elif spent >= int(c["through_steps"]) and c.get("relook"):
             # a83: no doorway read for through_steps and no goal in view: not
-            # through. Fly at the wall again from here.
-            sv.update(phase="look", since=step)
+            # through. Fly at the wall again from here (a86: `again`, so the
+            # look is the short one).
+            sv.update(phase="look", since=step, again=True)
         elif spent >= int(c["through_steps"]):
             sv["phase"] = "done"            # no doorway ahead any more, nothing in the way: through it
             return None, sv
@@ -2116,6 +2131,14 @@ def wall_survey(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.P
         met = met or bool(mem.nose_on and mem.nose_on[-1] == step)
     if met:
         sv["wall"] = round(along + float(c["wall_m"]), 2)
+    if (not met and sv.get("again") and c.get("relook_steps")
+            and step - int(sv["since"]) >= int(c["relook_steps"])):
+        # a86: a look taken up again after a doorway was flown at and lost:
+        # relook_steps at the wall's bearing with no wall met and no doorway
+        # read, the drone is through. (a85's through_adv_m called it through
+        # 5 m past a read made from far, still in the hall.)
+        sv["phase"] = "done"
+        return None, sv
     if met or step - int(sv["since"]) >= int(c["look_steps"]):
         _survey_next(sv, step)
         station = survey_station(sv, c)
@@ -2159,7 +2182,15 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     if p.get("dead_end_latch"):
         # a78: a latch holds from the step it fires to the end of the run;
         # the first step the drone is back out past its mouth shuts the lane.
-        latch = latch_from(records, step) or dead_end_latch(mem, here, step, p)
+        latch = latch_from(records, step)
+        surveying = None
+        if latch is None and p["dead_end_latch"].get("after_survey") and p.get("survey"):
+            # a86: no new latch while the wall survey is running (it is the
+            # survey's wall, and its look lanes are straight runs at a wall
+            # with a shut door in it).
+            surveying = survey_from(records, step)
+        if latch is None and (surveying is None or surveying["phase"] == "done"):
+            latch = dead_end_latch(mem, here, step, p, goal)
         if latch is not None:
             along = latch_frame(latch, here[:2])[0]
             if not latch["out"] and along < 0.0:
