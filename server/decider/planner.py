@@ -1855,11 +1855,27 @@ def survey_start(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.
         if abs(far) >= float(c["side_min_m"]):
             side = 1.0 if far > 0 else -1.0
     sv["order"] = [side * float(c["stations_m"]), -side * float(c["stations_m"])]
+
+    def shut(at: spatial.Point) -> bool:
+        if c.get("station_guard") == "hard":
+            # a87: only a wall the drone has met stands between it and a
+            # station: one it was stopped by, one seen nose-on, a shut door's.
+            # R44: in five of six s02 runs looked at, one cell sealed beside a
+            # wall the perceiver had read through open floor lay on the line
+            # to the station on the open door's side, and the survey went to
+            # the other side alone.
+            met = set(mem.stop_wall) | set(mem.firm_wall) | set(mem.door_wall)
+            n = max(1, int(math.ceil(spatial.dist(here[:2], at) / (spatial.CELL_M / 4.0))))
+            return any(spatial.cell((here[0] + (at[0] - here[0]) * i / n,
+                                     here[1] + (at[1] - here[1]) * i / n)) in met
+                       for i in range(1, n + 1))
+        return cm.cost(spatial.cell(at)) is None or not cm.passable_segment(here[:2], at)
+
     first = survey_station(sv, c)
-    if cm.cost(spatial.cell(first)) is None or not cm.passable_segment(here[:2], first):
+    if shut(first):
         sv["order"] = sv["order"][1:]
         first = survey_station(sv, c)
-        if cm.cost(spatial.cell(first)) is None or not cm.passable_segment(here[:2], first):
+        if shut(first):
             return None
     return sv
 

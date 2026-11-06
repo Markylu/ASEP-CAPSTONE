@@ -365,6 +365,13 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a85 with the route-behind sentence always and the latch off the survey's ground, contested cells",
             "agent": "a86", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R47: a87 (a86 with the survey's stations shut only by walls the drone
+    # has met). The same screen, read against R44 (a84, 18/30) and the rounds
+    # between.
+    "R47": {"folder": "R47_station_guard",
+            "title": "a86 with the survey's stations shut only by walls the drone has met, contested cells",
+            "agent": "a87", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
