@@ -3,7 +3,8 @@
 **Agent:** `a85` (`a43435111dff`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Planner:** `PATHFINDER_A85` ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
-here is Claude's, with its reason) while R44 was in flight; shakedown and flight below
+here is Claude's, with its reason) while R44 was in flight; shakedown flown 2026-11-06 (four of
+four solved, gate passed); round flight below
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30) and R44 (`a84`, in flight as this is written).
@@ -94,4 +95,24 @@ a crossing; a route is on at least 95% of steps. Wins are not required.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+
+**Shakedown (2026-11-06, 05:39–05:58 UTC): four unscored runs, slot 5 (port 8105) as a fifth
+client beside R44's four lanes, sctsvr6 `~/asep-r33-shake` at `7031eb4`, log
+`~/r45_shake_a85.log`. All valid, all four solved. Gate passed.** (`eval/probes/a80_check.py`.)
+
+| Cell (seed 1) | `a85` | `a84` | R32P `a66` | Survey | Crossed |
+|---|---|---|---|---|---|
+| s02vc `final` | **solved, 30** | lost (R44 shakedown) | lost | from step 4; the door flown at from 6, re-aimed on reads 21–58° off the axis at steps 7–12 (the waypoint's y from −2.9 to −8.8, the door at −9) | 14 |
+| s02vc `dynamic` | **solved, 46** | — | solved | from step 4; through phase 5–10, then ended 5 m on from its last read, still short of the wall; the route crossed | 37 |
+| s02va `dynamic` | **solved, 25** | — | solved | from step 4; flown at the door for 13 steps | 14 |
+| s02c `final` | solved, 41 | solved, 23 (R43 shakedown) | lost | from step 2 on a read from far; ended at 7, 5 m on, short of the wall; a latch in the hall at 12; the route crossed | 32 |
+
+- **Gate:** the s02vc `final` run crosses: held (step 14). No survey step more than five steps
+  after a crossing: held (five, in that run). A route on at least 95% of steps: held (40/41 at
+  the lowest).
+- **One fault, not in the gate:** `through_adv_m` calls the drone through when it is 5 m past
+  its last read with nothing in the way, and a door read from far leaves it 5 m on and still
+  in the hall. The survey ended early in two of the four runs (steps 7 and 10); both were
+  solved by the route afterwards, 9 and 18 steps later than a survey that had held on. Noted
+  for the version after; this round flies `a85` as laid out.
