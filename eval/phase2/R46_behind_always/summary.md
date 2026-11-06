@@ -36,7 +36,7 @@ What the runs say (`eval/probes/a80_check.py`, `eval/probes/a79_check.py`):
   runs (R45: 23). Of the 9 without one, 5 were lost (s02a `dynamic` 2, s02c `dynamic` 3, s02c
   `final` 3, s02vc `final` 1 and 2) and 4 found a door on the route (s02a `final` 1, s02c
   `dynamic` 2, s02va `final` 1, s02vc `final` 3 at 50). Of the 15 with one, 12 were won, all
-  12 crossing while the survey ran, at steps 13 to 37 (median 16.5).
+  12 crossing while the survey ran, at steps 13 to 37 (median 17).
 - **The three lost with a survey.** s02a `dynamic` 1 took both stations and crossed at 54
   (`timeout`). s02c `final` 2 had one station only, ended its survey at 15 and was latched
   along the wall at 25 (the one run with a route on under 95% of steps, 53/60). s02va
