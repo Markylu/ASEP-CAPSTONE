@@ -3,7 +3,9 @@
 **Agent:** `a79` (`4ef945298c6d`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Planner:** `PATHFINDER_A79` ·
 **Status:** laid out 2026-11-05 (overnight run, Claude alone, operator asleep; every decision
-here is Claude's, with its reason); offline gate passed; shakedown and flight below
+here is Claude's, with its reason); offline gates passed; shakedown flown 2026-11-06 (latch
+fired in the shut tine in both s03 `dynamic` runs, too late to judge the way out; s02 untouched);
+round flight below
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30), no control lane. Aimed at s03 `dynamic` (0/52 in
@@ -152,4 +154,34 @@ crossing it would otherwise make, and a route is on at least 95% of steps in eve
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+
+**Shakedown (2026-11-06, 03:42–04:15 UTC): five unscored runs, one lane alone on `:8004`,
+sctsvr6 `~/asep-r33-shake` at `1502692`; runs kept on the host as `~/r39_shake_a79_runs` and in
+that checkout, logs `~/r39_shake_a79.log`, `~/r39_shake2_a79.log`. All five valid. The gate's
+s02 and route rows passed; its s03 row could not be judged (both latches came with too few steps
+left). Flown on Claude's decision: nothing was broken, and the 30 runs are the test.**
+(`eval/probes/a79_check.py`.)
+
+| Cell | `a79` | Door shut | Latch | After the latch | Route on |
+|---|---|---|---|---|---|
+| s03 `dynamic` seed 1 | lost | step 49 | step 58, shut tine, axis 184°, mouth x = 3.4 | route points out, the turn-around taken at 59 (1 of 1 sentence) | 60/60 |
+| s03 `dynamic` seed 2 | lost | step 37 | step 49, shut tine | 7.6 m back up the tine in 10 steps (x = −5.3 to 2.3), the turn-around taken on both sentences | 60/60 |
+| s03 `final` seed 1 | **solved, 25** | — | none (took the open tine) | — | 25/25 |
+| s02c `dynamic` seed 1 | lost | step 3 | none | — | 60/60 |
+| s02a `final` seed 1 | **solved, 18** | — | none | — | 18/18 |
+
+- **The latch does what it was built to do, late.** In both s03 `dynamic` runs it fired in the
+  shut tine with the tine's axis, 9 and 12 steps after the door shut, and the route and the
+  drone turned for the mouth. Neither run had the steps left to show the rest: seed 1 spent 36
+  steps in the lobby (a sharp right at step 2, then the route's waypoint through the lobby
+  wall) and seed 2 spent 26 steps at the crossbar and the tine's mouth before going down it.
+  Both delays are before any latch and are `a66`'s own (R32P's door shut at steps 22–32, R35's
+  at 22–35).
+- **The way out is slow**: 0.8 m a step in seed 2 against 1.7 m for a straight flight. Twice
+  the waypoint lay about 90° off the heading beside a wall, no side move read open, and the
+  tag went to the turn-around.
+- **s02: no latch in either run; a route on every step.** The gate's rows for s02 and the
+  route passed.
+- **The gate's s03 row ("the drone then gets out past x = 5") was not met in the steps left
+  and is not failed either**: 2 and 11 steps after the latch are not the 12 it allows.
