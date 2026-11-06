@@ -1,0 +1,845 @@
+{
+  "p2_R39_s02vc_final_seed2_a01": {
+    "split_step": 3,
+    "post_steps": 49,
+    "post_collisions": 2,
+    "collision_share": 0.041,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 5,
+    "got_through": true,
+    "min_x": -11.34,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.842,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 3,
+      "missed": 0,
+      "visible": 7,
+      "closest_m": 2.54,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 12,
+      "turn_arounds": 5,
+      "tag": null
+    }
+  },
+  "p2_R39_s02a_final_seed2_a01": {
+    "split_step": 4,
+    "post_steps": 38,
+    "post_collisions": 1,
+    "collision_share": 0.026,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 2,
+    "got_through": true,
+    "min_x": -11.55,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.536,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 0,
+      "missed": 0,
+      "visible": 8,
+      "closest_m": 2.22,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 6,
+      "turn_arounds": 3,
+      "tag": null
+    }
+  },
+  "p2_R39_s02c_final_seed3_a01": {
+    "split_step": 3,
+    "post_steps": 57,
+    "post_collisions": 5,
+    "collision_share": 0.088,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 4,
+    "got_through": true,
+    "min_x": -9.42,
+    "goal_reached": false,
+    "final_goal_distance_m": 3.607,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 1,
+      "missed": 0,
+      "visible": 7,
+      "closest_m": 5.27,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 7,
+      "turn_arounds": 8,
+      "tag": null
+    }
+  },
+  "p2_R39_s02c_dynamic_seed3_a01": {
+    "split_step": 3,
+    "post_steps": 57,
+    "post_collisions": 1,
+    "collision_share": 0.018,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 3,
+    "got_through": false,
+    "min_x": 0.45,
+    "goal_reached": false,
+    "final_goal_distance_m": 16.975,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 3,
+      "missed": 0,
+      "visible": 3,
+      "closest_m": 13.0,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 6,
+      "turn_arounds": 12,
+      "tag": null
+    }
+  },
+  "p2_R39_s02a_final_seed3_a01": {
+    "split_step": 4,
+    "post_steps": 14,
+    "post_collisions": 0,
+    "collision_share": 0.0,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 0,
+    "got_through": true,
+    "min_x": -11.85,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.242,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 0,
+      "missed": 0,
+      "visible": 8,
+      "closest_m": 1.92,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 0,
+      "streak_from_step": null,
+      "turn_arounds": 0,
+      "tag": null
+    }
+  },
+  "p2_R39_s02va_final_seed2_a01": {
+    "split_step": 4,
+    "post_steps": 53,
+    "post_collisions": 3,
+    "collision_share": 0.057,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 5,
+    "got_through": true,
+    "min_x": -11.83,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.474,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 0,
+      "missed": 0,
+      "visible": 8,
+      "closest_m": 2.08,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 12,
+      "turn_arounds": 5,
+      "tag": null
+    }
+  },
+  "p2_R39_s02a_dynamic_seed3_a01": {
+    "split_step": 3,
+    "post_steps": 57,
+    "post_collisions": 5,
+    "collision_share": 0.088,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 4,
+    "got_through": false,
+    "min_x": 0.45,
+    "goal_reached": false,
+    "final_goal_distance_m": 29.579,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 1,
+      "missed": 0,
+      "visible": 3,
+      "closest_m": 12.45,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 2,
+      "streak_from_step": 25,
+      "turn_arounds": 6,
+      "tag": null
+    }
+  },
+  "p2_R39_s02va_final_seed3_a01": {
+    "split_step": 3,
+    "post_steps": 19,
+    "post_collisions": 0,
+    "collision_share": 0.0,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 5,
+    "got_through": true,
+    "min_x": -11.79,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.223,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 0,
+      "missed": 0,
+      "visible": 8,
+      "closest_m": 1.9,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 0,
+      "streak_from_step": null,
+      "turn_arounds": 0,
+      "tag": null
+    }
+  },
+  "p2_R39_s02a_dynamic_seed2_a01": {
+    "split_step": 3,
+    "post_steps": 31,
+    "post_collisions": 0,
+    "collision_share": 0.0,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 3,
+    "got_through": true,
+    "min_x": -12.06,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.456,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 1,
+      "missed": 0,
+      "visible": 11,
+      "closest_m": 2.05,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 6,
+      "turn_arounds": 2,
+      "tag": null
+    }
+  },
+  "p2_R39_s03_final_seed1_a01": {
+    "split_step": null,
+    "post_steps": 60,
+    "post_collisions": 1,
+    "collision_share": 0.017,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 5,
+    "got_through": false,
+    "min_x": 5.81,
+    "goal_reached": false,
+    "final_goal_distance_m": 31.974,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 2,
+      "missed": 0,
+      "visible": 0,
+      "closest_m": 17.81,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 2,
+      "streak_from_step": 49,
+      "turn_arounds": 9,
+      "tag": null
+    }
+  },
+  "p2_R39_s02vc_final_seed3_a01": {
+    "split_step": 8,
+    "post_steps": 36,
+    "post_collisions": 1,
+    "collision_share": 0.028,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 5,
+    "got_through": true,
+    "min_x": -12.47,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.519,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 2,
+      "missed": 0,
+      "visible": 10,
+      "closest_m": 1.22,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 3,
+      "streak_from_step": 17,
+      "turn_arounds": 5,
+      "tag": null
+    }
+  },
+  "p2_R39_s02va_dynamic_seed2_a01": {
+    "split_step": 3,
+    "post_steps": 34,
+    "post_collisions": 1,
+    "collision_share": 0.029,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 5,
+    "got_through": true,
+    "min_x": -11.99,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.094,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 4,
+      "missed": 0,
+      "visible": 10,
+      "closest_m": 1.77,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 11,
+      "turn_arounds": 2,
+      "tag": null
+    }
+  },
+  "p2_R39_s03_dynamic_seed1_a01": {
+    "split_step": 25,
+    "post_steps": 35,
+    "post_collisions": 4,
+    "collision_share": 0.114,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 3,
+    "got_through": true,
+    "min_x": -11.22,
+    "goal_reached": false,
+    "final_goal_distance_m": 1.011,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 6,
+      "missed": 0,
+      "visible": 4,
+      "closest_m": 2.71,
+      "facets": [
+        "phantom",
+        "close_range"
+      ],
+      "tag": "failed_goal_identification"
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 4,
+      "turn_arounds": 6,
+      "tag": null
+    }
+  },
+  "p2_R39_s02a_final_seed1_a01": {
+    "split_step": 4,
+    "post_steps": 56,
+    "post_collisions": 5,
+    "collision_share": 0.089,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 1,
+    "got_through": false,
+    "min_x": 0.45,
+    "goal_reached": false,
+    "final_goal_distance_m": 15.343,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 2,
+      "missed": 0,
+      "visible": 1,
+      "closest_m": 12.45,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 8,
+      "turn_arounds": 8,
+      "tag": null
+    }
+  },
+  "p2_R39_s02vc_dynamic_seed2_a01": {
+    "split_step": 3,
+    "post_steps": 57,
+    "post_collisions": 4,
+    "collision_share": 0.07,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 4,
+    "got_through": false,
+    "min_x": 0.7,
+    "goal_reached": false,
+    "final_goal_distance_m": 13.576,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 2,
+      "missed": 0,
+      "visible": 3,
+      "closest_m": 12.87,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 3,
+      "streak_from_step": 35,
+      "turn_arounds": 13,
+      "tag": null
+    }
+  },
+  "p2_R39_s02a_dynamic_seed1_a01": {
+    "split_step": 3,
+    "post_steps": 57,
+    "post_collisions": 3,
+    "collision_share": 0.053,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 3,
+    "got_through": false,
+    "min_x": 0.7,
+    "goal_reached": false,
+    "final_goal_distance_m": 27.596,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 3,
+      "missed": 0,
+      "visible": 3,
+      "closest_m": 12.8,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 6,
+      "turn_arounds": 9,
+      "tag": null
+    }
+  },
+  "p2_R39_s02vc_final_seed1_a01": {
+    "split_step": 3,
+    "post_steps": 25,
+    "post_collisions": 0,
+    "collision_share": 0.0,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 5,
+    "got_through": true,
+    "min_x": -11.48,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.727,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 0,
+      "missed": 0,
+      "visible": 7,
+      "closest_m": 2.4,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 11,
+      "turn_arounds": 1,
+      "tag": null
+    }
+  },
+  "p2_R39_s03_final_seed3_a01": {
+    "split_step": 17,
+    "post_steps": 8,
+    "post_collisions": 0,
+    "collision_share": 0.0,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 3,
+    "got_through": true,
+    "min_x": -12.35,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.445,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 0,
+      "missed": 0,
+      "visible": 5,
+      "closest_m": 1.26,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 9,
+      "turn_arounds": 1,
+      "tag": null
+    }
+  },
+  "p2_R39_s02va_dynamic_seed3_a01": {
+    "split_step": 3,
+    "post_steps": 57,
+    "post_collisions": 1,
+    "collision_share": 0.018,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 5,
+    "got_through": false,
+    "min_x": 0.45,
+    "goal_reached": false,
+    "final_goal_distance_m": 13.411,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 1,
+      "missed": 0,
+      "visible": 3,
+      "closest_m": 12.96,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 11,
+      "turn_arounds": 7,
+      "tag": null
+    }
+  },
+  "p2_R39_s02vc_dynamic_seed3_a01": {
+    "split_step": 3,
+    "post_steps": 57,
+    "post_collisions": 2,
+    "collision_share": 0.035,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 5,
+    "got_through": true,
+    "min_x": -11.58,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.565,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 2,
+      "missed": 0,
+      "visible": 11,
+      "closest_m": 1.49,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 3,
+      "streak_from_step": 23,
+      "turn_arounds": 7,
+      "tag": null
+    }
+  },
+  "p2_R39_s03_dynamic_seed2_a01": {
+    "split_step": 20,
+    "post_steps": 40,
+    "post_collisions": 1,
+    "collision_share": 0.025,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 3,
+    "got_through": false,
+    "min_x": -4.98,
+    "goal_reached": false,
+    "final_goal_distance_m": 18.466,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 3,
+      "missed": 0,
+      "visible": 0,
+      "closest_m": 7.93,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 3,
+      "streak_from_step": 10,
+      "turn_arounds": 11,
+      "tag": null
+    }
+  },
+  "p2_R39_s02va_dynamic_seed1_a01": {
+    "split_step": 3,
+    "post_steps": 57,
+    "post_collisions": 4,
+    "collision_share": 0.07,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 5,
+    "got_through": false,
+    "min_x": 0.45,
+    "goal_reached": false,
+    "final_goal_distance_m": 14.34,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 2,
+      "missed": 0,
+      "visible": 3,
+      "closest_m": 12.82,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 11,
+      "turn_arounds": 9,
+      "tag": null
+    }
+  },
+  "p2_R39_s02c_final_seed2_a01": {
+    "split_step": 4,
+    "post_steps": 41,
+    "post_collisions": 2,
+    "collision_share": 0.049,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 1,
+    "got_through": true,
+    "min_x": -11.5,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.645,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 2,
+      "missed": 0,
+      "visible": 8,
+      "closest_m": 2.34,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 3,
+      "streak_from_step": 24,
+      "turn_arounds": 7,
+      "tag": null
+    }
+  },
+  "p2_R39_s02c_dynamic_seed2_a01": {
+    "split_step": 3,
+    "post_steps": 57,
+    "post_collisions": 6,
+    "collision_share": 0.105,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 3,
+    "got_through": false,
+    "min_x": 0.45,
+    "goal_reached": false,
+    "final_goal_distance_m": 14.963,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 2,
+      "missed": 0,
+      "visible": 3,
+      "closest_m": 12.94,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 6,
+      "turn_arounds": 14,
+      "tag": null
+    }
+  },
+  "p2_R39_s03_dynamic_seed3_a01": {
+    "split_step": 25,
+    "post_steps": 35,
+    "post_collisions": 0,
+    "collision_share": 0.0,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 1,
+    "got_through": false,
+    "min_x": -5.92,
+    "goal_reached": false,
+    "final_goal_distance_m": 8.744,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 2,
+      "missed": 0,
+      "visible": 0,
+      "closest_m": 7.49,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 3,
+      "streak_from_step": 53,
+      "turn_arounds": 18,
+      "tag": null
+    }
+  },
+  "p2_R39_s02va_final_seed1_a01": {
+    "split_step": 4,
+    "post_steps": 56,
+    "post_collisions": 4,
+    "collision_share": 0.071,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 3,
+    "got_through": false,
+    "min_x": 0.7,
+    "goal_reached": false,
+    "final_goal_distance_m": 15.081,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 2,
+      "missed": 0,
+      "visible": 0,
+      "closest_m": 12.88,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 12,
+      "turn_arounds": 7,
+      "tag": null
+    }
+  },
+  "p2_R39_s03_final_seed2_a01": {
+    "split_step": 24,
+    "post_steps": 7,
+    "post_collisions": 0,
+    "collision_share": 0.0,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 3,
+    "got_through": true,
+    "min_x": -11.73,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.606,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 3,
+      "missed": 0,
+      "visible": 3,
+      "closest_m": 2.26,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 9,
+      "turn_arounds": 3,
+      "tag": null
+    }
+  },
+  "p2_R39_s02vc_dynamic_seed1_a01": {
+    "split_step": 3,
+    "post_steps": 35,
+    "post_collisions": 2,
+    "collision_share": 0.057,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 3,
+    "got_through": true,
+    "min_x": -12.42,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.839,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 1,
+      "missed": 0,
+      "visible": 16,
+      "closest_m": 1.42,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 12,
+      "turn_arounds": 3,
+      "tag": null
+    }
+  },
+  "p2_R39_s02c_dynamic_seed1_a01": {
+    "split_step": 3,
+    "post_steps": 57,
+    "post_collisions": 5,
+    "collision_share": 0.088,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 4,
+    "got_through": false,
+    "min_x": 0.45,
+    "goal_reached": false,
+    "final_goal_distance_m": 25.95,
+    "end_reason": "max_steps",
+    "goal_id": {
+      "phantom": 3,
+      "missed": 0,
+      "visible": 3,
+      "closest_m": 12.47,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 7,
+      "turn_arounds": 6,
+      "tag": null
+    }
+  },
+  "p2_R39_s02c_final_seed1_a01": {
+    "split_step": 3,
+    "post_steps": 46,
+    "post_collisions": 2,
+    "collision_share": 0.043,
+    "acknowledged": true,
+    "acked_in_first_5": true,
+    "toward_goal_in_first_5": 3,
+    "got_through": true,
+    "min_x": -11.23,
+    "goal_reached": true,
+    "final_goal_distance_m": 0.96,
+    "end_reason": "goal_reached",
+    "goal_id": {
+      "phantom": 0,
+      "missed": 0,
+      "visible": 7,
+      "closest_m": 2.51,
+      "facets": [],
+      "tag": null
+    },
+    "spin": {
+      "longest_streak": 1,
+      "streak_from_step": 7,
+      "turn_arounds": 6,
+      "tag": null
+    }
+  }
+}

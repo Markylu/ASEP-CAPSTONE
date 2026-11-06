@@ -5,7 +5,8 @@
 **Status:** laid out 2026-11-05 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason); offline gates passed; shakedown flown 2026-11-06 (latch
 fired in the shut tine in both s03 `dynamic` runs, too late to judge the way out; s02 untouched);
-round flight below
+**round flown 2026-11-06: 15/30, a draw against `a66`'s 15/30, s03 `dynamic` 0/3, not carried**
+([summary](summary.md))
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30), no control lane. Aimed at s03 `dynamic` (0/52 in
@@ -154,7 +155,14 @@ crossing it would otherwise make, and a route is on at least 95% of steps in eve
 
 ## Outcome
 
-Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Flown 2026-11-06, 04:15–05:09 UTC, 30/30 valid: 15/30 against `a66`'s 15/30 (R32P), a draw,
+with s03 `dynamic` at 0/3. The hypothesis did not hold and, by the drop criterion, `a79` is not
+carried forward as it is.** The latch worked in one of the three s03 `dynamic` runs: out of the
+shut tine five steps after it fired, through the other tine's open door at step 57 (the first
+run of the cell to reach the goal chamber in Phase 2), 2.8 m from the goal at 60. In the other
+two the trigger was too late (step 45) or silent; a dwell of three steps would have caught
+both. The latch also fired in 7 s02 runs, 5 of which then crossed. Details:
+[summary.md](summary.md). `a83` (R43) carries the latch on, sooner.
 
 **Shakedown (2026-11-06, 03:42–04:15 UTC): five unscored runs, one lane alone on `:8004`,
 sctsvr6 `~/asep-r33-shake` at `1502692`; runs kept on the host as `~/r39_shake_a79_runs` and in
