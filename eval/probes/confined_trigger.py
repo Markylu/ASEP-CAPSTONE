@@ -42,6 +42,8 @@ from common import REPO_ROOT, load, metrics, spatial, switch_step, xy  # noqa: E
 from server.decider import agent as agents, planner  # noqa: E402
 
 FOLDERS = "final,R32P_repeat_a66,R35_wall_turn_only"
+#: Every site's goal, map coordinates (a86's rule reads the direct line to it).
+GOAL = (-12.0, 0.0)
 
 
 def read_run(run: Path) -> Dict[str, Any]:
@@ -83,7 +85,7 @@ def first_fire(info: Dict[str, Any], d: Dict[str, Any]) -> Optional[Tuple[int, D
         if step < closed[0]:
             continue
         found = planner.confined_run(trail[:i + 1], [s for s in closed if s <= step],
-                                     (x, y, h), step, d)
+                                     (x, y, h), step, d, GOAL)
         if found is not None:
             began, since, axis, run = found
             return step, {"began": began, "since": since, "axis": axis, "run": run}

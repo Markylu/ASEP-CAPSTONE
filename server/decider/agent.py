@@ -429,6 +429,21 @@ SURVEY_A85: Dict[str, Any] = dict(
     SURVEY_A84, through_deg=65.0, lineup={"pre_m": 2.5, "align_m": 0.8}, through_adv_m=5.0)
 PATHFINDER_A85: Dict[str, Any] = dict(PATHFINDER_A84, survey=SURVEY_A85)
 
+#: a86 (R46): a85 with the latch kept off the survey's ground and a70's
+#: sentence always. confined.off_line_m: a lane within this of the direct line
+#: from the spawn to the goal, and running along it, is the drone's way in and
+#: is never latched. after_survey: no new latch while the wall survey runs.
+#: Survey: through_adv_m off (R45 shakedown: 5 m past a read made from far is
+#: still the hall, and the survey ended early in two runs of four); instead a
+#: look taken up again after a lost doorway is done after relook_steps with
+#: no wall met and no doorway read. Navigator: agent.NAVIGATOR_A86.
+#: eval/phase2/R46_behind_always/README.md.
+SURVEY_A86: Dict[str, Any] = dict(SURVEY_A85, through_adv_m=None, relook_steps=4)
+PATHFINDER_A86: Dict[str, Any] = dict(
+    PATHFINDER_A85, survey=SURVEY_A86, dead_end_latch=dict(
+        PATHFINDER_A85["dead_end_latch"], after_survey=True,
+        confined=dict(PATHFINDER_A85["dead_end_latch"]["confined"], off_line_m=2.5)))
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -437,6 +452,14 @@ NAVIGATOR_A78: Dict[str, str] = {
     "route_behind": NAVIGATOR_A70["route_behind"],
     "dead_end": "This corridor ends at a closed door: it is a dead end.",
 }
+
+#: a86 (R46): a78's notes with a70's route-behind sentence said whenever
+#: "toward your target" sits on the turn-around, not only inside a latched
+#: corridor. No critic. Round F, R32P and R39: the navigator took 63-68% of
+#: such turn-arounds in s02 and 68-92% in s03; tonight's s03 runs that spent
+#: 36-53 steps before the tine declined 40% of them. R30's shakedown (a70):
+#: 46 of 46 with the sentence.
+NAVIGATOR_A86: Dict[str, Any] = dict(NAVIGATOR_A78, always=True)
 
 
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
@@ -1815,6 +1838,31 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "strips 42-58 degrees off and dropped; the drone met the wall 3.3 m from the "
           "door's centre and spent twelve steps along it "
           "(eval/phase2/R45_survey_lineup/README.md)."),
+    Agent("a86", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A86,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A86,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a85 with three things from R44's flight and R45's shakedown. The navigator is "
+          "told the route's next point is behind it whenever 'toward your target' sits "
+          "on the turn-around (a70's sentence, said by a78 to a85 only in a latched "
+          "corridor): it declined about a third of those turn-arounds, and 40% in the "
+          "s03 runs that spent 36-53 steps before the tine. The latch stays off the "
+          "survey's ground: no latch on a lane along the direct line from the spawn to "
+          "the goal, none while the survey runs (R44 s02va dynamic seed 2: the hall in "
+          "front of the shut door latched, 13 steps lost). And the survey no longer calls "
+          "itself through 5 m past its last read (it ended early in two of R45's four "
+          "shakedown runs); a look taken up again after a lost doorway ends after four "
+          "steps with no wall met (eval/phase2/R46_behind_always/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"

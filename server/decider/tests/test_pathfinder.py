@@ -1474,3 +1474,77 @@ def test_a85_is_a84_with_the_through_phase_changed():
         a84["pathfinder"]["survey"], through_deg=65.0, lineup={"pre_m": 2.5, "align_m": 0.8},
         through_adv_m=5.0)
     assert agent.get("a84").sha() == "58e76b4b2054"
+
+
+# --- a86 (R46): the route-behind sentence, always --------------------------------------
+
+def test_a86_sentence_is_said_outside_a_latched_corridor_too():
+    notes = agent.NAVIGATOR_A86
+    turn = {"actions": [{"index": 0, "turn_around": True}, {"index": 3, "turn_around": False}]}
+    on_turn = {0: [spatial.WORDS["toward_target"]], 3: []}
+    ahead = {0: [], 3: [spatial.WORDS["toward_target"]]}
+    assert orchestrator.behind_note(notes, turn, on_turn, {}) == notes["route_behind"]
+    assert orchestrator.behind_note(notes, turn, ahead, {}) is None
+    latched = {"latch": {"out": False}}
+    assert orchestrator.behind_note(notes, turn, on_turn, latched) == \
+        notes["dead_end"] + " " + notes["route_behind"]
+    assert orchestrator.behind_note(notes, turn, on_turn, {"latch": {"out": True}}) == \
+        notes["route_behind"]
+    assert orchestrator.behind_note(agent.NAVIGATOR_A78, turn, on_turn, {}) is None   # a78 as it was
+
+
+def test_a86_no_latch_on_the_direct_line_or_while_the_survey_runs():
+    d = dict(L84["dead_end_latch"])
+    d["confined"] = dict(d["confined"], off_line_m=2.5)
+    # The way in along +x from (-4, 0), a sidestep at (-1, 1), then the lane from (0, 0):
+    # "turned into" by the sidestep, but it is the direct line's own lane.
+    trail, end = lane_trail(lead=((-4, 0), (-3, 0), (-2, 0), (-1, 1)))
+    closed = [end - 1, end]
+    step = trail[-1][0]
+    spawn = trail[0][1:3]
+    far = (spawn[0] + 30.0, spawn[1] + 40.0)                 # the direct line runs elsewhere
+    assert planner.confined_run(trail, closed, trail[-1][1:], step, d, far) is not None
+    on = (spawn[0] + 40.0, spawn[1])                         # the direct line is this lane's
+    assert planner.confined_run(trail, closed, trail[-1][1:], step, d, on) is None
+    assert planner.confined_run(trail, closed, trail[-1][1:], step, L84["dead_end_latch"], on) \
+        is not None                                          # a84: no such rule
+
+
+L86 = agent.PATHFINDER_A86
+
+
+def test_a86_a_look_taken_up_again_ends_after_four_steps_and_a85s_distance_rule_is_off():
+    mem, here, step = hall()
+    cm = spatial.CostMap(mem, [], L86, include=(spatial.cell(here[:2]), spatial.cell(GOAL80)),
+                         start=spatial.cell(here[:2]))
+    run = lambda at, k, recs: planner.wall_survey(mem, cm, at, k, GOAL80, recs, L86)  # noqa: E731
+    _, sv = run(here, step, [])
+    station = planner.survey_station(sv, L86["survey"])
+    at = (station[0], station[1], 0.0)
+    _, look = run(at, step + 5, [rec(step, sv)])
+    mem.door_rays.append(spatial.Ray(at[0], at[1], 0.0, step + 6, "open_far"))
+    _, thru = run(at, step + 6, [rec(step + 5, look)])
+    late = step + 6 + L86["survey"]["through_steps"]
+    far = (at[0] + 5.5, at[1], 0.0)                          # 5.5 m on, nothing in the way
+    wp, again = run(far, late, [rec(step + 6, thru)])
+    assert again["phase"] == "look" and again["again"] and wp is not None   # not called through
+    wp, on = run((far[0] + 3.0, far[1], 0.0), late + 3, [rec(late, again)])
+    assert on["phase"] == "look"
+    wp, done = run((far[0] + 5.0, far[1], 0.0), late + L86["survey"]["relook_steps"],
+                   [rec(late + 3, on)])
+    assert wp is None and done["phase"] == "done"            # four steps, no wall: through
+
+
+def test_a86_is_a85_with_the_sentence_always_the_latch_guards_and_the_short_second_look():
+    a85 = agent.get("a85").features["orchestrator"]
+    a86 = agent.get("a86").features["orchestrator"]
+    added = ("pathfinder", "navigator_notes")
+    assert {k: v for k, v in a86.items() if k not in added} == \
+        {k: v for k, v in a85.items() if k not in added}
+    assert a86["navigator_notes"] == dict(a85["navigator_notes"], always=True)
+    assert a86["pathfinder"]["survey"] == dict(a85["pathfinder"]["survey"], through_adv_m=None,
+                                               relook_steps=4)
+    latch, was = a86["pathfinder"]["dead_end_latch"], a85["pathfinder"]["dead_end_latch"]
+    assert latch["after_survey"] is True and latch["confined"] == dict(was["confined"], off_line_m=2.5)
+    assert agent.get("a85").sha() == "a43435111dff" and agent.get("a84").sha() == "58e76b4b2054"
+    assert [s.name for s in orchestrator.pipeline(a86)] == [s.name for s in orchestrator.pipeline(a85)]
