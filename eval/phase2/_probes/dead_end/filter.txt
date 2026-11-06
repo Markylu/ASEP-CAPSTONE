@@ -1,0 +1,32 @@
+Probe DE, e01 kept only while few closed-door places are known (read after the gate; a fit to these runs)
+
+Places are the memory's closed-door points, one place when within the radius of an earlier one.
+'in time': fired with 25 or more steps left. s02 runs: fired before the crossing.
+
+                             s03 dyn fired   in time    s02 runs    s02 yes kept     tine yes kept
+  every answer                       11/11         8       65/88        420/1126             85/90
+  <= 1 places, 3 m                    4/11         3        0/88            0/42             10/10
+  <= 2 places, 3 m                    8/11         6        0/88           1/158             33/36
+  <= 3 places, 3 m                   11/11         8        4/88          18/263             73/78
+  <= 4 places, 3 m                   11/11         8       14/88          51/397             85/90
+  <= 1 places, 4 m                    5/11         4        0/88            0/71             15/15
+  <= 2 places, 4 m                   11/11         8        1/88          10/246             56/60
+  <= 3 places, 4 m                   11/11         8        9/88          37/379             85/90
+  <= 4 places, 4 m                   11/11         8       26/88         117/605             85/90
+  <= 1 places, 6 m                    6/11         4        0/88           0/139             34/36
+  <= 2 places, 6 m                   11/11         8       11/88          43/430             75/80
+  <= 3 places, 6 m                   11/11         8       35/88         178/728             85/90
+  <= 4 places, 6 m                   11/11         8       54/88         332/981             85/90
+
+By round, <= 2 places, 4 m
+                             s03 dyn fired   in time    s02 runs    s02 yes kept     tine yes kept
+  R32P                                 3/3         2        1/24            3/61               8/8
+  R35                                  3/3         2        0/24            0/71             26/28
+  final                                5/5         4        0/40           7/114             22/24
+
+s02 runs fired in, <= 2 places, 4 m: R32P/s02a/dynamic/seed2 at step 5, a won run
+
+Asked steps no answer exists for (never put to the model), and how many the filter would keep:
+  final           initial                   30 runs,   85 asked steps,   40 with <= 2 places
+  R30             initial/final/dynamic     18 runs,  121 asked steps,   42 with <= 2 places
+  R32             final/dynamic             30 runs,  355 asked steps,   65 with <= 2 places

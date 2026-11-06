@@ -16,10 +16,13 @@ The frames are on the lane checkouts the rounds flew on (gitignored there), so
     LITELLM_BASE_URL=http://127.0.0.1:8004 python eval/probes/dead_end.py run --prompt e02
     python eval/probes/dead_end.py score
     python eval/probes/dead_end.py breakdown
+    python eval/probes/dead_end.py filter
 
-`breakdown` (no frames, no model; added after the gate was read, so it is a
-description, not a test) splits the answers by where the drone stood, from the
-repo's own copies of the runs. `run` takes --shard i --of n for more than one instance; concurrency is 1 per
+`breakdown` and `filter` need no frames and no model, and were added after the
+gate was read, so they describe and do not test. `breakdown` splits the answers
+by where the drone stood, from the repo's own copies of the runs. `filter`
+keeps e01's answers only on steps where the memory knew few closed-door places
+(dead_end_trigger.closed_door_places) and counts the latch's rule again. `run` takes --shard i --of n for more than one instance; concurrency is 1 per
 instance, as every recorded read. `score` needs no frames and no model.
 """
 from __future__ import annotations
@@ -296,6 +299,98 @@ def breakdown() -> int:
     return 0
 
 
+def filter_places() -> int:
+    """e01's answers kept only while the memory knows at most N closed-door
+    places: the latch's rule per run, over N and the radius that makes two
+    reads one place; then by round; then what no answer exists for."""
+    from common import REPO_ROOT
+    from server.decider import agent
+    rule = agent.PATHFINDER_A78["dead_end_latch"]
+    frames = load_sample()
+    said = {}
+    for fp in sorted(OUT.glob("calls_e01_*.jsonl")):
+        for c in map(json.loads, fp.read_text().splitlines()):
+            if c.get("result"):
+                said[c["id"]] = c["result"]["dead_end"]
+    folders = {f.split("_", 1)[0]: f for f in FOLDERS}
+    runs: Dict[Tuple[str, str, str, str], List[Dict[str, Any]]] = collections.defaultdict(list)
+    for f in frames:
+        if f["id"] in said:
+            runs[(f["folder"], f["site"], f["arm"], f["seed"])].append(f)
+    rows_of = {k: [r for r in load(REPO_ROOT / "eval" / "phase2" / folders[k[0]] / "runs" / k[1]
+                                   / k[2] / k[3]) if r.get("manifest")] for k in runs}
+
+    def count(most: int, radius: float, only: Optional[str] = None) -> Dict[str, Any]:
+        out: Dict[str, Any] = collections.Counter()
+        out["s02_fired"] = []
+        for key, asked in sorted(runs.items()):
+            if only and key[0] != only:
+                continue
+            known = trigger.closed_door_places(rows_of[key], radius)
+            kept = sorted((f for f in asked if known[f["step"]] <= most), key=lambda f: f["step"])
+            for f in kept:
+                out[f["where"] + "_kept"] += 1
+                out[f["where"] + "_yes"] += said[f["id"]] == "yes"
+            fire = first_fire([(f["step"], said[f["id"]]) for f in kept], rule)
+            if key[1] == "s03" and key[2] == "dynamic":
+                out["s03d"] += 1
+                out["s03d_fired"] += fire is not None
+                out["s03d_in_time"] += fire is not None and 60 - fire >= GATE["steps_left_min"]
+            elif key[1] != "s03":
+                out["s02"] += 1
+                if fire is not None and (asked[0]["crossed"] is None or fire < asked[0]["crossed"]):
+                    out["s02_fired"].append("{0}/{1}/{2}/{3} at step {4}{5}".format(
+                        *key, fire, ", a won run" if asked[0]["won"] else ""))
+        return out
+
+    head = "  {0:<26}{1:>14}{2:>10}{3:>12}{4:>16}{5:>18}".format(
+        "", "s03 dyn fired", "in time", "s02 runs", "s02 yes kept", "tine yes kept")
+
+    def row(name: str, c: Dict[str, Any]) -> str:
+        return "  {0:<26}{1:>14}{2:>10}{3:>12}{4:>16}{5:>18}".format(
+            name, "{0}/{1}".format(c["s03d_fired"], c["s03d"]), c["s03d_in_time"],
+            "{0}/{1}".format(len(c["s02_fired"]), c["s02"]),
+            "{0}/{1}".format(c["s02_yes"], c["s02_kept"]),
+            "{0}/{1}".format(c["shut_tine_yes"], c["shut_tine_kept"]))
+
+    lines = ["Probe DE, e01 kept only while few closed-door places are known "
+             "(read after the gate; a fit to these runs)", "",
+             "Places are the memory's closed-door points, one place when within the radius of "
+             "an earlier one.", "'in time': fired with {0} or more steps left. s02 runs: fired "
+             "before the crossing.".format(GATE["steps_left_min"]), "", head,
+             row("every answer", count(10 ** 6, 4.0))]
+    for radius in (3.0, 4.0, 6.0):
+        for most in (1, 2, 3, 4):
+            lines.append(row("<= {0} places, {1:g} m".format(most, radius), count(most, radius)))
+    lines += ["", "By round, <= 2 places, 4 m", head]
+    for short in sorted(folders):
+        lines.append(row(short, count(2, 4.0, short)))
+    lines += ["", "s02 runs fired in, <= 2 places, 4 m: " + ("; ".join(count(2, 4.0)["s02_fired"])
+                                                              or "none")]
+    lines += ["", "Asked steps no answer exists for (never put to the model), and how many the "
+              "filter would keep:"]
+    for folder, arms in (("final", ("initial",)), ("R30_pathfinder", ("initial", "final", "dynamic")),
+                         ("R32_repeat_a49", ("final", "dynamic"))):
+        tally = collections.Counter()
+        for run in trigger.run_dirs(folder):
+            if run.parts[-2] not in arms:
+                continue
+            rows = [r for r in load(run) if r.get("manifest")]
+            known = trigger.closed_door_places(rows)
+            steps = [r["step"] for r in rows
+                     if any(l.get("doorway") == "closed" and l.get("strip") in spatial.CENTRAL_STRIPS
+                            for l in ((r.get("perceiver") or {}).get("result") or {}).get("lanes")
+                            or [])]
+            tally["runs"] += 1
+            tally["asked"] += len(steps)
+            tally["kept"] += sum(known[step] <= 2 for step in steps)
+        lines.append("  {0:<16}{1:<24} {2:>3} runs, {3:>4} asked steps, {4:>4} with <= 2 places".format(
+            folder.split("_", 1)[0], "/".join(arms), tally["runs"], tally["asked"], tally["kept"]))
+    (OUT / "filter.txt").write_text("\n".join(lines) + "\n")
+    print("\n".join(lines))
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -307,6 +402,7 @@ def main() -> int:
     r.add_argument("--of", type=int, default=1)
     sub.add_parser("score")
     sub.add_parser("breakdown")
+    sub.add_parser("filter")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     if args.cmd == "sample":
@@ -316,6 +412,8 @@ def main() -> int:
         return 0
     if args.cmd == "breakdown":
         return breakdown()
+    if args.cmd == "filter":
+        return filter_places()
     return score()
 
 

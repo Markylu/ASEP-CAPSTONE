@@ -18,6 +18,11 @@ a78's latch needs the dead-end confirmer's answers, which no recorded run has.
                 (eval/phase2/_probes/dead_end/calls_e01_*.jsonl); an asked step
                 with no recorded answer gets none, as a failed call in flight.
 
+`--places N` drops every answer given on a step where the memory already knew
+more than N closed-door places (dead_end_trigger.closed_door_places): the
+filter read off probe DE's answers after its gate failed
+(eval/phase2/_probes/dead_end/README.md, section 3). Not an agent yet.
+
 Readouts, against the gates in eval/phase2/R38_dead_end_latch/README.md:
 
 1. s03 final/dynamic: the step the latch fires and the steps left; after it,
@@ -83,6 +88,8 @@ def main() -> int:
     ap.add_argument("--answers", default="oracle")
     ap.add_argument("--folders", default=trigger.FOLDERS)
     ap.add_argument("--only", default="", help="substring filter on site/arm/seed")
+    ap.add_argument("--places", type=int, default=None,
+                    help="drop answers on steps with more closed-door places known than this")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
     a66 = agents.get("a66").features["orchestrator"]
@@ -94,7 +101,9 @@ def main() -> int:
         print("no probe DE answers for {0} under {1}".format(args.answers, CALLS))
         return 1
 
-    lines = ["a78 replay, answers: {0} (open loop; eval/probes/a78_replay.py)".format(args.answers),
+    lines = ["a78 replay, answers: {0}{1} (open loop; eval/probes/a78_replay.py)".format(
+        args.answers, "" if args.places is None else ", only while {0} or fewer closed-door "
+        "places are known".format(args.places)),
              "", "run                          | won | latch step, left | s03 route out a66 a78 "
              "(after latch) | sentence | s02 gap crossing a66 a78 | no route"]
     tot: Dict[str, float] = collections.defaultdict(float)
@@ -112,6 +121,9 @@ def main() -> int:
             met = metrics(run)
             info = trigger.read_run(run)
             asked, right = set(info["asked"]), set(info["asked_right"])
+            if args.places is not None:
+                known = trigger.closed_door_places(rows)
+                asked = {step for step in asked if known[step] <= args.places}
 
             def answer(step: int) -> Optional[str]:
                 if step not in asked:
@@ -195,8 +207,9 @@ def main() -> int:
                                          tot["x78"] / tot["xn"]))
     lines.append("Steps with no route (soft or frontier fallback): {0:.0f} of {1:.0f}.".format(
         tot["no_route"], tot["steps"]))
-    out = Path(args.out or REPO_ROOT / "eval/phase2/_probes/a78/replay_{0}.txt".format(
-        args.answers.replace(":", "_")))
+    out = Path(args.out or REPO_ROOT / "eval/phase2/_probes/a78/replay_{0}{1}.txt".format(
+        args.answers.replace(":", "_"),
+        "" if args.places is None else "_places{0}".format(args.places)))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(lines) + "\n")
     print("\n".join(lines[-7:]))

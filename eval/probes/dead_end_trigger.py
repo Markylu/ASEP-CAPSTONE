@@ -104,6 +104,30 @@ def where(site: str, arm: str, shut: Optional[str], sw: Optional[int], here: spa
     return "s03_other"
 
 
+def closed_door_places(rows: List[Dict[str, Any]], radius_m: float = 4.0) -> Dict[int, int]:
+    """Per step, how many distinct places a closed door has been read at so far
+    in the run (this step included): the points the memory keeps for closed
+    doors (SpatialMemory.closed_doors: along the strip, at the range its floor
+    end stands for), counted as one place when within radius_m of an earlier
+    one. Everything in it is the agent's own: its pose and its perceiver's
+    reads. A hall whose wall has several doors collects places; a corridor
+    with one door at its end does not."""
+    places: List[spatial.Point] = []
+    out: Dict[int, int] = {}
+    for r in rows:
+        here = xy(r)
+        if here is not None:
+            for lane in ((r.get("perceiver") or {}).get("result") or {}).get("lanes") or []:
+                rng = DOOR_RANGE_M.get(lane.get("floor_end"))
+                if lane.get("doorway") == "closed" and rng is not None:
+                    at = spatial.ahead(here[:2], (here[2] + spatial.strip_offset(lane["strip"]))
+                                       % 360.0, rng)
+                    if all(spatial.dist(at, q) > radius_m for q in places):
+                        places.append(at)
+        out[r["step"]] = len(places)
+    return out
+
+
 def read_run(run: Path) -> Dict[str, Any]:
     site, arm, seed = run.parts[-3], run.parts[-2], run.parts[-1]
     rows = [r for r in load(run) if r.get("manifest")]

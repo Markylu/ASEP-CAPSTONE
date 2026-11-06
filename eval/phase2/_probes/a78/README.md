@@ -61,6 +61,12 @@ With `e01` the latch holds in 65 of the 98 s02 runs, the same 65 the probe count
 alone: needing a straight run the drone is still in stops none of them. With `e02` it is
 `a66` everywhere but three s03 runs.
 
+`e01` kept only while at most two closed-door places are known
+([_probes/dead_end §3](../dead_end/README.md), `--answers probe:e01 --places 2`,
+[replay_probe_e01_places2.txt](replay_probe_e01_places2.txt)): 11 of 11 s03 `dynamic` runs
+latched, 8 with 25 or more steps left, 346/421 (82%) routes out; 1 of 53 won s02 runs and 0 of
+45 lost ones latched; no route on 6 steps. A fit to these runs, read after the gate.
+
 Not covered: the lane shut once the drone is out (the recorded drone never leaves; unit tests
 `test_latch_is_carried_by_the_record_and_shuts_the_lane_once_out`), and anything the navigator
 does with the route.

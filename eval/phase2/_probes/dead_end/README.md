@@ -95,3 +95,64 @@ the hall only from where the hall looks like a hall. Close to the divider and al
 the s02 runs spend their steps, one frame is not enough, for this question as for doorways.
 Every call here saw one frame and nothing else, so this says nothing about a model that also
 holds a record of its earlier steps.
+
+## 3. After the gate: `e01` kept only while few closed-door places are known (no model)
+
+On the operator's instruction ("check filter"), 2026-11-05. Read on the same 1240 answers the
+gate failed on, so everything here is a fit to these runs and a lead, not a result.
+
+**The search.** Each asked step was joined to what the agent itself had at that step: the door
+strip's floor end, how many strips read a closed door or an open doorway, how many read
+blocked, the straight run of trail ending there and the heading against it, the goal's
+bearing (the planner's), the step number, and how many distinct places the memory had read a
+closed door at. Every conjunction of up to three of 18 conditions on those, under four
+versions of the yes rule: 3952 filters, each scored per run as the gate scores (a one-off, not
+kept). 70 meet both run rows of the gate; 68 of the 70 include the last feature. The best
+without it fires in 3 s02 runs and 7 s03 `dynamic` runs in time.
+
+**The feature** (`dead_end_trigger.closed_door_places`). The memory already keeps a point for
+every closed-door read (`SpatialMemory.closed_doors`). Points within 4 m of an earlier one are
+one place. An answer counts only if at most 2 places are known at that step.
+`python eval/probes/dead_end.py filter`, table in [filter.txt](filter.txt):
+
+| | s03 `dynamic` runs fired | with 25+ steps left | s02 runs fired before the crossing | s02 yes kept | Tine yes kept |
+|---|---|---|---|---|---|
+| Every answer (gate 1) | 11/11 | 8 | 65/88 | 420/1126 | 85/90 |
+| At most 2 places, 4 m | 11/11 | 8 | **1/88** | 10/246 | 56/60 |
+| by round: F | 5/5 | 4 | 0/40 | 7/114 | 22/24 |
+| R32P | 3/3 | 2 | 1/24 | 3/61 | 8/8 |
+| R35 | 3/3 | 2 | 0/24 | 0/71 | 26/28 |
+
+The full latch replayed with it (`eval/probes/a78_replay.py --answers probe:e01 --places 2`,
+[replay](../a78/replay_probe_e01_places2.txt)): all 11 s03 `dynamic` runs latched, 8 with 25 or
+more steps left, the route out of the shut tine on 346 of 421 steps from the latch on; one of
+the 98 s02 runs latched; no route on 6 of 5653 steps.
+
+**Why it separates them.** The s02 divider has three doors in one wall, most of them shut,
+and the perceiver adds phantom ones. `e01` says yes in the hall when the drone is
+close to that wall and looking along it; by then the memory holds three or more closed-door
+places. Where it holds two or fewer the drone is still far out and square on, and there `e01`
+says no (0 yes in 71 steps with one place, 10 in 175 with two). A tine has one door.
+
+**What it does not show.**
+- It is fitted. The count and the radius were read off this table, and the good settings are a
+  narrow ridge: at most 3 places at 4 m fires in 9 s02 runs, at most 2 at 6 m in 11, at most 2
+  at 3 m in 0 but only 8 of 11 s03 runs. At most 3 at 3 m (4 s02 runs, 11 of 11) is the other
+  point on it.
+- The one s02 run it fires in is a run `a66` won: R32P s02a `dynamic` seed 2, yes at steps 4
+  and 5, crossing at 16.
+- It separates a wall with several doors from a corridor with one. That is what these two
+  site families are. It says nothing about a hall with one door.
+- **The `initial` arms were never sampled.** Probe DE took the change arms only. Round F's 30
+  `initial` runs (30/30 for `a66`) hold 85 asked steps, 40 of them with two or fewer places,
+  and no answer exists for any of them. A latch there would cost solved runs.
+- In s03 some of the yes answers that fire the latch come before the door shut or with the
+  drone not facing it (24 such asked steps, 20 yes). In F s03 `dynamic` seed 1 the first of the
+  two is at step 15, four steps before the switch.
+
+**The check that would test it, with no flight.** Frames exist for runs no part of this fit
+has seen: R30 (`a66`, 18 runs), R32 (`a49`, 30 runs) and Round F's `initial` arms: 561 asked
+steps, 147 of them kept by the filter, about 9 minutes of calls. With the setting fixed at 2
+places and 4 m beforehand, the latch's rule should fire in none of the 36 `initial` runs (F 30,
+R30 6), in at most 2 of the 32 s02 change-arm runs, and in 3 of the 4 s03 `dynamic` runs. Not
+run.

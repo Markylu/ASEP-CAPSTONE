@@ -227,5 +227,13 @@ harm in s02 and reaches about a quarter of the cell it was built for. With `e01`
 all 11 and in 65 of the 98 s02 runs (21 of the 53 `a66` won), with no route on 220 of 5653
 steps. Both are read after the gate and do not reopen it.
 
+**After the gate (same day, operator: "check filter").** `e01`'s answers were read against
+what the agent has at each step ([_probes/dead_end §3](../_probes/dead_end/README.md)). Kept
+only while the memory knows at most two closed-door places, the latch's rule fires in all 11
+s03 `dynamic` runs (8 in time) and in 1 of the 88 s02 runs, and it holds in each of the three
+rounds separately. That is a fit to the answers the gate failed on, on a narrow range of
+settings, with the `initial` arms never sampled; it is a lead for a new agent and a held-out
+probe (561 asked steps on R30, R32 and F's `initial` runs), and it changes nothing above.
+
 What stands: the latch itself is sound on the record (gate 2 with a confirmer that is never
 wrong), and it has no trigger. `a66` is still the best agent (F 64/90, R32P 15/30).
