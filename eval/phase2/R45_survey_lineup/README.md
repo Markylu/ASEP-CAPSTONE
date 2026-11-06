@@ -99,10 +99,10 @@ a crossing; a route is on at least 95% of steps. Wins are not required.
 **Flown 2026-11-06, 06:17–07:02 UTC, 30/30 valid: 23/30 against `a84`'s 18/30 (R44) and
 `a66`'s 15/30 (R32P). The hypothesis held; `a85` is carried forward and is the bar.** s02
 19/24 (R44 13/24): s02va 6/6, s02a 6/6, s02c `dynamic` 3/3, s02vc 3/6; 17 of the 19 s02 wins
-crossed on the survey, at a median of step 15. s03 4/6 (`final` 3/3, `dynamic` 1/3). No
-line-up at the wall was needed in any run, so that setting is untested; the gain is the wider
-cone of reads. Three s02 losses ended their survey early by `through_adv_m`, as the shakedown
-had shown. Details: [summary.md](summary.md).
+crossed on the survey, at a median of step 15. s03 4/6 (`final` 3/3, `dynamic` 1/3). The gain
+is the wider cone of reads, not the line-up: of five line-ups at the near wall two crossed,
+and three s02 losses were stopped beside the jamb, lined up and did not get through. Details:
+[summary.md](summary.md).
 
 **Shakedown (2026-11-06, 05:39–05:58 UTC): four unscored runs, slot 5 (port 8105) as a fifth
 client beside R44's four lanes, sctsvr6 `~/asep-r33-shake` at `7031eb4`, log

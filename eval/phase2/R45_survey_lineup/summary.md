@@ -30,11 +30,16 @@ What the runs say (`eval/probes/a80_check.py`, `eval/probes/a79_check.py`):
   end, at steps 10 to 37 (median 15). Wins took 20–34 steps but for one of 49 (R32P's `a66`
   wins: 25–55).
 - **The in-view sites are no longer lost**: s02va 6/6 (R44 4/6), s02vc 3/6 (R44 1/6). The door
-  read from far is flown at and the aim follows its later reads; no line-up at the wall was
-  needed in any run (`lined` 0 in all 24), so that part of the change is untested here.
-- **The five s02 losses.** Three ended their survey early, 5 m past a far read with the wall
-  still ahead (`through_adv_m`: s02c `final` 3, s02vc `dynamic` 1, s02vc `final` 1), and were
-  then latched in the hall on the diagonal they had flown (steps 11, 16, 15). One never started
+  read from far is flown at and the aim follows its later reads. **The line-up is not what won
+  them.** A line-up followed a stop in 9 runs. In four the drone was already through the wall
+  (stopped in the far room, x from −1.4 to −2.7; all four solved). In five it was stopped at
+  the near wall: two then crossed (s02a `dynamic` 2 at step 17, s02va `dynamic` 3 at 25) and
+  three never did (s02c `final` 3, s02vc `dynamic` 1, s02vc `final` 1: stopped 0.4 to 1.3 m
+  beside the jamb, lined up once or twice, lost).
+- **The five s02 losses.** Three were stopped at the wall beside the door, lined up without
+  getting through, ended their survey (s02c `final` 3, s02vc `dynamic` 1, s02vc `final` 1, at
+  steps 11, 16 and 15), and were latched in the hall on the diagonal they had flown at the
+  same step. One never started
   a survey (s02vc `final` 3) and one took both stations and crossed at step 55 (s02c `final`
   2, `timeout`). `a86` (R46, in the air) drops the 5 m rule and holds the latch back while the
   survey runs.
@@ -55,7 +60,8 @@ What the runs say (`eval/probes/a80_check.py`, `eval/probes/a79_check.py`):
 - At least half the s02 wins cross during or within 3 steps of the survey: 17 of 19. Held.
 - No look phase begun after a crossing: one (s02va `final` 1, at step 20, crossed at 14,
   solved at 27). Failed by one run.
-- A line-up after a stop at the wall in the through phase: none occurred. Not tested.
+- "After a line-up, the drone within 1 m of the door's centre line at the wall in at least
+  half": of the five line-ups at the near wall, two crossed. Failed by the letter (2 of 5).
 - Latch within 9 steps of the door shutting in the s03 runs that stay in the shut tine: 3 of
   3 (7, 6, 6); out within 8 steps: 3 of 3 (8, 5, 4). Held; seed 1 then went back in.
 - A route on at least 95% of steps: 26 of 30 runs (s03 `dynamic` 1 39/60; s02vc `dynamic` 1
@@ -75,7 +81,7 @@ yet confirmed by the operator. Frames stay on the host.
 threshold (Fisher p = 0.06, two-sided; against R44's 18/30, 0.25), and it is where the change
 was aimed: the s02 change arms, 19/24. It is one round of 30 on three seeds, under a host
 shared with other clients, and the two steps from `a66` to here (R44, R45) were each chosen
-after looking at the runs before. What is left is named: the survey's early end after a far
-read, a latch that follows it in the hall, the latched corridor re-entered, and the s03 runs
-that reach the tine late. `a86` and `a87` (R46, R47) are in the queue for the first two and
-for s02c.
+after looking at the runs before. What is left is named: a line-up that fails beside the jamb,
+a latch that follows the survey's end in the hall, the latched corridor re-entered, and the
+s03 runs that reach the tine late. `a86` and `a87` (R46, R47) are in the queue for the second
+of these and for s02c.
