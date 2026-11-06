@@ -24,11 +24,29 @@ IMAGE=${PHASE1_IMAGE:-asep-phase1:latest}
 # PHASE1_DECIDER, DECIDER_PORT, PHASE1_STATE and XVFB_SERVERNUM set per lane
 # give parallel flights their own decider, Godot cache and X display.
 # LITELLM_BASE_URL, when set, points a lane's decider at another vLLM instance
-# (R29S: one instance per lane); unset, the remote profile's :8004.
+# (R29S: one instance per lane); unset, the remote profile's :8004. Lanes spread
+# over instances this way, and round_lane.sh here flies one lane.
 DECIDER=${PHASE1_DECIDER:-phase1-decider}
 STATE=${PHASE1_STATE:-$HOME/.cache/asep-phase1}
 # Not 8000: vLLM's text models hold :8000-:8003 on sctsvr6.
 DECIDER_PORT=${DECIDER_PORT:-8100}
+# GODOT_VK=nvidia renders Godot on an H100 instead of lavapipe (about a tenth of
+# the CPU per lane; the frames differ from lavapipe's on thin edges, see
+# README.md). GODOT_RENDER_GPU is the card's nvidia-smi index. Only that card is
+# passed into the container, so it is Godot's Vulkan device 0. Never a card a
+# vLLM holds: rendering there would slow every lane's model calls.
+RENDER=""
+if [ "${GODOT_VK:-lvp}" = nvidia ]; then
+    : "${GODOT_RENDER_GPU:?GODOT_VK=nvidia needs GODOT_RENDER_GPU, the nvidia-smi index of a card no vLLM holds}"
+    if nvidia-smi -i "$GODOT_RENDER_GPU" --query-compute-apps=process_name --format=csv,noheader 2>/dev/null | grep -qi vllm; then
+        echo "sweep.sh: GPU $GODOT_RENDER_GPU holds a vLLM; pick an idle card for GODOT_RENDER_GPU" >&2
+        exit 1
+    fi
+    RENDER="--gpus device=$GODOT_RENDER_GPU -e NVIDIA_DRIVER_CAPABILITIES=all -e GODOT_VK=nvidia -e GODOT_GPU=0"
+elif [ "${GODOT_VK:-lvp}" != lvp ]; then
+    echo "sweep.sh: GODOT_VK must be lvp or nvidia" >&2
+    exit 1
+fi
 
 run() {
     tty=""
@@ -39,8 +57,8 @@ run() {
     # A home that outlives the container keeps Godot's shader cache, which
     # lavapipe is slow to rebuild. Outside the repo, so it never dirties it.
     mkdir -p "$STATE"
-    # shellcheck disable=SC2086 # tty and gitconfig are intentionally word-split
-    docker run --rm $tty --network host --user "$(id -u):$(id -g)" \
+    # shellcheck disable=SC2086 # tty, gitconfig and RENDER are intentionally word-split
+    docker run --rm $tty --network host --user "$(id -u):$(id -g)" $RENDER \
         -v "$REPO:/repo" -v "$STATE:/tmp/home" $gitconfig \
         -e USER="${USER:-operator}" -e LP_NUM_THREADS="${LP_NUM_THREADS:-16}" \
         ${XVFB_SERVERNUM:+-e XVFB_SERVERNUM="$XVFB_SERVERNUM"} \
@@ -65,6 +83,7 @@ case "$cmd" in
             fake="FAKE_PICK=straight uvicorn server.decider.fake_litellm:app --port 4101 >/dev/null 2>&1 &
                   export VLM_STREAM=0 VLM_RTT_PROBE=0 LITELLM_BASE_URL=http://127.0.0.1:4101 VLM_MODEL=stub;"
         fi
+        RENDER="" # the decider renders nothing
         run -d --name "$DECIDER" "$IMAGE" \
             sh -c "$fake exec python -m server.decider --profile remote --port $DECIDER_PORT $*"
         echo "decider starting on 127.0.0.1:$DECIDER_PORT (logs: $0 logs)"
