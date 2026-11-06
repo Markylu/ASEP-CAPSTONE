@@ -1,0 +1,38 @@
+a93 goal check on 1579 goal reports in 197 runs with one, of R44_survey_latch_v3,R45_survey_lineup,R46_behind_always,R47_station_guard,R49_no_sentence,R51_no_station_guard,R52_station_stall (eval/probes/a93_goal_check.py)
+
+Reports with no line of sight: 249 of 1579; they raised a goal tag on 249 steps and the navigator took it on 247.
+
+off   15 deg, min 0.0 m | no line of sight: dropped 121 of 249 (49%), tag taken on 119 | line of sight: dropped 177 of 1330 (13.3%)
+off   15 deg, min 4.0 m | no line of sight: dropped 121 of 249 (49%), tag taken on 119 | line of sight: dropped 126 of 1330 (9.5%)
+off   20 deg, min 0.0 m | no line of sight: dropped 118 of 249 (47%), tag taken on 116 | line of sight: dropped  65 of 1330 (4.9%)
+off   20 deg, min 4.0 m | no line of sight: dropped 118 of 249 (47%), tag taken on 116 | line of sight: dropped  40 of 1330 (3.0%)
+off   26 deg, min 0.0 m | no line of sight: dropped 108 of 249 (43%), tag taken on 106 | line of sight: dropped  19 of 1330 (1.4%)
+off   26 deg, min 4.0 m | no line of sight: dropped 108 of 249 (43%), tag taken on 106 | line of sight: dropped  13 of 1330 (1.0%)
+off   35 deg, min 0.0 m | no line of sight: dropped  95 of 249 (38%), tag taken on 93 | line of sight: dropped   7 of 1330 (0.5%)
+off   35 deg, min 4.0 m | no line of sight: dropped  95 of 249 (38%), tag taken on 93 | line of sight: dropped   7 of 1330 (0.5%)
+off   45 deg, min 0.0 m | no line of sight: dropped  66 of 249 (27%), tag taken on 64 | line of sight: dropped   4 of 1330 (0.3%)
+off   45 deg, min 4.0 m | no line of sight: dropped  66 of 249 (27%), tag taken on 64 | line of sight: dropped   4 of 1330 (0.3%)
+
+Runs by the step of the first taken tag the rule drops (no line of sight):
+  s03: by step 4, 18 runs, won 6 | later, 15 runs, won 11 | none, 9 runs, won 4
+  s02: by step 4, 0 runs, won 0 | later, 51 runs, won 22 | none, 117 runs, won 93
+
+s03 runs with such a tag by step 4:
+  R44 dynamic  seed1  step 2  reported far_right  lost
+  R45 dynamic  seed1  step 2  reported far_right  lost
+  R45 final    seed1  step 2  reported far_right  won
+  R46 dynamic  seed1  step 2  reported far_right  won
+  R46 dynamic  seed2  step 0  reported far_right  lost
+  R46 final    seed1  step 2  reported far_right  won
+  R47 dynamic  seed1  step 2  reported far_right  lost
+  R47 final    seed1  step 2  reported far_right  lost
+  R49 dynamic  seed1  step 2  reported far_right  lost
+  R49 dynamic  seed2  step 2  reported far_right  lost
+  R49 final    seed3  step 4  reported far_right  won
+  R51 dynamic  seed1  step 2  reported far_right  lost
+  R51 dynamic  seed2  step 0  reported far_right  lost
+  R51 final    seed1  step 2  reported far_right  lost
+  R51 final    seed2  step 0  reported far_right  lost
+  R52 dynamic  seed1  step 2  reported far_right  lost
+  R52 final    seed1  step 2  reported far_right  won
+  R52 final    seed3  step 1  reported far_right  won

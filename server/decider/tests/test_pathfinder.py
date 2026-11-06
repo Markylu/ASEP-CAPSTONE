@@ -1674,3 +1674,35 @@ def test_a92_is_a91_with_the_stations_held_for_twelve_steps():
     assert {k: v for k, v in a92["pathfinder"].items() if k != "survey"} == \
         {k: v for k, v in a91["pathfinder"].items() if k != "survey"}
     assert agent.get("a91").sha() == "99b20381ecdc"
+
+
+def test_a93_drops_a_goal_report_off_the_line_to_the_goal():
+    a89 = agent.get("a89").features["orchestrator"]
+    a93 = agent.get("a93").features["orchestrator"]
+    assert a93 == dict(a89, goal_check=agent.GOAL_CHECK_A93)
+    assert agent.GOAL_CHECK_A93 == {"off_deg": 26.0, "min_m": 4.0}
+    assert agent.get("a92").sha() == "8e5bcc8a5c74"
+    names = [st.name for st in orchestrator.pipeline(a93)]
+    assert names.index("perceiver") < names.index("goal_check") < names.index("door_confirmer")
+    assert "goal_check" not in [st.name for st in orchestrator.pipeline(a89)]
+    c = agent.GOAL_CHECK_A93
+
+    # R52 s03 dynamic seed 1, step 2: the goal 30 m straight ahead, reported far right.
+    lobby = {"step": 2, "pose": {"position": [17.6025791168213, 1.75, -0.302979528903961],
+                                 "pitch": 0.0, "yaw": 1.53180480003357},
+             "goal": {"position": [-12.0, 1.0, 0.0]}}
+    here = spatial.pose_xyh(lobby["pose"])
+    assert abs(spatial.wrap(spatial.bearing(here[:2], (-12.0, 0.0)) - here[2])) < 4.0
+    hit = orchestrator.goal_off_line({"goal": "far_right"}, lobby, c)
+    assert hit is not None and hit["strip"] == "far_right" and 33.0 < hit["off_deg"] < 42.0
+    assert orchestrator.goal_off_line({"goal": "right"}, lobby, c) is None      # one strip off: kept
+    assert orchestrator.goal_off_line({"goal": "centre"}, lobby, c) is None
+    assert orchestrator.goal_off_line({"goal": "not_visible"}, lobby, c) is None
+    assert orchestrator.goal_off_line(None, lobby, c) is None
+    # Inside min_m the sphere is wider than a strip: never dropped.
+    near = dict(lobby, goal={"position": [here[0] - 3.0, 1.0, -here[1]]})
+    assert orchestrator.goal_off_line({"goal": "far_right"}, near, c) is None
+    # No goal truth in the manifest (goal_truth none): nothing to check against.
+    assert orchestrator.goal_off_line({"goal": "far_right"},
+                                      {k: v for k, v in lobby.items() if k != "goal"}, c) is None
+
