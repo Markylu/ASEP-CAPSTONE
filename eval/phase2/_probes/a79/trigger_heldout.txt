@@ -1,0 +1,46 @@
+Confined-lane trigger on 48 runs of R30_pathfinder,R32_repeat_a49 (eval/probes/confined_trigger.py)
+
+half 1.5 dwell 5 facing 70 reads 2 | s03 dyn right 2/4 (25+ left: 2, median left 28) wrong 0 | s03 final right 0/4 wrong 0 won-fired 0 | s02 won 1/17 lost 2/17 | initial 0/6
+
+R30   s01    dynamic  seed1  won yes switch   3 crossed  26 closed   - fired   - in None 
+R30   s01    final    seed1  won yes switch   - crossed  18 closed   - fired   - in None 
+R30   s02a   dynamic  seed1  won no  switch   3 crossed   - closed   0 fired   - in None 
+R30   s02a   final    seed1  won yes switch   - crossed  10 closed   0 fired   - in None 
+R30   s02c   dynamic  seed1  won yes switch   3 crossed  20 closed   0 fired   - in None 
+R30   s02c   final    seed1  won yes switch   - crossed  39 closed   0 fired   - in None 
+R30   s02va  dynamic  seed1  won yes switch   3 crossed  19 closed   0 fired   - in None 
+R30   s02va  final    seed1  won no  switch   - crossed   - closed   2 fired  21 in s02 run 5.1 m axis 263 since 13
+R30   s02vc  dynamic  seed1  won yes switch   3 crossed  46 closed   0 fired   - in None 
+R30   s02vc  final    seed1  won no  switch   - crossed   - closed   1 fired   - in None 
+R30   s03    dynamic  seed1  won no  switch  17 crossed   - closed  18 fired   - in None 
+R30   s03    final    seed1  won yes switch   - crossed  24 closed   - fired   - in None 
+R32   s02a   dynamic  seed1  won yes switch   3 crossed  18 closed   1 fired   - in None 
+R32   s02a   dynamic  seed2  won no  switch   3 crossed  58 closed   0 fired   - in None 
+R32   s02a   dynamic  seed3  won no  switch   3 crossed   - closed   0 fired   - in None 
+R32   s02a   final    seed1  won yes switch   - crossed  40 closed   0 fired   - in None 
+R32   s02a   final    seed2  won yes switch   - crossed  35 closed   0 fired   - in None 
+R32   s02a   final    seed3  won yes switch   - crossed  38 closed   0 fired   - in None 
+R32   s02c   dynamic  seed1  won no  switch   3 crossed   - closed   0 fired   - in None 
+R32   s02c   dynamic  seed2  won no  switch   3 crossed   - closed   0 fired   - in None 
+R32   s02c   dynamic  seed3  won no  switch   3 crossed   - closed   0 fired   - in None 
+R32   s02c   final    seed1  won yes switch   - crossed  18 closed   0 fired   - in None 
+R32   s02c   final    seed2  won no  switch   - crossed   - closed   0 fired   - in None 
+R32   s02c   final    seed3  won no  switch   - crossed   - closed   0 fired  35 in s02 run 7.5 m axis 93 since 25
+R32   s02va  dynamic  seed1  won no  switch   3 crossed  19 closed   0 fired   - in None 
+R32   s02va  dynamic  seed2  won yes switch   3 crossed  48 closed   0 fired  21 in s02 run 5.1 m axis 164 since 11
+R32   s02va  dynamic  seed3  won no  switch   3 crossed   - closed   0 fired   - in None 
+R32   s02va  final    seed1  won no  switch   - crossed   - closed   0 fired   - in None 
+R32   s02va  final    seed2  won yes switch   - crossed  44 closed   0 fired   - in None 
+R32   s02va  final    seed3  won yes switch   - crossed  24 closed   0 fired   - in None 
+R32   s02vc  dynamic  seed1  won no  switch   3 crossed   - closed   0 fired   - in None 
+R32   s02vc  dynamic  seed2  won no  switch   3 crossed   - closed   0 fired   - in None 
+R32   s02vc  dynamic  seed3  won no  switch   3 crossed   - closed   0 fired   - in None 
+R32   s02vc  final    seed1  won yes switch   - crossed  20 closed   0 fired   - in None 
+R32   s02vc  final    seed2  won no  switch   - crossed  56 closed   1 fired   - in None 
+R32   s02vc  final    seed3  won yes switch   - crossed  26 closed   0 fired   - in None 
+R32   s03    dynamic  seed1  won no  switch  26 crossed   - closed  27 fired  35 in tine_L run 13.6 m axis 176 since 20
+R32   s03    dynamic  seed2  won no  switch  20 crossed   - closed  22 fired  28 in tine_R run 8.5 m axis 175 since 16
+R32   s03    dynamic  seed3  won no  switch   - crossed   - closed   - fired   - in None 
+R32   s03    final    seed1  won yes switch   - crossed  51 closed   - fired   - in None 
+R32   s03    final    seed2  won no  switch   - crossed   - closed  11 fired   - in None 
+R32   s03    final    seed3  won no  switch   - crossed   - closed  36 fired   - in None 

@@ -882,3 +882,111 @@ def test_a78_is_a66_plus_the_latch_its_confirmer_and_its_sentence():
         ["perceiver", "door_confirmer", "dead_end_confirmer", "mapper"]
     assert "dead_end_confirmer" not in [s.name for s in orchestrator.pipeline(a66)]
     assert agent.get("a78").sha() not in {agent.get(a).sha() for a in ("a66", "a68", "a70")}
+
+
+# --- a79 (R39): the latch fired by the trail ------------------------------------
+
+L79 = agent.PATHFINDER_A79
+D79 = L79["dead_end_latch"]
+
+
+def lane_trail(x1=8, dwell=6, lead=((0, -4), (0, -3), (0, -2), (0, -1))):
+    """A trail that comes up +y (`lead`), turns into a straight run along +x
+    from (0, 0) to (x1, 0), then turns about at its end for `dwell` steps
+    (between x1 and x1 - 1). Returns (trail, the step the run's end was reached)."""
+    trail = []
+    for c in lead:
+        trail.append((len(trail),) + centre(c) + (90.0,))
+    for x in range(0, x1 + 1):
+        trail.append((len(trail),) + centre((x, 0)) + (0.0,))
+    end = trail[-1][0]
+    for k in range(dwell):
+        c, h = ((x1 - 1, 0), 180.0) if k % 2 == 0 else ((x1, 0), 0.0)
+        trail.append((len(trail),) + centre(c) + (h,))
+    return trail, end
+
+
+def fires(trail, closed, step=None):
+    step = trail[-1][0] if step is None else step
+    cut = [t for t in trail if t[0] <= step]
+    return planner.confined_run(cut, [s for s in closed if s <= step], cut[-1][1:], step, D79)
+
+
+def test_confined_run_fires_after_the_dwell_in_a_lane_the_drone_turned_into():
+    trail, end = lane_trail()
+    closed = [end - 1, end]                       # two closed-door reads looking down the lane
+    dwell = D79["confined"]["dwell_steps"]
+    assert fires(trail, closed, end) is None                    # still flying down it
+    assert fires(trail, closed, end + 2) is None                # two steps of turning about
+    found = fires(trail, closed, end + dwell)
+    assert found is not None
+    began, since, axis, run = found
+    assert began == centre((0, 0)) and abs(axis) < 1.0 and run > 6.0
+    assert fires(trail, [end], end + dwell) is None             # one read is not two
+    assert fires(trail, [end + 1, end + 3], end + dwell) is None  # read looking back up the lane
+
+
+def test_confined_run_needs_a_turn_into_the_lane():
+    trail, end = lane_trail(lead=())                            # the run from the spawn
+    assert fires(trail, [end - 1, end]) is None
+
+
+def test_confined_run_is_off_once_the_drone_leaves_the_lane_or_has_stood_beside_it():
+    trail, end = lane_trail()
+    closed = [end - 1, end]
+    assert fires(trail, closed) is not None
+    out = trail + [(trail[-1][0] + 1,) + centre((7, 3)) + (90.0,)]      # 2.55 m off the axis
+    assert fires(out, closed) is None
+    # The same lane, but the drone came to its mouth along a line beside it
+    # (y = -3 cells, 2.55 m off the axis, abreast of the lane): a hall, no wall there.
+    lead = tuple((x, -3) for x in range(6, -1, -1)) + ((0, -2), (0, -1))
+    hall, end = lane_trail(lead=lead)
+    assert fires(hall, [end - 1, end]) is None
+
+
+def test_a79_latch_comes_from_the_trail_with_no_confirmer_answers():
+    trail, end = lane_trail()
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    mem.trail = list(trail)
+    for step, x, y, _ in trail:
+        mem.visits.setdefault(spatial.cell((x, y)), []).append(step)
+    mem.closed_reads = [end - 1, end]
+    step = trail[-1][0]
+    latch = planner.dead_end_latch(mem, trail[-1][1:], step, L79)
+    assert latch is not None and latch["step"] == step and not latch["out"]
+    assert abs(latch["axis_deg"]) < 1.0
+    assert abs(latch["origin"][0] - (centre((0, 0))[0] + 2.0)) < 0.01      # mouth_m down the run
+    assert abs(latch["reach_m"] - (centre((8, 0))[0] - latch["origin"][0])) < 0.02
+    mem.closed_reads = []
+    assert planner.dead_end_latch(mem, trail[-1][1:], step, L79) is None
+
+
+def test_closed_reads_are_the_centre_strip_closed_doors():
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    lanes = [{"strip": s, "floor": "open_far", "floor_end": "lower", "doorway": False}
+             for s in spatial.STRIPS]
+    mem.observe(3, (0.0, 0.0, 0.0), {"lanes": lanes})
+    side = [dict(l, doorway="closed") if l["strip"] == spatial.STRIPS[0] else l for l in lanes]
+    mem.observe(4, (0.0, 0.0, 0.0), {"lanes": side})
+    mid = [dict(l, doorway="closed") if l["strip"] == spatial.STRIPS[2] else l for l in lanes]
+    mem.observe(5, (0.0, 0.0, 0.0), {"lanes": mid})
+    assert mem.closed_reads == [5]
+
+
+def test_a79_is_a66_plus_the_latch_its_trail_trigger_and_the_sentence():
+    a66 = agent.get("a66").features["orchestrator"]
+    a78 = agent.get("a78").features["orchestrator"]
+    a79 = agent.get("a79").features["orchestrator"]
+    added = ("pathfinder", "navigator_notes")
+    assert {k: v for k, v in a79.items() if k not in added} == \
+        {k: v for k, v in a66.items() if k not in added}
+    assert "dead_end_confirmer" not in a79
+    assert spatial.config_for(a79) == spatial.config_for(a66)
+    assert {k: v for k, v in a79["pathfinder"].items() if k != "dead_end_latch"} == \
+        a66["pathfinder"]
+    assert {k: v for k, v in a79["pathfinder"]["dead_end_latch"].items() if k != "confined"} == \
+        dict(a78["pathfinder"]["dead_end_latch"], min_run_m=5.0)
+    assert a79["navigator_notes"] == a78["navigator_notes"]
+    assert [p.version for p in agent.get("a79").subagent_prompts] == ["g05", "d01"]
+    assert "dead_end_confirmer" not in [s.name for s in orchestrator.pipeline(a79)]
+    assert agent.get("a79").sha() not in {agent.get(a).sha() for a in ("a66", "a75", "a78")}

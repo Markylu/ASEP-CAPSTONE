@@ -826,6 +826,9 @@ class SpatialMemory:
     #: a78: the dead-end confirmer's answers, (step, "yes" or "no"), on the
     #: steps it was asked (planner.dead_end_latch reads them).
     dead_end_reads: List[Tuple[int, str]] = field(default_factory=list)
+    #: a79: the steps a closed door was read in the centre three strips (after
+    #: the door confirmer), for planner.confined_run.
+    closed_reads: List[int] = field(default_factory=list)
     cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
@@ -882,6 +885,9 @@ class SpatialMemory:
             self.nose_on.append(step)
         if perception.get("dead_end") in ("yes", "no"):
             self.dead_end_reads.append((step, perception["dead_end"]))
+        if any(l.get("doorway") == "closed" and l.get("strip") in CENTRAL_STRIPS
+               for l in perception.get("lanes") or []):
+            self.closed_reads.append(step)
         if self.cfg.coverage:
             self._observe_cone(step, where, perception)
             return

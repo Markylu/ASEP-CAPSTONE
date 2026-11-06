@@ -1398,6 +1398,101 @@ def straight_run(trail: List[Tuple[int, float, float, float]], upto: int,
     return pts[i], steps[i], axis, run
 
 
+def _turned_into(trail: List[Tuple[int, float, float, float]], began: spatial.Point,
+                 since: int, axis: float, off_axis_deg: float) -> bool:
+    """Whether the straight run that began at `began` (step `since`) was turned
+    into: the last move of 0.3 m or more before it ran more than off_axis_deg
+    off the run's axis. False for a run that reaches back to the spawn."""
+    for s, x, y, _ in reversed(trail):
+        if s < since and spatial.dist((x, y), began) >= 0.3:
+            return abs(spatial.wrap(spatial.bearing((x, y), began) - axis)) > off_axis_deg
+    return False
+
+
+def confined_run(trail: List[Tuple[int, float, float, float]], closed: List[int],
+                 here: spatial.Pose, step: int,
+                 d: Dict[str, Any]) -> Optional[Tuple[spatial.Point, int, float, float]]:
+    """a79: the straight run of trail the drone has been confined to, as
+    straight_run gives it (where it began, the step it began at, its axis, its
+    length), or None. The trigger of the dead-end latch, from the trail alone.
+
+    A corridor confines the drone and a hall does not. A run qualifies when
+    every position since it began lies within half_m of its axis and no more
+    than back_m behind where it began (the drone never left the lane, however
+    often it turned about in it); in the last dwell_steps it has got no more
+    than advance_m farther down the lane than it had been before them (it is
+    not still flying down it); and a closed door was read in the centre three
+    strips (`closed`, the steps) on `reads` steps since the run began, with the
+    drone looking along the run (within facing_deg of its axis: the door is at
+    the lane's end, not beside it). The drone has never stood beside the lane
+    (between half_m and beside_m off its axis, from mouth_m down the run to
+    ahead_m beyond the farthest it has been): a corridor has walls there. The
+    run must begin at a turn (the move
+    before it more than off_axis_deg off its axis): a run that reaches back to
+    the spawn is not a corridor the drone turned into, its mouth is where the
+    flight started and there is nothing behind it to go back to. The longest
+    qualifying run ending at any step from look_back_steps before the first
+    closed read to now is the corridor.
+
+    Round F, R32P and R35 (eval/probes/confined_trigger.py): in the shut s03
+    tine the drone stays within about a metre of its line for 30-40 steps; at
+    the s02 divider it leaves the line of its approach within a few steps."""
+    c = d.get("confined")
+    if not c or not closed:
+        return None
+    half, back = float(c["half_m"]), float(c["back_m"])
+    head: Dict[int, float] = {s: h for s, _, _, h in trail}
+    best: Optional[Tuple[spatial.Point, int, float, float]] = None
+    tried = set()
+    for upto in range(max(0, min(closed) - int(d["look_back_steps"])), step + 1):
+        found = straight_run(trail, upto, d)
+        if found is None:
+            continue
+        began, since, axis, run = found
+        if not _turned_into(trail, began, since, axis, float(d["off_axis_deg"])):
+            continue  # the run from the spawn, or one cut short by max_back_m
+        key = (since, round(axis, 1))
+        if key in tried:
+            if best is not None and best[1] == since and run > best[3]:
+                best = found
+            continue
+        tried.add(key)
+        frame = {"origin": began, "axis_deg": axis}
+        inside = True
+        before = now = None  # farthest down the lane: dwell_steps ago, and to date
+        for s, x, y, _ in trail:
+            if s < since:
+                continue
+            along, left = latch_frame(frame, (x, y))
+            if along < -back or abs(left) > half:
+                inside = False
+                break
+            now = along if now is None else max(now, along)
+            if s <= step - int(c["dwell_steps"]):
+                before = along if before is None else max(before, along)
+        if not inside or before is None or now - before > float(c["advance_m"]):
+            continue  # left the lane, or still getting farther down it
+        # A corridor has walls. Ground the drone has stood on beside the lane
+        # says there is none there.
+        wide = float(c["beside_m"])
+        beside = False
+        for _, x, y, _ in trail:
+            along, left = latch_frame(frame, (x, y))
+            if (float(d["mouth_m"]) <= along <= now + float(d["ahead_m"])
+                    and half < abs(left) <= wide):
+                beside = True
+                break
+        if beside:
+            continue
+        facing = [s for s in closed if s >= since and s in head
+                  and abs(spatial.wrap(head[s] - axis)) <= float(c["facing_deg"])]
+        if len(facing) < int(c["reads"]):
+            continue
+        if best is None or run >= best[3]:
+            best = found
+    return best
+
+
 def dead_end_latch(mem: spatial.SpatialMemory, here: spatial.Pose, step: int,
                    p: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """a78: the latch this step fires, or None. Fires when the dead-end
@@ -1416,6 +1511,23 @@ def dead_end_latch(mem: spatial.SpatialMemory, here: spatial.Pose, step: int,
     d = p.get("dead_end_latch")
     if not d:
         return None
+    if d.get("confined"):
+        # a79: the trail is the trigger (confined_run); no confirmer.
+        found = confined_run(mem.trail, mem.closed_reads, here, step, d)
+        if found is None:
+            return None
+        began, since, axis, _ = found
+        origin = spatial.ahead(began, axis, float(d["mouth_m"]))
+        latch = {
+            "step": step, "origin": [round(origin[0], 2), round(origin[1], 2)],
+            "axis_deg": round(axis, 1), "lane_m": float(d["lane_m"]),
+            "half_width_m": round(int(d["seal_cells"]) * spatial.CELL_M, 2),
+            "ahead_m": float(d["ahead_m"]), "reach_m": 0.0, "out": False}
+        if latch_frame(latch, here[:2])[0] <= 0.0:
+            return None  # the drone is at the lane's mouth: nothing to shut behind it
+        latch["reach_m"] = round(max(latch_frame(latch, (x, y))[0]
+                                     for s, x, y, _ in mem.trail if s >= since), 2)
+        return latch
     yes = latch_yes_steps(mem.dead_end_reads, step, d)
     if not yes:
         return None

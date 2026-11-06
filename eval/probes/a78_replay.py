@@ -103,9 +103,11 @@ def main() -> int:
                     help="the runs and answers of the held-out check (dead_end_heldout.py): "
                          "initial arms included")
     ap.add_argument("--out", default="")
+    ap.add_argument("--agent", default="a78",
+                    help="the latched agent replayed; a79 has no confirmer (--answers none)")
     args = ap.parse_args()
     a66 = agents.get("a66").features["orchestrator"]
-    a78 = agents.get("a78").features["orchestrator"]
+    a78 = agents.get(args.agent).features["orchestrator"]
     cfg = spatial.config_for(a78)
     calls, arms_of = CALLS, {}
     if args.held_out:
@@ -118,10 +120,10 @@ def main() -> int:
         print("no probe DE answers for {0} under {1}".format(args.answers, calls))
         return 1
 
-    lines = ["a78 replay, answers: {0}{1}{2} (open loop; eval/probes/a78_replay.py)".format(
+    lines = ["{3} replay, answers: {0}{1}{2} (open loop; eval/probes/a78_replay.py)".format(
         args.answers, "" if args.places is None else ", only while {0} or fewer closed-door "
         "places are known".format(args.places),
-        ", on the held-out runs" if args.held_out else ""),
+        ", on the held-out runs" if args.held_out else "", args.agent),
              "", "run                          | won | latch step, left | s03 route out a66 a78 "
              "(after latch) | sentence | s02 gap crossing a66 a78 | no route"]
     tot: Dict[str, float] = collections.defaultdict(float)
@@ -145,7 +147,7 @@ def main() -> int:
                 asked = {step for step in asked if known[step] <= args.places}
 
             def answer(step: int) -> Optional[str]:
-                if step not in asked:
+                if step not in asked or args.answers == "none":
                     return None
                 if args.answers == "oracle":
                     return "yes" if step in right else "no"
@@ -232,10 +234,10 @@ def main() -> int:
                          frac(tot["x66"], tot["xn66"]), frac(tot["x78"], tot["xn"])))
     lines.append("Steps with no route (soft or frontier fallback): {0:.0f} of {1:.0f}.".format(
         tot["no_route"], tot["steps"]))
-    out = Path(args.out or REPO_ROOT / "eval/phase2/_probes/a78/replay_{0}{1}{2}.txt".format(
+    out = Path(args.out or REPO_ROOT / "eval/phase2/_probes/{3}/replay_{0}{1}{2}.txt".format(
         args.answers.replace(":", "_"),
         "" if args.places is None else "_places{0}".format(args.places),
-        "_heldout" if args.held_out else ""))
+        "_heldout" if args.held_out else "", args.agent))
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(lines) + "\n")
     print("\n".join(lines[-8:]))
