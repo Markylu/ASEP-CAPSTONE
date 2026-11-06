@@ -372,6 +372,20 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a86 with the survey's stations shut only by walls the drone has met, contested cells",
             "agent": "a87", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R48: a88 (a87 with the latched corridor's lane opened again when the
+    # drone is back inside it). The same screen, read against R45 (a85, 23/30)
+    # and the rounds between.
+    "R48": {"folder": "R48_latch_reopen",
+            "title": "a87 with the latched corridor reopened to a drone back inside it, contested cells",
+            "agent": "a88", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R49: a89 (a88's planner with a85's navigator: the route-behind sentence
+    # only inside a latched corridor, after R46). The same screen, read
+    # against R45 (a85, 23/30).
+    "R49": {"folder": "R49_no_sentence",
+            "title": "a88's planner without the route-behind sentence outside a latched corridor, contested cells",
+            "agent": "a89", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

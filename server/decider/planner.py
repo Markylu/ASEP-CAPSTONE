@@ -2209,6 +2209,18 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
             latch = dead_end_latch(mem, here, step, p, goal)
         if latch is not None:
             along = latch_frame(latch, here[:2])[0]
+            back_in = p["dead_end_latch"].get("reopen_m")
+            far_end = float(latch["reach_m"]) + float(latch["ahead_m"])
+            if (latch["out"] and back_in is not None and along > float(back_in)
+                    and (not p["dead_end_latch"].get("reopen_inside") or along <= far_end)
+                    and abs(latch_frame(latch, here[:2])[1]) <= float(latch["half_width_m"])):
+                # a88: the drone is back inside the corridor it had left. The
+                # lane shut behind it is opened again, or it has no way out
+                # (R45 s03 dynamic seed 1: out at step 36, back in, no route
+                # on 21 steps). a89 (reopen_inside): and short of the
+                # rectangle's far end (R48 shakedown: reopened for a drone
+                # already through the other tine's door, beyond it).
+                latch["out"] = False
             if not latch["out"] and along < 0.0:
                 latch["out"] = True
             elif not latch["out"]:
