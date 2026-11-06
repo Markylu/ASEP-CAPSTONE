@@ -5,7 +5,8 @@
 **Navigator notes:** `NAVIGATOR_A78` (`a85`'s) ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) while R47 was landing (22 of 30 flown) and R49's shakedown
-was flying; shakedown and flight below
+was flying; shakedown flown 2026-11-06 (three of four solved, gate passed); round flight
+below
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R45 (`a85`, 23/30, the bar), no control lane. With R46 (`a86`),
@@ -106,4 +107,24 @@ are merged in before this round's PR.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+
+**Shakedown (2026-11-06, 08:14–08:27 UTC): four unscored runs on lane slots 3 and 4 (freed by
+R47), beside R47's last two lanes and `a89`'s shakedown on slot 5; sctsvr6
+`~/asep-r51-shake-l3`, `-l4` at `16b6c49`, logs `~/r51_shake_l3.log`, `_l4.log`. All valid,
+three of four solved. Gate passed.** (`eval/probes/a80_check.py`, `eval/probes/a79_check.py`.)
+
+| Cell (seed) | `a91` | Earlier tonight, same cell and seed | What happened |
+|---|---|---|---|
+| s02c `final` (3) | **solved, 25** | lost in R45 (survey ended at 11 beside the jamb), in R46 (no survey) and in `a89`'s shakedown (both stations, no doorway flown at) | survey from 2, the door flown at from 3, through at 10, second look 13–17 |
+| s02vc `final` (1) | **solved, 29** | lost in R45 and R46; solved at 31 in `a89`'s shakedown | survey from 2, the door flown at from 6, through at 14 |
+| s02vc `dynamic` (1) | lost | lost in R45; solved at 26 in R46 | survey from 5, first station given up at 11, 12 steps and five square looks at the second, no doorway flown at |
+| s03 `dynamic` (1) | **solved, 53** | lost in R45 (back into the latched corridor); solved at 57 in R46 | door shut at 22, latch at 28, out at 36, through the other tine's door at 49 |
+
+- **Gate:** the survey by step 8 in the three s02 runs: 2, 5, 2. No latch before a survey
+  ended: none in an s02 run. The sentence on no step without a latch: said once, latched
+  (s03). A route on every step. Passed.
+- `a89`'s shakedown, flown beside it on other cells and two of the same: one of four solved
+  (R49's README). On s02c `final` seed 3 `a91` read the door at step 3 and `a89` did not, so
+  the two runs differ before the station guard could matter. One seed each, unscored.
+- **Order of flight changed on this:** R51 flies before R49, on the lanes R47 frees.
