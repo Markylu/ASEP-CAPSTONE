@@ -1566,3 +1566,25 @@ def test_a87_a_station_is_shut_only_by_a_wall_the_drone_has_met():
     assert sv["order"] == [-7.0]
     assert agent.SURVEY_A87 == dict(agent.SURVEY_A86, station_guard="hard")
     assert agent.get("a86").sha() == "cd6b8de756ab"
+
+
+def test_a88_the_lane_is_opened_again_to_a_drone_back_inside_its_latched_corridor():
+    L88 = agent.PATHFINDER_A88
+    latch = {"step": 30, "origin": [10.0, 0.425], "axis_deg": 0.0, "lane_m": 1.5,
+             "half_width_m": 6.8, "ahead_m": 2.0, "reach_m": 8.0, "out": True, "mid_m": 0.0}
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    for x in range(0, 24):
+        mem.visits[(x, 0)] = [x]
+        mem.trail.append((x,) + centre((x, 0)) + (0.0,))
+    inside = (14.0, 0.425, 0.0)                              # 4 m down the corridor again
+    man = {"step": 40, "pose": {"position": [inside[0], 1.75, -inside[1]],
+                                "yaw": math.radians(inside[2] - 90.0)}}
+    recs = [{"step": 39, "planner": {"latch": latch}}]
+    goal = (60.0, 30.0)
+    was = planner.pathfind(mem, man, recs, goal, agent.PATHFINDER_A87)
+    assert was.latch["out"] and was.fallback != "none"       # a87: shut in, no route
+    now = planner.pathfind(mem, man, recs, goal, L88)
+    assert not now.latch["out"] and now.fallback == "none"   # a88: the lane is open, a route out
+    back, left = planner.latch_frame(now.latch, now.waypoint)
+    assert back < 4.0 and abs(left) < 0.1                    # and the waypoint runs back down it
+    assert agent.get("a87").sha() == "aaf90e0ca54d"

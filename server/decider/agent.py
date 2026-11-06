@@ -451,6 +451,13 @@ PATHFINDER_A86: Dict[str, Any] = dict(
 SURVEY_A87: Dict[str, Any] = dict(SURVEY_A86, station_guard="hard")
 PATHFINDER_A87: Dict[str, Any] = dict(PATHFINDER_A86, survey=SURVEY_A87)
 
+#: a88 (R48): a87 with the latched corridor's lane opened again when the drone
+#: is back inside it (reopen_m down it from the mouth, within the rectangle):
+#: once out the lane was shut for good, and a drone that flew back in had no
+#: route. eval/phase2/R48_latch_reopen/README.md.
+PATHFINDER_A88: Dict[str, Any] = dict(
+    PATHFINDER_A87, dead_end_latch=dict(PATHFINDER_A87["dead_end_latch"], reopen_m=1.0))
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -1891,6 +1898,25 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "open door's side was shut by a single cell sealed beside a wall the perceiver "
           "had read through open floor, the survey went to the other side alone and "
           "ended by step 11 (eval/phase2/R47_station_guard/README.md)."),
+    Agent("a88", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A88,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A86,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a87 with the latched corridor's lane opened again when the drone is back "
+          "inside it. Once the drone was out past the mouth the lane was shut for good; "
+          "R45 s03 dynamic seed 1 was out at step 36, flew back in, and inside a corridor "
+          "shut on every side had no route on 21 of its last 24 steps "
+          "(eval/phase2/R48_latch_reopen/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"
