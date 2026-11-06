@@ -4,8 +4,9 @@
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Planner:** `PATHFINDER_A86` ·
 **Navigator notes:** `NAVIGATOR_A86` ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
-here is Claude's, with its reason) while R44 was landing and R45 taking off; shakedown and
-flight below
+here is Claude's, with its reason) while R44 was landing and R45 taking off; shakedown flown
+2026-11-06 (four of four solved, s03 `dynamic` seed 1 among them; gate passed); round flight
+below
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30), R44 (`a84`) and R45 (`a85`). The bundle is
@@ -100,4 +101,21 @@ tine by step 25, no latch lies on the direct line, and a route is on at least 95
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+
+**Shakedown (2026-11-06, 06:03–06:23 UTC): four unscored runs, slot 5 (port 8105) as a fifth
+client beside R44's last lanes and R45's first, sctsvr6 `~/asep-r33-shake` at `6a7aa18`, log
+`~/r46_shake_a86.log`. All valid, all four solved. Gate passed.**
+(`eval/probes/a79_check.py`, `eval/probes/a80_check.py`.)
+
+| Cell (seed) | `a86` | Earlier tonight, same cell and seed | What happened | Sentence taken / said |
+|---|---|---|---|---|
+| s03 `dynamic` (1) | **solved, 56** | lost in four shakedowns (37–53 steps before the tine) and in R39 and R44 | door shut at 21, latch at 27, out of the tine at 34, through the other tine's door at 53 | 6 / 6 |
+| s03 `final` (1) | solved, 35 | lost in R39 (lobby); solved at 58 in R44 | open tine, crossed at 31 | 3 / 3 |
+| s02c `dynamic` (1) | solved, 25 | no survey and lost in R44; solved at 24 in R44's shakedown | survey from 4, door flown at from 14, through at 16, second look 19–23, done | 1 / 1 |
+| s02va `dynamic` (2) | **solved, 30** | lost in R44 (hall latch at 15) | survey from 4, door flown at from 6, through at 14; no latch | 0 / 1 |
+
+- **Gate:** the turn-around taken on at least 80% of the steps the sentence is said: 10 of 11.
+  Both s03 runs in a tine by step 25: held (the door shut at 21 in the `dynamic` run). No
+  latch on the direct line: held (no latch in either s02 run). A route on every step. Passed.
+- One seed each, unscored, a fifth client on the host.
