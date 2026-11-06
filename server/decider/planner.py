@@ -999,6 +999,11 @@ class PathPlan:
     #: a80 (`survey`): the wall survey's state, carried on every step from the
     #: one it starts on (planner.wall_survey). None before it starts.
     survey: Optional[Dict[str, Any]] = None
+    #: a90 (`way_in`): True while the drone is on its first way in: before
+    #: step `steps`, no survey started, no latch, and never yet more than the
+    #: survey's line_m off the direct line from the spawn to the goal (so a
+    #: survey can still start). None for agents without the setting.
+    way_in: Optional[bool] = None
 
     def to_dict(self) -> Dict[str, Any]:
         out = {"way": "path", "path_m": self.path_m,
@@ -1018,6 +1023,8 @@ class PathPlan:
             out["latch"] = self.latch
         if self.survey is not None:
             out["survey"] = self.survey
+        if self.way_in is not None:
+            out["way_in"] = self.way_in
         return out
 
 
@@ -2310,8 +2317,21 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
     path_m = round(sum(spatial.dist(_centre(a), _centre(b)) for a, b in zip(path, path[1:])), 2)
     unknown = sum(1 for c in path[1:-1] if c not in cm.known)
     target = spatial.Target("path", "path", wp[0], wp[1], p["words"]["path"], step)
+    way_in: Optional[bool] = None
+    if p.get("way_in") and p.get("survey"):
+        # a90: the first way in, as survey_start reads it. While it lasts the
+        # navigator is not told its route is behind it (R46: told so on the
+        # way in, it turned off the direct line and 9 of 24 s02 runs never
+        # read the shut door in the centre strip).
+        way_in = (survey is None and latch is None and bool(mem.trail)
+                  and step < int(p["way_in"]["steps"]))
+        if way_in:
+            line = {"origin": mem.trail[0][1:3],
+                    "axis_deg": spatial.bearing(mem.trail[0][1:3], goal)}
+            way_in = not any(abs(latch_frame(line, (x, y))[1]) > float(p["survey"]["line_m"])
+                             for _, x, y, _ in mem.trail)
     return PathPlan(target, wp, path, path_m, unknown, fallback, added, cm.counts(), sealed_now,
-                    kept, fresh_m, door, latch, survey)
+                    kept, fresh_m, door, latch, survey, way_in)
 
 
 def search_situation_a20(mem: spatial.SpatialMemory, manifest: Dict[str, Any],

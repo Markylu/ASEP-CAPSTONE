@@ -742,7 +742,9 @@ def behind_note(notes: Dict[str, str], offered: Dict[str, Any], tags: Dict[int, 
     route-behind sentence, while "toward your target" sits on the turn-around.
     a78 (`dead_end` in the notes): that sentence only inside a latched
     corridor, with the reason before it; anywhere else the navigator is a66's.
-    a86 (`always`): a70's sentence outside a latched corridor too."""
+    a86 (`always`): a70's sentence outside a latched corridor too. a90
+    (`always` = "after_way_in"): outside one, not while the planner says the
+    drone is on its first way in (`way_in`)."""
     if not notes.get("route_behind") or not spatial.toward_on_turn_around(offered, tags):
         return None
     if not notes.get("dead_end"):
@@ -751,6 +753,8 @@ def behind_note(notes: Dict[str, str], offered: Dict[str, Any], tags: Dict[int, 
     if not latch or latch["out"]:
         # a86 (`always`): a70's sentence on its own whenever the tag sits on
         # the turn-around, latched or not; a78's reason only while latched.
+        if notes.get("always") == "after_way_in" and (plan or {}).get("way_in"):
+            return None
         return notes["route_behind"] if notes.get("always") else None
     return notes["dead_end"] + " " + notes["route_behind"]
 

@@ -468,6 +468,21 @@ PATHFINDER_A88: Dict[str, Any] = dict(
 PATHFINDER_A89: Dict[str, Any] = dict(
     PATHFINDER_A88, dead_end_latch=dict(PATHFINDER_A88["dead_end_latch"], reopen_inside=True))
 
+#: a90 (R50): a89's planner, and it tells the navigator's notes when the
+#: first way in is over (way_in): a survey started, a latch, the drone more
+#: than the survey's line_m off the direct line, or step 8 (R45's and R46's
+#: surveys started at steps 2 to 6). R46's sentences on the way in so read:
+#: 5 in s02, all at steps 0 to 2, in 5 of the 9 runs with no survey; in s03
+#: one of 26 before step 8. eval/phase2/R50_sentence_after_way_in/README.md.
+PATHFINDER_A90: Dict[str, Any] = dict(PATHFINDER_A89, way_in={"steps": 8})
+
+#: a91 (R51): a89's planner with a86's survey: the stations shut as a86 shut
+#: them (a87's hard guard off). With a78's notes that is a85 plus a86's
+#: planner changes alone (the second look in place of the through-by-distance
+#: rule, the latch held off the survey's ground) and a88's reopening.
+#: eval/phase2/R51_no_station_guard/README.md.
+PATHFINDER_A91: Dict[str, Any] = dict(PATHFINDER_A89, survey=PATHFINDER_A86["survey"])
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -484,6 +499,13 @@ NAVIGATOR_A78: Dict[str, str] = {
 #: 36-53 steps before the tine declined 40% of them. R30's shakedown (a70):
 #: 46 of 46 with the sentence.
 NAVIGATOR_A86: Dict[str, Any] = dict(NAVIGATOR_A78, always=True)
+
+#: a90 (R50): a86's sentence, not on the drone's first way in. R46: said
+#: always, it was taken 98 times of 98; s03 gained (in a tine by step 18, 28,
+#: 12 in the dynamic arm; R45 19, 37, 12) and 9 of 24 s02 runs never started a
+#: survey, 5 of them told at steps 0 to 2 that the route was behind. The
+#: planner says when the way in is over (`way_in`, PATHFINDER_A90).
+NAVIGATOR_A90: Dict[str, Any] = dict(NAVIGATOR_A78, always="after_way_in")
 
 
 AGENTS: Dict[str, Agent] = {a.version: a for a in (
@@ -1951,6 +1973,52 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "the spurious ones on the way in among them; 9 of 24 s02 runs never started a "
           "survey (R45: 1) and s02 fell from 19/24 to 16/24, with s03 at 5/6 against 4/6 "
           "(eval/phase2/R49_no_sentence/README.md)."),
+    Agent("a90", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A90,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A90,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a89 with a86's route-behind sentence back outside a latched corridor, but not "
+          "on the drone's first way in: before step 8, while no survey has started, no "
+          "corridor is latched and the drone has never been more than 2.5 m off the "
+          "direct line from the spawn to the goal, the navigator is a85's; after that, "
+          "whenever the tag sits on the turn-around it is told its route is behind it. "
+          "R46 (a86, the sentence always): taken 98 times of 98; s03 5/6 with the drone "
+          "in a tine sooner; s02 16/24, 9 of 24 runs with no survey, 5 of them told at "
+          "steps 0 to 2 that the route was behind "
+          "(eval/phase2/R50_sentence_after_way_in/README.md)."),
+    Agent("a91", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A91,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a89 without a87's station guard: a85's navigator (the route-behind sentence "
+          "only inside a latched corridor) on a86's planner (a short second look in place "
+          "of the through-by-distance rule; the dead-end latch kept off the direct line "
+          "and held back while the survey runs) with a88's reopening, bounded to the "
+          "rectangle. With a86 (the sentence), a87 (the sentence and the guard) and a89 "
+          "(the guard) it closes the square over a86's planner: R47 (a87) was at 9 of 20 "
+          "when this was laid out, and a89's first shakedown run took the stale side "
+          "first and 18 steps to the second station "
+          "(eval/phase2/R51_no_station_guard/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"
