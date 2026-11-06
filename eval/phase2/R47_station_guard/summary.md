@@ -94,3 +94,13 @@ the losses are long runs of obeyed turn-arounds. Second, the survey wins from it
 station and seldom from its second, so which side goes first matters more than whether both
 stand. R49 (`a89`) and R51 (`a91`) drop the always-on sentence; R51 also drops the guard.
 Neither touches the order of the stations.
+
+**Added after R51 landed (2026-11-06, 09:15 UTC).** The first reading above does not stand for
+s03. `a91` (R51) never says the sentence outside a latched corridor and scored 1/6 in s03 in
+the next flight, the same way: s03 `final` seed 1 never reached a tine in 60 steps. Its record
+against R46's on that cell and seed is identical for four steps; at step 4, in the same pose,
+the perceiver read the floor ahead blocked in R46 and open to the right in R51, the drone
+slid past the stem's mouth, and the route was laid through the lobby wall beside it for the
+next 35 steps. That is the planner not learning a wall it is stopped by, set off by one
+frame read two ways, with or without the sentence. What stands: the 14-turn spin and the
+162 of 162 are the sentence's; s03's 1/6 is the screen's noise, and it is that large.
