@@ -4,7 +4,8 @@
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Planner:** `PATHFINDER_A83` ·
 **Status:** laid out 2026-11-05/06 (overnight run, Claude alone, operator asleep; every
 decision here is Claude's, with its reason) from R39's flight and the shakedowns of R40 and
-R42; shakedown and flight below
+R42; **shaken down 2026-11-06 (s03 `dynamic` solved for the first time in Phase 2; two faults
+found); not flown, `a84` (R44) flies in its place** ([Outcome](#outcome))
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30) and R39 (`a79`), no control lane.
@@ -140,4 +141,30 @@ route on at least 95% of steps in every run.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Not flown: the shakedown failed its gate on the latch's row and showed a fault in the survey;
+both are fixed in `a84` ([R44](../R44_survey_latch_fixed/README.md)), which is this bundle and
+flies in its place.**
+
+**Shakedown (2026-11-06, 05:02–05:23 UTC): eight unscored runs, two on each of the four lane
+slots as R39's lanes freed them (`~/asep-r42-l1..4` at `a6ef0bf`, logs `~/r43_shake_l1..4.log`;
+never more than four clients on `:8004`). All valid.** (`eval/probes/a80_check.py`,
+`eval/probes/a79_check.py`.)
+
+| Cell (seed) | `a83` | R32P `a66` | What happened |
+|---|---|---|---|
+| s03 `dynamic` (2) | **solved, 54** | lost | door shut at 26, latch at 33, out of the tine at 37, through the other tine's door at 51. **The first solve of s03 `dynamic` in Phase 2** (0/58 scored runs) |
+| s03 `dynamic` (1) | lost | lost | 53 steps before the tine (lobby and stem); the door shut at 54. No latch to fire |
+| s03 `final` (1) | lost | solved | 34 steps in the shut tine, **no latch**: the drone stood 1.5–2.3 m off the run's axis, outside the lane |
+| s02a `dynamic` (1) | **solved, 39** | lost | survey from step 4: wrong side first, wall met at 14, other station, door read at 25, through at 30 |
+| s02c `final` (1) | **solved, 23** | lost | survey from step 4: door read at 12, through at 15 |
+| s02va `final` (1) | solved, 27 | solved | survey from step 2: door read at 10, through at 19 |
+| s02c `dynamic` (1) | lost | lost | **survey ended on its first step (4) by a goal report**: `g05` saw the goal "above the door" that had just shut |
+| s02vc `final` (1) | lost | lost | the navigator flew at the open door from step 4; **survey ended at step 11 by a goal report**, 3 m from the door; the route then met the wall 0.4 m beside the jamb |
+
+- **Gate:** no survey step in an s03 run: held. No through phase begun from a transit: held.
+  At least 2 of the 5 s02 runs solved: 3 of 5 (and s02va, added). A route on every step: held.
+  **A latch in each s03 run that spends 8 steps in the shut tine: failed** (s03 `final`). The
+  goal-report fault is not a row of the gate and cost two runs. By the rule set above the
+  round does not fly.
+- **Four solved runs in cells `a66` lost at the same seed**, one of them the cell that had
+  never been solved. One seed each, unscored.

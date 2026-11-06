@@ -1332,3 +1332,60 @@ def test_a83_the_goal_in_view_ends_the_survey_and_a_lost_door_goes_back_to_the_l
     mem.goal_rays.append(spatial.Ray(at[0] + 4.0, at[1], 0.0, late, "mid"))
     wp, done = survey83_at(mem, (at[0] + 4.0, at[1], 0.0), late, [rec(step + 6, thru)])
     assert wp is None and done["phase"] == "done"
+
+
+# --- a84 (R44): a83 after its shakedown ----------------------------------------------
+
+L84 = agent.PATHFINDER_A84
+
+
+def test_a84_lane_is_as_wide_as_the_drone_has_spread_wherever_the_axis_lies():
+    # The run flown along one wall of a 3 m corridor (y = 0), the drone then
+    # turning about by the other wall, 2.55 m across: a79's lane (1.5 m either
+    # side of the axis) loses it, a84's (2.8 m across) holds it.
+    trail, end = lane_trail(dwell=0)
+    for k, (c, h) in enumerate((((7, 3), 180.0), ((8, 3), 0.0), ((7, 3), 180.0), ((8, 3), 0.0),
+                                ((7, 3), 180.0), ((8, 3), 0.0))):
+        trail.append((end + 1 + k,) + centre(c) + (h,))
+    closed = [end - 1, end]
+    step = trail[-1][0]
+    assert planner.confined_run(trail, closed, trail[-1][1:], step, D79) is None
+    found = planner.confined_run(trail, closed, trail[-1][1:], step, L84["dead_end_latch"])
+    assert found is not None and found[0] == centre((0, 0))
+    # Four cells across (3.4 m) is no corridor of this width.
+    wide = trail + [(step + 1,) + centre((7, 4)) + (90.0,)]
+    assert planner.confined_run(wide, closed, wide[-1][1:], step + 1, L84["dead_end_latch"]) is None
+
+
+def test_a84_survey_is_not_ended_by_a_goal_report_and_flies_at_a_door_from_a_transit():
+    cm_p = L84
+    mem, here, step = hall()
+    cm = spatial.CostMap(mem, [], cm_p, include=(spatial.cell(here[:2]), spatial.cell(GOAL80)),
+                         start=spatial.cell(here[:2]))
+    _, sv = planner.wall_survey(mem, cm, here, step, GOAL80, [], cm_p)
+    assert sv["phase"] == "transit"
+    mem.goal_rays.append(spatial.Ray(here[0], here[1], 0.0, step + 1, "mid"))        # a goal report
+    wp, sv2 = planner.wall_survey(mem, cm, (here[0], here[1] + 1.0, 60.0), step + 1, GOAL80,
+                                  [rec(step, sv)], cm_p)
+    assert sv2["phase"] == "transit" and wp is not None                                # still surveying
+    mem.door_rays.append(spatial.Ray(here[0], here[1] + 2.0, -5.0, step + 2, "open_far"))
+    wp, sv3 = planner.wall_survey(mem, cm, (here[0], here[1] + 2.0, 40.0), step + 2, GOAL80,
+                                  [rec(step + 1, sv2)], cm_p)                          # an outer strip:
+    assert sv3["phase"] == "transit" and sv3["order"] == [-7.0, 7.0]                   # the side only
+    mem.door_rays.append(spatial.Ray(here[0], here[1] + 2.0, 25.0, step + 3, "open_far"))
+    wp, sv4 = planner.wall_survey(mem, cm, (here[0], here[1] + 2.0, 40.0), step + 3, GOAL80,
+                                  [rec(step + 2, sv3)], cm_p)                          # 15 degrees off the
+    assert sv4["phase"] == "through"                                                   # heading: flown at
+    assert abs(spatial.wrap(spatial.bearing((here[0], here[1] + 2.0), wp) - 25.0)) < 0.5
+
+
+def test_a84_is_a83_with_the_goal_rule_and_side_only_out_and_the_lane_by_its_spread():
+    a83 = agent.get("a83").features["orchestrator"]
+    a84 = agent.get("a84").features["orchestrator"]
+    assert {k: v for k, v in a84.items() if k != "pathfinder"} == \
+        {k: v for k, v in a83.items() if k != "pathfinder"}
+    assert a84["pathfinder"]["survey"] == dict(agent.SURVEY_A82, no_cross=True, relook=True,
+                                               side_only="far", far_strip_deg=30.0)
+    assert a84["pathfinder"]["dead_end_latch"]["confined"] == dict(
+        a83["pathfinder"]["dead_end_latch"]["confined"], span_m=2.8)
+    assert agent.get("a83").sha() == "db5b837c8d43" and agent.get("a82").sha() == "43255087a08a"

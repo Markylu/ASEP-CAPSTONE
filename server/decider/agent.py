@@ -393,6 +393,29 @@ PATHFINDER_A83: Dict[str, Any] = dict(
         confined=dict(PATHFINDER_A79["dead_end_latch"]["confined"], dwell_steps=3),
         exit={"carrot_m": 4.0}))
 
+#: a84 (R44): a83 after its shakedown. The survey without goal_ends: g05
+#: reported the goal on steps where it was not in view (above the shut door at
+#: steps 3-4 of s02c dynamic, through a wall at step 11 of s02vc final) and
+#: the survey ended on its first step. And side_only for the outer strips
+#: alone (side_only "far": a read more than far_strip_deg off the drone's
+#: heading): with it on every strip the survey looked away from a door the
+#: navigator was flying at; a doorway read in the centre three strips is
+#: flown at from any phase, on the newest ray. Rays are never crossed
+#: (no_cross), and through_steps without a read goes back to the look
+#: (relook).
+#: The latch with the lane as wide as it is (confined.span_m: the positions
+#: since the run began spread no more than this across its axis, wherever the
+#: axis lies; a79 and a83: within half_m of the axis, which a run flown along
+#: one wall of the tine fails from the other wall). 2.8 m: the drone's
+#: positions in the 3 m tine spread 2.6 m in every recorded run.
+#: eval/phase2/R44_survey_latch_fixed/README.md.
+SURVEY_A84: Dict[str, Any] = dict(SURVEY_A82, no_cross=True, relook=True, side_only="far",
+                                  far_strip_deg=30.0)
+PATHFINDER_A84: Dict[str, Any] = dict(
+    PATHFINDER_A83, survey=SURVEY_A84, dead_end_latch=dict(
+        PATHFINDER_A83["dead_end_latch"],
+        confined=dict(PATHFINDER_A83["dead_end_latch"]["confined"], span_m=2.8)))
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -1728,6 +1751,32 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "s03 dynamic seed 1: latch at step 35, out of the tine at 40, through the other "
           "tine's door at 57, 2.8 m from the goal at 60 "
           "(eval/phase2/R43_survey_latch/README.md)."),
+    Agent("a84", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A84,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a83 after its shakedown: the wall survey and the dead-end latch, two faults "
+          "out. The survey no longer ends when the goal is reported (g05 reported it on "
+          "steps where it was not in view, and the survey ended on its first step in two "
+          "of five s02 runs), and a doorway read in the centre three strips is flown at "
+          "from any phase, on the newest ray (one read in an outer strip on the way to a "
+          "station still only picks the side). The latch's lane is as wide as the drone "
+          "has spread across it (2.8 m), wherever the run's axis lies (a run flown along "
+          "one wall of the tine put the drone 1.5-2.3 m off its axis at the other, and the "
+          "latch stayed silent for 34 steps of an s03 final run). R43's shakedown: s03 "
+          "dynamic seed 2 solved at 54, the first of that cell in Phase 2 (latch at 33, "
+          "seven steps after the door shut); s02a dynamic and s02c final solved through "
+          "the survey (eval/phase2/R44_survey_latch_fixed/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"

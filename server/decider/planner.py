@@ -1465,11 +1465,19 @@ def confined_run(trail: List[Tuple[int, float, float, float]], closed: List[int]
         frame = {"origin": began, "axis_deg": axis}
         inside = True
         before = now = None  # farthest down the lane: dwell_steps ago, and to date
+        lo = hi = 0.0        # a84 (span_m): how far either side of the axis it has been
+        span = c.get("span_m")
         for s, x, y, _ in trail:
             if s < since:
                 continue
             along, left = latch_frame(frame, (x, y))
-            if along < -back or abs(left) > half:
+            lo, hi = min(lo, left), max(hi, left)
+            # a84: the lane is span_m wide wherever the run's axis lies in it
+            # (R39 and R43's shakedown: a run flown along one wall of the 3 m
+            # tine has its axis there, and the drone turning about by the
+            # other wall stood 1.5-2.3 m off it); a79: half_m either side.
+            off = (hi - lo > float(span)) if span else (abs(left) > half)
+            if along < -back or off:
                 inside = False
                 break
             now = along if now is None else max(now, along)
@@ -1480,11 +1488,12 @@ def confined_run(trail: List[Tuple[int, float, float, float]], closed: List[int]
         # A corridor has walls. Ground the drone has stood on beside the lane
         # says there is none there.
         wide = float(c["beside_m"])
+        mid, reach = ((lo + hi) / 2.0, float(span) / 2.0) if span else (0.0, half)
         beside = False
         for _, x, y, _ in trail:
             along, left = latch_frame(frame, (x, y))
             if (float(d["mouth_m"]) <= along <= now + float(d["ahead_m"])
-                    and half < abs(left) <= wide):
+                    and reach < abs(left - mid) <= wide):
                 beside = True
                 break
         if beside:
@@ -1948,7 +1957,13 @@ def wall_survey(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.P
         # the rest. On the s02 near side the goal shows only through a doorway.
         sv["phase"] = "done"
         return None, sv
-    if ray is not None and c.get("side_only") and sv["phase"] == "transit":
+    side_only = c.get("side_only")
+    if side_only == "far" and ray is not None:
+        # a84: only a read in one of the two outer strips is side-only; a
+        # doorway read in the centre three strips is ahead of the drone, and
+        # is flown at whatever the phase.
+        side_only = abs(spatial.wrap(ray.heading - here[2])) > float(c["far_strip_deg"])
+    if ray is not None and side_only and sv["phase"] == "transit":
         # a83: on the way to a station a doorway read says which side it is
         # on, no more: five strips give a bearing to about 9 degrees, 2.4 m at
         # 16 m (R40 and R42 shakedowns, s02vc final: a door read from 15 m was

@@ -1,0 +1,13 @@
+a84 s02a/initial   won 4/4 steps [14, 14, 14, 14] crossed [8, 8, 8, 8] survey steps [0, 0, 0, 0]
+a84 s02a/final     won 4/4 steps [35, 54, 54, 35] crossed [12, 12, 12, 12] survey steps [33, 44, 44, 33]
+a84 s02a/dynamic   won 4/4 steps [34, 34, 34, 34] crossed [25, 25, 25, 25] survey steps [23, 23, 23, 23]
+a84 s02c/initial   won 4/4 steps [14, 14, 14, 14] crossed [8, 8, 8, 8] survey steps [0, 0, 0, 0]
+a84 s02c/final     won 4/4 steps [35, 35, 35, 35] crossed [12, 12, 12, 12] survey steps [33, 33, 33, 33]
+a84 s02c/dynamic   won 4/4 steps [55, 35, 35, 55] crossed [12, 12, 12, 12] survey steps [44, 31, 31, 44]
+a84 s02va/initial  won 4/4 steps [19, 19, 19, 19] crossed [12, 12, 12, 12] survey steps [0, 0, 0, 0]
+a84 s02va/final    won 4/4 steps [39, 39, 39, 39] crossed [30, 30, 30, 30] survey steps [30, 30, 30, 30]
+a84 s02va/dynamic  won 4/4 steps [52, 52, 52, 52] crossed [17, 17, 17, 17] survey steps [39, 39, 39, 39]
+a84 s02vc/initial  won 4/4 steps [19, 19, 19, 19] crossed [12, 12, 12, 12] survey steps [0, 0, 0, 0]
+a84 s02vc/final    won 4/4 steps [52, 52, 52, 52] crossed [17, 17, 17, 17] survey steps [41, 41, 41, 41]
+a84 s02vc/dynamic  won 4/4 steps [52, 52, 52, 52] crossed [17, 17, 17, 17] survey steps [39, 39, 39, 39]
+a84: 48/48
