@@ -5,8 +5,8 @@
 **Navigator notes:** `NAVIGATOR_A86` ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) from R44's flight, while R45 was in the air and R46 queued
-behind it; shakedown flown 2026-11-06 (four of four s02c runs solved, gate passed); round
-flight below
+behind it; shakedown flown 2026-11-06 (four of four s02c runs solved, gate passed); **flown
+2026-11-06, 12/30, dropped**
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R44 (`a84`, 18/30, the bar since tonight), R32P (`a66`, 15/30) and
@@ -90,7 +90,10 @@ Wins are not required.
 
 ## Outcome
 
-Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Flown 2026-11-06: 12/30 against `a86`'s 21/30 (R46) and `a85`'s 23/30 (R45); dropped.** The
+hypothesis did not hold. s03 1/6 on code that is `a86`'s there (R46 5/6); s02 11/24: 7 of 7 surveys
+that crossed from their first station won, 2 of 11 that went on to the second.
+[summary.md](summary.md). Labels: Claude review, not yet confirmed by the operator.
 
 **Shakedown (2026-11-06, 06:32–06:47 UTC): four unscored runs, slot 5 (port 8105) as a fifth
 client beside R45's four lanes, sctsvr6 `~/asep-r33-shake` at `3ce00d1`, log
