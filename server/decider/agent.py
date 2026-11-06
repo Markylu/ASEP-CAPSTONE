@@ -483,6 +483,17 @@ PATHFINDER_A90: Dict[str, Any] = dict(PATHFINDER_A89, way_in={"steps": 8})
 #: eval/phase2/R51_no_station_guard/README.md.
 PATHFINDER_A91: Dict[str, Any] = dict(PATHFINDER_A89, survey=PATHFINDER_A86["survey"])
 
+#: a92 (R52): a91 with the survey waiting 12 steps, not 6, before it gives a
+#: station up. R45, R47 and R51: the first station was given up in transit in
+#: 9 s02 runs, 3 of them won (the 67 that kept it: 51 won); 7 of the 9 in s02c
+#: final, where the station is on the open door's side. R51 s02c final seed
+#: 2: survey from step 2, the navigator flew on at the shut door for four
+#: steps with the tag hard left, turned at the wall at 6, and at 8, one step
+#: into the flight back, the station was given up.
+#: eval/phase2/R52_station_stall/README.md.
+PATHFINDER_A92: Dict[str, Any] = dict(
+    PATHFINDER_A91, survey=dict(PATHFINDER_A91["survey"], stall_steps=12))
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -2019,6 +2030,26 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "when this was laid out, and a89's first shakedown run took the stale side "
           "first and 18 steps to the second station "
           "(eval/phase2/R51_no_station_guard/README.md)."),
+    Agent("a92", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A92,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a91 with the survey waiting 12 steps, not 6, before it gives a station up. "
+          "R45, R47 and R51: the first station was given up in transit in 9 s02 runs (7 "
+          "in s02c final, where it is on the open door's side) and 3 were won; of the 67 "
+          "that kept it, 51. The navigator flies on at the shut door for some steps with "
+          "the tag to the side, and the six ran out as it turned back "
+          "(eval/phase2/R52_station_stall/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"

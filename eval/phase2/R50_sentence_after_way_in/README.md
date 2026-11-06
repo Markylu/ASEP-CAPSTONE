@@ -104,10 +104,13 @@ sentence is said, and a route is on at least 95% of steps. Wins are not required
 
 ## Outcome
 
-**Not flown, no shakedown (decided 2026-11-06, 08:28 UTC, Claude alone).** Laid out at 08:07 UTC on
-R46's record. R47 then landed: s03 1/6 for `a87`, which is `a86` in s03 (R46: 5/6), the drone in a
-tine at steps 46, 32, 28, 42, 15 and never, the navigator taking every sentence in the lobby and
-the stem, nearly all of them after step 8. The s03 gain this round was written to keep was not
-there the second time, and the rule here would not have stopped those sentences. The two flights
-left went to `a91` (R51) and `a89` (R49). The code (`planner.PathPlan.way_in`, `NAVIGATOR_A90`)
-stands, tested, for a round that wants it.
+**Not flown, no shakedown (decided 2026-11-06, 08:28 UTC, Claude alone; reason corrected 09:25
+UTC).** Laid out at 08:07 UTC on R46's record. R47 then landed at 12/30 with s03 1/6, and the
+decision not to fly this was taken on the reading that the always-on sentence had lost R47's
+s03. R51 (`a91`, no such sentence) then also scored 1/6 in s03, so that reading was wrong: s03
+swings that far on its own. What does stand against this round: the s03 gain it was written
+to keep (R46's 5/6) is inside that swing; s02 with the sentence always is 27/48 (R46, R47)
+against 50/72 without (R44, R45, R51), of which the way in accounts for at most five runs;
+and R47 had a run turn around 14 times in a row on it. The two flights then left went to
+`a91` (R51) and `a89` (R49). The code (`planner.PathPlan.way_in`, `NAVIGATOR_A90`) stands,
+tested, for a round that wants it.

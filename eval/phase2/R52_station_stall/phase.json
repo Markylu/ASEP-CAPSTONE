@@ -1,0 +1,13 @@
+{
+  "round": "R52",
+  "title": "a91 with the survey's stations held for 12 steps, contested cells",
+  "citable": false,
+  "agent_version": "a92",
+  "status": "complete",
+  "git_sha": "c16d989",
+  "started": "2026-11-06T09:43:23+00:00",
+  "finished": "2026-11-06T10:32:32+00:00",
+  "operator": null,
+  "notes": "Flown 2026-11-06 by Claude alone on the overnight instruction (OVERNIGHT_PROMPT.md); the operator was asleep.",
+  "lanes": "sctsvr6 lanes 1-4 (asep-r52-l1..4), shared vLLM :8004; each lane started as its R49 lane ended (09:43-09:52 UTC), so the first runs flew beside R49's last; no other client after that; the last flight of the night"
+}
