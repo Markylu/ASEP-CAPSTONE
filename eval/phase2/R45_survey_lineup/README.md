@@ -4,7 +4,8 @@
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Planner:** `PATHFINDER_A85` ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) while R44 was in flight; shakedown flown 2026-11-06 (four of
-four solved, gate passed); round flight below
+four solved, gate passed); **round flown 2026-11-06: 23/30 against `a84`'s 18/30 and `a66`'s
+15/30, carried** ([summary](summary.md))
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30) and R44 (`a84`, in flight as this is written).
@@ -95,7 +96,13 @@ a crossing; a route is on at least 95% of steps. Wins are not required.
 
 ## Outcome
 
-Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Flown 2026-11-06, 06:17–07:02 UTC, 30/30 valid: 23/30 against `a84`'s 18/30 (R44) and
+`a66`'s 15/30 (R32P). The hypothesis held; `a85` is carried forward and is the bar.** s02
+19/24 (R44 13/24): s02va 6/6, s02a 6/6, s02c `dynamic` 3/3, s02vc 3/6; 17 of the 19 s02 wins
+crossed on the survey, at a median of step 15. s03 4/6 (`final` 3/3, `dynamic` 1/3). No
+line-up at the wall was needed in any run, so that setting is untested; the gain is the wider
+cone of reads. Three s02 losses ended their survey early by `through_adv_m`, as the shakedown
+had shown. Details: [summary.md](summary.md).
 
 **Shakedown (2026-11-06, 05:39–05:58 UTC): four unscored runs, slot 5 (port 8105) as a fifth
 client beside R44's four lanes, sctsvr6 `~/asep-r33-shake` at `7031eb4`, log
