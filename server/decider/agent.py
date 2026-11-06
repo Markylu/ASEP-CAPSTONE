@@ -372,14 +372,23 @@ PATHFINDER_A81: Dict[str, Any] = dict(PATHFINDER_A65, survey=SURVEY_A81)
 SURVEY_A82: Dict[str, Any] = dict(SURVEY_A81, home_ray=True)
 PATHFINDER_A82: Dict[str, Any] = dict(PATHFINDER_A65, survey=SURVEY_A82)
 
-#: a83 (R43): a82's survey and a79's latch together, the latch sooner and its
-#: way out steadier. dwell_steps 3 (a79: 5): on Round F, R32P and R35 the rule
-#: then fires 6 steps after the door shuts, not 8, in 9 of 11 s03 dynamic runs,
-#: and in 3 of 53 won s02 runs before the crossing (a79: 0). `exit`: latched
-#: and inside, the waypoint is carrot_m back down the corridor's middle
-#: (planner.pathfind). eval/phase2/R43_survey_latch/README.md.
+#: a83 (R43): the survey after a82's shakedown, and a79's latch with it. The
+#: survey: a doorway read on the way to a station only picks the side
+#: (side_only: the station on that side first); the door is flown at from the
+#: look phase alone, on the newest ray, and rays are never crossed (no_cross:
+#: R42 shakedown s02vc final, three reads 15 degrees apart and one of them a
+#: phantom crossed 5 m beside the door); the goal in view ends the survey
+#: (goal_ends); through_steps without a read and without the goal in view goes
+#: back to the look (relook). The latch: dwell_steps 3 (a79: 5; on Round F,
+#: R32P and R35 the rule then fires 6 steps after the door shuts, not 8, in 9
+#: of 11 s03 dynamic runs, and in 3 of 53 won s02 runs before the crossing,
+#: a79 0), and `exit`: latched and inside, the waypoint is carrot_m back down
+#: the corridor's middle (planner.pathfind).
+#: eval/phase2/R43_survey_latch/README.md.
+SURVEY_A83: Dict[str, Any] = dict(SURVEY_A82, side_only=True, no_cross=True, goal_ends=True,
+                                  relook=True)
 PATHFINDER_A83: Dict[str, Any] = dict(
-    PATHFINDER_A82, dead_end_latch=dict(
+    PATHFINDER_A82, survey=SURVEY_A83, dead_end_latch=dict(
         PATHFINDER_A79["dead_end_latch"],
         confined=dict(PATHFINDER_A79["dead_end_latch"]["confined"], dwell_steps=3),
         exit={"carrot_m": 4.0}))
@@ -1707,13 +1716,18 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
                                                         "lower": "open_far",
                                                         "middle": "open_far"},
                                           "spatial": "server/decider/spatial.py"}},
-          "a82's survey and a79's latch in one agent, the latch sooner (three steps "
-          "without getting farther down the lane, not five) and its way out steadier "
-          "(latched and inside, the waypoint is 4 m back down the middle of the corridor, "
-          "not the route's next point), with a78's sentence. R39 (a79), s03 dynamic seed "
-          "1: the latch fired at step 35, nine steps after the first closed read, the "
-          "drone was out of the tine at 40, through the other tine's open door at 57 and "
-          "2.8 m from the goal at 60 (eval/phase2/R43_survey_latch/README.md)."),
+          "The wall survey and the dead-end latch in one agent. The survey is a82's after "
+          "its shakedown: a doorway read on the way to a station only picks the side, the "
+          "door is flown at from the look phase on the newest ray with no crossing of "
+          "rays, the goal in view ends the survey, and five steps without a read go back "
+          "to the look. The latch is a79's, sooner (three steps without getting farther "
+          "down the lane, not five) and with a steadier way out (latched and inside, the "
+          "waypoint is 4 m back down the middle of the corridor), with a78's sentence. "
+          "R42 shakedown, s02vc final seed 1: three bearings 15 degrees apart, one a "
+          "phantom, crossed 5 m beside the door and the survey ended there. R39 (a79), "
+          "s03 dynamic seed 1: latch at step 35, out of the tine at 40, through the other "
+          "tine's door at 57, 2.8 m from the goal at 60 "
+          "(eval/phase2/R43_survey_latch/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"

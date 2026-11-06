@@ -53,6 +53,23 @@ MISSED_WALL, PHANTOM_WALL = 0.167, 0.124
 CLOSED_READ = 0.7
 
 
+#: How far a doorway is read from (--far: the R40 and R42 shakedowns read the
+#: open s02vc door from 16 m; the first tables used 12).
+DOOR_RANGE_M = 12.0
+
+
+def goal_seen(free, pose) -> Tuple[str, Optional[str]]:
+    """The goal's strip and range class when it is in the frame with a clear
+    line to it, as the perceiver reports it; else not_visible."""
+    x, y, h = pose
+    off = spatial.wrap(spatial.bearing((x, y), GOAL) - h)
+    if abs(off) > spatial.FOV_DEG / 2.0 or not geo.segment_clear(free, (x, y), GOAL):
+        return "not_visible", None
+    d = spatial.dist((x, y), GOAL)
+    strip = min(spatial.STRIPS, key=lambda s: abs(spatial.strip_offset(s) - off))
+    return strip, ("touching" if d < 2.0 else "near" if d < 6.0 else "mid" if d < 14.0 else "far")
+
+
 def perceive(free, doors_open, pose, door_deg: float,
              noise: Optional[random.Random] = None) -> Dict[str, Any]:
     x, y, h = pose
@@ -73,7 +90,7 @@ def perceive(free, doors_open, pose, door_deg: float,
             t = (0.5 - x) / c
             yhit = y + t * math.sin(math.radians(hd))
             off = abs(spatial.wrap(hd - 180.0))
-            if t <= 12.0 and geo.ray(free, x, y, hd, max_d=12.0) >= t - 0.1:
+            if t <= DOOR_RANGE_M and geo.ray(free, x, y, hd, max_d=DOOR_RANGE_M) >= t - 0.1:
                 at = next((name for name, dy in geo.S02_DOORS.items()
                            if abs(yhit - dy) < geo.DOOR_HALF), None)
                 if noise is None:
@@ -90,7 +107,8 @@ def perceive(free, doors_open, pose, door_deg: float,
                     elif roll < p_wall_open:
                         door = "open"
         lanes.append({"strip": strip, "floor": floor, "floor_end": end, "doorway": door})
-    return {"goal": "not_visible", "goal_range": None, "lanes": lanes}
+    goal, goal_range = goal_seen(free, pose)
+    return {"goal": goal, "goal_range": goal_range, "lanes": lanes}
 
 
 def fly(site: str, arm: str, feats: Dict[str, Any], slip: float, rng: random.Random,
@@ -154,7 +172,10 @@ def main() -> int:
     ap.add_argument("--trace", default="")
     ap.add_argument("--noise", action="store_true",
                     help="doorway and wall reads wrong at the rates measured in flight")
+    ap.add_argument("--far", type=float, default=DOOR_RANGE_M,
+                    help="metres a doorway is read from (default 12; the shakedowns: 16 and more)")
     args = ap.parse_args()
+    globals()["DOOR_RANGE_M"] = args.far
     feats = agents.get(args.agent).features["orchestrator"]
     won = n = 0
     for site in ("s02a", "s02c", "s02va", "s02vc"):

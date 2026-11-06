@@ -1279,7 +1279,8 @@ def test_a82_is_a81_homing_on_the_ray_and_a83_is_a82_plus_the_latch_sooner_with_
     assert {k: v for k, v in a82.items() if k not in added} == \
         {k: v for k, v in a81.items() if k not in added}
     assert a82["navigator_notes"] == a79["navigator_notes"]
-    assert a82["pathfinder"]["survey"] == a81["pathfinder"]["survey"]
+    assert a82["pathfinder"]["survey"] == dict(a81["pathfinder"]["survey"], side_only=True,
+                                               no_cross=True, goal_ends=True, relook=True)
     latch, was = a82["pathfinder"]["dead_end_latch"], a79["pathfinder"]["dead_end_latch"]
     assert latch["exit"] == {"carrot_m": 4.0} and latch["confined"]["dwell_steps"] == 3
     assert {k: v for k, v in latch.items() if k not in ("exit", "confined")} == \
@@ -1287,3 +1288,47 @@ def test_a82_is_a81_homing_on_the_ray_and_a83_is_a82_plus_the_latch_sooner_with_
     assert {k: v for k, v in latch["confined"].items() if k != "dwell_steps"} == \
         {k: v for k, v in was["confined"].items() if k != "dwell_steps"}
     assert agent.get("a79").sha() == "4ef945298c6d" and agent.get("a81").sha() == "61e8e685422a"
+
+
+def survey83_at(mem, here, step, records=()):
+    cm = spatial.CostMap(mem, [], L83, include=(spatial.cell(here[:2]), spatial.cell(GOAL80)),
+                         start=spatial.cell(here[:2]))
+    return planner.wall_survey(mem, cm, here, step, GOAL80, list(records), L83)
+
+
+def test_a83_a_doorway_read_on_the_way_to_a_station_only_picks_the_side():
+    mem, here, step = hall()
+    wp, sv = survey83_at(mem, here, step)
+    assert sv["order"] == [7.0, -7.0]
+    mem.door_rays.append(spatial.Ray(here[0], here[1], -30.0, step + 1, "open_far"))   # to the right
+    wp, sv2 = survey83_at(mem, (here[0], here[1] + 1.0, 60.0), step + 1, [rec(step, sv)])
+    assert sv2["phase"] == "transit" and sv2["order"] == [-7.0, 7.0] and sv2["rays"] == []
+    assert abs(wp[1] - (here[1] - 7.0)) < 0.01                    # the right-hand station now
+    # From the station, in the look phase, the same kind of read is flown at, on its own ray.
+    station = planner.survey_station(sv2, L83["survey"])
+    at = (station[0], station[1], 0.0)
+    wp, sv3 = survey83_at(mem, at, step + 6, [rec(step + 1, sv2)])
+    assert sv3["phase"] == "look"
+    for k, heading in ((7, -10.0), (8, 25.0)):                   # bearings 35 degrees apart
+        mem.door_rays.append(spatial.Ray(at[0], at[1], heading, step + k, "open_far"))
+    wp, sv4 = survey83_at(mem, at, step + 7, [rec(step + 6, sv3)])
+    assert sv4["phase"] == "through"
+    wp, sv5 = survey83_at(mem, at, step + 8, [rec(step + 7, sv4)])
+    assert abs(spatial.wrap(spatial.bearing(at[:2], wp) - 25.0)) < 0.5   # the newest ray, not a crossing
+
+
+def test_a83_the_goal_in_view_ends_the_survey_and_a_lost_door_goes_back_to_the_look():
+    mem, here, step = hall()
+    _, sv = survey83_at(mem, here, step)
+    station = planner.survey_station(sv, L83["survey"])
+    at = (station[0], station[1], 0.0)
+    _, look = survey83_at(mem, at, step + 5, [rec(step, sv)])
+    mem.door_rays.append(spatial.Ray(at[0], at[1], 0.0, step + 6, "open_far"))
+    _, thru = survey83_at(mem, at, step + 6, [rec(step + 5, look)])
+    assert thru["phase"] == "through"
+    late = step + 6 + L83["survey"]["through_steps"]
+    wp, again = survey83_at(mem, (at[0] + 4.0, at[1], 0.0), late, [rec(step + 6, thru)])
+    assert again["phase"] == "look" and wp is not None            # no read, no goal: not through
+    mem.goal_rays.append(spatial.Ray(at[0] + 4.0, at[1], 0.0, late, "mid"))
+    wp, done = survey83_at(mem, (at[0] + 4.0, at[1], 0.0), late, [rec(step + 6, thru)])
+    assert wp is None and done["phase"] == "done"

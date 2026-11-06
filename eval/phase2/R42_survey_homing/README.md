@@ -3,14 +3,15 @@
 **Agent:** `a82` (`43255087a08a`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Planner:** `PATHFINDER_A82` ·
 **Status:** laid out 2026-11-05 (overnight run, Claude alone, operator asleep; every decision
-here is Claude's, with its reason) from R40's shakedown; shakedown and flight below
+here is Claude's, with its reason) from R40's shakedown; **shakedown gate failed on its first
+run, `a82` dropped, not flown** ([Outcome](#outcome))
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30), no control lane. The survey is R40's
 ([README](../R40_wall_survey/README.md)); its through phase is R41's
-([README](../R41_survey_check/README.md)) with one more setting. **This is the round of the
-three that flies**: R40 (`a80`) was shaken down and R41 (`a81`) laid out, and each showed the
-next fix before 30 runs were spent.
+([README](../R41_survey_check/README.md)) with one more setting. R40 (`a80`) was shaken down
+and R41 (`a81`) laid out, and each showed the next fix before 30 runs were spent; so did this
+one.
 
 ## Change
 
@@ -104,4 +105,32 @@ R32P 15/30). Branch `phase2/r42-survey-homing` from `phase2/r41-survey-check` (`
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Not flown: the shakedown's first run failed its gate, and `a82` is dropped. The fix is
+`a83` ([R43](../R43_survey_latch/README.md)).**
+
+**Shakedown (2026-11-06, 04:48–04:57 UTC): one unscored run, slot 5 (port 8105) as a fifth
+client beside R39's four lanes, sctsvr6 `~/asep-r33-shake` at `bceddac`; kept on the host as
+`~/r42_shake_a82_runs`, log `~/r42_shake_a82.log`. Stopped by Claude after the first run (the
+second, s02c `dynamic`, was two minutes in and is not counted).**
+
+| Cell (seed 1) | `a82` | `a80` (R40 shakedown) | R32P `a66` |
+|---|---|---|---|
+| s02vc `final` | **lost** (60 steps, never through) | solved, 49 | lost |
+
+- The survey started at step 3 on the open door read in the far-left strip from 15 m, and
+  flew at it as `home_ray` says (steps 3–4, bearing 215° against a true 212°).
+- Steps 5–7 read the door in three different strips (centre at 221°, right at 200°, left at
+  221°); the right-strip read was a blank wall. With three bearings 15° and more apart the
+  rays "crossed", the door's line took over from the bearing and sat at y = −3.3 to −4.6
+  (the door is centred at −9); the drone flew down it to (2.5, −4.0).
+- The last reads (step 10, far-left and left strips with the drone heading 200°) lay more than
+  40° off the approach axis and were not counted; five steps after the last counted read the
+  survey ended, at step 11, beside the wall and 5 m from the door. The route had the remaining
+  49 steps and did not cross.
+- **Gate:** "the s02vc run crosses by step 30 or its survey's waypoint is within 2 m of the
+  open door's centre when the drone reaches the wall": failed (4.4 m). By the rule set above
+  the round does not fly.
+- **What it says:** from that far, five strips give the door's side and nothing finer; a
+  bearing flown diagonally ends in looks along the wall, which is where the reading breaks
+  (probe door_read). `a83` uses a far read for the side only and flies at the door from the
+  station, square to the wall.

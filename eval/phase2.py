@@ -333,6 +333,14 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a66 with the wall survey homing on the door's bearing, contested cells",
             "agent": "a82", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R43: a83, a bundle: the wall survey after a82's shakedown (far reads pick
+    # the side only, no crossing of rays, the goal in view ends it) with
+    # a79's dead-end latch, sooner and with a steadier way out. The same
+    # screen, read against R32P (a66, 15/30) and R39 (a79).
+    "R43": {"folder": "R43_survey_latch",
+            "title": "a66 with the wall survey and the dead-end latch, contested cells",
+            "agent": "a83", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

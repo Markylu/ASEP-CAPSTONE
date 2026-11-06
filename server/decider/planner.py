@@ -1882,7 +1882,7 @@ def survey_door_line(sv: Dict[str, Any], c: Dict[str, Any],
         b1 += m11 * rx + m12 * ry
         b2 += m12 * rx + m22 * ry
     det = a11 * a22 - a12 * a12
-    if len(rays) >= 2 and det > float(c["cross_det"]):
+    if len(rays) >= 2 and det > float(c["cross_det"]) and not c.get("no_cross"):
         px, py = (a22 * b1 - a12 * b2) / det, (a11 * b2 - a12 * b1) / det
         ahead_m, at_left = survey_frame(sv, (px, py))
         if ahead_m > along:                      # the crossing lies ahead of the drone
@@ -1942,6 +1942,23 @@ def wall_survey(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.P
     rays = [r for r in mem.door_rays if r.step == step
             and abs(spatial.wrap(r.heading - axis)) <= float(c["open_deg"])] if short else []
     ray = min(rays, key=lambda r: abs(spatial.wrap(r.heading - here[2]))) if rays else None
+    if c.get("goal_ends") and any(g.step == step for g in mem.goal_rays):
+        # a83: the goal is in view: the drone is through the wall or looking
+        # through its door, and the route (which knows where the goal is) has
+        # the rest. On the s02 near side the goal shows only through a doorway.
+        sv["phase"] = "done"
+        return None, sv
+    if ray is not None and c.get("side_only") and sv["phase"] == "transit":
+        # a83: on the way to a station a doorway read says which side it is
+        # on, no more: five strips give a bearing to about 9 degrees, 2.4 m at
+        # 16 m (R40 and R42 shakedowns, s02vc final: a door read from 15 m was
+        # flown at down lines 4 and 5 m beside it). The station on that side
+        # goes first; the door is flown at from there, square to the wall.
+        side = 1.0 if spatial.wrap(ray.heading - axis) > 0 else -1.0
+        cur = float(sv["order"][int(sv["i"])]) if int(sv["i"]) < len(sv["order"]) else 0.0
+        if int(sv["i"]) == 0 and len(sv["order"]) > 1 and cur * side < 0:
+            sv.update(order=[sv["order"][1], sv["order"][0]], best=None, since=step)
+        ray = None
     if ray is not None:
         toward = ray.heading
         if c.get("ray_mean"):
@@ -1961,7 +1978,8 @@ def wall_survey(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.P
         been = None
         if c.get("been_floor"):
             been = max(survey_frame(sv, (x, y))[0] for _, x, y, _ in mem.trail)
-        if c.get("home_ray") and wall is None and not survey_rays_cross(sv, c):
+        if c.get("home_ray") and wall is None and (c.get("no_cross")
+                                                   or not survey_rays_cross(sv, c)):
             # a81: the wall's range unknown and the rays not yet crossing, the
             # door's line cannot be placed (R40 shakedown s02vc final: read
             # from 16 m, placed 5 m out, the drone met the wall 4 m beside the
@@ -2004,6 +2022,10 @@ def wall_survey(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.P
             return None, sv
         if bumped:
             _survey_next(sv, step)          # stopped, and no doorway read from here: a phantom
+        elif spent >= int(c["through_steps"]) and c.get("relook"):
+            # a83: no doorway read for through_steps and no goal in view: not
+            # through. Fly at the wall again from here.
+            sv.update(phase="look", since=step)
         elif spent >= int(c["through_steps"]):
             sv["phase"] = "done"            # no doorway ahead any more, nothing in the way: through it
             return None, sv
