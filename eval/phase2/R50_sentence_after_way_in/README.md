@@ -40,7 +40,7 @@ The route, the survey, the latch and the tags are `a89`'s; the prompt is `p17`.
   surveys all started at steps 2 to 6, so a drone still on the line at step 8 with none is
   not going to start one.
 - **After the way in the sentence did not cost the survey:** R46's 15 runs with a survey won
-  12 (80%); R45's 23 won 18.
+  12 (80%); R45's 23 won 19.
 - **Against it:** R48's shakedown lost s03 `final` seed 1 in the lobby with the navigator
   taking 13 of 13 sentences on a route laid through a wall it had not seen. The sentence makes
   the navigator fly the route, right or wrong.
