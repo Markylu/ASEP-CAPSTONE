@@ -349,6 +349,14 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a66 with the wall survey and the dead-end latch, after R43's shakedown, contested cells",
             "agent": "a84", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R45: a85 (a84 with the survey's last stretch: reads out to 65 degrees
+    # once a door is being flown at, a line-up in front of the door when
+    # stopped by the wall, through by distance flown). The same screen, read
+    # against R32P (a66, 15/30) and R44 (a84).
+    "R45": {"folder": "R45_survey_lineup",
+            "title": "a84 with the survey lining up on the door, contested cells",
+            "agent": "a85", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

@@ -416,6 +416,19 @@ PATHFINDER_A84: Dict[str, Any] = dict(
         PATHFINDER_A83["dead_end_latch"],
         confined=dict(PATHFINDER_A83["dead_end_latch"]["confined"], span_m=2.8)))
 
+#: a85 (R45): a84 with the survey's through phase after R44's shakedown.
+#: through_deg: once a doorway is being flown at, its reads count out to 65
+#: degrees off the approach axis (open_deg 40 still starts it). lineup: stopped
+#: by the wall with the doorway's reads in hand, the wall is wall_m ahead and
+#: the door's line is where the newest ray meets it; off that line by more than
+#: align_m, the waypoint is pre_m out from the wall on it, then through
+#: (twice at most). through_adv_m: through_steps without a read and this much
+#: farther on than the last read, the drone is through and the survey done.
+#: eval/phase2/R45_survey_lineup/README.md.
+SURVEY_A85: Dict[str, Any] = dict(
+    SURVEY_A84, through_deg=65.0, lineup={"pre_m": 2.5, "align_m": 0.8}, through_adv_m=5.0)
+PATHFINDER_A85: Dict[str, Any] = dict(PATHFINDER_A84, survey=SURVEY_A85)
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -1777,6 +1790,31 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "dynamic seed 2 solved at 54, the first of that cell in Phase 2 (latch at 33, "
           "seven steps after the door shut); s02a dynamic and s02c final solved through "
           "the survey (eval/phase2/R44_survey_latch_fixed/README.md)."),
+    Agent("a85", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A85,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a84 with the survey's last stretch after R44's shakedown. Once a doorway is "
+          "being flown at, its reads count out to 65 degrees off the approach axis (40 "
+          "still starts it); stopped by the wall with those reads in hand, the wall is a "
+          "metre ahead, the door's line is where the newest ray meets it, and the drone "
+          "goes to the point 2.5 m out from the wall on that line and through it square; "
+          "and five steps without a read, 5 m on from the last one with nothing in the "
+          "way, is through. R44 shakedown, s02vc final seed 1: the door read 21 degrees "
+          "off the axis at step 8 and flown at, read again at steps 9-11 in the left "
+          "strips 42-58 degrees off and dropped; the drone met the wall 3.3 m from the "
+          "door's centre and spent twelve steps along it "
+          "(eval/phase2/R45_survey_lineup/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"
