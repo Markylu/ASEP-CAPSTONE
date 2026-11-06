@@ -1,0 +1,13 @@
+a89 s02a/initial   won 4/4 steps [14, 14, 14, 14] crossed [8, 8, 8, 8] survey steps [0, 0, 0, 0]
+a89 s02a/final     won 4/4 steps [27, 27, 27, 27] crossed [12, 12, 12, 12] survey steps [18, 18, 18, 18]
+a89 s02a/dynamic   won 4/4 steps [35, 35, 35, 35] crossed [25, 25, 25, 25] survey steps [23, 23, 23, 23]
+a89 s02c/initial   won 4/4 steps [14, 14, 14, 14] crossed [8, 8, 8, 8] survey steps [0, 0, 0, 0]
+a89 s02c/final     won 4/4 steps [28, 28, 28, 28] crossed [12, 12, 12, 12] survey steps [18, 18, 18, 18]
+a89 s02c/dynamic   won 4/4 steps [28, 28, 28, 28] crossed [12, 12, 12, 12] survey steps [16, 16, 16, 16]
+a89 s02va/initial  won 4/4 steps [19, 19, 19, 19] crossed [12, 12, 12, 12] survey steps [0, 0, 0, 0]
+a89 s02va/final    won 4/4 steps [40, 40, 40, 40] crossed [30, 30, 30, 30] survey steps [30, 30, 30, 30]
+a89 s02va/dynamic  won 4/4 steps [33, 33, 33, 33] crossed [17, 17, 17, 17] survey steps [21, 21, 21, 21]
+a89 s02vc/initial  won 4/4 steps [19, 19, 19, 19] crossed [12, 12, 12, 12] survey steps [0, 0, 0, 0]
+a89 s02vc/final    won 4/4 steps [33, 33, 33, 33] crossed [17, 17, 17, 17] survey steps [23, 23, 23, 23]
+a89 s02vc/dynamic  won 4/4 steps [33, 33, 33, 33] crossed [17, 17, 17, 17] survey steps [21, 21, 21, 21]
+a89: 48/48

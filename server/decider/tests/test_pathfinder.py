@@ -1588,3 +1588,29 @@ def test_a88_the_lane_is_opened_again_to_a_drone_back_inside_its_latched_corrido
     back, left = planner.latch_frame(now.latch, now.waypoint)
     assert back < 4.0 and abs(left) < 0.1                    # and the waypoint runs back down it
     assert agent.get("a87").sha() == "aaf90e0ca54d"
+
+
+def test_a89_is_a88s_planner_with_a85s_navigator_and_reopens_only_inside_the_rectangle():
+    a85 = agent.get("a85").features["orchestrator"]
+    a88 = agent.get("a88").features["orchestrator"]
+    a89 = agent.get("a89").features["orchestrator"]
+    assert a89["navigator_notes"] == a85["navigator_notes"] == agent.NAVIGATOR_A78
+    assert a89["pathfinder"]["survey"] == a88["pathfinder"]["survey"]
+    assert a89["pathfinder"]["dead_end_latch"] == dict(a88["pathfinder"]["dead_end_latch"],
+                                                       reopen_inside=True)
+    assert agent.get("a88").sha() == "144756aca5a8"
+    latch = {"step": 30, "origin": [10.0, 0.425], "axis_deg": 0.0, "lane_m": 1.5,
+             "half_width_m": 6.8, "ahead_m": 2.0, "reach_m": 8.0, "out": True, "mid_m": 0.0}
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    for x in range(0, 40):
+        mem.visits[(x, 0)] = [x]
+        mem.trail.append((x,) + centre((x, 0)) + (0.0,))
+    recs = [{"step": 39, "planner": {"latch": latch}}]
+
+    def at(x, p):
+        man = {"step": 40, "pose": {"position": [x, 1.75, -0.425], "yaw": math.radians(-90.0)}}
+        return planner.pathfind(mem, man, recs, (60.0, 30.0), p).latch["out"]
+
+    assert at(14.0, agent.PATHFINDER_A89) is False           # 4 m down it: reopened
+    assert at(24.0, agent.PATHFINDER_A89) is True            # 4 m beyond its far end: left shut
+    assert at(24.0, agent.PATHFINDER_A88) is False           # a88 reopened it there
