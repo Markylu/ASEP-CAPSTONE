@@ -1530,8 +1530,14 @@ def dead_end_latch(mem: spatial.SpatialMemory, here: spatial.Pose, step: int,
             "ahead_m": float(d["ahead_m"]), "reach_m": 0.0, "out": False}
         if latch_frame(latch, here[:2])[0] <= 0.0:
             return None  # the drone is at the lane's mouth: nothing to shut behind it
-        latch["reach_m"] = round(max(latch_frame(latch, (x, y))[0]
-                                     for s, x, y, _ in mem.trail if s >= since), 2)
+        inside = [latch_frame(latch, (x, y)) for s, x, y, _ in mem.trail if s >= since]
+        latch["reach_m"] = round(max(a for a, _ in inside), 2)
+        if d.get("exit"):
+            # a82: the middle of where the drone has flown in the corridor,
+            # metres left of the run's axis (a run flown along one wall has
+            # its axis there; the way out is down the corridor's middle).
+            lefts = sorted(l for a, l in inside if a >= 0.0)
+            latch["mid_m"] = round(lefts[len(lefts) // 2], 2) if lefts else 0.0
         return latch
     yes = latch_yes_steps(mem.dead_end_reads, step, d)
     if not yes:
@@ -1840,6 +1846,17 @@ def _survey_next(sv: Dict[str, Any], step: int) -> None:
     sv.update(i=int(sv["i"]) + 1, phase="transit", since=step, best=None, rays=[])
 
 
+def survey_rays_cross(sv: Dict[str, Any], c: Dict[str, Any]) -> bool:
+    """Whether the survey's kept rays differ enough in bearing to be crossed
+    (the least-squares system's determinant over cross_det)."""
+    rays = sv.get("rays") or []
+    a11 = a12 = a22 = 0.0
+    for _, _, rh in rays:
+        dx, dy = math.cos(math.radians(rh)), math.sin(math.radians(rh))
+        a11 += 1.0 - dx * dx; a12 += -dx * dy; a22 += 1.0 - dy * dy
+    return len(rays) >= 2 and a11 * a22 - a12 * a12 > float(c["cross_det"])
+
+
 def survey_door_line(sv: Dict[str, Any], c: Dict[str, Any],
                      been: Optional[float] = None) -> Optional[float]:
     """Metres left of the approach axis of the doorway the survey's open reads
@@ -1944,6 +1961,16 @@ def wall_survey(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.P
         been = None
         if c.get("been_floor"):
             been = max(survey_frame(sv, (x, y))[0] for _, x, y, _ in mem.trail)
+        if c.get("home_ray") and wall is None and not survey_rays_cross(sv, c):
+            # a81: the wall's range unknown and the rays not yet crossing, the
+            # door's line cannot be placed (R40 shakedown s02vc final: read
+            # from 16 m, placed 5 m out, the drone met the wall 4 m beside the
+            # door). Its bearing can: fly at it, the newest read's ray from
+            # where it was taken, carrot_m ahead of the drone along it.
+            rx, ry, rh = sv["rays"][-1]
+            done = max(0.0, (here[0] - rx) * math.cos(math.radians(rh))
+                       + (here[1] - ry) * math.sin(math.radians(rh)))
+            return spatial.ahead((rx, ry), rh, done + float(c["carrot_m"]))
         line = survey_door_line(sv, c, been)
         return survey_point(sv, along + float(c["carrot_m"]), line)
 
@@ -2120,6 +2147,19 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
             near = float(p.get("waypoint_min_m", 1.0))
             if spatial.dist(here[:2], wp) < near:
                 wp = spatial.ahead(here[:2], spatial.bearing(here[:2], wp), near)
+    leave = (p.get("dead_end_latch") or {}).get("exit")
+    if leave and latch is not None and not latch["out"] and fallback != "frontier":
+        # a82: latched and inside, the waypoint is carrot_m back down the
+        # corridor's middle, not the route's next point: one steady bearing
+        # to the mouth. R39 (a79) s03 dynamic seed 1 was out of the tine five
+        # steps after the latch and lost by two; its shakedown's seed 2 made
+        # 0.8 m a step on the way out, the route's point 90 degrees off beside a
+        # wall and the tag on the turn-around.
+        back = latch_frame(latch, here[:2])[0] - float(leave["carrot_m"])
+        rad = math.radians(float(latch["axis_deg"]))
+        mid = float(latch.get("mid_m", 0.0))
+        wp = (float(latch["origin"][0]) + back * math.cos(rad) - mid * math.sin(rad),
+              float(latch["origin"][1]) + back * math.sin(rad) + mid * math.cos(rad))
     survey: Optional[Dict[str, Any]] = None
     if p.get("survey") and latch is None:
         # a80: the wall survey takes the waypoint while it runs. A latched

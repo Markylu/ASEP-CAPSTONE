@@ -3,7 +3,8 @@
 **Agent:** `a81` (`61e8e685422a`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Planner:** `PATHFINDER_A81` ·
 **Status:** laid out 2026-11-05 (overnight run, Claude alone, operator asleep; every decision
-here is Claude's, with its reason) while R40's shakedown was in flight; shakedown and flight below
+here is Claude's, with its reason) while R40's shakedown was in flight; **never run, superseded
+by `a82` (R42) before its shakedown** ([Outcome](#outcome))
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30), no control lane. The survey is R40's
@@ -104,4 +105,10 @@ does not start in the s03 run, and a route is on at least 95% of steps in every 
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Not flown and never run: superseded before its shakedown by `a82` ([R42](../R42_survey_homing/README.md)).**
+While this round was being laid out, R40's third shakedown run (s02vc `final`) showed a fault
+`a81` does not fix: an open door read from 16 m was placed on a line by a guessed range, and
+the drone met the wall 4 m beside it. The fix is one more setting; the tooling does not let a
+laid-out agent be edited (`eval/phase2.py init` refuses, by the spec's §2), so it is a new
+version and a new round. `a81`'s five settings are all in `a82`, so nothing of this round is
+lost; its hypothesis is tested there.

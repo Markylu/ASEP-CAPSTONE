@@ -1197,6 +1197,16 @@ def test_a81_door_line_takes_the_middle_of_the_strips_and_no_nearer_than_the_dro
     want = 7.0 + math.tan(math.radians(20.0)) * SV81["reach_ray_m"]
     assert abs(planner.survey_door_line(sv2, SV81) - want) < 0.02
     assert abs(wp[1] - (here[1] + want)) < 0.05
+    # a82: one ray and no range, the waypoint is 3 m out along the ray itself.
+    cm = spatial.CostMap(mem, [], agent.PATHFINDER_A82)
+    wp82, sv82 = planner.wall_survey(mem, cm, at, step + 5, GOAL80, [rec(step, sv)],
+                                     agent.PATHFINDER_A82)
+    assert abs(spatial.dist(at[:2], wp82) - SV81["carrot_m"]) < 0.01
+    assert abs(spatial.wrap(spatial.bearing(at[:2], wp82) - 20.0)) < 0.5
+    on = spatial.ahead(at[:2], 20.0, 2.0)                    # 2 m along it, no new read: 5 m out
+    wp83, _ = planner.wall_survey(mem, cm, (on[0], on[1], 20.0), step + 6, GOAL80,
+                                  [rec(step + 5, sv82)], agent.PATHFINDER_A82)
+    assert abs(spatial.dist(at[:2], wp83) - (2.0 + SV81["carrot_m"])) < 0.01
     # The drone has been 6 m toward the wall without meeting it: at least 7 m out.
     far = 7.0 + math.tan(math.radians(20.0)) * 7.0
     assert abs(planner.survey_door_line(sv2, SV81, been=6.0) - far) < 0.02
@@ -1226,3 +1236,54 @@ def test_a81_is_a80_with_the_survey_changed():
         {k: v for k, v in a80["pathfinder"].items() if k != "survey"}
     assert agent.get("a81").sha() != agent.get("a80").sha()
     assert agent.get("a80").sha() == "1c1790de9767"
+
+
+# --- a83 (R43): the survey and the latch together ----------------------------------
+
+L83 = agent.PATHFINDER_A83
+
+
+def test_a83_latched_waypoint_runs_back_down_the_middle_of_the_corridor():
+    trail, end = lane_trail(dwell=4)
+    trail = [(s, x, y + (0.6 if s > end else 0.0), h) for s, x, y, h in trail]   # dwelt off the axis
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    mem.trail = list(trail)
+    for step, x, y, _ in trail:
+        mem.visits.setdefault(spatial.cell((x, y)), []).append(step)
+        for dy in range(-6, 7):
+            mem.free[(spatial.cell((x, y))[0], dy)] = step
+    mem.closed_reads = [end - 1, end]
+    step = trail[-1][0]
+    here = trail[-1][1:]
+    latch = planner.dead_end_latch(mem, here, step, L83)
+    assert latch is not None and "mid_m" in latch and 0.0 <= latch["mid_m"] <= 0.6
+    assert "mid_m" not in planner.dead_end_latch(mem, here, step, L79)       # a79's latch as it was
+    man = {"step": step, "pose": {"position": [here[0], 1.75, -here[1]],
+                                  "yaw": math.radians(here[2] - 90.0)}}
+    plan = planner.pathfind(mem, man, [], (40.0, centre((0, 0))[1]), L83)
+    assert plan.latch is not None and not plan.latch["out"] and plan.survey is None
+    along = planner.latch_frame(plan.latch, here[:2])[0]
+    back, left = planner.latch_frame(plan.latch, plan.waypoint)
+    assert abs(back - (along - 4.0)) < 0.01 and abs(left - plan.latch["mid_m"]) < 0.01
+
+
+def test_a82_is_a81_homing_on_the_ray_and_a83_is_a82_plus_the_latch_sooner_with_its_way_out():
+    assert agent.SURVEY_A82 == dict(agent.SURVEY_A81, home_ray=True)
+    assert {k: v for k, v in agent.get("a82").features["orchestrator"].items()
+            if k != "pathfinder"} == {k: v for k, v in agent.get("a81").features[
+                "orchestrator"].items() if k != "pathfinder"}
+    a81 = agent.get("a82").features["orchestrator"]
+    a79 = agent.get("a79").features["orchestrator"]
+    a82 = agent.get("a83").features["orchestrator"]
+    added = ("pathfinder", "navigator_notes")
+    assert {k: v for k, v in a82.items() if k not in added} == \
+        {k: v for k, v in a81.items() if k not in added}
+    assert a82["navigator_notes"] == a79["navigator_notes"]
+    assert a82["pathfinder"]["survey"] == a81["pathfinder"]["survey"]
+    latch, was = a82["pathfinder"]["dead_end_latch"], a79["pathfinder"]["dead_end_latch"]
+    assert latch["exit"] == {"carrot_m": 4.0} and latch["confined"]["dwell_steps"] == 3
+    assert {k: v for k, v in latch.items() if k not in ("exit", "confined")} == \
+        {k: v for k, v in was.items() if k != "confined"}
+    assert {k: v for k, v in latch["confined"].items() if k != "dwell_steps"} == \
+        {k: v for k, v in was["confined"].items() if k != "dwell_steps"}
+    assert agent.get("a79").sha() == "4ef945298c6d" and agent.get("a81").sha() == "61e8e685422a"

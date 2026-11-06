@@ -364,6 +364,26 @@ SURVEY_A81: Dict[str, Any] = dict(
     check_steps=3, check_m=2.0, look_nose_on=True)
 PATHFINDER_A81: Dict[str, Any] = dict(PATHFINDER_A65, survey=SURVEY_A81)
 
+#: a82 (R42): a81's survey homing on the door's bearing (home_ray). While the
+#: wall's range is unknown and the kept rays do not yet cross, the waypoint is
+#: carrot_m ahead of the drone along the newest ray, not on a line placed by a
+#: guessed range. R40 shakedown, s02vc final seed 1: the open door read from
+#: 16 m at step 2 was placed 5 m out, and the drone met the wall 4 m beside it.
+SURVEY_A82: Dict[str, Any] = dict(SURVEY_A81, home_ray=True)
+PATHFINDER_A82: Dict[str, Any] = dict(PATHFINDER_A65, survey=SURVEY_A82)
+
+#: a83 (R43): a82's survey and a79's latch together, the latch sooner and its
+#: way out steadier. dwell_steps 3 (a79: 5): on Round F, R32P and R35 the rule
+#: then fires 6 steps after the door shuts, not 8, in 9 of 11 s03 dynamic runs,
+#: and in 3 of 53 won s02 runs before the crossing (a79: 0). `exit`: latched
+#: and inside, the waypoint is carrot_m back down the corridor's middle
+#: (planner.pathfind). eval/phase2/R43_survey_latch/README.md.
+PATHFINDER_A83: Dict[str, Any] = dict(
+    PATHFINDER_A82, dead_end_latch=dict(
+        PATHFINDER_A79["dead_end_latch"],
+        confined=dict(PATHFINDER_A79["dead_end_latch"]["confined"], dwell_steps=3),
+        exit={"carrot_m": 4.0}))
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -1653,6 +1673,47 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "called the door a phantom and pointed the tags back at the other station for "
           "the nine steps the navigator took to the goal "
           "(eval/phase2/R41_survey_check/README.md)."),
+    Agent("a82", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A82,
+                                          "memory": "a17f",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a81 with the survey homing on the door's bearing: while the wall's range is "
+          "unknown and the kept rays do not yet cross, the waypoint is 3 m ahead of the "
+          "drone along the newest open-doorway ray, not on a line placed by a guessed "
+          "range. R40 shakedown, s02vc final seed 1 (a80): the open door was read from "
+          "16 m at step 2, its line was placed 5 m out, and the drone flew down a line 4 m "
+          "beside the door, met the wall at step 16 and spent ten steps on the other "
+          "station (eval/phase2/R42_survey_homing/README.md)."),
+    Agent("a83", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A83,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a82's survey and a79's latch in one agent, the latch sooner (three steps "
+          "without getting farther down the lane, not five) and its way out steadier "
+          "(latched and inside, the waypoint is 4 m back down the middle of the corridor, "
+          "not the route's next point), with a78's sentence. R39 (a79), s03 dynamic seed "
+          "1: the latch fired at step 35, nine steps after the first closed read, the "
+          "drone was out of the tine at 40, through the other tine's open door at 57 and "
+          "2.8 m from the goal at 60 (eval/phase2/R43_survey_latch/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"
