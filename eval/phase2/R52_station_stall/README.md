@@ -6,7 +6,7 @@
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) from R51's flight, while R49 was in the air; the last round
 of the night; shakedown flown 2026-11-06 (two of four solved, gate passed, the longer wait not
-called on); round flight below
+called on); **flown 2026-11-06, 20/30, not carried**
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R45 (`a85`, 23/30, the bar) and R51 (`a91`, 19/30), no control lane.
@@ -92,7 +92,10 @@ not required.
 
 ## Outcome
 
-Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Flown 2026-11-06: 20/30 against `a91`'s 19/30 (R51) and the bar's 23/30; not carried.** The
+hypothesis did not hold: s02c `final` 1/3. The longer wait won the one run that called on it; the
+other two runs of the cell never started a survey. s02 17/24, s03 3/6.
+[summary.md](summary.md). Labels: Claude review, not yet confirmed by the operator.
 
 **Shakedown (2026-11-06, 09:20–09:34 UTC): four unscored runs as two extra clients beside
 R49's four lanes, slot 5 (port 8105, sctsvr6 `~/asep-r33-shake`) and slot 6 (port 8106,
