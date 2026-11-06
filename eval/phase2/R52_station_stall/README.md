@@ -5,7 +5,8 @@
 **Navigator notes:** `NAVIGATOR_A78` (`a85`'s) ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) from R51's flight, while R49 was in the air; the last round
-of the night; shakedown and flight below
+of the night; shakedown flown 2026-11-06 (two of four solved, gate passed, the longer wait not
+called on); round flight below
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R45 (`a85`, 23/30, the bar) and R51 (`a91`, 19/30), no control lane.
@@ -91,4 +92,24 @@ not required.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+
+**Shakedown (2026-11-06, 09:20–09:34 UTC): four unscored runs as two extra clients beside
+R49's four lanes, slot 5 (port 8105, sctsvr6 `~/asep-r33-shake`) and slot 6 (port 8106,
+`~/asep-r52-shake-b`) at `64129a9`, logs `~/r52_shake_5.log`, `_6.log`. All valid, two of
+four solved. Gate passed.** (`eval/probes/a80_check.py`.)
+
+| Cell (seed) | `a92` | R51 (`a91`), same cell and seed | What happened |
+|---|---|---|---|
+| s02c `final` (1) | lost | lost (first station given up at 9, through at 48) | a doorway read at step 2 and flown at, look at 11, flown at again at 13, look at 18, survey over at 22; no station, never through; a hall latch at 30 |
+| s02c `final` (2) | lost | lost (first station given up at 8, through at 56) | survey from 6; **the first station reached at 12** and looked from for 7 steps (one square look), no doorway flown at; second station looked from at 25; over at 30 |
+| s02c `final` (3) | **solved, 23** | lost (flew at a doorway, never through) | survey from 2, the door flown at from 6, through at 10 |
+| s02vc `final` (1) | solved, 27 | solved at 56 (no survey) | survey from 2, **the first station reached at 7**, the door flown at from 9, through at 19 |
+
+- **Gate:** the first station not given up in transit in at least three of four: none was
+  given up (two runs had a transit to it, both reached it; two flew at a doorway before any
+  transit). A route on every step. Surveys over at 22, 30, 16 and 26, inside the 44. Passed.
+- **What it shows and does not:** where the station was flown to it was reached, in 6 and 5
+  steps, so in neither run did the longer wait come into play: the navigator turned to the
+  side sooner than in R51's runs. s02c `final` seed 2 reached the door's side, looked, and
+  saw no door. One seed each, unscored, six clients on the host.
