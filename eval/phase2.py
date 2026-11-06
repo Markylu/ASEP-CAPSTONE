@@ -400,6 +400,12 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a85's navigator on a86's planner (a89 without the station guard), contested cells",
             "agent": "a91", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R52: a92 (a91 with the survey waiting 12 steps before it gives a
+    # station up, after 9 first stations given up in transit in R45-R51).
+    "R52": {"folder": "R52_station_stall",
+            "title": "a91 with the survey's stations held for 12 steps, contested cells",
+            "agent": "a92", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

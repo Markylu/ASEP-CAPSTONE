@@ -1662,3 +1662,15 @@ def test_a91_is_a89_without_the_station_guard():
     assert {k: v for k, v in a91["pathfinder"].items() if k != "survey"} == \
         {k: v for k, v in a89["pathfinder"].items() if k != "survey"}
     assert agent.get("a90").sha() == "5a714edadebd"
+
+
+def test_a92_is_a91_with_the_stations_held_for_twelve_steps():
+    a91 = agent.get("a91").features["orchestrator"]
+    a92 = agent.get("a92").features["orchestrator"]
+    assert a91["pathfinder"]["survey"]["stall_steps"] == 6
+    assert a92["pathfinder"]["survey"] == dict(a91["pathfinder"]["survey"], stall_steps=12)
+    assert {k: v for k, v in a92.items() if k != "pathfinder"} == \
+        {k: v for k, v in a91.items() if k != "pathfinder"}
+    assert {k: v for k, v in a92["pathfinder"].items() if k != "survey"} == \
+        {k: v for k, v in a91["pathfinder"].items() if k != "survey"}
+    assert agent.get("a91").sha() == "99b20381ecdc"
