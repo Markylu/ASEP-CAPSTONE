@@ -5,7 +5,8 @@
 **Navigator notes:** `NAVIGATOR_A78` (`a85`'s) ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) from R46's flight, while R47 was in the air and R48 queued;
-shakedown flown 2026-11-06 (one of four solved, gate passed by its letter); round flight below
+shakedown flown 2026-11-06 (one of four solved, gate passed by its letter); **flown
+2026-11-06, 23/30, a draw with `a85`**
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R45 (`a85`, 23/30, the bar), no control lane.
@@ -108,7 +109,9 @@ results are merged in before this round's PR.
 
 ## Outcome
 
-Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Flown 2026-11-06: 23/30, level with `a85` (R45, 23/30); a draw by the rule, not the new bar.** The
+hypothesis held: s02 21/24, the best of the night (the survey started in 21 runs and 20 were won);
+s03 2/6. [summary.md](summary.md). Labels: Claude review, not yet confirmed by the operator.
 
 **Shakedown (2026-11-06, 07:59–08:27 UTC): four unscored runs, slot 5 (port 8105) as a fifth
 client beside R47's lanes (and, from 08:14, `a91`'s shakedown on two freed lanes), sctsvr6
