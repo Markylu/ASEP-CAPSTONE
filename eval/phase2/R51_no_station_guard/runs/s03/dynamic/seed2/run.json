@@ -1,0 +1,56 @@
+{
+  "run_id": "p2_R51_s03_dynamic_seed2_a01",
+  "started": "2026-11-06T08:57:33+00:00",
+  "model": "Qwen3-VL-30B-A3B",
+  "vlm_profile": "remote",
+  "litellm_base_url": "http://127.0.0.1:8004",
+  "agent_version": "a91",
+  "agent_sha": "99b20381ecdc",
+  "prompt_version": "p17",
+  "prompt_sha": "cb3578251cfe",
+  "subagent_prompts": {
+    "g05": "133ed83db46b",
+    "d01": "95c80a5ef984"
+  },
+  "spatial_sha": "eceb875a68a3",
+  "spatial_a14_sha": "0075a8a0e5c0",
+  "spatial_a17d_sha": "38b2169d0ae8",
+  "git_sha": "8b3f291",
+  "git_dirty": false,
+  "temperature": 0.0,
+  "scene": "res://sites/s03_fork_deadend/site.tscn",
+  "config": {
+    "action_dist": 1.7,
+    "annotation_distance": 6.0,
+    "camera_pitch": 0.0,
+    "draw_plane_offset": 1.5,
+    "fan_spread": 1.0,
+    "fov_deg": 87.0,
+    "image_edge_threshold": 0.04,
+    "include_turn_around": true,
+    "move_speed": 8.0,
+    "num_actions": 5,
+    "turn_speed": 6.0
+  },
+  "frame_size": [
+    768,
+    768
+  ],
+  "godot_version": "4.7.2-stable (official)",
+  "max_steps": 60,
+  "site_id": "s03_fork_deadend",
+  "site_version": 2,
+  "physics_ticks_per_second": 60,
+  "freeze_world": true,
+  "static_doors": false,
+  "world": "dynamic",
+  "spawn_seed": 2,
+  "spawn_offset": {
+    "dyaw_deg": 0.193672657012939,
+    "dz": 0.202882349491119
+  },
+  "final_closed": [],
+  "run_dir": "eval/phase2/R51_no_station_guard/runs/s03/dynamic/seed2",
+  "ended": "2026-11-06T09:04:28+00:00",
+  "end_reason": "max_steps"
+}

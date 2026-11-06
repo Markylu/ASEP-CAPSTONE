@@ -5,8 +5,8 @@
 **Navigator notes:** `NAVIGATOR_A78` (`a85`'s) ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) while R47 was landing (22 of 30 flown) and R49's shakedown
-was flying; shakedown flown 2026-11-06 (three of four solved, gate passed); round flight
-below
+was flying; shakedown flown 2026-11-06 (three of four solved, gate passed); **flown
+2026-11-06, 19/30, not carried**
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R45 (`a85`, 23/30, the bar), no control lane. With R46 (`a86`),
@@ -107,7 +107,10 @@ are merged in before this round's PR.
 
 ## Outcome
 
-Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Flown 2026-11-06: 19/30 against `a85`'s 23/30 (R45); not carried.** The hypothesis did not hold.
+s02 18/24, level with `a85`'s 19/24 (12 of 12 surveys that crossed from their first station won);
+s03 1/6 (R45 4/6), lost in the lobby and the shut tine with no always-on sentence.
+[summary.md](summary.md). Labels: Claude review, not yet confirmed by the operator.
 
 **Shakedown (2026-11-06, 08:14–08:27 UTC): four unscored runs on lane slots 3 and 4 (freed by
 R47), beside R47's last two lanes and `a89`'s shakedown on slot 5; sctsvr6
