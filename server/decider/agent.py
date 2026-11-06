@@ -494,6 +494,14 @@ PATHFINDER_A91: Dict[str, Any] = dict(PATHFINDER_A89, survey=PATHFINDER_A86["sur
 PATHFINDER_A92: Dict[str, Any] = dict(
     PATHFINDER_A91, survey=dict(PATHFINDER_A91["survey"], stall_steps=12))
 
+#: a93: a goal report is dropped when its strip lies more than 26 degrees off
+#: the bearing to where the goal truly is, the goal 4 m or more away
+#: (orchestrator.check_goal). Chosen on R44 to R52's 210 runs: it drops 108 of
+#: the 249 reports made with no line of sight and 13 of the 1330 made with
+#: one; inside 4 m the sphere is wider than a strip (6 reports there lay off
+#: the line, 1.1 to 2.4 m). eval/phase2/R53_goal_check/README.md.
+GOAL_CHECK_A93: Dict[str, Any] = {"off_deg": 26.0, "min_m": 4.0}
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -2050,6 +2058,29 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "that kept it, 51. The navigator flies on at the shut door for some steps with "
           "the tag to the side, and the six ran out as it turned back "
           "(eval/phase2/R52_station_stall/README.md)."),
+    Agent("a93", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "goal_check": GOAL_CHECK_A93,
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A89,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a89 with a check on the perceiver's goal reports: one whose strip lies more "
+          "than 26 degrees off the bearing to the goal, the goal 4 m or more away, is "
+          "dropped before the map, the planner or the navigator read it. The planner "
+          "side already knows where the goal is; the navigator's first rule is a goal "
+          "tag, and it took 247 of the 249 the perceiver raised with no line of sight "
+          "in R44 to R52. In s03 seed 1 the report at step 2 (far right, the goal "
+          "straight ahead behind walls) turned the drone off the stem's line in 12 of "
+          "14 runs, and 8 of the 12 were lost (eval/phase2/R53_goal_check/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"

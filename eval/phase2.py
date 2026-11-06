@@ -406,6 +406,22 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a91 with the survey's stations held for 12 steps, contested cells",
             "agent": "a92", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R53: a93 (a89 with the perceiver's goal reports checked against the
+    # bearing to the goal: 249 reports with no line of sight in R44-R52, the
+    # navigator took the tag on 247; s03 seed 1 turned off the stem's line at
+    # step 2 on one in 12 of 14 runs).
+    "R53": {"folder": "R53_goal_check",
+            "title": "a89 with goal reports off the line to the goal dropped, contested cells",
+            "agent": "a93", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R54: a host round (2026-11-02's rule), flown beside R53: the same a93,
+    # Godot rendered on an H100 (GODOT_VK=nvidia) and not by lavapipe. Not an
+    # agent change: it asks whether a round flown on H100 frames reads like
+    # one flown on lavapipe's.
+    "R54": {"folder": "R54_h100_frames",
+            "title": "a93 again with Godot rendered on an H100 (host round), contested cells",
+            "agent": "a93", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

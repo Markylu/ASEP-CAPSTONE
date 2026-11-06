@@ -446,6 +446,47 @@ async def confirm(s: Step) -> Optional[str]:
     return None
 
 
+def goal_off_line(perception: Optional[Dict[str, Any]], manifest: Dict[str, Any],
+                  c: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """a93: the perceiver's goal report, when its strip lies more than
+    `off_deg` off the bearing to where the goal truly is and the goal is
+    `min_m` or more away (nearer, the sphere fills more than a strip). None
+    when there is no report or it lies on the line."""
+    if not perception or perception.get("goal") not in spatial.STRIPS:
+        return None
+    goal, here = goal_at(manifest), spatial.pose_xyh(manifest.get("pose"))
+    if goal is None or here is None:
+        return None
+    far = spatial.dist(here[:2], goal)
+    if far < float(c["min_m"]):
+        return None
+    off = abs(spatial.wrap(here[2] + spatial.strip_offset(perception["goal"])
+                           - spatial.bearing(here[:2], goal)))
+    if off <= float(c["off_deg"]):
+        return None
+    return {"strip": perception["goal"], "off_deg": round(off, 1), "goal_m": round(far, 1)}
+
+
+async def check_goal(s: Step) -> Optional[str]:
+    """a93 (`goal_check`, code only, `goal_truth: planner`): a goal report off
+    the line to the goal is removed (kept as goal_reported, as a27's confirmer
+    keeps it) before the map, the planner or the navigator read it. R44 to
+    R52: 249 of 1579 goal reports had no line of sight and the navigator took
+    the goal tag on 247 of them; in s03 seed 1 the report at step 2 (far
+    right, the goal 30 m straight ahead behind walls) turned the drone off
+    the stem's line in 12 of 14 runs, and 8 of the 12 were lost
+    (eval/phase2/R53_goal_check/README.md)."""
+    hit = goal_off_line(s.perception, s.manifest, s.features["goal_check"])
+    if hit is None:
+        return None
+    s.record["goal_check"] = hit
+    s.perception = dict(s.perception, goal="not_visible", goal_range=None,
+                        goal_reported=hit["strip"])
+    s.record["perceiver"] = dict(s.record["perceiver"], result=s.perception)
+    s.record["goal"] = LEGACY_GOAL["not_visible"]
+    return None
+
+
 def _doors_checked(strips: List[str]) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
     def check(parsed: Dict[str, Any]) -> Dict[str, Any]:
         out = {"reason": str(parsed.get("reason", ""))}
@@ -845,6 +886,9 @@ def pipeline(features: Dict[str, Any]) -> List[Stage]:
     if features.get("confirmer"):
         stages.append(Stage("confirmer", confirm, features.get("confirmer"),
                             "when the perceiver reports the goal"))
+    if features.get("goal_check"):
+        stages.append(Stage("goal_check", check_goal, None,
+                            "when the perceiver reports the goal; code only"))
     if features.get("door_confirmer"):
         stages.append(Stage("door_confirmer", confirm_doors, features.get("door_confirmer"),
                             "when the perceiver reports an open doorway"))
