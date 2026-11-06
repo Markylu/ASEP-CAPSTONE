@@ -350,6 +350,20 @@ SURVEY_A80: Dict[str, Any] = {
 #: a80: a65's planner with the wall survey.
 PATHFINDER_A80: Dict[str, Any] = dict(PATHFINDER_A65, survey=SURVEY_A80)
 
+#: a81 (R41): a80's survey after its shakedown (R40 README, Outcome). A
+#: doorway read across several strips lies at their middle (ray_mean); with
+#: the wall's range unknown the newest ray is taken no nearer than a metre
+#: beyond the farthest the drone has been toward the wall (been_floor), 4 m
+#: out otherwise, and rays must differ by about 18 degrees to be crossed
+#: (cross_det 0.1); a move stopped short in the through phase with no doorway
+#: read gives the route the waypoint for check_steps, and check_m farther on
+#: the drone is through (a jamb clipped), else it was a phantom; flying at the
+#: wall in the look phase, every strip blocked is the wall (look_nose_on).
+SURVEY_A81: Dict[str, Any] = dict(
+    SURVEY_A80, ray_mean=True, been_floor=True, reach_ray_m=4.0, cross_det=0.1,
+    check_steps=3, check_m=2.0, look_nose_on=True)
+PATHFINDER_A81: Dict[str, Any] = dict(PATHFINDER_A65, survey=SURVEY_A81)
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -1613,6 +1627,32 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "strip as open on 1 of 366; beyond 60 degrees, 112 of 231 and 76 of 393; the "
           "open door was in view within 20 degrees of square at 2-6 m on 58 of 4256 "
           "near-side frames (eval/phase2/R40_wall_survey/README.md)."),
+    Agent("a81", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A81,
+                                          "memory": "a17f",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a80 after its shakedown: the survey's through phase made sure. A doorway read "
+          "across several strips lies at their middle; with the wall's range unknown the "
+          "ray is taken 4 m out and no nearer than a metre beyond the farthest the drone "
+          "has been toward the wall, and rays are crossed only when they differ by about "
+          "18 degrees; a move stopped short with no doorway read hands the waypoint to the "
+          "route for three steps, and 2 m farther on the drone is through (it clipped a "
+          "jamb), else the doorway was a phantom; flying at the wall, every strip blocked "
+          "is the wall. R40 shakedown, s02c dynamic seed 1: the survey read the open door "
+          "at step 12 and the drone was through it at 16, but two near-parallel rays put "
+          "the door's line 1.7 m off its centre, the drone clipped the jamb, and the survey "
+          "called the door a phantom and pointed the tags back at the other station for "
+          "the nine steps the navigator took to the goal "
+          "(eval/phase2/R41_survey_check/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"

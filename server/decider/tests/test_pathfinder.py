@@ -1145,3 +1145,84 @@ def test_survey_door_line_is_where_the_ray_meets_a_wall_whose_range_is_known():
     sv = dict(sv, wall=6.0, rays=[[here[0], here[1] + 3.0, 21.75]])
     want = 3.0 + math.tan(math.radians(21.75)) * 6.0
     assert abs(planner.survey_door_line(sv, SV) - want) < 0.02
+
+
+# --- a81 (R41): the survey after a80's shakedown -----------------------------------
+
+S81 = agent.PATHFINDER_A81
+SV81 = S81["survey"]
+
+
+def survey81_at(mem, here, step, records=()):
+    cm = spatial.CostMap(mem, [], S81, include=(spatial.cell(here[:2]), spatial.cell(GOAL80)),
+                         start=spatial.cell(here[:2]))
+    return planner.wall_survey(mem, cm, here, step, GOAL80, list(records), S81)
+
+
+def test_a81_a_bump_in_the_through_phase_is_checked_before_it_is_called_a_phantom():
+    mem, here, step = hall()
+    _, sv = survey81_at(mem, here, step)
+    station = planner.survey_station(sv, SV81)
+    at = (station[0], station[1], 0.0)
+    mem.door_rays.append(spatial.Ray(at[0], at[1], 0.0, step + 5, "open_far"))
+    wp, sv = survey81_at(mem, at, step + 5, [rec(step, sv)])
+    assert sv["phase"] == "through"
+    hit = (at[0] + 3.0, at[1], 0.0)
+    mem.blocks.append(spatial.Block(hit[0], hit[1], 0.0, step + 6, 0.4))
+    wp, chk = survey81_at(mem, hit, step + 7, [rec(step + 5, sv)])
+    assert wp is None and chk["phase"] == "check" and abs(chk["mark"] - 3.0) < 0.01   # the route's turn
+    # 2 m farther toward the wall: it was a jamb, the drone is through.
+    wp, done = survey81_at(mem, (hit[0] + 2.2, hit[1], 0.0), step + 9, [rec(step + 7, chk)])
+    assert wp is None and done["phase"] == "done"
+    # No farther in check_steps: a phantom, on to the next station.
+    wp, nxt = survey81_at(mem, hit, step + 7 + SV81["check_steps"], [rec(step + 7, chk)])
+    assert nxt["phase"] == "transit" and nxt["i"] == 1
+    # a80 has no check: the bump alone moves it on.
+    _, sv80 = survey_at(mem, here, step)
+    wp, sv80 = survey_at(mem, at, step + 5, [rec(step, sv80)])
+    wp, sv80 = survey_at(mem, hit, step + 7, [rec(step + 5, sv80)])
+    assert sv80["phase"] == "transit" and sv80["i"] == 1
+
+
+def test_a81_door_line_takes_the_middle_of_the_strips_and_no_nearer_than_the_drone_has_been():
+    mem, here, step = hall()
+    _, sv = survey81_at(mem, here, step)
+    station = planner.survey_station(sv, SV81)
+    at = (station[0], station[1], 0.0)
+    for heading in (10.0, 30.0):                             # the doorway spans two strips
+        mem.door_rays.append(spatial.Ray(at[0], at[1], heading, step + 5, "open_far"))
+    wp, sv2 = survey81_at(mem, at, step + 5, [rec(step, sv)])
+    assert sv2["rays"][-1][2] == 20.0
+    # The wall's range unknown: 4 m out along the ray, the carrot on that line.
+    want = 7.0 + math.tan(math.radians(20.0)) * SV81["reach_ray_m"]
+    assert abs(planner.survey_door_line(sv2, SV81) - want) < 0.02
+    assert abs(wp[1] - (here[1] + want)) < 0.05
+    # The drone has been 6 m toward the wall without meeting it: at least 7 m out.
+    far = 7.0 + math.tan(math.radians(20.0)) * 7.0
+    assert abs(planner.survey_door_line(sv2, SV81, been=6.0) - far) < 0.02
+
+
+def test_a81_flying_at_the_wall_every_strip_blocked_is_the_wall():
+    mem, here, step = hall()
+    _, sv = survey81_at(mem, here, step)
+    station = planner.survey_station(sv, SV81)
+    at = (station[0], station[1], 0.0)
+    wp, sv = survey81_at(mem, at, step + 4, [rec(step, sv)])
+    assert sv["phase"] == "look"
+    mem.nose_on.append(step + 6)
+    close = (at[0] + 3.0, at[1], 0.0)
+    wp, sv2 = survey81_at(mem, close, step + 6, [rec(step + 4, sv)])
+    assert sv2["phase"] == "transit" and sv2["i"] == 1 and abs(sv2["wall"] - (3.0 + SV81["wall_m"])) < 0.02
+    wp, sv80 = survey_at(mem, close, step + 6, [rec(step + 4, sv)])     # a80 wants more than that
+    assert sv80["phase"] == "look"
+
+
+def test_a81_is_a80_with_the_survey_changed():
+    a80 = agent.get("a80").features["orchestrator"]
+    a81 = agent.get("a81").features["orchestrator"]
+    assert {k: v for k, v in a81.items() if k != "pathfinder"} == \
+        {k: v for k, v in a80.items() if k != "pathfinder"}
+    assert {k: v for k, v in a81["pathfinder"].items() if k != "survey"} == \
+        {k: v for k, v in a80["pathfinder"].items() if k != "survey"}
+    assert agent.get("a81").sha() != agent.get("a80").sha()
+    assert agent.get("a80").sha() == "1c1790de9767"

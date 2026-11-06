@@ -321,6 +321,12 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a66 with the wall survey, contested cells",
             "agent": "a80", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R41: a81 (a80 with the survey's through phase made sure after a80's
+    # shakedown), the same screen. Read against R32P (a66, 15/30).
+    "R41": {"folder": "R41_survey_check",
+            "title": "a66 with the wall survey, through phase checked, contested cells",
+            "agent": "a81", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
