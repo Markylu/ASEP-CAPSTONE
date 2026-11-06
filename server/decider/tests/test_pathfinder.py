@@ -1614,3 +1614,36 @@ def test_a89_is_a88s_planner_with_a85s_navigator_and_reopens_only_inside_the_rec
     assert at(14.0, agent.PATHFINDER_A89) is False           # 4 m down it: reopened
     assert at(24.0, agent.PATHFINDER_A89) is True            # 4 m beyond its far end: left shut
     assert at(24.0, agent.PATHFINDER_A88) is False           # a88 reopened it there
+
+
+def test_a90_says_the_sentence_only_after_the_first_way_in():
+    a89 = agent.get("a89").features["orchestrator"]
+    a90 = agent.get("a90").features["orchestrator"]
+    assert a90["pathfinder"] == dict(a89["pathfinder"], way_in={"steps": 8})
+    notes = a90["navigator_notes"]
+    assert notes == dict(agent.NAVIGATOR_A78, always="after_way_in")
+    assert agent.get("a89").sha() == "85cda76df25b"
+    turn = {"actions": [{"index": 0, "turn_around": True}, {"index": 1}]}
+    on_turn = {0: ["toward your target"]}
+    assert orchestrator.behind_note(notes, turn, on_turn, {"way_in": True}) is None
+    assert orchestrator.behind_note(notes, turn, on_turn, {"way_in": False}) == notes["route_behind"]
+    assert orchestrator.behind_note(notes, turn, on_turn, {"way_in": True, "latch": {"out": False}}) \
+        == notes["dead_end"] + " " + notes["route_behind"]
+    assert orchestrator.behind_note(agent.NAVIGATOR_A86, turn, on_turn, {"way_in": True}) \
+        == notes["route_behind"]                                   # a86 as it was
+
+    def plan(cells, p):
+        mem = spatial.SpatialMemory(cfg=spatial.A17F)
+        for i, c in enumerate(cells):
+            mem.visits[c] = [i]
+            mem.trail.append((i,) + centre(c) + (0.0,))
+        x, y = centre(cells[-1])
+        man = {"step": len(cells), "pose": {"position": [x, 1.75, -y], "yaw": math.radians(-90.0)}}
+        return planner.pathfind(mem, man, [], (60.0, centre((0, 0))[1]), p)
+
+    straight = [(x, 0) for x in range(6)]
+    assert plan(straight, agent.PATHFINDER_A90).way_in is True
+    assert plan(straight + [(6, 4), (7, 4)], agent.PATHFINDER_A90).way_in is False   # 3.4 m off the line
+    assert plan([(x, 0) for x in range(8)], agent.PATHFINDER_A90).way_in is False     # step 8
+    assert plan(straight, agent.PATHFINDER_A89).way_in is None
+    assert "way_in" not in plan(straight, agent.PATHFINDER_A89).to_dict()

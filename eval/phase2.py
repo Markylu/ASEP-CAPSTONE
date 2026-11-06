@@ -386,6 +386,13 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a88's planner without the route-behind sentence outside a latched corridor, contested cells",
             "agent": "a89", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R50: a90 (a89 with a86's sentence outside a latched corridor again, but
+    # not on the drone's first way in). The same screen, read against R45
+    # (a85, 23/30), R46 (a86) and R49 (a89).
+    "R50": {"folder": "R50_sentence_after_way_in",
+            "title": "a89 with the route-behind sentence after the first way in, contested cells",
+            "agent": "a90", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
