@@ -5,7 +5,7 @@
 **Navigator notes:** `NAVIGATOR_A78` (`a85`'s) ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) from R46's flight, while R47 was in the air and R48 queued;
-shakedown and flight below
+shakedown flown 2026-11-06 (one of four solved, gate passed by its letter); round flight below
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R45 (`a85`, 23/30, the bar), no control lane.
@@ -108,4 +108,24 @@ results are merged in before this round's PR.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+
+**Shakedown (2026-11-06, 07:59–08:27 UTC): four unscored runs, slot 5 (port 8105) as a fifth
+client beside R47's lanes (and, from 08:14, `a91`'s shakedown on two freed lanes), sctsvr6
+`~/asep-r33-shake` at `12c2814`, log `~/r49_shake_a89.log`. All valid, one of four solved.
+Gate passed by its letter.** (`eval/probes/a80_check.py`, `eval/probes/a79_check.py`.)
+
+| Cell (seed) | `a89` | Earlier tonight, same cell and seed | What happened | Sentence |
+|---|---|---|---|---|
+| s02a `dynamic` (2) | lost | solved at 26 in R45 (one station); no survey and lost in R46 | survey from 4; the first station on the side of the door that had shut (looks 11–15), 18 steps to the second (two turn-arounds the tags did not ask for), at the door at step 36 beside the jamb, turned away, survey over at 45 | none |
+| s03 `dynamic` (2) | lost | lost in R45 and R46 | door shut at 18, latch at 35, 17 steps later, out at 39, not out of the tine in time | 1, latched, taken |
+| s02c `final` (3) | lost | lost in R45 and R46; solved at 25 in `a91`'s shakedown | survey from 5, both stations (looks at 13 and 24, two square), no doorway flown at, over at 28 | none |
+| s02vc `final` (1) | solved, 31 | lost in R45 and R46 | survey from 2, the door flown at from 3, through at 23 | none |
+
+- **Gate:** the survey by step 8 in the three s02 runs: 4, 5, 2. A frame square to the wall
+  in each: 2, 2, 1. The sentence on no step without a latch: held. A route on every step.
+  Passed.
+- **What it does not show:** a win where R46 lost for want of a survey. The survey started in
+  all three (R46: none of the three), and two of the three were still lost, at the stations
+  and at the door. `a91` (R51: this agent without the station guard) solved three of four on
+  its own shakedown beside this one and flies first; R49 follows it on the same lanes.
