@@ -1548,3 +1548,21 @@ def test_a86_is_a85_with_the_sentence_always_the_latch_guards_and_the_short_seco
     assert latch["after_survey"] is True and latch["confined"] == dict(was["confined"], off_line_m=2.5)
     assert agent.get("a85").sha() == "a43435111dff" and agent.get("a84").sha() == "58e76b4b2054"
     assert [s.name for s in orchestrator.pipeline(a86)] == [s.name for s in orchestrator.pipeline(a85)]
+
+
+def test_a87_a_station_is_shut_only_by_a_wall_the_drone_has_met():
+    L87 = agent.PATHFINDER_A87
+    mem, here, step = hall()
+    for x in range(0, 12):
+        mem.near_wall[(x, 2)] = x                       # a wall the perceiver read, never met
+    cm = spatial.CostMap(mem, [], L87, include=(spatial.cell(here[:2]), spatial.cell(GOAL80)),
+                         start=spatial.cell(here[:2]))
+    _, sv = planner.wall_survey(mem, cm, here, step, GOAL80, [], L87)
+    assert sv["order"] == [7.0, -7.0]                   # both stations stand (a86: the right only)
+    _, was = planner.wall_survey(mem, cm, here, step, GOAL80, [], L86)
+    assert was["order"] == [-7.0]
+    mem.stop_wall[(6, 3)] = step - 1                    # stopped by a wall on the line to the left one
+    _, sv = planner.wall_survey(mem, cm, here, step, GOAL80, [], L87)
+    assert sv["order"] == [-7.0]
+    assert agent.SURVEY_A87 == dict(agent.SURVEY_A86, station_guard="hard")
+    assert agent.get("a86").sha() == "cd6b8de756ab"
