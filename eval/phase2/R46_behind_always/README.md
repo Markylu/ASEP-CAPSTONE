@@ -5,8 +5,8 @@
 **Navigator notes:** `NAVIGATOR_A86` ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) while R44 was landing and R45 taking off; shakedown flown
-2026-11-06 (four of four solved, s03 `dynamic` seed 1 among them; gate passed); round flight
-below
+2026-11-06 (four of four solved, s03 `dynamic` seed 1 among them; gate passed); **flown
+2026-11-06, 21/30, a draw with `a85` (23/30), not carried**
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30), R44 (`a84`) and R45 (`a85`). The bundle is
@@ -101,7 +101,10 @@ tine by step 25, no latch lies on the direct line, and a route is on at least 95
 
 ## Outcome
 
-Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Flown 2026-11-06: 21/30 against `a85`'s 23/30 (R45), a draw; not carried.** s03 5/6 (R45 4/6), s02
+16/24 (R45 19/24). The hypothesis did not hold as written: the sentence was taken 98 times of 98,
+s03 gained, and in s02 the survey started in 15 of 24 runs (R45: 23), 5 of the 9 without one lost.
+[summary.md](summary.md). Labels: Claude review, not yet confirmed by the operator.
 
 **Shakedown (2026-11-06, 06:03–06:23 UTC): four unscored runs, slot 5 (port 8105) as a fifth
 client beside R44's last lanes and R45's first, sctsvr6 `~/asep-r33-shake` at `6a7aa18`, log
