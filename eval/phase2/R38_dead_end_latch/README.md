@@ -235,5 +235,15 @@ rounds separately. That is a fit to the answers the gate failed on, on a narrow 
 settings, with the `initial` arms never sampled; it is a lead for a new agent and a held-out
 probe (561 asked steps on R30, R32 and F's `initial` runs), and it changes nothing above.
 
+**The held-out probe (same day, operator: "Run held-out probe").** Run with the setting and the
+gate fixed beforehand ([_probes/dead_end_heldout](../_probes/dead_end_heldout/README.md)): 561
+calls, all answered. The filter held in the hall: the rule fires in 0 of 32 s02 change-arm
+runs (25 with no filter) and in none of the 30 s02 and s01 `initial` runs. It fires in 3 of 4
+s03 `dynamic` runs. **The gate fails** on its `initial` row, 1 of 36 where 0 was asked: Round F
+s03 `initial` seed 4, a run `a66` won, where `e01` says yes twice with the drone already through
+the tine's open door, and the latch then routes it back down the tine for three steps. `e01`
+says yes on 38 of 41 asked steps anywhere in s03, shut tine or not, so in s03 it is not a
+dead-end call. By the rule set beforehand the filter is dropped.
+
 What stands: the latch itself is sound on the record (gate 2 with a confirmer that is never
 wrong), and it has no trigger. `a66` is still the best agent (F 64/90, R32P 15/30).

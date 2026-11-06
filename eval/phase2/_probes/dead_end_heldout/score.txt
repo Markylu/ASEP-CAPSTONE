@@ -1,0 +1,40 @@
+Probe DE, held-out check: e01 on the asked steps of 78 runs the places filter was not fitted on
+(final initial; R30 initial/final/dynamic; R32 final/dynamic).
+Filter, fixed before any call: an answer counts only while at most 2 closed-door places are known (4 m).
+Rule for a run: yes on a step and on 2 of the last 3 answers, none older than 15 steps (a78's).
+
+561 of 561 asked steps answered (561 with a frame), 0 failed calls; median latency 924 ms
+
+group          runs  yes all   yes kept     fired      near   in time  fired, all  near, all
+initial          36     5/99       4/44         1         1         1           1          1
+s02 change       32  170/424       1/83         0         0         0          25         25
+s01 change        2      0/0        0/0         0         0         0           0          0
+s03 dynamic       4    17/20      14/16         3         3         2           3          3
+s03 final         4    18/18        4/4         1         1         0           2          2
+
+'yes all': yes answers of all answers; 'yes kept': of those the filter keeps.
+'fired': runs the rule fires in on the kept answers; 'near': before the drone crossed (s02: x < 0; s03: x < -7);
+'in time': with 25 or more steps left; 'fired, all' and 'near, all': the same on every answer, no filter.
+
+By round (fired on the kept answers / runs)
+  R30   initial 0/6; s02 change 0/8; s01 change 0/2; s03 dynamic 1/1; s03 final 0/1
+  R32   s02 change 0/24; s03 dynamic 2/3; s03 final 1/3
+  final initial 1/30
+
+Yes by where the drone stood (kept answers, all answers)
+  shut_tine      14/16     27/30
+  s03_other        7/7     11/11
+  s02            2/124   172/520
+
+Runs the rule fires in on the kept answers
+  final/s03/initial/seed4      won   step 30 (s03_other), crossed 31
+  R30/s03/dynamic/seed1        lost  step 19 (shut_tine), crossed -
+  R32/s03/dynamic/seed1        lost  step 36 (shut_tine), crossed -
+  R32/s03/dynamic/seed2        lost  step 27 (shut_tine), crossed -
+  R32/s03/final/seed3          lost  step 37 (shut_tine), crossed -
+
+FAIL: fires in none of the 36 initial runs
+PASS: fires before the crossing in at most 2 of the 32 s02 change-arm runs
+PASS: fires in at least 3 of the 4 s03 dynamic runs
+PASS: every asked step answered
+Held-out gate: FAIL

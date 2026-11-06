@@ -67,6 +67,15 @@ alone: needing a straight run the drone is still in stops none of them. With `e0
 latched, 8 with 25 or more steps left, 346/421 (82%) routes out; 1 of 53 won s02 runs and 0 of
 45 lost ones latched; no route on 6 steps. A fit to these runs, read after the gate.
 
+The same on the held-out runs ([_probes/dead_end_heldout](../dead_end_heldout/README.md),
+`--answers probe:e01 --places 2 --held-out`,
+[replay_probe_e01_places2_heldout.txt](replay_probe_e01_places2_heldout.txt); F's `initial`
+arms, R30, R32): 3 of 4 s03 `dynamic` runs latched (2 with 25 or more steps left), 79/102 (77%)
+routes out; none of the 34 s02 and s01 change-arm runs latched; no step without a route; and
+1 of the 36 `initial` runs latched, F s03 `initial` seed 4 at step 30, a won run, where the
+route then runs back down the tine for three steps. That run fails the held-out gate. R32's
+runs (`a49`) record no route, so the `a66` columns count R30 only.
+
 Not covered: the lane shut once the drone is out (the recorded drone never leaves; unit tests
 `test_latch_is_carried_by_the_record_and_shuts_the_lane_once_out`), and anything the navigator
 does with the route.

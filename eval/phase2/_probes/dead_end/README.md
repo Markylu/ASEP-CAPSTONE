@@ -154,5 +154,9 @@ says no (0 yes in 71 steps with one place, 10 in 175 with two). A tine has one d
 has seen: R30 (`a66`, 18 runs), R32 (`a49`, 30 runs) and Round F's `initial` arms: 561 asked
 steps, 147 of them kept by the filter, about 9 minutes of calls. With the setting fixed at 2
 places and 4 m beforehand, the latch's rule should fire in none of the 36 `initial` runs (F 30,
-R30 6), in at most 2 of the 32 s02 change-arm runs, and in 3 of the 4 s03 `dynamic` runs. Not
-run.
+R30 6), in at most 2 of the 32 s02 change-arm runs, and in 3 of the 4 s03 `dynamic` runs.
+
+**Run the same day: the gate failed** ([_probes/dead_end_heldout](../dead_end_heldout/README.md)).
+s02 change arms 0 of 32 and s03 `dynamic` 3 of 4, as asked; but the rule fires in 1 of the 36
+`initial` runs, Round F s03 `initial` seed 4, a won run, with the drone already through the
+tine's open door. `e01` says yes on 38 of 41 asked steps anywhere in s03. The filter is dropped.
