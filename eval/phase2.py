@@ -314,6 +314,41 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a66 with the dead-end latch fired by the trail, contested cells",
             "agent": "a79", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R40: a80 (a66 with the wall survey, planner.wall_survey: square looks at
+    # the wall either side of a closed door met on the direct line), the same
+    # screen. Read against R32P (a66, 15/30). Overnight run 2026-11-05.
+    "R40": {"folder": "R40_wall_survey",
+            "title": "a66 with the wall survey, contested cells",
+            "agent": "a80", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R41: a81 (a80 with the survey's through phase made sure after a80's
+    # shakedown), the same screen. Read against R32P (a66, 15/30).
+    "R41": {"folder": "R41_survey_check",
+            "title": "a66 with the wall survey, through phase checked, contested cells",
+            "agent": "a81", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R42: a82 (a81 with the survey homing on the door's bearing while the
+    # wall's range is unknown), the same screen. Read against R32P (a66, 15/30).
+    "R42": {"folder": "R42_survey_homing",
+            "title": "a66 with the wall survey homing on the door's bearing, contested cells",
+            "agent": "a82", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R43: a83, a bundle: the wall survey after a82's shakedown (far reads pick
+    # the side only, no crossing of rays, the goal in view ends it) with
+    # a79's dead-end latch, sooner and with a steadier way out. The same
+    # screen, read against R32P (a66, 15/30) and R39 (a79).
+    "R43": {"folder": "R43_survey_latch",
+            "title": "a66 with the wall survey and the dead-end latch, contested cells",
+            "agent": "a83", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R44: a84, R43's bundle with the two faults its shakedown showed taken
+    # out (the survey ended by a goal report that was not there; the latch's
+    # lane narrower than the tine). The same screen, read against R32P (a66,
+    # 15/30) and R39 (a79, 15/30).
+    "R44": {"folder": "R44_survey_latch_fixed",
+            "title": "a66 with the wall survey and the dead-end latch, after R43's shakedown, contested cells",
+            "agent": "a84", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

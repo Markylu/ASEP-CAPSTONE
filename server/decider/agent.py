@@ -320,6 +320,102 @@ PATHFINDER_A79: Dict[str, Any] = dict(
         confined={"half_m": 1.5, "back_m": 1.0, "facing_deg": 70.0, "reads": 2,
                   "dwell_steps": 5, "advance_m": 1.0, "beside_m": 4.0}))
 
+#: a80 (R40): the wall survey (planner.wall_survey). The approach axis is the
+#: bearing from the spawn to the goal. A closed door read in the centre strip
+#: while the drone heads within goal_deg of the axis, run_m or more along it
+#: and never yet more than line_m off the direct line, starts it. Stations lie
+#: stations_m to the side of the approach (the side of a remembered open
+#: doorway at least side_min_m off it first, else the left; then the other
+#: side), back_m behind where it started until the wall has been met, then
+#: standoff_m back from the wall; a station is reached within reach_m and
+#: given up after stall_steps without coming half a metre nearer. There the
+#: drone turns to the wall and flies at it (a waypoint face_m ahead along the
+#: axis), each frame within square_deg of the axis a square look, until it
+#: meets the wall (wall_m ahead of where it is stopped) or look_steps pass. An
+#: open doorway read on a strip whose ray is within open_deg of the axis is
+#: kept (the last rays_kept); the doorway's line is where those rays cross
+#: (least squares, determinant over cross_det), or meet a wall whose range is
+#: known, or reach_ray_m out along the newest; the waypoint is carrot_m ahead
+#: of the drone on that line until through_steps pass with no such read, or
+#: the drone is through_m beyond a known wall. 7 m: what one square look's
+#: 87-degree frame covers of a wall 4 m off.
+#: eval/phase2/R40_wall_survey/README.md.
+SURVEY_A80: Dict[str, Any] = {
+    "goal_deg": 35.0, "run_m": 3.0, "line_m": 2.5, "stations_m": 7.0, "side_min_m": 2.0,
+    "back_m": 0.0, "standoff_m": 5.0, "wall_m": 1.0, "reach_m": 1.7, "stall_steps": 6,
+    "face_m": 6.0, "square_deg": 25.0, "look_steps": 12, "open_deg": 40.0,
+    "reach_ray_m": 5.0, "rays_kept": 6, "cross_det": 0.05, "carrot_m": 3.0,
+    "through_m": 3.0, "through_steps": 5, "budget_steps": 44}
+
+#: a80: a65's planner with the wall survey.
+PATHFINDER_A80: Dict[str, Any] = dict(PATHFINDER_A65, survey=SURVEY_A80)
+
+#: a81 (R41): a80's survey after its shakedown (R40 README, Outcome). A
+#: doorway read across several strips lies at their middle (ray_mean); with
+#: the wall's range unknown the newest ray is taken no nearer than a metre
+#: beyond the farthest the drone has been toward the wall (been_floor), 4 m
+#: out otherwise, and rays must differ by about 18 degrees to be crossed
+#: (cross_det 0.1); a move stopped short in the through phase with no doorway
+#: read gives the route the waypoint for check_steps, and check_m farther on
+#: the drone is through (a jamb clipped), else it was a phantom; flying at the
+#: wall in the look phase, every strip blocked is the wall (look_nose_on).
+SURVEY_A81: Dict[str, Any] = dict(
+    SURVEY_A80, ray_mean=True, been_floor=True, reach_ray_m=4.0, cross_det=0.1,
+    check_steps=3, check_m=2.0, look_nose_on=True)
+PATHFINDER_A81: Dict[str, Any] = dict(PATHFINDER_A65, survey=SURVEY_A81)
+
+#: a82 (R42): a81's survey homing on the door's bearing (home_ray). While the
+#: wall's range is unknown and the kept rays do not yet cross, the waypoint is
+#: carrot_m ahead of the drone along the newest ray, not on a line placed by a
+#: guessed range. R40 shakedown, s02vc final seed 1: the open door read from
+#: 16 m at step 2 was placed 5 m out, and the drone met the wall 4 m beside it.
+SURVEY_A82: Dict[str, Any] = dict(SURVEY_A81, home_ray=True)
+PATHFINDER_A82: Dict[str, Any] = dict(PATHFINDER_A65, survey=SURVEY_A82)
+
+#: a83 (R43): the survey after a82's shakedown, and a79's latch with it. The
+#: survey: a doorway read on the way to a station only picks the side
+#: (side_only: the station on that side first); the door is flown at from the
+#: look phase alone, on the newest ray, and rays are never crossed (no_cross:
+#: R42 shakedown s02vc final, three reads 15 degrees apart and one of them a
+#: phantom crossed 5 m beside the door); the goal in view ends the survey
+#: (goal_ends); through_steps without a read and without the goal in view goes
+#: back to the look (relook). The latch: dwell_steps 3 (a79: 5; on Round F,
+#: R32P and R35 the rule then fires 6 steps after the door shuts, not 8, in 9
+#: of 11 s03 dynamic runs, and in 3 of 53 won s02 runs before the crossing,
+#: a79 0), and `exit`: latched and inside, the waypoint is carrot_m back down
+#: the corridor's middle (planner.pathfind).
+#: eval/phase2/R43_survey_latch/README.md.
+SURVEY_A83: Dict[str, Any] = dict(SURVEY_A82, side_only=True, no_cross=True, goal_ends=True,
+                                  relook=True)
+PATHFINDER_A83: Dict[str, Any] = dict(
+    PATHFINDER_A82, survey=SURVEY_A83, dead_end_latch=dict(
+        PATHFINDER_A79["dead_end_latch"],
+        confined=dict(PATHFINDER_A79["dead_end_latch"]["confined"], dwell_steps=3),
+        exit={"carrot_m": 4.0}))
+
+#: a84 (R44): a83 after its shakedown. The survey without goal_ends: g05
+#: reported the goal on steps where it was not in view (above the shut door at
+#: steps 3-4 of s02c dynamic, through a wall at step 11 of s02vc final) and
+#: the survey ended on its first step. And side_only for the outer strips
+#: alone (side_only "far": a read more than far_strip_deg off the drone's
+#: heading): with it on every strip the survey looked away from a door the
+#: navigator was flying at; a doorway read in the centre three strips is
+#: flown at from any phase, on the newest ray. Rays are never crossed
+#: (no_cross), and through_steps without a read goes back to the look
+#: (relook).
+#: The latch with the lane as wide as it is (confined.span_m: the positions
+#: since the run began spread no more than this across its axis, wherever the
+#: axis lies; a79 and a83: within half_m of the axis, which a run flown along
+#: one wall of the tine fails from the other wall). 2.8 m: the drone's
+#: positions in the 3 m tine spread 2.6 m in every recorded run.
+#: eval/phase2/R44_survey_latch_fixed/README.md.
+SURVEY_A84: Dict[str, Any] = dict(SURVEY_A82, no_cross=True, relook=True, side_only="far",
+                                  far_strip_deg=30.0)
+PATHFINDER_A84: Dict[str, Any] = dict(
+    PATHFINDER_A83, survey=SURVEY_A84, dead_end_latch=dict(
+        PATHFINDER_A83["dead_end_latch"],
+        confined=dict(PATHFINDER_A83["dead_end_latch"]["confined"], span_m=2.8)))
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -1556,6 +1652,131 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "that confirmer (e01 yes on 37% of s02 steps). Round F, R32P and R35: the rule "
           "fires in the shut tine in 9 of 11 s03 dynamic runs and in none of 53 won s02 "
           "runs before the crossing (eval/phase2/R39_confined_latch/README.md)."),
+    Agent("a80", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A80,
+                                          "memory": "a17f",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a66 with the wall survey: the square looks the route never takes. A closed "
+          "door read dead ahead on the first way in along the direct line from the spawn "
+          "to the goal starts it. The drone steps 7 m to the side of that line (the side "
+          "of a remembered open doorway first, else the left), turns back to the line's "
+          "bearing and flies at the wall, every frame on the way in a look square to it; "
+          "at the wall with no door it goes 5 m back and to the other side and flies in "
+          "again. An open doorway read on a strip within 40 degrees of square is kept as a "
+          "ray; the doorway's line is where the rays cross, and the waypoint runs 3 m "
+          "ahead of the drone on it until the drone is through. The wall's range is taken "
+          "only from where the drone is stopped. Probe door_read: at 2-9 m a look within "
+          "20 degrees of square read the open door on 157 of 158 looks and a blank wall "
+          "strip as open on 1 of 366; beyond 60 degrees, 112 of 231 and 76 of 393; the "
+          "open door was in view within 20 degrees of square at 2-6 m on 58 of 4256 "
+          "near-side frames (eval/phase2/R40_wall_survey/README.md)."),
+    Agent("a81", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A81,
+                                          "memory": "a17f",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a80 after its shakedown: the survey's through phase made sure. A doorway read "
+          "across several strips lies at their middle; with the wall's range unknown the "
+          "ray is taken 4 m out and no nearer than a metre beyond the farthest the drone "
+          "has been toward the wall, and rays are crossed only when they differ by about "
+          "18 degrees; a move stopped short with no doorway read hands the waypoint to the "
+          "route for three steps, and 2 m farther on the drone is through (it clipped a "
+          "jamb), else the doorway was a phantom; flying at the wall, every strip blocked "
+          "is the wall. R40 shakedown, s02c dynamic seed 1: the survey read the open door "
+          "at step 12 and the drone was through it at 16, but two near-parallel rays put "
+          "the door's line 1.7 m off its centre, the drone clipped the jamb, and the survey "
+          "called the door a phantom and pointed the tags back at the other station for "
+          "the nine steps the navigator took to the goal "
+          "(eval/phase2/R41_survey_check/README.md)."),
+    Agent("a82", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A82,
+                                          "memory": "a17f",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a81 with the survey homing on the door's bearing: while the wall's range is "
+          "unknown and the kept rays do not yet cross, the waypoint is 3 m ahead of the "
+          "drone along the newest open-doorway ray, not on a line placed by a guessed "
+          "range. R40 shakedown, s02vc final seed 1 (a80): the open door was read from "
+          "16 m at step 2, its line was placed 5 m out, and the drone flew down a line 4 m "
+          "beside the door, met the wall at step 16 and spent ten steps on the other "
+          "station (eval/phase2/R42_survey_homing/README.md)."),
+    Agent("a83", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A83,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "The wall survey and the dead-end latch in one agent. The survey is a82's after "
+          "its shakedown: a doorway read on the way to a station only picks the side, the "
+          "door is flown at from the look phase on the newest ray with no crossing of "
+          "rays, the goal in view ends the survey, and five steps without a read go back "
+          "to the look. The latch is a79's, sooner (three steps without getting farther "
+          "down the lane, not five) and with a steadier way out (latched and inside, the "
+          "waypoint is 4 m back down the middle of the corridor), with a78's sentence. "
+          "R42 shakedown, s02vc final seed 1: three bearings 15 degrees apart, one a "
+          "phantom, crossed 5 m beside the door and the survey ended there. R39 (a79), "
+          "s03 dynamic seed 1: latch at step 35, out of the tine at 40, through the other "
+          "tine's door at 57, 2.8 m from the goal at 60 "
+          "(eval/phase2/R43_survey_latch/README.md)."),
+    Agent("a84", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A84,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a83 after its shakedown: the wall survey and the dead-end latch, two faults "
+          "out. The survey no longer ends when the goal is reported (g05 reported it on "
+          "steps where it was not in view, and the survey ended on its first step in two "
+          "of five s02 runs), and a doorway read in the centre three strips is flown at "
+          "from any phase, on the newest ray (one read in an outer strip on the way to a "
+          "station still only picks the side). The latch's lane is as wide as the drone "
+          "has spread across it (2.8 m), wherever the run's axis lies (a run flown along "
+          "one wall of the tine put the drone 1.5-2.3 m off its axis at the other, and the "
+          "latch stayed silent for 34 steps of an s03 final run). R43's shakedown: s03 "
+          "dynamic seed 2 solved at 54, the first of that cell in Phase 2 (latch at 33, "
+          "seven steps after the door shut); s02a dynamic and s02c final solved through "
+          "the survey (eval/phase2/R44_survey_latch_fixed/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"

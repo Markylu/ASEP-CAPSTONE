@@ -1,0 +1,13 @@
+a66 s02a/initial   won 11/12 steps [14, 15, 15, 19, 24, 15, 14, 29, 27, 19, 15, 60] crossed [8, 8, 8, 11, 17, 8, 8, 23, 20, 13, 8, 18] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66 s02a/final     won 6/12 steps [23, 60, 60, 26, 49, 34, 60, 60, 60, 60, 29, 58] crossed [13, None, None, 17, 40, 25, None, None, None, None, 20, 47] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66 s02a/dynamic   won 7/12 steps [23, 60, 60, 60, 49, 34, 43, 60, 37, 60, 29, 47] crossed [13, None, None, None, 40, 25, 32, None, 28, 43, 20, 38] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66 s02c/initial   won 11/12 steps [14, 15, 15, 19, 24, 15, 14, 29, 27, 19, 15, 60] crossed [8, 8, 8, 11, 17, 8, 8, 23, 20, 13, 8, 18] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66 s02c/final     won 3/12 steps [60, 31, 60, 60, 60, 60, 49, 21, 60, 60, 60, 60] crossed [None, 22, 59, 57, None, None, 39, 13, None, None, None, None] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66 s02c/dynamic   won 5/12 steps [60, 31, 60, 25, 60, 60, 28, 21, 59, 60, 60, 60] crossed [None, 22, None, 15, None, None, 18, 13, 50, None, None, None] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66 s02va/initial  won 12/12 steps [32, 19, 20, 30, 19, 29, 19, 20, 21, 19, 19, 22] crossed [25, 12, 13, 13, 12, 13, 12, 13, 13, 13, 13, 15] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66 s02va/final    won 8/12 steps [50, 44, 60, 60, 25, 27, 48, 34, 60, 31, 60, 40] crossed [41, 35, None, None, 17, 18, 24, 25, None, 22, None, 32] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66 s02va/dynamic  won 8/12 steps [50, 44, 60, 60, 25, 27, 60, 34, 60, 31, 60, 40] crossed [41, 35, None, None, 17, 18, 50, 25, None, 22, None, 32] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66 s02vc/initial  won 12/12 steps [32, 19, 20, 30, 19, 29, 19, 20, 21, 19, 19, 22] crossed [25, 12, 13, 13, 12, 13, 12, 13, 13, 13, 13, 15] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66 s02vc/final    won 6/12 steps [32, 60, 55, 60, 60, 35, 39, 60, 25, 60, 29, 60] crossed [24, None, 47, None, 25, 27, 31, None, 17, None, 21, None] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66 s02vc/dynamic  won 5/12 steps [32, 60, 55, 60, 60, 60, 39, 60, 25, 60, 29, 60] crossed [24, None, 47, None, 25, None, 31, 52, 17, None, 21, None] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a66: 94/144

@@ -1,0 +1,13 @@
+a80 s02a/initial   won 12/12 steps [15, 14, 43, 16, 14, 28, 25, 31, 15, 14, 29, 40] crossed [9, 8, 8, 9, 8, 20, 8, 25, 8, 8, 14, 33] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a80 s02a/final     won 9/12 steps [36, 45, 55, 27, 60, 51, 42, 25, 45, 60, 60, 45] crossed [26, 30, 45, 15, 30, 43, 32, 15, 36, None, 57, 35] survey steps [25, 29, 17, 0, 29, 0, 33, 14, 34, 22, 24, 33]
+a80 s02a/dynamic   won 8/12 steps [43, 59, 45, 41, 60, 51, 38, 60, 60, 26, 60, 59] crossed [33, 49, 33, 32, None, 43, 30, None, None, 15, None, 49] survey steps [30, 0, 32, 28, 0, 0, 26, 30, 18, 14, 0, 12]
+a80 s02c/initial   won 12/12 steps [15, 14, 43, 16, 14, 28, 25, 31, 15, 14, 29, 40] crossed [9, 8, 8, 9, 8, 20, 8, 25, 8, 8, 14, 33] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a80 s02c/final     won 6/12 steps [23, 60, 37, 60, 24, 60, 60, 60, 60, 37, 36, 24] crossed [12, None, 20, None, 15, None, None, 59, 15, 26, 27, 14] survey steps [13, 30, 21, 0, 16, 0, 29, 24, 36, 27, 28, 15]
+a80 s02c/dynamic   won 7/12 steps [26, 26, 60, 24, 50, 60, 60, 28, 27, 60, 27, 60] crossed [15, 16, None, 13, 40, None, None, 16, 17, None, 16, None] survey steps [15, 0, 34, 12, 0, 0, 25, 15, 17, 26, 0, 25]
+a80 s02va/initial  won 12/12 steps [26, 26, 45, 21, 19, 31, 20, 20, 29, 21, 19, 20] crossed [13, 19, 37, 13, 13, 25, 13, 14, 22, 13, 12, 13] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a80 s02va/final    won 7/12 steps [48, 51, 58, 43, 60, 60, 25, 60, 33, 60, 41, 60] crossed [38, 40, 50, 34, None, None, 16, None, 23, None, 32, None] survey steps [34, 39, 14, 28, 33, 23, 0, 0, 21, 38, 28, 0]
+a80 s02va/dynamic  won 7/12 steps [48, 51, 58, 43, 60, 60, 25, 60, 33, 60, 41, 60] crossed [38, 40, 50, 34, None, None, 16, None, 23, None, 32, None] survey steps [34, 39, 14, 28, 33, 23, 0, 0, 21, 38, 28, 0]
+a80 s02vc/initial  won 12/12 steps [26, 26, 45, 21, 19, 31, 20, 20, 29, 21, 19, 20] crossed [13, 19, 37, 13, 13, 25, 13, 14, 22, 13, 12, 13] survey steps [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+a80 s02vc/final    won 5/12 steps [60, 31, 60, 28, 27, 60, 60, 60, 60, 38, 27, 60] crossed [None, 21, None, 19, 17, None, None, 51, None, 19, 17, None] survey steps [37, 19, 25, 14, 15, 23, 0, 0, 13, 12, 15, 0]
+a80 s02vc/dynamic  won 5/12 steps [60, 31, 60, 28, 27, 60, 60, 60, 60, 38, 27, 60] crossed [None, 21, None, 19, 17, None, None, 51, None, 19, 17, None] survey steps [37, 19, 25, 14, 15, 23, 0, 0, 13, 12, 15, 0]
+a80: 102/144

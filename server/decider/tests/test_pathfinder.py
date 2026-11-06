@@ -990,3 +990,402 @@ def test_a79_is_a66_plus_the_latch_its_trail_trigger_and_the_sentence():
     assert [p.version for p in agent.get("a79").subagent_prompts] == ["g05", "d01"]
     assert "dead_end_confirmer" not in [s.name for s in orchestrator.pipeline(a79)]
     assert agent.get("a79").sha() not in {agent.get(a).sha() for a in ("a66", "a75", "a78")}
+
+
+# --- a80 (R40): the wall survey --------------------------------------------------
+
+S80 = agent.PATHFINDER_A80
+SV = S80["survey"]
+GOAL80 = (30.0, C / 2.0)                      # on the line of the approach: the axis is +x
+
+
+def hall(x1=6):
+    """A straight approach along +x from (0, 0) to cell (x1, 0) in open floor
+    (a66's memory), a closed door read in the centre strip on the last step."""
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    for x in range(0, x1 + 1):
+        mem.visits[(x, 0)] = [x]
+        mem.trail.append((x,) + centre((x, 0)) + (0.0,))
+    mem.centre_closed = [x1]
+    return mem, pose((x1, 0)), x1
+
+
+def survey_at(mem, here, step, records=(), goal=GOAL80):
+    cm = spatial.CostMap(mem, [], S80, include=(spatial.cell(here[:2]), spatial.cell(goal)),
+                         start=spatial.cell(here[:2]))
+    return planner.wall_survey(mem, cm, here, step, goal, list(records), S80)
+
+
+def rec(step, sv):
+    return {"step": step, "planner": {"survey": sv}}
+
+
+def test_survey_starts_on_a_closed_door_dead_ahead_and_steps_to_the_side():
+    mem, here, step = hall()
+    wp, sv = survey_at(mem, here, step)
+    assert sv is not None and sv["phase"] == "transit" and sv["step"] == step
+    assert abs(sv["axis_deg"]) < 1.0 and sv["wall"] is None
+    assert sv["order"] == [7.0, -7.0]                       # the left first
+    assert abs(wp[0] - (here[0] - SV["back_m"])) < 0.01 and abs(wp[1] - (here[1] + 7.0)) < 0.01
+    # No closed door dead ahead this step, heading off the line, too short a way in: no survey.
+    mem2, here2, step2 = hall()
+    mem2.centre_closed = [step2 - 1]
+    assert survey_at(mem2, here2, step2) == (None, None)
+    mem3, here3, step3 = hall()
+    assert survey_at(mem3, (here3[0], here3[1], 60.0), step3) == (None, None)
+    mem4, here4, step4 = hall(x1=2)
+    assert survey_at(mem4, here4, step4) == (None, None)
+    mem5, here5, step5 = hall()                             # it has been 3.4 m off the direct line
+    mem5.trail.insert(3, (2, centre((2, 4))[0], centre((2, 4))[1], 0.0))
+    assert survey_at(mem5, here5, step5) == (None, None)
+    mem6, here6, step6 = hall()                             # stopped by the wall already
+    mem6.blocks.append(spatial.Block(here6[0] - 0.4, here6[1], 0.0, step6 - 1, 0.4))
+    wp, sv = survey_at(mem6, here6, step6)
+    assert sv["wall"] == SV["wall_m"]
+    assert abs(wp[0] - (here6[0] + SV["wall_m"] - SV["standoff_m"])) < 0.01
+
+
+def test_survey_goes_first_to_the_side_of_a_remembered_open_doorway():
+    mem, here, step = hall()
+    mem.openings.append(spatial.Opening(here[0] + 4.0, here[1] - 8.0, 2, label="A"))
+    _, sv = survey_at(mem, here, step)
+    assert sv["order"] == [-7.0, 7.0]
+
+
+def test_survey_has_no_station_in_a_corridor_whose_side_walls_are_on_the_map():
+    mem, here, step = hall()
+    for x in range(0, 12):
+        mem.near_wall[(x, 2)] = x
+    _, sv = survey_at(mem, here, step)
+    assert sv["order"] == [-7.0]                            # the left is walled: the right only
+    for x in range(0, 12):
+        mem.near_wall[(x, -2)] = x
+    assert survey_at(mem, here, step) == (None, None)
+
+
+def test_survey_flies_at_the_wall_from_the_station_then_goes_back_and_across():
+    mem, here, step = hall()
+    _, sv = survey_at(mem, here, step)
+    station = planner.survey_station(sv, SV)
+    at = (station[0], station[1], 90.0)                     # arrived, still heading along the wall
+    wp, sv = survey_at(mem, at, step + 4, [rec(step, sv)])
+    assert sv["phase"] == "look"
+    assert abs(wp[0] - (at[0] + SV["face_m"])) < 0.01 and abs(wp[1] - at[1]) < 0.01   # at the wall
+    wp, sv = survey_at(mem, (at[0] + 1.0, at[1] + 1.0, 10.0), step + 6, [rec(step + 4, sv)])
+    assert sv["phase"] == "look" and sv["looks"] == 1 and sv["wall"] is None   # square, no wall yet
+    met = (at[0] + 6.0, at[1] + 1.0, 0.0)
+    mem.blocks.append(spatial.Block(met[0] - 0.4, met[1], 0.0, step + 8, 0.4))   # stopped short
+    wp, sv = survey_at(mem, met, step + 9, [rec(step + 6, sv)])
+    assert sv["phase"] == "transit" and sv["i"] == 1
+    assert abs(sv["wall"] - (met[0] - here[0] + SV["wall_m"])) < 0.02       # the wall's range, now known
+    back = here[0] + sv["wall"] - SV["standoff_m"]
+    assert sv["looks"] == 2
+    assert abs(wp[0] - back) < 0.02 and abs(wp[1] - (here[1] - 7.0)) < 0.01  # back, and the other side
+    other = planner.survey_station(sv, SV)
+    wp, sv = survey_at(mem, (other[0], other[1], 270.0), step + 18, [rec(step + 9, sv)])
+    assert sv["phase"] == "look"
+    wp, sv = survey_at(mem, (other[0], other[1], 270.0), step + 18 + SV["look_steps"],
+                       [rec(step + 18, sv)])                 # never met the wall: given up
+    assert wp is None and sv["phase"] == "done"
+    assert survey_at(mem, (other[0], other[1], 0.0), step + 30, [rec(step + 29, sv)]) == (None, sv)
+
+
+def test_survey_gives_up_a_station_it_does_not_get_nearer_to():
+    mem, here, step = hall()
+    _, sv = survey_at(mem, here, step)
+    recs = [rec(step, sv)]
+    for k in range(1, SV["stall_steps"] + 2):
+        wp, sv = survey_at(mem, here, step + k, recs)
+        recs = [rec(step + k, sv)]
+    assert sv["i"] == 1 and sv["phase"] == "transit"
+
+
+def test_survey_takes_an_open_doorway_read_near_square_through_the_wall():
+    mem, here, step = hall()
+    _, sv = survey_at(mem, here, step)
+    station = planner.survey_station(sv, SV)
+    at = (station[0], station[1], 0.0)
+    mem.door_rays.append(spatial.Ray(at[0], at[1], 80.0, step + 5, "open_far"))   # along the wall
+    wp, sv2 = survey_at(mem, at, step + 5, [rec(step, sv)])
+    assert sv2["phase"] != "through"
+    mem.door_rays.append(spatial.Ray(at[0], at[1], 0.0, step + 5, "open_far"))    # dead ahead
+    wp, sv2 = survey_at(mem, at, step + 5, [rec(step, sv)])
+    assert sv2["phase"] == "through" and len(sv2["rays"]) == 1
+    assert abs(wp[0] - (at[0] + SV["carrot_m"])) < 0.01 and abs(wp[1] - at[1]) < 0.01   # straight on
+    # Knocked 1.5 m off the line with no read: the carrot is still on the door's line.
+    off = (at[0] + 1.5, at[1] - 1.5, 315.0)
+    wp2, sv3 = survey_at(mem, off, step + 6, [rec(step + 5, sv2)])
+    assert sv3["phase"] == "through" and abs(wp2[1] - at[1]) < 0.01
+    assert abs(wp2[0] - (off[0] + SV["carrot_m"])) < 0.01
+    # A second read from there crosses the first: the door is where the rays meet.
+    door = (at[0] + 6.0, at[1])
+    mem.door_rays.append(spatial.Ray(off[0], off[1], spatial.bearing(off[:2], door), step + 7,
+                                     "open_far"))
+    wp3, sv4 = survey_at(mem, off, step + 7, [rec(step + 6, sv3)])
+    assert len(sv4["rays"]) == 2 and abs(planner.survey_door_line(sv4, SV) - 7.0) < 0.05
+    assert abs(wp3[1] - door[1]) < 0.05
+    # through_steps with no read and nothing in the way: through it, the route takes over.
+    wp4, sv5 = survey_at(mem, (door[0] + 2.0, door[1], 0.0), step + 7 + SV["through_steps"],
+                         [rec(step + 7, sv4)])
+    assert wp4 is None and sv5["phase"] == "done"
+    # A move stopped short with the doorway still read: a jamb, the survey holds on.
+    mem.blocks.append(spatial.Block(off[0], off[1], 0.0, step + 7, 0.3))
+    mem.door_rays.append(spatial.Ray(off[0], off[1], 20.0, step + 8, "open_far"))
+    wp5, sv6 = survey_at(mem, off, step + 8, [rec(step + 7, sv4)])
+    assert sv6["phase"] == "through" and len(sv6["rays"]) == 3
+    # Stopped short and no doorway read from there: a phantom, on to the next station.
+    mem.blocks.append(spatial.Block(off[0], off[1], 0.0, step + 9, 0.3))
+    wp6, sv7 = survey_at(mem, off, step + 10, [rec(step + 8, sv6)])
+    assert sv7["phase"] == "transit" and sv7["i"] == 1 and sv7["rays"] == []
+
+
+def test_survey_door_line_is_where_the_ray_meets_a_wall_whose_range_is_known():
+    mem, here, step = hall()
+    _, sv = survey_at(mem, here, step)
+    sv = dict(sv, wall=6.0, rays=[[here[0], here[1] + 3.0, 21.75]])
+    want = 3.0 + math.tan(math.radians(21.75)) * 6.0
+    assert abs(planner.survey_door_line(sv, SV) - want) < 0.02
+
+
+# --- a81 (R41): the survey after a80's shakedown -----------------------------------
+
+S81 = agent.PATHFINDER_A81
+SV81 = S81["survey"]
+
+
+def survey81_at(mem, here, step, records=()):
+    cm = spatial.CostMap(mem, [], S81, include=(spatial.cell(here[:2]), spatial.cell(GOAL80)),
+                         start=spatial.cell(here[:2]))
+    return planner.wall_survey(mem, cm, here, step, GOAL80, list(records), S81)
+
+
+def test_a81_a_bump_in_the_through_phase_is_checked_before_it_is_called_a_phantom():
+    mem, here, step = hall()
+    _, sv = survey81_at(mem, here, step)
+    station = planner.survey_station(sv, SV81)
+    at = (station[0], station[1], 0.0)
+    mem.door_rays.append(spatial.Ray(at[0], at[1], 0.0, step + 5, "open_far"))
+    wp, sv = survey81_at(mem, at, step + 5, [rec(step, sv)])
+    assert sv["phase"] == "through"
+    hit = (at[0] + 3.0, at[1], 0.0)
+    mem.blocks.append(spatial.Block(hit[0], hit[1], 0.0, step + 6, 0.4))
+    wp, chk = survey81_at(mem, hit, step + 7, [rec(step + 5, sv)])
+    assert wp is None and chk["phase"] == "check" and abs(chk["mark"] - 3.0) < 0.01   # the route's turn
+    # 2 m farther toward the wall: it was a jamb, the drone is through.
+    wp, done = survey81_at(mem, (hit[0] + 2.2, hit[1], 0.0), step + 9, [rec(step + 7, chk)])
+    assert wp is None and done["phase"] == "done"
+    # No farther in check_steps: a phantom, on to the next station.
+    wp, nxt = survey81_at(mem, hit, step + 7 + SV81["check_steps"], [rec(step + 7, chk)])
+    assert nxt["phase"] == "transit" and nxt["i"] == 1
+    # a80 has no check: the bump alone moves it on.
+    _, sv80 = survey_at(mem, here, step)
+    wp, sv80 = survey_at(mem, at, step + 5, [rec(step, sv80)])
+    wp, sv80 = survey_at(mem, hit, step + 7, [rec(step + 5, sv80)])
+    assert sv80["phase"] == "transit" and sv80["i"] == 1
+
+
+def test_a81_door_line_takes_the_middle_of_the_strips_and_no_nearer_than_the_drone_has_been():
+    mem, here, step = hall()
+    _, sv = survey81_at(mem, here, step)
+    station = planner.survey_station(sv, SV81)
+    at = (station[0], station[1], 0.0)
+    for heading in (10.0, 30.0):                             # the doorway spans two strips
+        mem.door_rays.append(spatial.Ray(at[0], at[1], heading, step + 5, "open_far"))
+    wp, sv2 = survey81_at(mem, at, step + 5, [rec(step, sv)])
+    assert sv2["rays"][-1][2] == 20.0
+    # The wall's range unknown: 4 m out along the ray, the carrot on that line.
+    want = 7.0 + math.tan(math.radians(20.0)) * SV81["reach_ray_m"]
+    assert abs(planner.survey_door_line(sv2, SV81) - want) < 0.02
+    assert abs(wp[1] - (here[1] + want)) < 0.05
+    # a82: one ray and no range, the waypoint is 3 m out along the ray itself.
+    cm = spatial.CostMap(mem, [], agent.PATHFINDER_A82)
+    wp82, sv82 = planner.wall_survey(mem, cm, at, step + 5, GOAL80, [rec(step, sv)],
+                                     agent.PATHFINDER_A82)
+    assert abs(spatial.dist(at[:2], wp82) - SV81["carrot_m"]) < 0.01
+    assert abs(spatial.wrap(spatial.bearing(at[:2], wp82) - 20.0)) < 0.5
+    on = spatial.ahead(at[:2], 20.0, 2.0)                    # 2 m along it, no new read: 5 m out
+    wp83, _ = planner.wall_survey(mem, cm, (on[0], on[1], 20.0), step + 6, GOAL80,
+                                  [rec(step + 5, sv82)], agent.PATHFINDER_A82)
+    assert abs(spatial.dist(at[:2], wp83) - (2.0 + SV81["carrot_m"])) < 0.01
+    # The drone has been 6 m toward the wall without meeting it: at least 7 m out.
+    far = 7.0 + math.tan(math.radians(20.0)) * 7.0
+    assert abs(planner.survey_door_line(sv2, SV81, been=6.0) - far) < 0.02
+
+
+def test_a81_flying_at_the_wall_every_strip_blocked_is_the_wall():
+    mem, here, step = hall()
+    _, sv = survey81_at(mem, here, step)
+    station = planner.survey_station(sv, SV81)
+    at = (station[0], station[1], 0.0)
+    wp, sv = survey81_at(mem, at, step + 4, [rec(step, sv)])
+    assert sv["phase"] == "look"
+    mem.nose_on.append(step + 6)
+    close = (at[0] + 3.0, at[1], 0.0)
+    wp, sv2 = survey81_at(mem, close, step + 6, [rec(step + 4, sv)])
+    assert sv2["phase"] == "transit" and sv2["i"] == 1 and abs(sv2["wall"] - (3.0 + SV81["wall_m"])) < 0.02
+    wp, sv80 = survey_at(mem, close, step + 6, [rec(step + 4, sv)])     # a80 wants more than that
+    assert sv80["phase"] == "look"
+
+
+def test_a81_is_a80_with_the_survey_changed():
+    a80 = agent.get("a80").features["orchestrator"]
+    a81 = agent.get("a81").features["orchestrator"]
+    assert {k: v for k, v in a81.items() if k != "pathfinder"} == \
+        {k: v for k, v in a80.items() if k != "pathfinder"}
+    assert {k: v for k, v in a81["pathfinder"].items() if k != "survey"} == \
+        {k: v for k, v in a80["pathfinder"].items() if k != "survey"}
+    assert agent.get("a81").sha() != agent.get("a80").sha()
+    assert agent.get("a80").sha() == "1c1790de9767"
+
+
+# --- a83 (R43): the survey and the latch together ----------------------------------
+
+L83 = agent.PATHFINDER_A83
+
+
+def test_a83_latched_waypoint_runs_back_down_the_middle_of_the_corridor():
+    trail, end = lane_trail(dwell=4)
+    trail = [(s, x, y + (0.6 if s > end else 0.0), h) for s, x, y, h in trail]   # dwelt off the axis
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    mem.trail = list(trail)
+    for step, x, y, _ in trail:
+        mem.visits.setdefault(spatial.cell((x, y)), []).append(step)
+        for dy in range(-6, 7):
+            mem.free[(spatial.cell((x, y))[0], dy)] = step
+    mem.closed_reads = [end - 1, end]
+    step = trail[-1][0]
+    here = trail[-1][1:]
+    latch = planner.dead_end_latch(mem, here, step, L83)
+    assert latch is not None and "mid_m" in latch and 0.0 <= latch["mid_m"] <= 0.6
+    assert "mid_m" not in planner.dead_end_latch(mem, here, step, L79)       # a79's latch as it was
+    man = {"step": step, "pose": {"position": [here[0], 1.75, -here[1]],
+                                  "yaw": math.radians(here[2] - 90.0)}}
+    plan = planner.pathfind(mem, man, [], (40.0, centre((0, 0))[1]), L83)
+    assert plan.latch is not None and not plan.latch["out"] and plan.survey is None
+    along = planner.latch_frame(plan.latch, here[:2])[0]
+    back, left = planner.latch_frame(plan.latch, plan.waypoint)
+    assert abs(back - (along - 4.0)) < 0.01 and abs(left - plan.latch["mid_m"]) < 0.01
+
+
+def test_a82_is_a81_homing_on_the_ray_and_a83_is_a82_plus_the_latch_sooner_with_its_way_out():
+    assert agent.SURVEY_A82 == dict(agent.SURVEY_A81, home_ray=True)
+    assert {k: v for k, v in agent.get("a82").features["orchestrator"].items()
+            if k != "pathfinder"} == {k: v for k, v in agent.get("a81").features[
+                "orchestrator"].items() if k != "pathfinder"}
+    a81 = agent.get("a82").features["orchestrator"]
+    a79 = agent.get("a79").features["orchestrator"]
+    a82 = agent.get("a83").features["orchestrator"]
+    added = ("pathfinder", "navigator_notes")
+    assert {k: v for k, v in a82.items() if k not in added} == \
+        {k: v for k, v in a81.items() if k not in added}
+    assert a82["navigator_notes"] == a79["navigator_notes"]
+    assert a82["pathfinder"]["survey"] == dict(a81["pathfinder"]["survey"], side_only=True,
+                                               no_cross=True, goal_ends=True, relook=True)
+    latch, was = a82["pathfinder"]["dead_end_latch"], a79["pathfinder"]["dead_end_latch"]
+    assert latch["exit"] == {"carrot_m": 4.0} and latch["confined"]["dwell_steps"] == 3
+    assert {k: v for k, v in latch.items() if k not in ("exit", "confined")} == \
+        {k: v for k, v in was.items() if k != "confined"}
+    assert {k: v for k, v in latch["confined"].items() if k != "dwell_steps"} == \
+        {k: v for k, v in was["confined"].items() if k != "dwell_steps"}
+    assert agent.get("a79").sha() == "4ef945298c6d" and agent.get("a81").sha() == "61e8e685422a"
+
+
+def survey83_at(mem, here, step, records=()):
+    cm = spatial.CostMap(mem, [], L83, include=(spatial.cell(here[:2]), spatial.cell(GOAL80)),
+                         start=spatial.cell(here[:2]))
+    return planner.wall_survey(mem, cm, here, step, GOAL80, list(records), L83)
+
+
+def test_a83_a_doorway_read_on_the_way_to_a_station_only_picks_the_side():
+    mem, here, step = hall()
+    wp, sv = survey83_at(mem, here, step)
+    assert sv["order"] == [7.0, -7.0]
+    mem.door_rays.append(spatial.Ray(here[0], here[1], -30.0, step + 1, "open_far"))   # to the right
+    wp, sv2 = survey83_at(mem, (here[0], here[1] + 1.0, 60.0), step + 1, [rec(step, sv)])
+    assert sv2["phase"] == "transit" and sv2["order"] == [-7.0, 7.0] and sv2["rays"] == []
+    assert abs(wp[1] - (here[1] - 7.0)) < 0.01                    # the right-hand station now
+    # From the station, in the look phase, the same kind of read is flown at, on its own ray.
+    station = planner.survey_station(sv2, L83["survey"])
+    at = (station[0], station[1], 0.0)
+    wp, sv3 = survey83_at(mem, at, step + 6, [rec(step + 1, sv2)])
+    assert sv3["phase"] == "look"
+    for k, heading in ((7, -10.0), (8, 25.0)):                   # bearings 35 degrees apart
+        mem.door_rays.append(spatial.Ray(at[0], at[1], heading, step + k, "open_far"))
+    wp, sv4 = survey83_at(mem, at, step + 7, [rec(step + 6, sv3)])
+    assert sv4["phase"] == "through"
+    wp, sv5 = survey83_at(mem, at, step + 8, [rec(step + 7, sv4)])
+    assert abs(spatial.wrap(spatial.bearing(at[:2], wp) - 25.0)) < 0.5   # the newest ray, not a crossing
+
+
+def test_a83_the_goal_in_view_ends_the_survey_and_a_lost_door_goes_back_to_the_look():
+    mem, here, step = hall()
+    _, sv = survey83_at(mem, here, step)
+    station = planner.survey_station(sv, L83["survey"])
+    at = (station[0], station[1], 0.0)
+    _, look = survey83_at(mem, at, step + 5, [rec(step, sv)])
+    mem.door_rays.append(spatial.Ray(at[0], at[1], 0.0, step + 6, "open_far"))
+    _, thru = survey83_at(mem, at, step + 6, [rec(step + 5, look)])
+    assert thru["phase"] == "through"
+    late = step + 6 + L83["survey"]["through_steps"]
+    wp, again = survey83_at(mem, (at[0] + 4.0, at[1], 0.0), late, [rec(step + 6, thru)])
+    assert again["phase"] == "look" and wp is not None            # no read, no goal: not through
+    mem.goal_rays.append(spatial.Ray(at[0] + 4.0, at[1], 0.0, late, "mid"))
+    wp, done = survey83_at(mem, (at[0] + 4.0, at[1], 0.0), late, [rec(step + 6, thru)])
+    assert wp is None and done["phase"] == "done"
+
+
+# --- a84 (R44): a83 after its shakedown ----------------------------------------------
+
+L84 = agent.PATHFINDER_A84
+
+
+def test_a84_lane_is_as_wide_as_the_drone_has_spread_wherever_the_axis_lies():
+    # The run flown along one wall of a 3 m corridor (y = 0), the drone then
+    # turning about by the other wall, 2.55 m across: a79's lane (1.5 m either
+    # side of the axis) loses it, a84's (2.8 m across) holds it.
+    trail, end = lane_trail(dwell=0)
+    for k, (c, h) in enumerate((((7, 3), 180.0), ((8, 3), 0.0), ((7, 3), 180.0), ((8, 3), 0.0),
+                                ((7, 3), 180.0), ((8, 3), 0.0))):
+        trail.append((end + 1 + k,) + centre(c) + (h,))
+    closed = [end - 1, end]
+    step = trail[-1][0]
+    assert planner.confined_run(trail, closed, trail[-1][1:], step, D79) is None
+    found = planner.confined_run(trail, closed, trail[-1][1:], step, L84["dead_end_latch"])
+    assert found is not None and found[0] == centre((0, 0))
+    # Four cells across (3.4 m) is no corridor of this width.
+    wide = trail + [(step + 1,) + centre((7, 4)) + (90.0,)]
+    assert planner.confined_run(wide, closed, wide[-1][1:], step + 1, L84["dead_end_latch"]) is None
+
+
+def test_a84_survey_is_not_ended_by_a_goal_report_and_flies_at_a_door_from_a_transit():
+    cm_p = L84
+    mem, here, step = hall()
+    cm = spatial.CostMap(mem, [], cm_p, include=(spatial.cell(here[:2]), spatial.cell(GOAL80)),
+                         start=spatial.cell(here[:2]))
+    _, sv = planner.wall_survey(mem, cm, here, step, GOAL80, [], cm_p)
+    assert sv["phase"] == "transit"
+    mem.goal_rays.append(spatial.Ray(here[0], here[1], 0.0, step + 1, "mid"))        # a goal report
+    wp, sv2 = planner.wall_survey(mem, cm, (here[0], here[1] + 1.0, 60.0), step + 1, GOAL80,
+                                  [rec(step, sv)], cm_p)
+    assert sv2["phase"] == "transit" and wp is not None                                # still surveying
+    mem.door_rays.append(spatial.Ray(here[0], here[1] + 2.0, -5.0, step + 2, "open_far"))
+    wp, sv3 = planner.wall_survey(mem, cm, (here[0], here[1] + 2.0, 40.0), step + 2, GOAL80,
+                                  [rec(step + 1, sv2)], cm_p)                          # an outer strip:
+    assert sv3["phase"] == "transit" and sv3["order"] == [-7.0, 7.0]                   # the side only
+    mem.door_rays.append(spatial.Ray(here[0], here[1] + 2.0, 25.0, step + 3, "open_far"))
+    wp, sv4 = planner.wall_survey(mem, cm, (here[0], here[1] + 2.0, 40.0), step + 3, GOAL80,
+                                  [rec(step + 2, sv3)], cm_p)                          # 15 degrees off the
+    assert sv4["phase"] == "through"                                                   # heading: flown at
+    assert abs(spatial.wrap(spatial.bearing((here[0], here[1] + 2.0), wp) - 25.0)) < 0.5
+
+
+def test_a84_is_a83_with_the_goal_rule_and_side_only_out_and_the_lane_by_its_spread():
+    a83 = agent.get("a83").features["orchestrator"]
+    a84 = agent.get("a84").features["orchestrator"]
+    assert {k: v for k, v in a84.items() if k != "pathfinder"} == \
+        {k: v for k, v in a83.items() if k != "pathfinder"}
+    assert a84["pathfinder"]["survey"] == dict(agent.SURVEY_A82, no_cross=True, relook=True,
+                                               side_only="far", far_strip_deg=30.0)
+    assert a84["pathfinder"]["dead_end_latch"]["confined"] == dict(
+        a83["pathfinder"]["dead_end_latch"]["confined"], span_m=2.8)
+    assert agent.get("a83").sha() == "db5b837c8d43" and agent.get("a82").sha() == "43255087a08a"
