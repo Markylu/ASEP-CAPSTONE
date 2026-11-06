@@ -42,6 +42,25 @@ stand-ins bracket it until probe DE has run:
   turned about at the door); and the rectangle's far end moves with the drone (a fixed end
   was flown past in the record). So these numbers are a fit to these runs, not a test.
 
+## With probe DE's answers (2026-11-05)
+
+Probe DE failed its gate for both prompts ([_probes/dead_end](../dead_end/README.md)), so `a78`
+is dropped. The replay with the answers it recorded, for the record:
+
+| Readout | `e01` | `e02` |
+|---|---|---|
+| s03 `dynamic` runs latched, of 11 | 11 | 3 (steps 35, 19, 35) |
+| of those, with 25 or more steps left | 8 | 3 |
+| s03 shut-tine steps from the latch on whose route leaves by the crossbar | 346/421 (82%) | 87/89 (98%) |
+| s02 won runs latched before the crossing, of 53 | 21 | 0 |
+| s02 lost runs latched before a crossing, of 45 | 44 | 0 |
+| Steps with no route, of 5653 | 220 | 4 |
+
+[replay_probe_e01.txt](replay_probe_e01.txt), [replay_probe_e02.txt](replay_probe_e02.txt).
+With `e01` the latch holds in 65 of the 98 s02 runs, the same 65 the probe counts for the rule
+alone: needing a straight run the drone is still in stops none of them. With `e02` it is
+`a66` everywhere but three s03 runs.
+
 Not covered: the lane shut once the drone is out (the recorded drone never leaves; unit tests
 `test_latch_is_carried_by_the_record_and_shuts_the_lane_once_out`), and anything the navigator
 does with the route.

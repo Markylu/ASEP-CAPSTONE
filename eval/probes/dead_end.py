@@ -15,8 +15,11 @@ The frames are on the lane checkouts the rounds flew on (gitignored there), so
     LITELLM_BASE_URL=http://127.0.0.1:8004 python eval/probes/dead_end.py run --prompt e01
     LITELLM_BASE_URL=http://127.0.0.1:8004 python eval/probes/dead_end.py run --prompt e02
     python eval/probes/dead_end.py score
+    python eval/probes/dead_end.py breakdown
 
-`run` takes --shard i --of n for more than one instance; concurrency is 1 per
+`breakdown` (no frames, no model; added after the gate was read, so it is a
+description, not a test) splits the answers by where the drone stood, from the
+repo's own copies of the runs. `run` takes --shard i --of n for more than one instance; concurrency is 1 per
 instance, as every recorded read. `score` needs no frames and no model.
 """
 from __future__ import annotations
@@ -213,6 +216,86 @@ def score() -> int:
     return 0 if any(passed.values()) else 1
 
 
+def breakdown() -> int:
+    """The answers by site, by range and angle to the s02 divider, by depth in
+    the shut tine, and per run. Poses are the recorded ones (evaluation only)."""
+    from common import REPO_ROOT
+    frames = load_sample()
+    answers: Dict[str, Dict[str, str]] = {}
+    for prompt in PROMPTS:
+        answers[prompt] = {}
+        for fp in sorted(OUT.glob("calls_{0}_*.jsonl".format(prompt))):
+            for c in map(json.loads, fp.read_text().splitlines()):
+                if c.get("result"):
+                    answers[prompt][c["id"]] = c["result"]["dead_end"]
+    folders = {f.split("_", 1)[0]: f for f in FOLDERS}
+    poses: Dict[Tuple[str, str, str, str], Dict[int, Any]] = {}
+
+    def here(f: Dict[str, Any]):
+        key = (f["folder"], f["site"], f["arm"], f["seed"])
+        if key not in poses:
+            run = (REPO_ROOT / "eval" / "phase2" / folders[f["folder"]] / "runs" / f["site"]
+                   / f["arm"] / f["seed"])
+            poses[key] = {r["step"]: xy(r) for r in load(run) if r.get("manifest")}
+        return poses[key][f["step"]]
+
+    def yes(rows: List[Dict[str, Any]], prompt: str) -> str:
+        got = [answers[prompt][f["id"]] for f in rows if f["id"] in answers[prompt]]
+        return pct(sum(a == "yes" for a in got), len(got)) if got else "0/0"
+
+    def table(title: str, rows: List[Dict[str, Any]], key) -> List[str]:
+        groups: Dict[str, List[Dict[str, Any]]] = collections.defaultdict(list)
+        for f in rows:
+            groups[key(f)].append(f)
+        out = ["", title, "  {0:<22}{1:>18}{2:>18}".format("", *PROMPTS)]
+        for name in sorted(groups):
+            out.append("  {0:<22}{1:>18}{2:>18}".format(
+                name.split(" ", 1)[1], *(yes(groups[name], p) for p in PROMPTS)))
+        return out
+
+    def bands(value: float, edges: List[float], unit: str) -> str:
+        for i, edge in enumerate(edges):
+            if value < edge:
+                return "{0} under {1:g} {2}".format(i, edge, unit)
+        return "{0} {1:g} {2} or more".format(len(edges), edges[-1], unit)
+
+    s02 = [f for f in frames if f["where"] == "s02"]
+    tine = [f for f in frames if f["where"] == "shut_tine"]
+    lines = ["Probe DE breakdown: yes answers by where the drone stood ({0} asked steps)".format(
+        len(frames))]
+    lines += table("s02, by site", s02, lambda f: "0 " + f["site"])
+    lines += table("s02, by metres from the divider (x; under 0 is the far side)", s02,
+                   lambda f: bands(here(f)[0], [0.0, 2.0, 4.0, 8.0], "m"))
+    lines += table("s02, by heading off square to the divider", s02,
+                   lambda f: bands(abs(spatial.wrap(here(f)[2] - 180.0)), [30.0, 60.0], "deg"))
+    lines += table("s02, by closed-door strips among the centre three", s02,
+                   lambda f: "{0} {0} strip(s)".format(len(f["strips"])))
+    lines += table("shut tine, by metres short of the door wall (x = -6)", tine,
+                   lambda f: bands(here(f)[0] + 6.0, [2.0, 4.0, 6.0], "m"))
+    lines += ["", "yes from both prompts on the same step"]
+    for where in ("shut_tine", "s03_other", "s02"):
+        rows = [f for f in frames if f["where"] == where]
+        lines.append("  {0:<22}{1}".format(where, pct(sum(
+            all(answers[p].get(f["id"]) == "yes" for p in PROMPTS) for f in rows), len(rows))))
+    runs: Dict[Tuple[str, str, str, str], List[Dict[str, Any]]] = collections.defaultdict(list)
+    for f in frames:
+        runs[(f["folder"], f["site"], f["arm"], f["seed"])].append(f)
+    lines += ["", "runs with at least one yes before the drone crossed"]
+    for prompt in PROMPTS:
+        hit = {k: sorted(f["step"] for f in v if answers[prompt].get(f["id"]) == "yes"
+                         and (f["crossed"] is None or f["step"] < f["crossed"]))
+               for k, v in runs.items()}
+        s02_runs = [k for k in runs if k[1] != "s03"]
+        s03d = sorted(k for k in runs if k[1] == "s03" and k[2] == "dynamic")
+        lines.append("  {0}: s02 {1} of {2}; s03 dynamic {3} of {4}, first yes at step {5}".format(
+            prompt, sum(bool(hit[k]) for k in s02_runs), len(s02_runs),
+            sum(bool(hit[k]) for k in s03d), len(s03d),
+            ", ".join(str(hit[k][0]) if hit[k] else "-" for k in s03d)))
+    (OUT / "breakdown.txt").write_text("\n".join(lines) + "\n")
+    print("\n".join(lines))
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -223,6 +306,7 @@ def main() -> int:
     r.add_argument("--shard", type=int, default=0)
     r.add_argument("--of", type=int, default=1)
     sub.add_parser("score")
+    sub.add_parser("breakdown")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     if args.cmd == "sample":
@@ -230,6 +314,8 @@ def main() -> int:
     if args.cmd == "run":
         asyncio.run(run_probe(args.prompt, args.shard, args.of))
         return 0
+    if args.cmd == "breakdown":
+        return breakdown()
     return score()
 
 

@@ -1,0 +1,30 @@
+Probe DE: the dead-end confirmer on 1240 asked steps of final, R32P_repeat_a66, R35_wall_turn_only
+Rule for a run: yes on a step and on 2 of the last 3 answers, none older than 15 steps (a78's).
+
+## e01: 1240 of 1240 asked steps answered, 0 failed calls; median latency 927 ms
+  yes in shut_tine  85/90 = 94%
+  yes in s03_other  20/24 = 83%
+  yes in s02        420/1126 = 37%
+  s03 dynamic runs fired in: 11 of 11; with 25 or more steps left: 8
+  s02 runs fired in before the crossing: 65 of 88 (21 of them won runs)
+  PASS: yes on >= 80% of shut-tine steps
+  FAIL: yes on <= 5% of s02 steps
+  PASS: fires in >= 7 s03 dynamic runs with 25 or more steps left
+  FAIL: fires in <= 5 s02 runs
+  PASS: every asked step answered
+  gate: FAIL
+
+## e02: 1240 of 1240 asked steps answered, 0 failed calls; median latency 768 ms
+  yes in shut_tine  15/90 = 17%
+  yes in s03_other  4/24 = 17%
+  yes in s02        15/1126 = 1%
+  s03 dynamic runs fired in: 3 of 11; with 25 or more steps left: 3
+  s02 runs fired in before the crossing: 0 of 88 (0 of them won runs)
+  FAIL: yes on >= 80% of shut-tine steps
+  PASS: yes on <= 5% of s02 steps
+  FAIL: fires in >= 7 s03 dynamic runs with 25 or more steps left
+  PASS: fires in <= 5 s02 runs
+  PASS: every asked step answered
+  gate: FAIL
+
+Probe gate: FAIL

@@ -3,7 +3,8 @@
 **Agent:** `a78` (`d2c5d0f26cf4`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Dead-end confirmer:** `e01` (`4bd77647a0d7`) · **Memory:** `a17f` ·
 **Planner:** `PATHFINDER_A78` · **Status:** laid out 2026-11-05 from the recorded runs of Round
-F, R32P and R35; offline readouts measured (below); **probe DE not run, nothing flown**
+F, R32P and R35; offline readouts measured (below); probe DE run the same day on the operator's
+instruction ("Run probe DE"): **gate failed for both prompts, `a78` dropped, round not flown**
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30), no control lane. The round is aimed at one cell,
@@ -117,8 +118,8 @@ of the 24 s02 runs.
 
 ## Probe gate
 
-Two gates. The first needs the model and has not been run. The second needs no model and was
-read while the latch was being built.
+Two gates. The first needs the model; it was run after this section was written and failed
+([Outcome](#outcome)). The second needs no model and was read while the latch was being built.
 
 **Gate 1, probe DE: can the model call the corridor?** `eval/probes/dead_end.py`, write-up
 [_probes/dead_end](../_probes/dead_end/README.md). `e01` and `e02` (the same question put as
@@ -198,4 +199,33 @@ R35 (`a66` still the best agent: F 64/90, R32P 15/30). Branch `phase2/r38-dead-e
 
 ## Outcome
 
-Not flown. Probe DE not run.
+Round not flown. **Probe DE (2026-11-05, operator: "Run probe DE"): gate 1 failed for both
+prompts.** 2480 calls, one at a time, alone on sctsvr6's `:8004`, from `bfd0cf6`; no failed
+call. Write-up and tables: [_probes/dead_end](../_probes/dead_end/README.md).
+
+| Readout | Gate | `e01` | `e02` |
+|---|---|---|---|
+| Yes in the shut tine facing its door | at least 80% | 85/90 (94%) | **15/90 (17%)** |
+| Yes on s02 steps | at most 5% | **420/1126 (37%)** | 15/1126 (1%) |
+| s03 `dynamic` runs fired in with 25 or more steps left | at least 7 of 11 | 8 | **3** |
+| s02 runs fired in before the crossing | at most 5 of 88 | **65** | 0 |
+
+- **`e01` cannot be the trigger.** It calls the s02 hall a dead-end corridor on 37% of asked
+  steps: 84% within 2 m of the divider, 80% on looks 30–60° off square to it, 1% from 8 m out.
+  The rule fires in 65 of 88 s02 runs, 21 of them runs `a66` won.
+- **`e02` is quiet and nearly blind.** Yes on 1% of s02 steps and 17% of shut-tine steps; in
+  the tine it counts the floor beside the door as a way past it.
+- **Drop criterion met before flight:** by the rule set above, with neither prompt passing,
+  `a78` is dropped and R38 is not flown. The hypothesis is not tested; its premise, that the
+  model can be asked what `g05`'s strips cannot say, did not hold on single frames.
+
+Gate 2 read again with the probe's own answers (`eval/probes/a78_replay.py --answers
+probe:e02`, [_probes/a78](../_probes/a78/README.md)): with `e02` the latch fires in 3 of the 11
+s03 `dynamic` runs (steps 35, 19, 35, with 25, 41 and 25 steps left) and in none of the 98 s02
+runs; in those three the route leaves the tine on 87 of 89 steps. That is a latch that does no
+harm in s02 and reaches about a quarter of the cell it was built for. With `e01` it fires in
+all 11 and in 65 of the 98 s02 runs (21 of the 53 `a66` won), with no route on 220 of 5653
+steps. Both are read after the gate and do not reopen it.
+
+What stands: the latch itself is sound on the record (gate 2 with a confirmer that is never
+wrong), and it has no trigger. `a66` is still the best agent (F 64/90, R32P 15/30).
