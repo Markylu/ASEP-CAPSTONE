@@ -3,7 +3,9 @@
 **Agent:** `a80` (`1c1790de9767`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Planner:** `PATHFINDER_A80` ·
 **Status:** laid out 2026-11-05 (overnight run, Claude alone, operator asleep; every decision
-here is Claude's, with its reason); offline gates passed; shakedown and flight below
+here is Claude's, with its reason); offline gates passed; shakedown flown 2026-11-06 (3 of 3
+s02 runs solved, three faults found in the through phase); **not flown, superseded by `a82`
+(R42)** ([Outcome](#outcome))
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30), no control lane. Aimed at the eight s02 cells
@@ -154,4 +156,35 @@ failure.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Not flown: shaken down, and superseded by `a82` ([R42](../R42_survey_homing/README.md)), which
+is this survey with the faults the shakedown showed fixed.** The hypothesis is tested there.
+
+**Shakedown (2026-11-06, 04:28–04:48 UTC): four unscored runs, slot 5 (port 8105) as a fifth
+client beside R39's four lanes on `:8004`, sctsvr6 `~/asep-r33-shake` at `5f09d34`; runs kept
+on the host as `~/r40_shake_a80_runs`, log `~/r40_shake_a80.log`. All four valid.**
+(`eval/probes/a80_check.py`.)
+
+| Cell (seed 1) | `a80` | R32P `a66`, same cell and seed | Survey | Crossed | Route on |
+|---|---|---|---|---|---|
+| s02c `dynamic` | **solved, 25** | lost | started step 4, station at 11, open door read at 12–13, through at 16 | 16 | 25/25 |
+| s02a `final` | **solved, 22** | solved | none: no closed door dead ahead, the route knew the open door from step 0 | 14 | 22/22 |
+| s02vc `final` | **solved, 49** | lost | started step 2 on a door read from 16 m; met the wall 4 m beside it at 16; other station to 25; door read again, through at 40 | 40 | 49/49 |
+| s03 `final` | lost | solved | none (as designed) | — | 60/60 |
+
+- **The survey found the open door in both runs it started in, and both were solved**, two
+  cells `a66` lost at this seed in R32P (s02c `dynamic` is 0/3 there and 1/5 in Round F).
+- **The gate as written was not met**: it asked for a frame square to the wall in each s02
+  run, and there was none, because the door was read before the drone had squared up (while
+  turning in at the station, and from 16 m on the way in). The rows it was written to protect
+  held: the survey started by step 4 where a closed door stood dead ahead, did not start in
+  s03, and a route was on every step.
+- **Three faults, all in the through phase** (R41's and R42's READMEs give the traces): a
+  jamb clipped was called a phantom and the tags pointed back through the wall for nine steps
+  (s02c); two near-parallel rays put the door's line 1.7 m off (s02c); a door read from 16 m
+  was placed 5 m out and the drone flew a line 4 m beside it (s02vc). `a81` fixes the first
+  two, `a82` the third.
+- **The navigator declined the survey's first move** in s02c (steps 4–5, straight at the shut
+  door with the tag on the sharp left) and took it after meeting the wall.
+- **s03 `final` was lost where `a66` loses it**: 28 steps in the stem and lobby, then the shut
+  tine from step 34. No survey step in the run. One seed; R39's own s03 `final` seed 1 was lost
+  in the lobby the same night.
