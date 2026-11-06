@@ -103,7 +103,8 @@ tine by step 25, no latch lies on the direct line, and a route is on at least 95
 
 **Flown 2026-11-06: 21/30 against `a85`'s 23/30 (R45), a draw; not carried.** s03 5/6 (R45 4/6), s02
 16/24 (R45 19/24). The hypothesis did not hold as written: the sentence was taken 98 times of 98,
-s03 gained, and in s02 the survey started in 15 of 24 runs (R45: 23), 5 of the 9 without one lost.
+s03 gained, and in s02 the survey started in 15 of 24 runs (R45: 23), 5 of the 9 without one lost
+(5 of the 9 told at steps 0 to 2 that the route was behind).
 [summary.md](summary.md). Labels: Claude review, not yet confirmed by the operator.
 
 **Shakedown (2026-11-06, 06:03–06:23 UTC): four unscored runs, slot 5 (port 8105) as a fifth

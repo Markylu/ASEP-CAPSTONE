@@ -2,9 +2,10 @@
 
 **a86 21/30, a85 23/30 (R45), a84 18/30 (R44), a66 15/30 (R32P): a draw with the bar, two
 under it. The hypothesis did not hold as written: s03 went to 5/6 (R45 4/6), s02 fell to
-16/24 (R45 19/24). The sentence was taken every time it was said, 98 of 98, and that is the
-trouble in s02: the survey started in 15 of the 24 s02 runs (R45: 23), and 5 of the 9 runs
-without one were lost. `a86` is not carried; `a85` stays the bar.**
+16/24 (R45 19/24). The sentence was taken every time it was said, 98 of 98, and that is part
+of the trouble in s02: the survey started in 15 of the 24 s02 runs (R45: 23), 5 of the 9 runs
+without one were lost, and 5 of the 9 had been told at steps 0 to 2 that their route was
+behind them. `a86` is not carried; `a85` stays the bar.**
 
 | cell | `a66` (R32P) | `a84` (R44) | `a85` (R45) | `a86` (R46), steps to the goal |
 |---|---|---|---|---|
@@ -37,6 +38,15 @@ What the runs say (`eval/probes/a80_check.py`, `eval/probes/a79_check.py`):
   `final` 3, s02vc `final` 1 and 2) and 4 found a door on the route (s02a `final` 1, s02c
   `dynamic` 2, s02va `final` 1, s02vc `final` 3 at 50). Of the 15 with one, 12 were won, all
   12 crossing while the survey ran, at steps 13 to 37 (median 17).
+- **What the sentence accounts for, counted on the record.** A step is on the first way in
+  while no survey has started, no corridor is latched and the drone has never been more than
+  2.5 m off the direct line (so a survey could still start). 5 of the 72 s02 sentences fell
+  there, all at steps 0 to 2, one in each of 5 of the 9 runs without a survey (s02a `dynamic`
+  2, s02c `dynamic` 2 and 3, s02vc `final` 2 and 3; three of the five lost). Of the other
+  four, two flew straight to an open door and won (s02a `final` 1, s02va `final` 1) and two
+  left the line with no sentence said and lost (s02c `final` 3, s02vc `final` 1): the
+  sentence does not explain those. In s03, 10 of the 26 sentences fell on the way in (the stem
+  lies on the direct line), one of them before step 8.
 - **The three lost with a survey.** s02a `dynamic` 1 took both stations and crossed at 54
   (`timeout`). s02c `final` 2 had one station only, ended its survey at 15 and was latched
   along the wall at 25 (the one run with a route on under 95% of steps, 53/60). s02va
@@ -81,7 +91,7 @@ yet confirmed by the operator. Frames stay on the host.
 bundle (the sentence, the latch guards, the second look), so the score alone does not say
 which part did what. The record does: the sentence moved s03 the way it was meant to (the
 drone is in a tine sooner, two of three `dynamic` runs solved) and cost s02 its survey in
-nine runs. The two can be had apart, since inside a latched corridor `a85` already says the
+up to five runs (nine had none; five were told to turn on the way in). The two can be had apart, since inside a latched corridor `a85` already says the
 sentence. R49 (`a89`) is that: `a88`'s planner with `a85`'s navigator. R47 (`a87`) and R48
 (`a88`), laid out before this round landed, carry `a86`'s sentence and should be read with
 that in mind.
