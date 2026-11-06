@@ -1,0 +1,11 @@
+a93 goal check on 211 goal reports in 25 runs with one, of R54_h100_frames (eval/probes/a93_goal_check.py)
+
+Reports with no line of sight: 27 of 211; they raised a goal tag on 19 steps and the navigator took it on 19.
+
+off   26 deg, min 4.0 m | no line of sight: dropped   8 of 27 (30%), tag taken on 0 | line of sight: dropped   3 of 184 (1.6%)
+
+Runs by the step of the first taken tag the rule drops (no line of sight):
+  s03: by step 4, 0 runs, won 0 | later, 0 runs, won 0 | none, 6 runs, won 2
+  s02: by step 4, 0 runs, won 0 | later, 0 runs, won 0 | none, 24 runs, won 17
+
+s03 runs with such a tag by step 4:

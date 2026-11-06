@@ -4,7 +4,8 @@
 **Perceiver:** `g05` · **Door confirmer:** `d01` · **Memory:** `a17f` ·
 **Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`), not lavapipe ·
 **Status:** laid out 2026-11-06 by Claude on the operator's instruction ("do one more cycle of
-the loop"); every decision here is Claude's, with its reason; not flown
+the loop"); every decision here is Claude's, with its reason; **flown 2026-11-06, 19/30 against R53's
+24/30: outside the 4 allowed, the renderer not cleared**
 
 Written before flying. Spec: `docs/phase2-test-plan.md` (host rounds, changelog 2026-11-02: a
 round may change the host and not the agent, with the same agent sha in every run). Design: the
@@ -83,4 +84,7 @@ R29S shared one.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Flown 2026-11-06, 19/30** (s02 17/24, s03 2/6) against R53's 24/30 for the same agent on lavapipe:
+the hypothesis did not hold (a gap of 5, the limit 4); every other check held (renderer, walls,
+reports, survey, route). One flight each; the gap is s03 `final` 3 to 1 and four s02 cells one run
+each way. H100 frames are not cleared for rounds read against the lavapipe bar. [summary.md](summary.md).

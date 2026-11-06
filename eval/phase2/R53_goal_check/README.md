@@ -5,7 +5,8 @@
 **Navigator notes:** `NAVIGATOR_A78` · **Goal check:** `GOAL_CHECK_A93` ·
 **Status:** laid out 2026-11-06 by Claude on the operator's instruction ("do one more cycle of
 the loop"); every decision here is Claude's, with its reason; shakedown flown 2026-11-06
-(four of four solved; two gate rows not met as written, neither the change's doing; flown on)
+(four of four solved; two gate rows not met as written, neither the change's doing; flown on);
+**flown 2026-11-06, 24/30, a draw with the bar, not the new bar**
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R45 (`a85`, 23/30, the bar) and R49 (`a89`, 23/30, the agent this
@@ -151,4 +152,7 @@ render scripts).
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Flown 2026-11-06, 24/30** (s02 20/24, s03 4/6): the hypothesis held as written (at least 23,
+s03 at least 3, s02 at least 19), and 24 against the bar's 23 is a draw by the rule. Every s03 run
+was in the stem by step 5, s03 `final` 3/3; the check dropped 14 of 32 blind reports and 5 of 214
+made with a line of sight. [summary.md](summary.md).
