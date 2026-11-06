@@ -1647,3 +1647,18 @@ def test_a90_says_the_sentence_only_after_the_first_way_in():
     assert plan([(x, 0) for x in range(8)], agent.PATHFINDER_A90).way_in is False     # step 8
     assert plan(straight, agent.PATHFINDER_A89).way_in is None
     assert "way_in" not in plan(straight, agent.PATHFINDER_A89).to_dict()
+
+
+def test_a91_is_a89_without_the_station_guard():
+    a85 = agent.get("a85").features["orchestrator"]
+    a86 = agent.get("a86").features["orchestrator"]
+    a89 = agent.get("a89").features["orchestrator"]
+    a91 = agent.get("a91").features["orchestrator"]
+    assert a91["pathfinder"]["survey"] == a86["pathfinder"]["survey"]
+    assert "station_guard" not in a91["pathfinder"]["survey"]
+    assert a89["pathfinder"]["survey"] == dict(a86["pathfinder"]["survey"], station_guard="hard")
+    assert a91["pathfinder"]["dead_end_latch"] == a89["pathfinder"]["dead_end_latch"]
+    assert a91["navigator_notes"] == a85["navigator_notes"]
+    assert {k: v for k, v in a91["pathfinder"].items() if k != "survey"} == \
+        {k: v for k, v in a89["pathfinder"].items() if k != "survey"}
+    assert agent.get("a90").sha() == "5a714edadebd"

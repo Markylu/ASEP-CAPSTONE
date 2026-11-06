@@ -393,6 +393,13 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a89 with the route-behind sentence after the first way in, contested cells",
             "agent": "a90", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R51: a91 (a89 without a87's station guard: a85's navigator on a86's
+    # planner). With R46, R47 and R49 a square over a86's planner: the
+    # sentence and the station guard, each on and off.
+    "R51": {"folder": "R51_no_station_guard",
+            "title": "a85's navigator on a86's planner (a89 without the station guard), contested cells",
+            "agent": "a91", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
