@@ -3,8 +3,8 @@
 **a87 12/30, a86 21/30 (R46), a85 23/30 (R45, the bar), a66 15/30 (R32P): nine under the
 agent it differs from by one setting, eleven under the bar, three under `a66`. Dropped. The
 record does not put the loss on the station guard: s03, where `a87` is `a86` line for line,
-fell from 5/6 to 1/6, and in s02 the surveys that did not find the door from their first
-station lost at the second, as `a86`'s did. What the round shows is how far one agent's score
+fell from 5/6 to 1/6, and in s02 the surveys that did not get through from their first
+station lost at the second. What the round shows is how far one agent's score
 moves between two flights of this screen, and what the always-on sentence does in a run that
 has gone wrong.**
 
@@ -32,18 +32,20 @@ What the runs say (`eval/probes/a80_check.py`, `eval/probes/a79_check.py`):
   the station guard is read nowhere else. The first step in a tine: 46, 32, 28 (`dynamic`)
   and 42, 15, never (`final`); R46: 18, 28, 12 and 17, 16, 22. The drone spent the run in the
   lobby and the stem with the navigator taking every sentence it was given (54 of 54 in s03;
-  13 or 14 in each of the three runs that reached a tine after step 40). s03 `final` had been
+  14 and 13 in the two runs that reached a tine after step 40). s03 `final` had been
   3/3 for `a66`, `a84`, `a85` and `a86`. R48's shakedown lost s03 `final` seed 1 the same way.
 - **s02: the first station wins, the second does not.** The survey started in 19 of the 24
-  s02 runs. 7 flew at a door from their first station and all 7 were won. 11 went on to the
-  second station and 2 were won (s02c `dynamic` 1 through the door at 31; s02c `final` 2 by
-  the route at 27, its survey over). One had a single station and lost (s02c `final` 1). R46:
-  12 of 15 surveys flew at a door from the first station.
+  s02 runs. 7 crossed from their first station and all 7 were won. 11 went on to the second
+  station (two of them after flying at a doorway from the first and not getting through) and
+  2 were won (s02c `dynamic` 1 through the door at 31; s02c `final` 2 by the route at 27, its
+  survey over). One had a single station and lost (s02c `final` 1). R46: 11 of 15 surveys
+  crossed from the first station.
 - **Why fewer first stations found the door.** With no open doorway remembered to the side
   when the survey starts, the left goes first. In the s02a cells that was the order in 5 of 6
   runs and all five lost (R46: 2 of 4 surveys, one lost; R45: 1 of 6, won): the door was on
-  the other side, the crossing to the second station took 8 to 12 steps, and of the three
-  that then flew at the door one got through, at step 30, and was not solved. The order is
+  the other side, the crossing to the second station took 8 to 11 steps (given up in two),
+  and of the three that then flew at the door one got through, at step 30, and was not
+  solved. The order is
   decided by what the perceiver had read by steps 2 to 6; the station guard has no part in it.
 - **The station guard itself.** Both stations stood in 18 of the 19 surveys. In R46 they
   stood in 14 of 15 under `a86`'s rule, so in flight the setting changed little (on R44's
@@ -82,7 +84,8 @@ operator. Frames stay on the host.
 **Reading.** Two things, both about how to read the night rather than about the station
 guard. First, `a86` and `a87` are the same agent in s03 and scored 5/6 and 1/6 an hour apart
 (Fisher p = 0.08, two-sided, on six runs each); over the whole screen they differ by one
-setting that changed one survey in nineteen, and scored 21 and 12 (p = 0.03). Either the
+setting, under which the stations stood much as they had under `a86`'s rule, and scored 21
+and 12 (p = 0.04). Either the
 always-on sentence makes this agent's runs unusually sensitive to small differences in what
 the model returns, or a 3-run rule on 30 runs understates the noise of this screen for every
 round flown on it, R45's 23 included. The record favours the first without ruling out the

@@ -92,7 +92,7 @@ Wins are not required.
 
 **Flown 2026-11-06: 12/30 against `a86`'s 21/30 (R46) and `a85`'s 23/30 (R45); dropped.** The
 hypothesis did not hold. s03 1/6 on code that is `a86`'s there (R46 5/6); s02 11/24: 7 of 7 surveys
-that flew at a door from their first station won, 2 of 11 that went on to the second.
+that crossed from their first station won, 2 of 11 that went on to the second.
 [summary.md](summary.md). Labels: Claude review, not yet confirmed by the operator.
 
 **Shakedown (2026-11-06, 06:32–06:47 UTC): four unscored runs, slot 5 (port 8105) as a fifth
