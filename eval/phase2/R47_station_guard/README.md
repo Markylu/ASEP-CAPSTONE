@@ -5,7 +5,8 @@
 **Navigator notes:** `NAVIGATOR_A86` ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) from R44's flight, while R45 was in the air and R46 queued
-behind it; shakedown and flight below
+behind it; shakedown flown 2026-11-06 (four of four s02c runs solved, gate passed); round
+flight below
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R44 (`a84`, 18/30, the bar since tonight), R32P (`a66`, 15/30) and
@@ -89,4 +90,20 @@ Wins are not required.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+
+**Shakedown (2026-11-06, 06:32–06:47 UTC): four unscored runs, slot 5 (port 8105) as a fifth
+client beside R45's four lanes, sctsvr6 `~/asep-r33-shake` at `3ce00d1`, log
+`~/r47_shake_a87.log`. All valid, all four solved. Gate passed.** (`eval/probes/a80_check.py`.)
+
+| Cell (seed) | `a87` | R44 `a84`, same cell and seed | Survey | Crossed |
+|---|---|---|---|---|
+| s02c `final` (2) | solved, 36 | solved, 60 (one station) | did not start (no closed door read dead ahead on the way in); the route crossed, after a latch at 10 off the direct line | 28 |
+| s02c `final` (3) | **solved, 26** | lost (one station) | both stations; the door flown at from step 7, through at 18 | 18 |
+| s02c `dynamic` (2) | **solved, 25** | lost (one station) | both stations; station at 11, door flown at from 14, through at 17 | 17 |
+| s02c `dynamic` (3) | solved, 22 | solved, 45 (one station) | both stations; door flown at from 11, through at 14 | 14 |
+
+- **Gate:** the survey starts with both stations in at least three of the four: three (the
+  fourth did not start). A route on every step. Passed.
+- The three runs with a survey crossed at steps 14 to 18, on the survey; in R44 the same three
+  had one station, on the wrong side, and crossed at 36 or never.
