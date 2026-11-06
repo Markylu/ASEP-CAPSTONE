@@ -422,6 +422,13 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a93 again with Godot rendered on an H100 (host round), contested cells",
             "agent": "a93", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R55: the bar on H100 frames (host round, operator's call after R54: a93
+    # scored 19 on H100 frames against 24 on lavapipe's). a89 as R49 flew it,
+    # Godot rendered on an H100; read against R49 (23/30) and R54.
+    "R55": {"folder": "R55_h100_a89",
+            "title": "a89 again with Godot rendered on an H100 (host round), contested cells",
+            "agent": "a89", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
