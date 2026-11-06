@@ -5,7 +5,7 @@
 **Navigator notes:** `NAVIGATOR_A90` ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) from R46's flight, while R47 was in the air and R49's
-shakedown was flying; shakedown and flight below
+shakedown was flying; **not flown** (see Outcome)
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R45 (`a85`, 23/30, the bar), R46 (`a86`, 21/30) and R49 (`a89`) as
@@ -104,4 +104,10 @@ sentence is said, and a route is on at least 95% of steps. Wins are not required
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Not flown, no shakedown (decided 2026-11-06, 08:28 UTC, Claude alone).** Laid out at 08:07 UTC on
+R46's record. R47 then landed: s03 1/6 for `a87`, which is `a86` in s03 (R46: 5/6), the drone in a
+tine at steps 46, 32, 28, 42, 15 and never, the navigator taking every sentence in the lobby and
+the stem, nearly all of them after step 8. The s03 gain this round was written to keep was not
+there the second time, and the rule here would not have stopped those sentences. The two flights
+left went to `a91` (R51) and `a89` (R49). The code (`planner.PathPlan.way_in`, `NAVIGATOR_A90`)
+stands, tested, for a round that wants it.
