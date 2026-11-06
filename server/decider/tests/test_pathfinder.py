@@ -1389,3 +1389,88 @@ def test_a84_is_a83_with_the_goal_rule_and_side_only_out_and_the_lane_by_its_spr
     assert a84["pathfinder"]["dead_end_latch"]["confined"] == dict(
         a83["pathfinder"]["dead_end_latch"]["confined"], span_m=2.8)
     assert agent.get("a83").sha() == "db5b837c8d43" and agent.get("a82").sha() == "43255087a08a"
+
+
+# --- a85 (R45): the through phase after R44's shakedown ------------------------------
+
+L85 = agent.PATHFINDER_A85
+SV85 = L85["survey"]
+
+
+def survey85_at(mem, here, step, records=()):
+    cm = spatial.CostMap(mem, [], L85, include=(spatial.cell(here[:2]), spatial.cell(GOAL80)),
+                         start=spatial.cell(here[:2]))
+    return planner.wall_survey(mem, cm, here, step, GOAL80, list(records), L85)
+
+
+def flying_at_a_door(off_deg=20.0):
+    """a85's survey in its through phase from the first station, on a ray off_deg off the axis."""
+    mem, here, step = hall()
+    _, sv = survey85_at(mem, here, step)
+    station = planner.survey_station(sv, SV85)
+    at = (station[0], station[1], 0.0)
+    _, look = survey85_at(mem, at, step + 5, [rec(step, sv)])
+    mem.door_rays.append(spatial.Ray(at[0], at[1], off_deg, step + 6, "open_far"))
+    _, thru = survey85_at(mem, at, step + 6, [rec(step + 5, look)])
+    assert thru["phase"] == "through"
+    return mem, here, step + 6, at, thru
+
+
+def test_a85_reads_out_to_65_degrees_count_once_the_door_is_being_flown_at():
+    mem, here, step, at, thru = flying_at_a_door()
+    nxt = (at[0] + 2.0, at[1] + 0.7, 20.0)
+    mem.door_rays.append(spatial.Ray(nxt[0], nxt[1], 55.0, step + 1, "open_far"))
+    wp, sv = survey85_at(mem, nxt, step + 1, [rec(step, thru)])
+    assert len(sv["rays"]) == 2 and abs(spatial.wrap(spatial.bearing(nxt[:2], wp) - 55.0)) < 0.5
+    # Before a door is being flown at, a read that far off the axis starts nothing (a84's rule).
+    mem2, here2, step2 = hall()
+    _, sv2 = survey85_at(mem2, here2, step2)
+    station = planner.survey_station(sv2, SV85)
+    _, look = survey85_at(mem2, (station[0], station[1], 0.0), step2 + 5, [rec(step2, sv2)])
+    mem2.door_rays.append(spatial.Ray(station[0], station[1], 55.0, step2 + 6, "open_far"))
+    _, still = survey85_at(mem2, (station[0], station[1], 0.0), step2 + 6, [rec(step2 + 5, look)])
+    assert still["phase"] == "look"
+
+
+def test_a85_stopped_at_the_wall_it_lines_up_on_the_doors_line_and_goes_through():
+    mem, here, step, at, thru = flying_at_a_door(off_deg=30.0)
+    hit = (at[0] + 4.0, at[1] + 1.0, 30.0)                   # met the wall beside the door
+    mem.nose_on.append(step + 3)
+    wp, sv = survey85_at(mem, hit, step + 3, [rec(step, thru)])
+    wall = planner.survey_frame(sv, hit[:2])[0] + SV85["wall_m"]
+    assert sv["phase"] == "through" and sv["lined"] == 1 and abs(sv["wall"] - wall) < 0.02
+    line = planner.survey_door_line(sv, SV85)                # where the ray meets the wall
+    want = 7.0 + math.tan(math.radians(30.0)) * (wall - planner.survey_frame(sv, at[:2])[0])
+    assert abs(line - want) < 0.05
+    pre = planner.survey_point(sv, wall - SV85["lineup"]["pre_m"], line)
+    assert spatial.dist(wp, pre) < 0.05                      # first to the point in front of the door
+    on = (pre[0], pre[1], 0.0)
+    wp2, sv2 = survey85_at(mem, on, step + 6, [rec(step + 3, sv)])
+    along = planner.survey_frame(sv2, on[:2])[0]
+    assert abs(planner.survey_frame(sv2, wp2)[1] - line) < 0.05          # then down the door's line
+    assert abs(planner.survey_frame(sv2, wp2)[0] - (along + SV85["carrot_m"])) < 0.05
+    beyond = planner.survey_point(sv2, wall + SV85["through_m"], line)
+    wp3, sv3 = survey85_at(mem, (beyond[0], beyond[1], 0.0), step + 9, [rec(step + 6, sv2)])
+    assert wp3 is None and sv3["phase"] == "done"
+
+
+def test_a85_five_metres_on_from_the_last_read_with_nothing_in_the_way_is_through():
+    mem, here, step, at, thru = flying_at_a_door(off_deg=0.0)
+    late = step + SV85["through_steps"]
+    wp, sv = survey85_at(mem, (at[0] + 5.5, at[1], 0.0), late, [rec(step, thru)])
+    assert wp is None and sv["phase"] == "done"
+    wp, sv = survey85_at(mem, (at[0] + 3.0, at[1], 0.0), late, [rec(step, thru)])
+    assert sv["phase"] == "look"                             # not that far on: look again (a83)
+
+
+def test_a85_is_a84_with_the_through_phase_changed():
+    a84 = agent.get("a84").features["orchestrator"]
+    a85 = agent.get("a85").features["orchestrator"]
+    assert {k: v for k, v in a85.items() if k != "pathfinder"} == \
+        {k: v for k, v in a84.items() if k != "pathfinder"}
+    assert {k: v for k, v in a85["pathfinder"].items() if k != "survey"} == \
+        {k: v for k, v in a84["pathfinder"].items() if k != "survey"}
+    assert a85["pathfinder"]["survey"] == dict(
+        a84["pathfinder"]["survey"], through_deg=65.0, lineup={"pre_m": 2.5, "align_m": 0.8},
+        through_adv_m=5.0)
+    assert agent.get("a84").sha() == "58e76b4b2054"
