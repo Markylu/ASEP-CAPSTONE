@@ -4,7 +4,8 @@
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Planner:** `PATHFINDER_A89` ·
 **Navigator notes:** `NAVIGATOR_A78` · **Goal check:** `GOAL_CHECK_A93` ·
 **Status:** laid out 2026-11-06 by Claude on the operator's instruction ("do one more cycle of
-the loop"); every decision here is Claude's, with its reason; not flown
+the loop"); every decision here is Claude's, with its reason; shakedown flown 2026-11-06
+(four of four solved; two gate rows not met as written, neither the change's doing; flown on)
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R45 (`a85`, 23/30, the bar) and R49 (`a89`, 23/30, the agent this
@@ -101,6 +102,25 @@ dropped by step 4 in both s03 runs and both are in the stem by step 6, no report
 line of sight from 4 m or more is dropped in the s02 runs' first 20 steps more than once, the
 survey starts in both s02 runs by step 8, and a route is on at least 95% of steps in every
 run. Wins are not required.
+
+**Shakedown outcome** (2026-11-06, 18:34–18:42 UTC, `b8ef443`, two lanes alone on `:8004`,
+checkouts `~/asep-r53-shake-a`, `-b`; unscored, not part of the round):
+
+| run | result | reports dropped (step, strip, off the line) | in the stem | first tine step | survey from | route |
+|---|---|---|---|---|---|---|
+| s03 `final` 1 | goal at 34 | none (no goal report before step 5) | step 4 | 16 | — | 34/34 |
+| s03 `dynamic` 1 | goal at 51 | 2 far right 40°; 37 far right 28° | step 4 | 13 | — | 51/51 |
+| s02c `dynamic` 1 | goal at 29 | none | — | — | step 4 | 29/29 |
+| s02a `final` 1 | goal at 32 | 21 far right 85° | — | — | never | 32/32 |
+
+All four dropped reports had no line of sight; none of the 26 made with one was dropped; no
+goal tag stood on a step whose report was dropped. **Two rows not met as written.** In s03
+`final` no report was dropped by step 4 because the perceiver made none there this time; the
+drone was in the stem at step 4 all the same. In s02a `final` the survey never started; it
+did not in R49 either (`a89`, same cell and seed, lost there, won here at 32), so it is not
+this change's doing. s03 `dynamic` seed 1 had been lost in six of the seven flights of
+2026-11-05 and 06. **Flown on**: nothing here says the check breaks s02, which is what the
+gate is for.
 
 ## Host
 
