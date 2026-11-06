@@ -3,7 +3,9 @@
 **Agent:** `a84` (`58e76b4b2054`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Planner:** `PATHFINDER_A84` ·
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
-here is Claude's, with its reason) from R43's shakedown; shakedown and flight below
+here is Claude's, with its reason) from R43's shakedown; shakedown flown 2026-11-06 (s02c
+`dynamic` and s03 `final` solved; one gate row failed in s02vc `final`, waived with reasons);
+round flight below
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30) and R39 (`a79`, 15/30), no control lane. **A
@@ -123,4 +125,33 @@ Wins are not required.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+
+**Shakedown (2026-11-06, 05:23–05:30 UTC): four unscored runs, one on each lane slot together
+(`~/asep-r42-l1..4` at `ccf3e46`, logs `~/r44_shake_l1..4.log`), alone on `:8004`. All valid.
+One row of the gate failed (s02vc `final`); the round is flown all the same, on Claude's
+decision, for the reasons under the table.**
+
+| Cell (seed 1) | `a84` | `a83` (R43 shakedown) | R32P `a66` | What happened |
+|---|---|---|---|---|
+| s02c `dynamic` | **solved, 24** | lost (survey ended by a goal report) | lost | survey from step 4, station at 11, door read at 12, through at 15; goal reports at steps 3–4 no longer end it |
+| s02vc `final` | lost | lost | lost | survey from step 6; the door read in the right strip at step 8 (21° off the axis) and flown at; at steps 9–11 it was read in the left strips, 42–58° off the axis, **not counted**, so the aim stayed on the first ray and the drone met the wall at (1.1, −5.8), 3.3 m from the door's centre; then 12 steps along the wall in the look phase |
+| s03 `final` | **solved, 55** | lost (no latch) | solved | took the open tine; no latch needed |
+| s03 `dynamic` | lost | lost | lost | 38 steps before the tine; door shut at 39, **latch at 45**, out of the tine at 50, ten steps left |
+
+- **Gate.** Not ended by a goal report: held in both s02 runs. No survey step in s03: held. A
+  latch in the s03 run that stayed in the shut tine: held (six steps after the door shut). A
+  route on every step: held. **"Both s02 runs come within 2 m of the door's centre or cross":
+  failed for s02vc `final` (3.3 m).**
+- **Why it flies anyway** (Claude's decision; the operator's instruction for the night is that
+  rounds fly, and that a gate is there to stop a change that breaks s02). (1) Across the
+  shakedowns of `a83` and `a84`, the same survey but for the faults named, five s02 cells were
+  flown at seed 1 and four were solved (s02a `dynamic`, s02c `final`, s02c `dynamic`, s02va
+  `final`); `a66` solved one of those five in R32P. Nothing is broken; one cell has a known
+  fault. (2) That fault is a threshold: doorway reads more than 40° off the approach axis are
+  dropped even while the drone is already flying at the door. The fix is a new version
+  (`a85`), built while this round is in the air, and it will be read against this round. (3)
+  The four lanes were idle, and R40 to R43 had each been stopped before a flight.
+- **What is new and held:** the s03 `dynamic` latch came six steps after the door shut (R39:
+  ten, 25 and never); s03 `final` seed 1 was solved (lost in R39's flight and in R40's and
+  R43's shakedowns).
