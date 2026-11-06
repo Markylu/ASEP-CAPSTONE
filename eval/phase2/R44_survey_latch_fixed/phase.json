@@ -3,10 +3,11 @@
   "title": "a66 with the wall survey and the dead-end latch, after R43's shakedown, contested cells",
   "citable": false,
   "agent_version": "a84",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "eb80c0f",
+  "started": "2026-11-06T05:33:14+00:00",
+  "finished": "2026-11-06T06:24:37+00:00",
+  "operator": "Claude (overnight run; operator Markylu asleep)",
+  "notes": "Flown 2026-11-06, 05:33-06:22 UTC, by Claude alone on the overnight instruction (OVERNIGHT_PROMPT.md); the operator was asleep. One row of the shakedown gate was waived (README, Outcome).",
+  "lanes": "sctsvr6 lanes 1-4 (asep-r44-l1..4), shared vLLM :8004; a fifth client on slot 5 from 05:39 to 05:58 UTC (R45's unscored shakedown) and from 06:03 (R46's); from about 06:19 UTC the lanes that had finished flew R45 beside the last R44 runs (never more than five clients)"
 }

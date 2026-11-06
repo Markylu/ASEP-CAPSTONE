@@ -5,7 +5,8 @@
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) from R43's shakedown; shakedown flown 2026-11-06 (s02c
 `dynamic` and s03 `final` solved; one gate row failed in s02vc `final`, waived with reasons);
-round flight below
+**round flown 2026-11-06: 18/30 against `a66`'s 15/30, +3, carried; s03 `dynamic` 2/3**
+([summary](summary.md))
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R32P (`a66`, 15/30) and R39 (`a79`, 15/30), no control lane. **A
@@ -125,7 +126,13 @@ Wins are not required.
 
 ## Outcome
 
-Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Flown 2026-11-06, 05:33–06:22 UTC, 30/30 valid: 18/30 against `a66`'s 15/30 (R32P), +3, the
+rule's threshold: `a84` is carried forward and is the bar for the rounds after it.** s03 5/6
+(R32P 3/6), with s03 `dynamic` 2/3, the first scored solves of that cell in Phase 2: the latch
+fired five steps after the door shut and the drone was out of the tine four and six steps
+later. s02 13/24 (R32P 12/24), a draw: 8/12 where the open door is out of view from the way
+in, 5/12 where it is in view (s02vc 1/6, the fault the waived gate row named). The hypothesis
+held for the latch and in part for the survey. Details: [summary.md](summary.md).
 
 **Shakedown (2026-11-06, 05:23–05:30 UTC): four unscored runs, one on each lane slot together
 (`~/asep-r42-l1..4` at `ccf3e46`, logs `~/r44_shake_l1..4.log`), alone on `:8004`. All valid.
