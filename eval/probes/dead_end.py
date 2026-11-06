@@ -56,17 +56,20 @@ GATE = {"shut_tine_yes_min": 0.80, "s02_yes_max": 0.05,
         "s03_dynamic_runs_min": 7, "steps_left_min": 25, "s02_runs_max": 5}
 
 
-def sample(roots: List[str]) -> int:
-    """One row per asked step whose clean frame is on disk under a lane root."""
+def sample(roots: List[str], wanted=None) -> int:
+    """One row per asked step whose clean frame is on disk under a lane root.
+    `wanted(folder, arm)` picks the runs; by default the change arms of FOLDERS
+    (dead_end_heldout.py passes its own)."""
+    pick = wanted or (lambda folder, arm: folder in FOLDERS and arm != "initial")
     seen: Dict[Tuple[str, str, str, str], Path] = {}
     for root in roots:
-        for folder in FOLDERS:
-            for d in sorted(Path(root).expanduser().glob(
-                    "eval/phase2/{0}/runs/*/*/seed*/decisions.jsonl".format(folder))):
-                run = d.parent
-                key = (folder.split("_", 1)[0], run.parts[-3], run.parts[-2], run.parts[-1])
-                if run.parts[-2] != "initial" and (run / "frames").is_dir():
-                    seen.setdefault(key, run)
+        for d in sorted(Path(root).expanduser().glob(
+                "eval/phase2/*/runs/*/*/seed*/decisions.jsonl")):
+            run = d.parent
+            folder = run.parts[-5]
+            key = (folder.split("_", 1)[0], run.parts[-3], run.parts[-2], run.parts[-1])
+            if pick(folder, run.parts[-2]) and (run / "frames").is_dir():
+                seen.setdefault(key, run)
     frames: List[Dict[str, Any]] = []
     missing = 0
     for (short, site, arm, seed), run in sorted(seen.items()):
