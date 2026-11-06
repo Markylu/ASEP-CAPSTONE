@@ -314,6 +314,13 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a66 with the dead-end latch fired by the trail, contested cells",
             "agent": "a79", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R40: a80 (a66 with the wall survey, planner.wall_survey: square looks at
+    # the wall either side of a closed door met on the direct line), the same
+    # screen. Read against R32P (a66, 15/30). Overnight run 2026-11-05.
+    "R40": {"folder": "R40_wall_survey",
+            "title": "a66 with the wall survey, contested cells",
+            "agent": "a80", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

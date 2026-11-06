@@ -996,6 +996,9 @@ class PathPlan:
     #: every step from the one it fired on: {step, origin, axis_deg, lane_m,
     #: half_width_m, ahead_m, reach_m, out}. None before it fires.
     latch: Optional[Dict[str, Any]] = None
+    #: a80 (`survey`): the wall survey's state, carried on every step from the
+    #: one it starts on (planner.wall_survey). None before it starts.
+    survey: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         out = {"way": "path", "path_m": self.path_m,
@@ -1013,6 +1016,8 @@ class PathPlan:
             out["door"] = self.door
         if self.latch is not None:
             out["latch"] = self.latch
+        if self.survey is not None:
+            out["survey"] = self.survey
         return out
 
 
@@ -1705,6 +1710,278 @@ def door_approach(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial
                 "along_m": round(along, 2), "lateral_m": round(lateral, 2)}
 
 
+# --- a80 (R40): the wall survey -------------------------------------------------
+#
+# docs/research/round-f-analysis.md §9: at 2-9 m a look within 20 degrees of
+# square read the open door on 157 of 158 looks and a blank wall strip as open
+# on 1 of 366; within 20-40 degrees, 36 of 41 and 17 of 939; beyond 60 degrees,
+# 112 of 231 and 76 of 393. a66 meets the s02 divider at a closed door, then
+# flies along it: the open door was in view within 20 degrees of square at
+# 2-6 m on 58 of 4256 near-side frames. The survey takes the square looks the
+# route never takes. When a closed door is read dead ahead on the drone's
+# first way in along the direct line from the spawn to the goal, the drone
+# steps `stations_m` to the side of that line, turns back to the line's
+# bearing and flies at the wall:
+# every frame on the way in is a look square to it. An open doorway read on
+# such a look takes the waypoint through the wall along that strip's ray. At
+# the wall with no door, it goes `standoff_m` back and to the other side, and
+# flies in again. Everything is the agent's own: its trail, its perceiver's
+# reads after the door confirmer, its bumps. The perceiver's floor classes do
+# not give the wall's range (Round F: a closed door "2.5 m ahead" read from
+# 16 m, every strip blocked read from 13 m), so the wall is where the drone
+# is stopped by it. Parameters: agent.SURVEY_A80.
+
+
+def survey_from(records: List[Dict[str, Any]], step: int) -> Optional[Dict[str, Any]]:
+    """The survey state the newest earlier planner record carries, or None."""
+    best: Optional[Dict[str, Any]] = None
+    at = -1
+    for r in records:
+        if "step" in r and at < r["step"] < step:
+            sv = (r.get("planner") or {}).get("survey")
+            if sv:
+                best, at = sv, r["step"]
+    return dict(best) if best else None
+
+
+def survey_frame(sv: Dict[str, Any], at: spatial.Point) -> Tuple[float, float]:
+    """(metres toward the wall from where the survey began, metres left of the
+    approach axis) for a point on the map."""
+    return latch_frame({"origin": sv["at"], "axis_deg": sv["axis_deg"]}, at)
+
+
+def survey_point(sv: Dict[str, Any], along: float, left: float) -> spatial.Point:
+    rad = math.radians(float(sv["axis_deg"]))
+    ux, uy = math.cos(rad), math.sin(rad)
+    return (float(sv["at"][0]) + along * ux - left * uy,
+            float(sv["at"][1]) + along * uy + left * ux)
+
+
+def survey_station(sv: Dict[str, Any], c: Dict[str, Any]) -> Optional[spatial.Point]:
+    """The station the survey is on: the current offset to the side of the
+    approach axis, `back_m` behind where the survey began while the wall's
+    range is unknown, `standoff_m` back from the wall once the drone has met
+    it. None when no station is left."""
+    if int(sv["i"]) >= len(sv["order"]):
+        return None
+    along = (-float(c["back_m"]) if sv.get("wall") is None
+             else float(sv["wall"]) - float(c["standoff_m"]))
+    return survey_point(sv, along, float(sv["order"][int(sv["i"])]))
+
+
+def _centre_floor_before(records: List[Dict[str, Any]], step: int) -> Optional[str]:
+    """The floor class the perceiver gave the centre strip on step - 1."""
+    for r in records:
+        if r.get("step") == step - 1:
+            for lane in ((r.get("perceiver") or {}).get("result") or {}).get("lanes") or []:
+                if lane.get("strip") == "centre":
+                    return lane.get("floor")
+    return None
+
+
+def at_wall(mem: spatial.SpatialMemory, records: List[Dict[str, Any]], step: int) -> bool:
+    """Whether the drone has met a wall on this step: its last move was stopped
+    short, or every strip reads blocked_near now and the step before did not
+    read far floor down the centre (Round F read every strip blocked on frames
+    5-17 m from any wall, one step after reading 6 m of floor ahead)."""
+    if any(b.step == step - 1 for b in mem.blocks):
+        return True
+    return bool(mem.nose_on and mem.nose_on[-1] == step
+                and _centre_floor_before(records, step) in ("open_near", "blocked_near"))
+
+
+def survey_start(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.Pose,
+                 step: int, goal: spatial.Point, records: List[Dict[str, Any]],
+                 c: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """The survey this step starts, or None. The wall to survey is one across
+    the direct line from the spawn to the goal: the approach axis is that
+    line's bearing. Starts when a closed door is read in the centre strip on
+    this step (after the door confirmer); the drone is heading within
+    goal_deg of the axis and has come run_m or more along it; it has never
+    been more than line_m off the direct line (it is still on its first way
+    in: a corridor turned into lies off it, and a closed door at its end is
+    a79's dead end, not a wall to survey); and a station can be flown to over
+    passable cells."""
+    if not mem.centre_closed or mem.centre_closed[-1] != step or not mem.trail:
+        return None
+    spawn = mem.trail[0][1:3]
+    axis = spatial.bearing(spawn, goal)
+    if abs(spatial.wrap(here[2] - axis)) > float(c["goal_deg"]):
+        return None
+    sv: Dict[str, Any] = {"step": step, "at": [round(here[0], 2), round(here[1], 2)],
+                          "axis_deg": round(axis, 1), "wall": None,
+                          "order": [], "i": 0, "phase": "transit", "since": step,
+                          "best": None, "rays": [], "looks": 0}
+    line = {"origin": spawn, "axis_deg": axis}
+    if latch_frame(line, here[:2])[0] < float(c["run_m"]):
+        return None
+    if any(abs(latch_frame(line, (x, y))[1]) > float(c["line_m"]) for _, x, y, _ in mem.trail):
+        return None
+    if at_wall(mem, records, step):
+        sv["wall"] = float(c["wall_m"])     # already stopped by it: its range is known
+    # The side a remembered open doorway lies on goes first; else the left.
+    side = 1.0
+    live = [o for o in mem.openings if not (o.passed or o.closed or o.dead)]
+    if live:
+        far = max((survey_frame(sv, (o.x, o.y))[1] for o in live), key=abs)
+        if abs(far) >= float(c["side_min_m"]):
+            side = 1.0 if far > 0 else -1.0
+    sv["order"] = [side * float(c["stations_m"]), -side * float(c["stations_m"])]
+    first = survey_station(sv, c)
+    if cm.cost(spatial.cell(first)) is None or not cm.passable_segment(here[:2], first):
+        sv["order"] = sv["order"][1:]
+        first = survey_station(sv, c)
+        if cm.cost(spatial.cell(first)) is None or not cm.passable_segment(here[:2], first):
+            return None
+    return sv
+
+
+def _survey_next(sv: Dict[str, Any], step: int) -> None:
+    sv.update(i=int(sv["i"]) + 1, phase="transit", since=step, best=None, rays=[])
+
+
+def survey_door_line(sv: Dict[str, Any], c: Dict[str, Any]) -> Optional[float]:
+    """Metres left of the approach axis of the doorway the survey's open reads
+    point at (sv["rays"]: [x, y, heading] of each, newest last), or None.
+    With the wall's range known, where the newest ray meets the wall. Else
+    where the rays cross (least squares over the last `rays_kept`), when they
+    are not near parallel; else the newest ray taken `reach_ray_m` out."""
+    rays = sv.get("rays") or []
+    if not rays:
+        return None
+    x, y, heading = rays[-1]
+    along, left = survey_frame(sv, (x, y))
+    off = math.radians(spatial.wrap(heading - float(sv["axis_deg"])))
+    if sv.get("wall") is not None:
+        return left + math.tan(off) * max(float(sv["wall"]) - along, 0.0)
+    a11 = a12 = a22 = b1 = b2 = 0.0
+    for rx, ry, rh in rays:
+        dx, dy = math.cos(math.radians(rh)), math.sin(math.radians(rh))
+        m11, m12, m22 = 1.0 - dx * dx, -dx * dy, 1.0 - dy * dy
+        a11 += m11; a12 += m12; a22 += m22
+        b1 += m11 * rx + m12 * ry
+        b2 += m12 * rx + m22 * ry
+    det = a11 * a22 - a12 * a12
+    if len(rays) >= 2 and det > float(c["cross_det"]):
+        px, py = (a22 * b1 - a12 * b2) / det, (a11 * b2 - a12 * b1) / det
+        ahead_m, at_left = survey_frame(sv, (px, py))
+        if ahead_m > along:                      # the crossing lies ahead of the drone
+            return at_left
+    return left + math.tan(off) * float(c["reach_ray_m"])
+
+
+def wall_survey(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.Pose,
+                step: int, goal: spatial.Point, records: List[Dict[str, Any]],
+                p: Dict[str, Any]) -> Tuple[Optional[spatial.Point], Optional[Dict[str, Any]]]:
+    """a80: (the waypoint the survey sets this step or None, the survey's state
+    to carry or None).
+
+    transit   fly to the station; a station not come half a metre nearer in
+              stall_steps is given up.
+    look      at the station, the waypoint is face_m ahead along the approach
+              axis: the drone turns to the wall and flies at it, and every
+              frame taken with the heading within square_deg of the axis is a
+              square look. It ends at the wall (at_wall: the wall's range is
+              then known, one cell ahead) or after look_steps.
+    through   an open doorway read (after the door confirmer) on any step of
+              the survey short of the wall, on a strip whose ray lies within
+              open_deg of the approach axis, is kept as a ray. The doorway's
+              line (survey_door_line: where the rays cross, or meet a wall
+              whose range is known) runs along the approach axis, and the
+              waypoint is carrot_m ahead of the drone on it. Done when the
+              drone is beyond the wall, or through_steps after the last such
+              read; given up (on to the next station) when a move is stopped
+              short and no doorway is read from where it stopped (a jamb
+              clipped leaves the door in view; a phantom does not read open
+              twice).
+    The survey is done when the stations are, or after budget_steps."""
+    c = p.get("survey")
+    if not c:
+        return None, None
+    sv = survey_from(records, step)
+    if sv is None:
+        sv = survey_start(mem, cm, here, step, goal, records, c)
+        if sv is None:
+            return None, None
+    if sv["phase"] == "done":
+        return None, sv
+    if step - int(sv["step"]) >= int(c["budget_steps"]):
+        sv["phase"] = "done"
+        return None, sv
+    axis = float(sv["axis_deg"])
+    along, _ = survey_frame(sv, here[:2])
+    wall = sv.get("wall")
+    short = wall is None or along < float(wall) - 0.5
+    rays = [r for r in mem.door_rays if r.step == step
+            and abs(spatial.wrap(r.heading - axis)) <= float(c["open_deg"])] if short else []
+    ray = min(rays, key=lambda r: abs(spatial.wrap(r.heading - here[2]))) if rays else None
+    if ray is not None:
+        kept = list(sv.get("rays") or []) + [[round(here[0], 2), round(here[1], 2),
+                                              round(ray.heading, 1)]]
+        sv["rays"] = kept[-int(c["rays_kept"]):]
+
+    def carrot() -> spatial.Point:
+        # The door's line runs along the approach axis through the doorway;
+        # the waypoint is carrot_m ahead of the drone on it, so a drone
+        # knocked off the line comes back onto it before the wall.
+        line = survey_door_line(sv, c)
+        return survey_point(sv, along + float(c["carrot_m"]), line)
+
+    if sv["phase"] == "through":
+        spent = step - int(sv["since"])
+        bumped = any(b.step == step - 1 for b in mem.blocks)
+        if wall is not None and along >= float(wall) + float(c["through_m"]) - 0.5:
+            sv["phase"] = "done"            # beyond the wall: the route takes over
+            return None, sv
+        if ray is not None:
+            sv["since"] = step              # still read ahead: the count restarts
+            return carrot(), sv
+        if bumped:
+            _survey_next(sv, step)          # stopped, and no doorway read from here: a phantom
+        elif spent >= int(c["through_steps"]):
+            sv["phase"] = "done"            # no doorway ahead any more, nothing in the way: through it
+            return None, sv
+        else:
+            return carrot(), sv
+    elif ray is not None:
+        sv.update(phase="through", since=step)
+        return carrot(), sv
+    station = survey_station(sv, c)
+    if station is None:
+        sv["phase"] = "done"
+        return None, sv
+    if sv["phase"] == "transit":
+        d = spatial.dist(here[:2], station)
+        if d <= float(c["reach_m"]):
+            sv.update(phase="look", since=step)
+        else:
+            if sv["best"] is None or d < float(sv["best"]) - 0.5:
+                sv.update(best=round(d, 2), since=step)
+            elif step - int(sv["since"]) >= int(c["stall_steps"]):
+                _survey_next(sv, step)
+                station = survey_station(sv, c)
+                if station is None:
+                    sv["phase"] = "done"
+                    return None, sv
+            if sv["phase"] == "transit":
+                return station, sv
+    # look: turn to the wall and fly at it until it is met.
+    square = abs(spatial.wrap(here[2] - axis)) <= float(c["square_deg"])
+    if square:
+        sv["looks"] = int(sv["looks"]) + 1
+    met = square and step > int(sv["since"]) and at_wall(mem, records, step)
+    if met:
+        sv["wall"] = round(along + float(c["wall_m"]), 2)
+    if met or step - int(sv["since"]) >= int(c["look_steps"]):
+        _survey_next(sv, step)
+        station = survey_station(sv, c)
+        if station is None:
+            sv["phase"] = "done"
+            return None, sv
+        return station, sv
+    return spatial.ahead(here[:2], axis, float(c["face_m"])), sv
+
+
 def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
              records: List[Dict[str, Any]], goal: spatial.Point,
              p: Dict[str, Any]) -> PathPlan:
@@ -1800,11 +2077,25 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
             near = float(p.get("waypoint_min_m", 1.0))
             if spatial.dist(here[:2], wp) < near:
                 wp = spatial.ahead(here[:2], spatial.bearing(here[:2], wp), near)
+    survey: Optional[Dict[str, Any]] = None
+    if p.get("survey") and latch is None:
+        # a80: the wall survey takes the waypoint while it runs. A latched
+        # corridor has none (the latch is the way out of it).
+        hit_wp, survey = wall_survey(mem, cm, here, step, goal, records, p)
+        if hit_wp is not None:
+            wp = hit_wp
+            near = float(p.get("waypoint_min_m", 1.0))
+            if spatial.dist(here[:2], wp) < near:
+                wp = spatial.ahead(here[:2], spatial.bearing(here[:2], wp), near)
+    elif p.get("survey"):
+        survey = survey_from(records, step)
+        if survey is not None and survey["phase"] != "done":
+            survey["phase"] = "done"
     path_m = round(sum(spatial.dist(_centre(a), _centre(b)) for a, b in zip(path, path[1:])), 2)
     unknown = sum(1 for c in path[1:-1] if c not in cm.known)
     target = spatial.Target("path", "path", wp[0], wp[1], p["words"]["path"], step)
     return PathPlan(target, wp, path, path_m, unknown, fallback, added, cm.counts(), sealed_now,
-                    kept, fresh_m, door, latch)
+                    kept, fresh_m, door, latch, survey)
 
 
 def search_situation_a20(mem: spatial.SpatialMemory, manifest: Dict[str, Any],

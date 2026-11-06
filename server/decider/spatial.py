@@ -829,6 +829,9 @@ class SpatialMemory:
     #: a79: the steps a closed door was read in the centre three strips (after
     #: the door confirmer), for planner.confined_run.
     closed_reads: List[int] = field(default_factory=list)
+    #: a80: the steps a closed door was read in the centre strip itself, for
+    #: planner.survey_start.
+    centre_closed: List[int] = field(default_factory=list)
     cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
@@ -888,6 +891,9 @@ class SpatialMemory:
         if any(l.get("doorway") == "closed" and l.get("strip") in CENTRAL_STRIPS
                for l in perception.get("lanes") or []):
             self.closed_reads.append(step)
+        if any(l.get("doorway") == "closed" and l.get("strip") == "centre"
+               for l in perception.get("lanes") or []):
+            self.centre_closed.append(step)
         if self.cfg.coverage:
             self._observe_cone(step, where, perception)
             return

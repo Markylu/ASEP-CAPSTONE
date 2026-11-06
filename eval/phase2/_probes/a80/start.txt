@@ -1,0 +1,180 @@
+final s01    dynamic  seed1  won  sw 3 crossed 13 | -
+final s01    dynamic  seed2  won  sw 3 crossed 13 | -
+final s01    dynamic  seed3  won  sw 3 crossed 14 | -
+final s01    dynamic  seed4  won  sw 3 crossed 12 | -
+final s01    dynamic  seed5  won  sw 3 crossed 9 | -
+final s01    final    seed1  won  sw None crossed 18 | -
+final s01    final    seed2  won  sw None crossed 41 | -
+final s01    final    seed3  won  sw None crossed 20 | -
+final s01    final    seed4  won  sw None crossed 21 | -
+final s01    final    seed5  won  sw None crossed 12 | -
+final s01    initial  seed1  won  sw None crossed 8 | -
+final s01    initial  seed2  won  sw None crossed 8 | -
+final s01    initial  seed3  won  sw None crossed 8 | -
+final s01    initial  seed4  won  sw None crossed 8 | -
+final s01    initial  seed5  won  sw None crossed 8 | -
+final s02a   dynamic  seed1  lost sw 3 crossed 57 | start 4 at (5.2,0.4) h178 axis 180.4 wall_m None order [7.0, -7.0]
+final s02a   dynamic  seed2  won  sw 3 crossed 28 | start 4 at (5.2,-0.2) h180 axis 179.5 wall_m None order [7.0, -7.0]
+final s02a   dynamic  seed3  won  sw 3 crossed 32 | start 4 at (5.2,-0.3) h182 axis 180.0 wall_m None order [7.0, -7.0]
+final s02a   dynamic  seed4  lost sw 3 crossed None | start 4 at (5.2,-0.1) h178 axis 179.0 wall_m None order [-7.0, 7.0]
+final s02a   dynamic  seed5  won  sw 3 crossed 47 | start 4 at (5.2,-0.5) h183 axis 179.9 wall_m None order [7.0, -7.0]
+final s02a   final    seed1  lost sw None crossed None | start 2 at (8.7,0.9) h178 axis 180.4 wall_m None order [-7.0]
+final s02a   final    seed2  lost sw None crossed None | start 2 at (8.6,-0.2) h180 axis 179.5 wall_m None order [-7.0, 7.0]
+final s02a   final    seed3  won  sw None crossed 32 | start 2 at (8.6,-0.1) h182 axis 180.0 wall_m None order [-7.0]
+final s02a   final    seed4  lost sw None crossed None | start 2 at (8.7,0.4) h178 axis 179.0 wall_m None order [-7.0]
+final s02a   final    seed5  lost sw None crossed None | -
+final s02a   initial  seed1  won  sw None crossed 8 | -
+final s02a   initial  seed2  won  sw None crossed 8 | -
+final s02a   initial  seed3  won  sw None crossed 8 | -
+final s02a   initial  seed4  won  sw None crossed 8 | -
+final s02a   initial  seed5  won  sw None crossed 8 | -
+final s02c   dynamic  seed1  lost sw 3 crossed None | start 4 at (5.2,0.4) h178 axis 180.4 wall_m None order [7.0, -7.0]
+final s02c   dynamic  seed2  lost sw 3 crossed None | start 4 at (5.2,-0.2) h180 axis 179.5 wall_m None order [7.0, -7.0]
+final s02c   dynamic  seed3  won  sw 3 crossed 23 | start 5 at (3.5,-0.3) h182 axis 180.0 wall_m None order [7.0, -7.0]
+final s02c   dynamic  seed4  lost sw 3 crossed None | start 5 at (3.5,-0.1) h178 axis 179.0 wall_m None order [-7.0]
+final s02c   dynamic  seed5  lost sw 3 crossed None | start 4 at (5.2,-0.5) h183 axis 179.9 wall_m None order [7.0, -7.0]
+final s02c   final    seed1  won  sw None crossed 39 | -
+final s02c   final    seed2  lost sw None crossed None | start 2 at (8.7,0.4) h180 axis 179.5 wall_m None order [7.0, -7.0]
+final s02c   final    seed3  lost sw None crossed None | start 2 at (8.6,-0.1) h182 axis 180.0 wall_m None order [7.0, -7.0]
+final s02c   final    seed4  won  sw None crossed 18 | -
+final s02c   final    seed5  lost sw None crossed None | start 2 at (8.8,-0.9) h183 axis 179.9 wall_m None order [7.0, -7.0]
+final s02c   initial  seed1  won  sw None crossed 8 | -
+final s02c   initial  seed2  won  sw None crossed 8 | -
+final s02c   initial  seed3  won  sw None crossed 8 | -
+final s02c   initial  seed4  won  sw None crossed 8 | -
+final s02c   initial  seed5  won  sw None crossed 8 | -
+final s02va  dynamic  seed1  won  sw 3 crossed 17 | start 5 at (11.5,0.5) h178 axis 180.3 wall_m None order [-7.0]
+final s02va  dynamic  seed2  lost sw 3 crossed None | start 4 at (13.2,-0.2) h180 axis 179.6 wall_m None order [7.0, -7.0]
+final s02va  dynamic  seed3  won  sw 3 crossed 23 | start 4 at (13.2,-0.3) h182 axis 180.0 wall_m None order [7.0, -7.0]
+final s02va  dynamic  seed4  won  sw 3 crossed 31 | start 4 at (13.2,-0.1) h178 axis 179.3 wall_m None order [7.0, -7.0]
+final s02va  dynamic  seed5  won  sw 3 crossed 38 | start 5 at (11.5,-0.6) h183 axis 179.9 wall_m None order [7.0, -7.0]
+final s02va  final    seed1  won  sw None crossed 19 | -
+final s02va  final    seed2  lost sw None crossed None | start 4 at (13.4,1.0) h180 axis 179.6 wall_m None order [-7.0, 7.0]
+final s02va  final    seed3  won  sw None crossed 21 | -
+final s02va  final    seed4  won  sw None crossed 18 | start 2 at (16.6,-0.3) h178 axis 179.3 wall_m None order [7.0, -7.0]
+final s02va  final    seed5  won  sw None crossed 19 | -
+final s02va  initial  seed1  won  sw None crossed 12 | -
+final s02va  initial  seed2  won  sw None crossed 12 | -
+final s02va  initial  seed3  won  sw None crossed 12 | -
+final s02va  initial  seed4  won  sw None crossed 12 | -
+final s02va  initial  seed5  won  sw None crossed 13 | -
+final s02vc  dynamic  seed1  won  sw 3 crossed 24 | start 4 at (13.2,0.4) h178 axis 180.3 wall_m None order [7.0, -7.0]
+final s02vc  dynamic  seed2  won  sw 3 crossed 43 | start 4 at (13.2,-0.2) h180 axis 179.6 wall_m None order [7.0, -7.0]
+final s02vc  dynamic  seed3  lost sw 3 crossed None | start 4 at (13.2,-0.3) h182 axis 180.0 wall_m None order [7.0, -7.0]
+final s02vc  dynamic  seed4  won  sw 3 crossed 39 | start 4 at (13.2,-0.1) h178 axis 179.3 wall_m None order [7.0, -7.0]
+final s02vc  dynamic  seed5  won  sw 3 crossed 28 | start 5 at (11.5,-0.6) h183 axis 179.9 wall_m None order [7.0, -7.0]
+final s02vc  final    seed1  lost sw None crossed None | start 3 at (15.0,-0.3) h178 axis 180.3 wall_m None order [7.0, -7.0]
+final s02vc  final    seed2  lost sw None crossed None | start 3 at (15.0,-0.8) h180 axis 179.6 wall_m None order [7.0, -7.0]
+final s02vc  final    seed3  lost sw None crossed None | -
+final s02vc  final    seed4  won  sw None crossed 36 | start 2 at (16.6,-0.3) h178 axis 179.3 wall_m None order [7.0, -7.0]
+final s02vc  final    seed5  lost sw None crossed None | start 2 at (16.6,-0.3) h183 axis 179.9 wall_m None order [7.0, -7.0]
+final s02vc  initial  seed1  won  sw None crossed 12 | -
+final s02vc  initial  seed2  won  sw None crossed 12 | -
+final s02vc  initial  seed3  won  sw None crossed 12 | -
+final s02vc  initial  seed4  won  sw None crossed 12 | -
+final s02vc  initial  seed5  won  sw None crossed 13 | -
+final s03    dynamic  seed1  lost sw 19 crossed None | -
+final s03    dynamic  seed2  lost sw 15 crossed None | -
+final s03    dynamic  seed3  lost sw 18 crossed None | -
+final s03    dynamic  seed4  lost sw 18 crossed None | -
+final s03    dynamic  seed5  lost sw 17 crossed None | -
+final s03    final    seed1  lost sw None crossed None | -
+final s03    final    seed2  won  sw None crossed 22 | -
+final s03    final    seed3  won  sw None crossed 47 | -
+final s03    final    seed4  won  sw None crossed 51 | -
+final s03    final    seed5  won  sw None crossed 26 | -
+final s03    initial  seed1  won  sw None crossed 31 | -
+final s03    initial  seed2  won  sw None crossed 21 | -
+final s03    initial  seed3  won  sw None crossed 22 | -
+final s03    initial  seed4  won  sw None crossed 31 | -
+final s03    initial  seed5  won  sw None crossed 34 | -
+R32P  s02a   dynamic  seed1  lost sw 3 crossed None | -
+R32P  s02a   dynamic  seed2  won  sw 3 crossed 16 | start 4 at (5.2,-0.2) h180 axis 179.5 wall_m None order [-7.0]
+R32P  s02a   dynamic  seed3  won  sw 3 crossed 38 | start 4 at (5.2,-0.3) h182 axis 180.0 wall_m None order [-7.0]
+R32P  s02a   final    seed1  won  sw None crossed 29 | start 3 at (7.0,1.0) h178 axis 180.4 wall_m None order [-7.0, 7.0]
+R32P  s02a   final    seed2  won  sw None crossed 13 | start 3 at (7.4,1.0) h180 axis 179.5 wall_m None order [-7.0, 7.0]
+R32P  s02a   final    seed3  lost sw None crossed None | start 3 at (7.3,1.0) h182 axis 180.0 wall_m None order [-7.0, 7.0]
+R32P  s02c   dynamic  seed1  lost sw 3 crossed None | start 4 at (5.2,0.4) h178 axis 180.4 wall_m None order [7.0, -7.0]
+R32P  s02c   dynamic  seed2  lost sw 3 crossed None | start 4 at (5.2,-0.2) h180 axis 179.5 wall_m None order [7.0, -7.0]
+R32P  s02c   dynamic  seed3  lost sw 3 crossed None | start 4 at (5.2,-0.3) h182 axis 180.0 wall_m None order [7.0, -7.0]
+R32P  s02c   final    seed1  lost sw None crossed None | start 4 at (5.5,1.7) h178 axis 180.4 wall_m None order [-7.0]
+R32P  s02c   final    seed2  lost sw None crossed None | start 2 at (8.7,0.4) h180 axis 179.5 wall_m None order [7.0, -7.0]
+R32P  s02c   final    seed3  won  sw None crossed 44 | start 2 at (8.6,-0.1) h182 axis 180.0 wall_m None order [7.0, -7.0]
+R32P  s02va  dynamic  seed1  won  sw 3 crossed 19 | start 4 at (13.2,0.4) h178 axis 180.3 wall_m None order [7.0, -7.0]
+R32P  s02va  dynamic  seed2  lost sw 3 crossed None | start 5 at (11.5,-0.2) h180 axis 179.6 wall_m None order [-7.0]
+R32P  s02va  dynamic  seed3  won  sw 3 crossed 38 | start 4 at (13.2,-0.3) h182 axis 180.0 wall_m None order [-7.0, 7.0]
+R32P  s02va  final    seed1  won  sw None crossed 27 | start 4 at (13.5,1.7) h178 axis 180.3 wall_m None order [-7.0, 7.0]
+R32P  s02va  final    seed2  lost sw None crossed None | start 3 at (15.5,1.6) h180 axis 179.6 wall_m None order [-7.0, 7.0]
+R32P  s02va  final    seed3  won  sw None crossed 36 | start 3 at (14.9,-0.2) h182 axis 180.0 wall_m None order [7.0, -7.0]
+R32P  s02vc  dynamic  seed1  won  sw 3 crossed 42 | start 5 at (11.5,0.5) h178 axis 180.3 wall_m None order [-7.0, 7.0]
+R32P  s02vc  dynamic  seed2  won  sw 3 crossed 30 | start 4 at (13.2,-0.2) h180 axis 179.6 wall_m None order [7.0, -7.0]
+R32P  s02vc  dynamic  seed3  lost sw 3 crossed None | start 4 at (13.2,-0.3) h182 axis 180.0 wall_m None order [7.0, -7.0]
+R32P  s02vc  final    seed1  lost sw None crossed None | -
+R32P  s02vc  final    seed2  lost sw None crossed None | start 3 at (14.9,-0.2) h180 axis 179.6 wall_m None order [7.0, -7.0]
+R32P  s02vc  final    seed3  won  sw None crossed 51 | -
+R32P  s03    dynamic  seed1  lost sw 22 crossed None | -
+R32P  s03    dynamic  seed2  lost sw 24 crossed None | -
+R32P  s03    dynamic  seed3  lost sw 32 crossed None | -
+R32P  s03    final    seed1  won  sw None crossed 18 | -
+R32P  s03    final    seed2  won  sw None crossed 52 | -
+R32P  s03    final    seed3  won  sw None crossed 21 | -
+R35   s02a   dynamic  seed1  won  sw 3 crossed 14 | start 4 at (5.2,0.4) h178 axis 180.4 wall_m None order [7.0, -7.0]
+R35   s02a   dynamic  seed2  won  sw 3 crossed 27 | start 4 at (5.2,-0.2) h180 axis 179.5 wall_m None order [-7.0]
+R35   s02a   dynamic  seed3  won  sw 3 crossed 31 | start 4 at (5.2,-0.3) h182 axis 180.0 wall_m None order [7.0, -7.0]
+R35   s02a   final    seed1  won  sw None crossed 14 | start 2 at (8.7,0.9) h178 axis 180.4 wall_m None order [-7.0, 7.0]
+R35   s02a   final    seed2  won  sw None crossed 13 | start 2 at (8.7,0.4) h158 axis 179.5 wall_m None order [-7.0, 7.0]
+R35   s02a   final    seed3  won  sw None crossed 10 | -
+R35   s02c   dynamic  seed1  lost sw 3 crossed None | start 4 at (5.2,0.4) h178 axis 180.4 wall_m None order [7.0, -7.0]
+R35   s02c   dynamic  seed2  lost sw 3 crossed None | start 4 at (5.2,-0.2) h180 axis 179.5 wall_m None order [-7.0]
+R35   s02c   dynamic  seed3  lost sw 3 crossed None | start 4 at (5.2,-0.3) h182 axis 180.0 wall_m None order [7.0, -7.0]
+R35   s02c   final    seed1  lost sw None crossed None | start 2 at (8.7,-0.3) h178 axis 180.4 wall_m None order [7.0, -7.0]
+R35   s02c   final    seed2  lost sw None crossed None | start 4 at (5.3,0.4) h180 axis 179.5 wall_m None order [7.0, -7.0]
+R35   s02c   final    seed3  won  sw None crossed 18 | start 2 at (8.9,-1.4) h204 axis 180.0 wall_m None order [7.0, -7.0]
+R35   s02va  dynamic  seed1  won  sw 3 crossed 21 | start 4 at (13.2,0.4) h178 axis 180.3 wall_m None order [7.0, -7.0]
+R35   s02va  dynamic  seed2  lost sw 3 crossed None | start 4 at (13.2,-0.2) h180 axis 179.6 wall_m None order [-7.0, 7.0]
+R35   s02va  dynamic  seed3  won  sw 3 crossed 26 | start 4 at (13.2,-0.3) h182 axis 180.0 wall_m None order [7.0, -7.0]
+R35   s02va  final    seed1  lost sw None crossed None | start 4 at (13.5,1.7) h178 axis 180.3 wall_m None order [7.0, -7.0]
+R35   s02va  final    seed2  lost sw None crossed None | start 2 at (16.6,-0.2) h180 axis 179.6 wall_m None order [-7.0, 7.0]
+R35   s02va  final    seed3  won  sw None crossed 40 | start 2 at (16.6,-0.1) h182 axis 180.0 wall_m None order [-7.0]
+R35   s02vc  dynamic  seed1  lost sw 3 crossed None | start 5 at (11.5,0.5) h178 axis 180.3 wall_m None order [7.0, -7.0]
+R35   s02vc  dynamic  seed2  lost sw 3 crossed None | start 4 at (13.2,-0.2) h180 axis 179.6 wall_m None order [7.0, -7.0]
+R35   s02vc  dynamic  seed3  won  sw 3 crossed 21 | start 2 at (16.6,-0.1) h182 axis 180.0 wall_m None order [7.0, -7.0]
+R35   s02vc  final    seed1  lost sw None crossed None | start 3 at (15.0,1.0) h178 axis 180.3 wall_m None order [7.0, -7.0]
+R35   s02vc  final    seed2  lost sw None crossed None | start 3 at (14.9,-0.2) h180 axis 179.6 wall_m None order [7.0, -7.0]
+R35   s02vc  final    seed3  lost sw None crossed None | start 2 at (16.6,-0.1) h182 axis 180.0 wall_m None order [7.0, -7.0]
+R35   s03    dynamic  seed1  lost sw 22 crossed None | -
+R35   s03    dynamic  seed2  lost sw 25 crossed None | -
+R35   s03    dynamic  seed3  lost sw 35 crossed None | -
+R35   s03    final    seed1  lost sw None crossed None | -
+R35   s03    final    seed2  won  sw None crossed 22 | -
+R35   s03    final    seed3  won  sw None crossed 28 | -
+R30   s01    dynamic  seed1  won  sw 3 crossed 26 | -
+R30   s01    final    seed1  won  sw None crossed 18 | -
+R30   s01    initial  seed1  won  sw None crossed 8 | -
+R30   s02a   dynamic  seed1  lost sw 3 crossed None | start 4 at (5.2,0.4) h178 axis 180.4 wall_m None order [7.0, -7.0]
+R30   s02a   final    seed1  won  sw None crossed 10 | -
+R30   s02a   initial  seed1  won  sw None crossed 8 | -
+R30   s02c   dynamic  seed1  won  sw 3 crossed 20 | start 4 at (5.2,0.4) h178 axis 180.4 wall_m None order [7.0, -7.0]
+R30   s02c   final    seed1  won  sw None crossed 39 | -
+R30   s02c   initial  seed1  won  sw None crossed 8 | -
+R30   s02va  dynamic  seed1  won  sw 3 crossed 19 | start 4 at (13.2,0.4) h178 axis 180.3 wall_m None order [7.0, -7.0]
+R30   s02va  final    seed1  lost sw None crossed None | start 2 at (16.6,0.3) h178 axis 180.3 wall_m None order [-7.0, 7.0]
+R30   s02va  initial  seed1  won  sw None crossed 12 | -
+R30   s02vc  dynamic  seed1  won  sw 3 crossed 46 | start 5 at (11.5,0.5) h178 axis 180.3 wall_m None order [7.0, -7.0]
+R30   s02vc  final    seed1  lost sw None crossed None | start 3 at (15.0,-0.3) h178 axis 180.3 wall_m None order [7.0, -7.0]
+R30   s02vc  initial  seed1  won  sw None crossed 12 | -
+R30   s03    dynamic  seed1  lost sw 17 crossed None | -
+R30   s03    final    seed1  won  sw None crossed 24 | -
+R30   s03    initial  seed1  won  sw None crossed 54 | -
+('s01', 'dynamic', 'won') runs 6 started 0 before crossing 0
+('s01', 'final', 'won') runs 6 started 0 before crossing 0
+('s01', 'initial', 'won') runs 6 started 0 before crossing 0
+('s02', 'dynamic', 'lost') runs 21 started 20 before crossing 20
+('s02', 'dynamic', 'won') runs 27 started 27 before crossing 27
+('s02', 'final', 'lost') runs 27 started 24 before crossing 24
+('s02', 'final', 'won') runs 21 started 12 before crossing 12
+('s02', 'initial', 'won') runs 24 started 0 before crossing 0
+('s03', 'dynamic', 'lost') runs 12 started 0 before crossing 0
+('s03', 'final', 'lost') runs 2 started 0 before crossing 0
+('s03', 'final', 'won') runs 10 started 0 before crossing 0
+('s03', 'initial', 'won') runs 6 started 0 before crossing 0

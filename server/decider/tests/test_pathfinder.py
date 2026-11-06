@@ -990,3 +990,158 @@ def test_a79_is_a66_plus_the_latch_its_trail_trigger_and_the_sentence():
     assert [p.version for p in agent.get("a79").subagent_prompts] == ["g05", "d01"]
     assert "dead_end_confirmer" not in [s.name for s in orchestrator.pipeline(a79)]
     assert agent.get("a79").sha() not in {agent.get(a).sha() for a in ("a66", "a75", "a78")}
+
+
+# --- a80 (R40): the wall survey --------------------------------------------------
+
+S80 = agent.PATHFINDER_A80
+SV = S80["survey"]
+GOAL80 = (30.0, C / 2.0)                      # on the line of the approach: the axis is +x
+
+
+def hall(x1=6):
+    """A straight approach along +x from (0, 0) to cell (x1, 0) in open floor
+    (a66's memory), a closed door read in the centre strip on the last step."""
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    for x in range(0, x1 + 1):
+        mem.visits[(x, 0)] = [x]
+        mem.trail.append((x,) + centre((x, 0)) + (0.0,))
+    mem.centre_closed = [x1]
+    return mem, pose((x1, 0)), x1
+
+
+def survey_at(mem, here, step, records=(), goal=GOAL80):
+    cm = spatial.CostMap(mem, [], S80, include=(spatial.cell(here[:2]), spatial.cell(goal)),
+                         start=spatial.cell(here[:2]))
+    return planner.wall_survey(mem, cm, here, step, goal, list(records), S80)
+
+
+def rec(step, sv):
+    return {"step": step, "planner": {"survey": sv}}
+
+
+def test_survey_starts_on_a_closed_door_dead_ahead_and_steps_to_the_side():
+    mem, here, step = hall()
+    wp, sv = survey_at(mem, here, step)
+    assert sv is not None and sv["phase"] == "transit" and sv["step"] == step
+    assert abs(sv["axis_deg"]) < 1.0 and sv["wall"] is None
+    assert sv["order"] == [7.0, -7.0]                       # the left first
+    assert abs(wp[0] - (here[0] - SV["back_m"])) < 0.01 and abs(wp[1] - (here[1] + 7.0)) < 0.01
+    # No closed door dead ahead this step, heading off the line, too short a way in: no survey.
+    mem2, here2, step2 = hall()
+    mem2.centre_closed = [step2 - 1]
+    assert survey_at(mem2, here2, step2) == (None, None)
+    mem3, here3, step3 = hall()
+    assert survey_at(mem3, (here3[0], here3[1], 60.0), step3) == (None, None)
+    mem4, here4, step4 = hall(x1=2)
+    assert survey_at(mem4, here4, step4) == (None, None)
+    mem5, here5, step5 = hall()                             # it has been 3.4 m off the direct line
+    mem5.trail.insert(3, (2, centre((2, 4))[0], centre((2, 4))[1], 0.0))
+    assert survey_at(mem5, here5, step5) == (None, None)
+    mem6, here6, step6 = hall()                             # stopped by the wall already
+    mem6.blocks.append(spatial.Block(here6[0] - 0.4, here6[1], 0.0, step6 - 1, 0.4))
+    wp, sv = survey_at(mem6, here6, step6)
+    assert sv["wall"] == SV["wall_m"]
+    assert abs(wp[0] - (here6[0] + SV["wall_m"] - SV["standoff_m"])) < 0.01
+
+
+def test_survey_goes_first_to_the_side_of_a_remembered_open_doorway():
+    mem, here, step = hall()
+    mem.openings.append(spatial.Opening(here[0] + 4.0, here[1] - 8.0, 2, label="A"))
+    _, sv = survey_at(mem, here, step)
+    assert sv["order"] == [-7.0, 7.0]
+
+
+def test_survey_has_no_station_in_a_corridor_whose_side_walls_are_on_the_map():
+    mem, here, step = hall()
+    for x in range(0, 12):
+        mem.near_wall[(x, 2)] = x
+    _, sv = survey_at(mem, here, step)
+    assert sv["order"] == [-7.0]                            # the left is walled: the right only
+    for x in range(0, 12):
+        mem.near_wall[(x, -2)] = x
+    assert survey_at(mem, here, step) == (None, None)
+
+
+def test_survey_flies_at_the_wall_from_the_station_then_goes_back_and_across():
+    mem, here, step = hall()
+    _, sv = survey_at(mem, here, step)
+    station = planner.survey_station(sv, SV)
+    at = (station[0], station[1], 90.0)                     # arrived, still heading along the wall
+    wp, sv = survey_at(mem, at, step + 4, [rec(step, sv)])
+    assert sv["phase"] == "look"
+    assert abs(wp[0] - (at[0] + SV["face_m"])) < 0.01 and abs(wp[1] - at[1]) < 0.01   # at the wall
+    wp, sv = survey_at(mem, (at[0] + 1.0, at[1] + 1.0, 10.0), step + 6, [rec(step + 4, sv)])
+    assert sv["phase"] == "look" and sv["looks"] == 1 and sv["wall"] is None   # square, no wall yet
+    met = (at[0] + 6.0, at[1] + 1.0, 0.0)
+    mem.blocks.append(spatial.Block(met[0] - 0.4, met[1], 0.0, step + 8, 0.4))   # stopped short
+    wp, sv = survey_at(mem, met, step + 9, [rec(step + 6, sv)])
+    assert sv["phase"] == "transit" and sv["i"] == 1
+    assert abs(sv["wall"] - (met[0] - here[0] + SV["wall_m"])) < 0.02       # the wall's range, now known
+    back = here[0] + sv["wall"] - SV["standoff_m"]
+    assert sv["looks"] == 2
+    assert abs(wp[0] - back) < 0.02 and abs(wp[1] - (here[1] - 7.0)) < 0.01  # back, and the other side
+    other = planner.survey_station(sv, SV)
+    wp, sv = survey_at(mem, (other[0], other[1], 270.0), step + 18, [rec(step + 9, sv)])
+    assert sv["phase"] == "look"
+    wp, sv = survey_at(mem, (other[0], other[1], 270.0), step + 18 + SV["look_steps"],
+                       [rec(step + 18, sv)])                 # never met the wall: given up
+    assert wp is None and sv["phase"] == "done"
+    assert survey_at(mem, (other[0], other[1], 0.0), step + 30, [rec(step + 29, sv)]) == (None, sv)
+
+
+def test_survey_gives_up_a_station_it_does_not_get_nearer_to():
+    mem, here, step = hall()
+    _, sv = survey_at(mem, here, step)
+    recs = [rec(step, sv)]
+    for k in range(1, SV["stall_steps"] + 2):
+        wp, sv = survey_at(mem, here, step + k, recs)
+        recs = [rec(step + k, sv)]
+    assert sv["i"] == 1 and sv["phase"] == "transit"
+
+
+def test_survey_takes_an_open_doorway_read_near_square_through_the_wall():
+    mem, here, step = hall()
+    _, sv = survey_at(mem, here, step)
+    station = planner.survey_station(sv, SV)
+    at = (station[0], station[1], 0.0)
+    mem.door_rays.append(spatial.Ray(at[0], at[1], 80.0, step + 5, "open_far"))   # along the wall
+    wp, sv2 = survey_at(mem, at, step + 5, [rec(step, sv)])
+    assert sv2["phase"] != "through"
+    mem.door_rays.append(spatial.Ray(at[0], at[1], 0.0, step + 5, "open_far"))    # dead ahead
+    wp, sv2 = survey_at(mem, at, step + 5, [rec(step, sv)])
+    assert sv2["phase"] == "through" and len(sv2["rays"]) == 1
+    assert abs(wp[0] - (at[0] + SV["carrot_m"])) < 0.01 and abs(wp[1] - at[1]) < 0.01   # straight on
+    # Knocked 1.5 m off the line with no read: the carrot is still on the door's line.
+    off = (at[0] + 1.5, at[1] - 1.5, 315.0)
+    wp2, sv3 = survey_at(mem, off, step + 6, [rec(step + 5, sv2)])
+    assert sv3["phase"] == "through" and abs(wp2[1] - at[1]) < 0.01
+    assert abs(wp2[0] - (off[0] + SV["carrot_m"])) < 0.01
+    # A second read from there crosses the first: the door is where the rays meet.
+    door = (at[0] + 6.0, at[1])
+    mem.door_rays.append(spatial.Ray(off[0], off[1], spatial.bearing(off[:2], door), step + 7,
+                                     "open_far"))
+    wp3, sv4 = survey_at(mem, off, step + 7, [rec(step + 6, sv3)])
+    assert len(sv4["rays"]) == 2 and abs(planner.survey_door_line(sv4, SV) - 7.0) < 0.05
+    assert abs(wp3[1] - door[1]) < 0.05
+    # through_steps with no read and nothing in the way: through it, the route takes over.
+    wp4, sv5 = survey_at(mem, (door[0] + 2.0, door[1], 0.0), step + 7 + SV["through_steps"],
+                         [rec(step + 7, sv4)])
+    assert wp4 is None and sv5["phase"] == "done"
+    # A move stopped short with the doorway still read: a jamb, the survey holds on.
+    mem.blocks.append(spatial.Block(off[0], off[1], 0.0, step + 7, 0.3))
+    mem.door_rays.append(spatial.Ray(off[0], off[1], 20.0, step + 8, "open_far"))
+    wp5, sv6 = survey_at(mem, off, step + 8, [rec(step + 7, sv4)])
+    assert sv6["phase"] == "through" and len(sv6["rays"]) == 3
+    # Stopped short and no doorway read from there: a phantom, on to the next station.
+    mem.blocks.append(spatial.Block(off[0], off[1], 0.0, step + 9, 0.3))
+    wp6, sv7 = survey_at(mem, off, step + 10, [rec(step + 8, sv6)])
+    assert sv7["phase"] == "transit" and sv7["i"] == 1 and sv7["rays"] == []
+
+
+def test_survey_door_line_is_where_the_ray_meets_a_wall_whose_range_is_known():
+    mem, here, step = hall()
+    _, sv = survey_at(mem, here, step)
+    sv = dict(sv, wall=6.0, rays=[[here[0], here[1] + 3.0, 21.75]])
+    want = 3.0 + math.tan(math.radians(21.75)) * 6.0
+    assert abs(planner.survey_door_line(sv, SV) - want) < 0.02

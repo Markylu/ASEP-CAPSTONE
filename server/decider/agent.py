@@ -320,6 +320,36 @@ PATHFINDER_A79: Dict[str, Any] = dict(
         confined={"half_m": 1.5, "back_m": 1.0, "facing_deg": 70.0, "reads": 2,
                   "dwell_steps": 5, "advance_m": 1.0, "beside_m": 4.0}))
 
+#: a80 (R40): the wall survey (planner.wall_survey). The approach axis is the
+#: bearing from the spawn to the goal. A closed door read in the centre strip
+#: while the drone heads within goal_deg of the axis, run_m or more along it
+#: and never yet more than line_m off the direct line, starts it. Stations lie
+#: stations_m to the side of the approach (the side of a remembered open
+#: doorway at least side_min_m off it first, else the left; then the other
+#: side), back_m behind where it started until the wall has been met, then
+#: standoff_m back from the wall; a station is reached within reach_m and
+#: given up after stall_steps without coming half a metre nearer. There the
+#: drone turns to the wall and flies at it (a waypoint face_m ahead along the
+#: axis), each frame within square_deg of the axis a square look, until it
+#: meets the wall (wall_m ahead of where it is stopped) or look_steps pass. An
+#: open doorway read on a strip whose ray is within open_deg of the axis is
+#: kept (the last rays_kept); the doorway's line is where those rays cross
+#: (least squares, determinant over cross_det), or meet a wall whose range is
+#: known, or reach_ray_m out along the newest; the waypoint is carrot_m ahead
+#: of the drone on that line until through_steps pass with no such read, or
+#: the drone is through_m beyond a known wall. 7 m: what one square look's
+#: 87-degree frame covers of a wall 4 m off.
+#: eval/phase2/R40_wall_survey/README.md.
+SURVEY_A80: Dict[str, Any] = {
+    "goal_deg": 35.0, "run_m": 3.0, "line_m": 2.5, "stations_m": 7.0, "side_min_m": 2.0,
+    "back_m": 0.0, "standoff_m": 5.0, "wall_m": 1.0, "reach_m": 1.7, "stall_steps": 6,
+    "face_m": 6.0, "square_deg": 25.0, "look_steps": 12, "open_deg": 40.0,
+    "reach_ray_m": 5.0, "rays_kept": 6, "cross_det": 0.05, "carrot_m": 3.0,
+    "through_m": 3.0, "through_steps": 5, "budget_steps": 44}
+
+#: a80: a65's planner with the wall survey.
+PATHFINDER_A80: Dict[str, Any] = dict(PATHFINDER_A65, survey=SURVEY_A80)
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -1556,6 +1586,33 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "that confirmer (e01 yes on 37% of s02 steps). Round F, R32P and R35: the rule "
           "fires in the shut tine in 9 of 11 s03 dynamic runs and in none of 53 won s02 "
           "runs before the crossing (eval/phase2/R39_confined_latch/README.md)."),
+    Agent("a80", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A80,
+                                          "memory": "a17f",
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a66 with the wall survey: the square looks the route never takes. A closed "
+          "door read dead ahead on the first way in along the direct line from the spawn "
+          "to the goal starts it. The drone steps 7 m to the side of that line (the side "
+          "of a remembered open doorway first, else the left), turns back to the line's "
+          "bearing and flies at the wall, every frame on the way in a look square to it; "
+          "at the wall with no door it goes 5 m back and to the other side and flies in "
+          "again. An open doorway read on a strip within 40 degrees of square is kept as a "
+          "ray; the doorway's line is where the rays cross, and the waypoint runs 3 m "
+          "ahead of the drone on it until the drone is through. The wall's range is taken "
+          "only from where the drone is stopped. Probe door_read: at 2-9 m a look within "
+          "20 degrees of square read the open door on 157 of 158 looks and a blank wall "
+          "strip as open on 1 of 366; beyond 60 degrees, 112 of 231 and 76 of 393; the "
+          "open door was in view within 20 degrees of square at 2-6 m on 58 of 4256 "
+          "near-side frames (eval/phase2/R40_wall_survey/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"
