@@ -6,7 +6,7 @@
 **Status:** laid out 2026-11-06 (overnight run, Claude alone, operator asleep; every decision
 here is Claude's, with its reason) from R45's flight, while R46 was in the air and R47 queued
 behind it; shakedown flown 2026-11-06 (two of four solved, gate passed, the change not
-exercised); round flight below
+exercised); **not flown** (see Outcome)
 
 Written before flying. Spec: `docs/phase2-test-plan.md`. Design: the ten contested cells, seeds
 1–3, 30 runs, read against R45 (`a85`, 23/30, the bar) and R46 and R47 as they land.
@@ -76,7 +76,11 @@ required.
 
 ## Outcome
 
-Not flown yet. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Not flown (decided 2026-11-06, 08:28 UTC, Claude alone).** Its gate passed and its lanes stood
+queued behind R47. R47 (`a87`: this agent but for the reopening, which the shakedown did not
+exercise) landed at 12/30 with the always-on sentence taken 162 times of 162, and the two flights
+left before the 05:15 EST deadline went to `a91` (R51) and `a89` (R49), which drop that sentence.
+The reopening itself flies in both, bounded to the rectangle.
 
 **Shakedown (2026-11-06, 07:08–07:36 UTC): four unscored runs, slot 5 (port 8105) as a fifth
 client beside R46's and R47's lanes, sctsvr6 `~/asep-r33-shake` at `07e3674`, log
