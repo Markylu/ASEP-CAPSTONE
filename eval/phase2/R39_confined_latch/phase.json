@@ -3,10 +3,11 @@
   "title": "a66 with the dead-end latch fired by the trail, contested cells",
   "citable": false,
   "agent_version": "a79",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
-  "operator": null,
-  "notes": ""
+  "status": "complete",
+  "git_sha": "095d9c9",
+  "started": "2026-11-06T04:14:58+00:00",
+  "finished": "2026-11-06T05:10:15+00:00",
+  "operator": "Claude (overnight run; operator Markylu asleep)",
+  "notes": "Flown 2026-11-06, 04:15-05:09 UTC, by Claude alone on the overnight instruction (OVERNIGHT_PROMPT.md); the operator was asleep.",
+  "lanes": "sctsvr6 lanes 1-4 (asep-r39-l1..4), shared vLLM :8004; a fifth client on slot 5 from 04:28 to 04:57 UTC (the unscored shakedowns of R40 and R42), and from 05:02 UTC the lanes that had finished flew R43's shakedown beside the last R39 runs (never more than four clients then)"
 }
