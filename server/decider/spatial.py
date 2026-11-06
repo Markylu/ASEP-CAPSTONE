@@ -47,6 +47,9 @@ BLOCK_WITHIN_DEG = 15.0
 #: The camera's horizontal field of view and the perceiver's five strips.
 FOV_DEG = 87.0
 STRIPS = ("far_left", "left", "centre", "right", "far_right")
+#: The strips a closed door must be read in for the dead-end confirmer to be
+#: asked (a78): a door off in a far strip is a door beside the way, not ahead.
+CENTRAL_STRIPS = STRIPS[1:4]
 #: Open floor the perceiver's lane classes stand for, metres along the strip.
 FLOOR_RANGE_M = {"open_far": 6.0, "open_near": 2.5, "blocked_near": 1.0}
 #: Goal distance classes, as the g03 prompt words them, and the point used
@@ -820,6 +823,9 @@ class SpatialMemory:
     #: a74: the floor a confirmed open doorway's rays claim through its gap
     #: (also in free_near). Read only by a cost map with ray_floor_known off.
     door_free: Dict[Tuple[int, int], int] = field(default_factory=dict)
+    #: a78: the dead-end confirmer's answers, (step, "yes" or "no"), on the
+    #: steps it was asked (planner.dead_end_latch reads them).
+    dead_end_reads: List[Tuple[int, str]] = field(default_factory=list)
     cfg: SpatialConfig = A13
 
     # -- folding ---------------------------------------------------------------
@@ -874,6 +880,8 @@ class SpatialMemory:
         if len(lanes_now) == len(STRIPS) and all(l.get("floor") == "blocked_near"
                                                  for l in lanes_now):
             self.nose_on.append(step)
+        if perception.get("dead_end") in ("yes", "no"):
+            self.dead_end_reads.append((step, perception["dead_end"]))
         if self.cfg.coverage:
             self._observe_cone(step, where, perception)
             return
@@ -2051,7 +2059,8 @@ class CostMap:
 
     def __init__(self, mem: SpatialMemory, stall_cells: Iterable[Cell], p: Dict[str, Any],
                  soft: bool = False, include: Iterable[Cell] = (),
-                 start: Optional[Cell] = None) -> None:
+                 start: Optional[Cell] = None, latched: Iterable[Cell] = (),
+                 plugged: bool = False) -> None:
         self.mem = mem
         self.p = p
         self.soft = soft
@@ -2080,7 +2089,16 @@ class CostMap:
         # Stall cells and dead-end seals are the planner's own inferences:
         # known ground seen later (a door looked through) overrides them.
         inferred = {c for c in stall_cells if c not in known}
-        hard = set(mem.stop_wall) | set(mem.door_wall) | set(mem.firm_wall) | inferred
+        # a78 (`latched`, planner.dead_end_latch): the cells of a corridor
+        # confirmed a dead end. Unlike stall cells and a68's seal they do not
+        # yield to floor seen later: in the shut tine 205 of 223 routes left
+        # through floor the perceiver had painted through the walls (Round F),
+        # and a68 flew back into the tine when a look reopened its seal. Ground
+        # the drone has stood on stays passable (the way back out) until the
+        # drone is out (`plugged`); then the whole corridor is shut for good.
+        latched = set(latched)
+        hard = (set(mem.stop_wall) | set(mem.door_wall) | set(mem.firm_wall) | inferred
+                | latched)
         if not soft:
             hard |= set(mem.wall) | set(mem.near_wall)
         n = int(p.get("inflate_stop_walls", 1))
@@ -2105,6 +2123,10 @@ class CostMap:
             hard = {c for c in hard
                     if c in seen_walls or max(abs(c[0] - sx), abs(c[1] - sy)) > 1}
         self.hard = {c for c in hard if c not in mem.visits}
+        if plugged:
+            self.hard |= {c for c in latched
+                          if self.start is None
+                          or max(abs(c[0] - self.start[0]), abs(c[1] - self.start[1])) > 1}
         # a17h: floor an opening claims on one look is passable at unknown
         # cost and never sealed (the gap sits beside seen jambs), but seals
         # nothing itself: not known ground.

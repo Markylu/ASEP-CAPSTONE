@@ -11,8 +11,13 @@ offered index on every step.
 Real clean frames are used where the run's frames are on disk; elsewhere a
 stand-in, since no stub looks at the image.
 
+a78's dead-end confirmer stub answers SMOKE_DEAD_END: "s03" (the default: yes
+on s03 runs, no elsewhere), "yes" or "no". It stands in for a model whose
+answers are not known yet (probe DE), to run the latch's code on real steps.
+
     VLM_AGENT=a63 python eval/probes/a63_smoke.py
     VLM_AGENT=a64 python eval/probes/a63_smoke.py
+    VLM_AGENT=a78 SMOKE_DEAD_END=yes python eval/probes/a63_smoke.py
 """
 from __future__ import annotations
 
@@ -57,6 +62,10 @@ def main() -> int:
             had = ((rec.get("door_confirmer") or {}).get("result") or {})
             reply = dict({"reason": "stub"}, **{s: had.get(s, "open") for s in strips})
             return vlm.SubCall(name, validate(reply), "stub")
+        if name == schema.DEAD_END_CONFIRMER_SCHEMA_NAME:
+            say = os.environ.get("SMOKE_DEAD_END", "s03")
+            answer = ("yes" if cur["site"] == "s03" else "no") if say == "s03" else say
+            return vlm.SubCall(name, validate({"reason": "stub", "dead_end": answer}), "stub")
         if name == schema.STRATEGIST_SCHEMA_NAME:
             raise AssertionError("a63 never asks a strategist")
         enum = json_schema["properties"]["action"]["enum"]
@@ -67,6 +76,7 @@ def main() -> int:
     steps = failed = planned = real = coded = 0
     fallbacks = collections.Counter()
     stalls = door_walls = suspects = behind = critic = 0
+    asked = said_yes = latched = latched_out = latched_runs = 0
     t0 = time.time()
     with tempfile.TemporaryDirectory() as tmp:
         for run in runs(25, 25):
@@ -77,6 +87,8 @@ def main() -> int:
             r = recorder.Run("smoke-{0}-{1}".format(run["site"], run["arm"]),
                              Path(tmp) / run["site"] / run["arm"])
             r.ensure()
+            cur["site"] = run["site"]
+            run_latched = False
             for rec in rows:
                 cur["rec"] = rec
                 frame = path / rec["clean_frame"]
@@ -106,6 +118,14 @@ def main() -> int:
                     coded += out["index"] in [a["index"] for a in out["manifest"]["actions"]]
                 behind += bool(out.get("route_behind"))
                 critic += bool(out.get("critic"))
+                answer = (out.get("dead_end_confirmer") or {}).get("result")
+                asked += answer is not None
+                said_yes += bool(answer and answer["dead_end"] == "yes")
+                latch = plan.get("latch")
+                latched += bool(latch)
+                latched_out += bool(latch and latch["out"])
+                run_latched = run_latched or bool(latch)
+            latched_runs += run_latched
     secs = time.time() - t0
     ok = failed == 0 and steps > 0 and planned == steps
     if version == "a64":
@@ -116,6 +136,10 @@ def main() -> int:
           "{13:.2f} s per step -> {14}".format(
               version, ROUND, steps, real, failed, planned, dict(fallbacks), stalls, door_walls,
               suspects, coded, behind, critic, secs / max(1, steps), "pass" if ok else "FAIL"))
+    if version == "a78":
+        print("  dead-end confirmer asked on {0} steps, yes on {1}; latch held on {2} steps "
+              "in {3} runs, {4} of them after the drone was out".format(
+                  asked, said_yes, latched, latched_runs, latched_out))
     return 0 if ok else 1
 
 

@@ -2036,7 +2036,77 @@ strip and what cues give its distance. Then give the report.""",
     render=render_identifier_question,
 )
 
-PROMPTS: Dict[str, Prompt] = {p.version: p for p in (P02, P03, P04, P05, P06, P07, P08, P09,
+# --- e01, e02: Phase 2 R38, the dead-end confirmer --------------------------------
+# s03 dynamic is 0/52: the drone reads the tine's door closed and stays in the
+# tine. a68's corridor seal took it out in flight but fired in the s02 hall too,
+# and a69 found nothing in g05's per-strip reads that tells a 3 m corridor from
+# a hall. Probe dead_end_trigger: a closed-door read in the centre three strips
+# comes on 1126 s02 steps against 90 in the shut tine. e01 asks the one question
+# those reads cannot answer, on the same clean frame, on a step with such a
+# read. e02 is the same question put as the way out. Probe DE scores both
+# (eval/phase2/_probes/dead_end); neither is flown before it passes.
+
+
+def render_dead_end_question(prompt: Prompt, strips: List[str]) -> str:
+    """The dead-end confirmer's question: the strips a closed door was read in."""
+    return prompt.user_template.format(
+        strips=", ".join(s.replace("_", " ") for s in strips))
+
+
+E01 = Prompt(
+    version="e01",
+    system="""You check one image from the front camera of a small indoor drone.
+Another model looked at this image and reported a closed door ahead. Your job
+is to say what kind of place the drone is in.
+
+A dead-end corridor is a narrow passage: a wall close on the left and a wall
+close on the right, both running away from the camera toward the closed door,
+and the door is in the wall that ends the passage. The only way out is back
+the way the drone came.
+
+These are not dead-end corridors: a large room or hall, where the wall with
+the door in it runs on to the left or right past the door; open floor to
+either side of the drone; a wall seen from the side or at an angle; a door
+with another opening beside it; an image with no closed door in it.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+First describe the wall to the left of the drone, the wall to the right, and
+the wall the door is in. Then answer yes if the drone is in a dead-end
+corridor that ends at the closed door, and no otherwise.""",
+    user_template="""A closed door was reported in: {strips}. Is the drone in a dead-end corridor that ends at that closed door?""",
+    render=render_dead_end_question,
+)
+
+E02 = Prompt(
+    version="e02",
+    system="""You check one image from the front camera of a small indoor drone.
+Another model looked at this image and reported a closed door ahead. The drone
+cannot open doors. Your job is to say whether there is any way on from here
+other than turning back.
+
+There is a way on when the image shows open floor leading away to the left or
+to the right of the closed door: the wall with the door in it runs along a
+room or hall, and the drone could fly along that wall, or past the door on
+either side, or through another opening.
+
+There is no way on when walls close in on both sides: the floor is a narrow
+strip between a left wall and a right wall, and it stops at the wall with the
+closed door in it. The drone can only turn back.
+
+Think of the image as five equal vertical strips, from left to right:
+far_left, left, centre, right, far_right.
+
+First describe where the floor goes to the left of the door and to the right
+of it. Then answer yes if the drone can only turn back, and no if there is
+any other way on.""",
+    user_template="""A closed door was reported in: {strips}. Is turning back the only way on from here?""",
+    render=render_dead_end_question,
+)
+
+
+PROMPTS: Dict[str, Prompt] = {p.version: p for p in (E01, E02, P02, P03, P04, P05, P06, P07, P08, P09,
                                                       P10, P11, P12, P13, P14, G01, G02,
                                                       G03, Q01, Q02, Q03, G04, Q04, G05,
                                                       Q05, G06, P15, P16, C01, Q06, Q07, P17, D01, Q08, P18, Q09, Q10, Q11, Q12, Q13,

@@ -356,6 +356,21 @@ def door_confirmer_schema(strips: List[str]) -> Dict[str, Any]:
             "additionalProperties": False}
 
 
+DEAD_END_CONFIRMER_SCHEMA_NAME = "dead_end_confirmer"
+
+
+def dead_end_confirmer_schema() -> Dict[str, Any]:
+    """e01, e02 (a78 on): is the place a dead-end corridor ending at the
+    reported closed door, after a description."""
+    return {"type": "object",
+            "properties": {
+                "reason": {"type": "string",
+                           "description": "The wall to the left, the wall to the right, and "
+                                          "the wall the door is in."},
+                "dead_end": {"type": "string", "enum": ["yes", "no"]}},
+            "required": ["reason", "dead_end"], "additionalProperties": False}
+
+
 def strategist_schema(target_ids: List[str]) -> Dict[str, Any]:
     properties = {
         "reason": {"type": "string",

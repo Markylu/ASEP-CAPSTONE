@@ -702,3 +702,183 @@ def test_a77_is_a66_plus_a17k_and_the_trusted_approach():
     assert {k: v for k, v in a77["pathfinder"].items() if k != "door_approach"} == \
         agent.PATHFINDER_A65
     assert agent.get("a77").sha() not in {agent.get(a).sha() for a in ("a66", "a75", "a76")}
+
+
+
+# --- a78 (R38): the dead-end latch --------------------------------------------
+
+L = agent.PATHFINDER_A78
+
+
+def tine(x1, reads, painted=True):
+    """A straight run along +x from (0, 0) to (x1, 0) on a66's memory, the
+    perceiver's floor painted six cells either side (through the walls, as in
+    the shut tine), and the dead-end confirmer's answers [(step, answer)]."""
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    for x in range(0, x1 + 1):
+        mem.visits[(x, 0)] = [x]
+        mem.trail.append((x,) + centre((x, 0)) + (0.0,))
+        if painted:
+            for y in range(-6, 7):
+                mem.free[(x, y)] = x
+    mem.dead_end_reads = list(reads)
+    return mem
+
+
+def test_latch_fires_on_two_yes_in_three_recent_reads_at_the_end_of_a_straight_run():
+    here = pose((8, 0))
+    assert planner.dead_end_latch(tine(8, [(8, "yes")]), here, 8, L) is None
+    assert planner.dead_end_latch(tine(8, [(7, "yes"), (8, "no")]), here, 8, L) is None
+    assert planner.dead_end_latch(tine(20, [(2, "yes"), (20, "yes")]), pose((20, 0)), 20,
+                                  L) is None                               # 18 steps apart: stale
+    assert planner.dead_end_latch(tine(8, [(7, "yes"), (8, "yes")]), here, 9, L) is None  # not now
+    assert planner.dead_end_latch(tine(2, [(1, "yes"), (2, "yes")]), pose((2, 0)), 2, L) is None
+    latch = planner.dead_end_latch(tine(8, [(6, "yes"), (7, "no"), (8, "yes")]), here, 8, L)
+    assert latch is not None and latch["step"] == 8 and not latch["out"]
+    assert abs(latch["axis_deg"]) < 1.0
+    assert abs(latch["origin"][0] - (centre((0, 0))[0] + 2.0)) < 0.01      # mouth_m down the run
+    assert abs(latch["reach_m"] - (centre((8, 0))[0] - latch["origin"][0])) < 0.02
+    assert latch["half_width_m"] == round(8 * C, 2) and latch["ahead_m"] == 2.0
+
+
+def test_latch_corridor_is_the_run_flown_at_the_first_yes_not_the_turning_about_after():
+    mem = tine(8, [(8, "yes"), (12, "yes")])
+    for step, c, h in ((9, (8, 1), 90.0), (10, (7, 1), 180.0), (11, (7, 0), 270.0),
+                       (12, (8, 0), 0.0)):                   # turning about at the door
+        mem.visits.setdefault(c, []).append(step)
+        mem.trail.append((step,) + centre(c) + (h,))
+    assert planner.straight_run(mem.trail, 12, L["dead_end_latch"]) is None
+    latch = planner.dead_end_latch(mem, pose((8, 0)), 12, L)
+    assert latch is not None and latch["step"] == 12 and abs(latch["axis_deg"]) < 1.0
+    assert abs(latch["origin"][0] - (centre((0, 0))[0] + 2.0)) < 0.01
+    assert abs(latch["reach_m"] - (centre((8, 0))[0] - latch["origin"][0])) < 0.02
+
+
+def test_latch_run_starts_where_the_trail_turned():
+    mem = tine(8, [(15, "yes"), (16, "yes")])
+    for k, y in enumerate(range(1, 9)):                      # then eight cells along +y
+        mem.visits[(8, y)] = [9 + k]
+        mem.trail.append((9 + k,) + centre((8, y)) + (90.0,))
+    latch = planner.dead_end_latch(mem, pose((8, 8), 90.0), 16, L)
+    assert latch is not None and abs(latch["axis_deg"] - 90.0) < 1.0
+    assert abs(latch["origin"][0] - centre((8, 0))[0]) < 0.01
+    assert latch["origin"][1] > centre((8, 0))[1] + 1.9      # past the corner, not the first leg
+
+
+def test_latch_looks_back_for_the_run_and_skips_one_the_drone_has_left():
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    cells = ([(x, 0) for x in range(0, 5)] + [(4, y) for y in range(1, 11)]     # stem, long leg
+             + [(x, 10) for x in range(5, 13)]                                  # the corridor
+             + [(12, 11), (11, 11), (12, 10)])                                  # about at the door
+    for step, c in enumerate(cells):
+        mem.visits.setdefault(c, []).append(step)
+        mem.trail.append((step,) + centre(c) + (0.0,))
+    mem.dead_end_reads = [(23, "yes"), (25, "yes")]
+    d = L["dead_end_latch"]
+    leg, corridor = planner.straight_run(mem.trail, 14, d), planner.straight_run(mem.trail, 22, d)
+    assert leg[3] > corridor[3] and planner.straight_run(mem.trail, 25, d) is None
+    latch = planner.dead_end_latch(mem, pose((12, 10)), 25, L)
+    assert latch is not None and abs(latch["axis_deg"]) < 1.0       # not the longer leg
+    assert abs(latch["origin"][0] - (centre((4, 10))[0] + 2.0)) < 0.01
+    assert abs(latch["origin"][1] - centre((4, 10))[1]) < 0.01
+    short = dict(L, dead_end_latch=dict(d, look_back_steps=0))
+    assert planner.dead_end_latch(mem, pose((12, 10)), 25, short) is None
+
+
+def test_latch_shuts_the_rectangle_but_for_the_lane_until_the_drone_is_out():
+    latch = planner.dead_end_latch(tine(8, [(7, "yes"), (8, "yes")]), pose((8, 0)), 8, L)
+    cells = set(planner.latch_cells(latch))
+    assert (5, 0) not in cells and (5, 1) not in cells       # the lane back
+    assert (5, 2) in cells and (5, -7) in cells and (5, 7) in cells
+    assert (5, 9) not in cells and (0, 3) not in cells       # beyond its width; before its mouth
+    assert (9, 0) in cells and (10, 0) in cells              # the lane is capped ahead of the drone
+    assert (11, 0) not in cells                              # ahead_m beyond the drone, no farther
+    on = set(planner.latch_cells(dict(latch, reach_m=latch["reach_m"] + 2 * C)))
+    assert (9, 0) not in on and (11, 0) in on and (12, 0) in on   # the cap moves with the drone
+    shut = set(planner.latch_cells(dict(latch, out=True)))
+    assert cells < shut and (5, 0) in shut and (5, 1) in shut
+
+
+def test_latched_route_goes_back_down_the_lane_over_painted_floor():
+    mem = tine(8, [(7, "yes"), (8, "yes")])
+    goal = centre((14, 3))                                    # beyond the door, off the axis
+    free = planner.pathfind(mem, manifest_at((8, 0), 8), [], goal, agent.PATHFINDER_A65)
+    assert free.path[1][0] > 8 and free.latch is None        # a66: on through the painted floor
+    plan = planner.pathfind(mem, manifest_at((8, 0), 8), [], goal, L)
+    assert plan.latch is not None and plan.fallback == "none"
+    assert plan.to_dict()["latch"]["step"] == 8
+    assert plan.path[1][0] < 8 and plan.waypoint[0] < centre((8, 0))[0]
+    inside = [c for c in plan.path if 3 <= c[0] <= 8 and abs(c[1]) <= 7]
+    assert inside and all(abs(c[1]) <= 1 for c in inside), plan.path   # only by the lane
+    assert plan.path_m > free.path_m
+
+
+def test_latch_is_carried_by_the_record_and_shuts_the_lane_once_out():
+    mem = tine(8, [(7, "yes"), (8, "yes")])
+    goal = centre((14, 3))
+    fired = planner.pathfind(mem, manifest_at((8, 0), 8), [], goal, L).to_dict()
+    records = [{"step": 8, "planner": fired}]
+    assert planner.latch_from(records, 9) == fired["latch"]
+    assert planner.latch_from(records, 8) is None
+    # No confirmer answer on later steps: the latch still holds.
+    mem.dead_end_reads = []
+    held = planner.pathfind(mem, manifest_at((6, 0), 9), records, goal, L)
+    assert held.latch == fired["latch"] and held.path[1][0] < 6
+    # Back at the run's start, before the mouth: out, and the lane is shut for good.
+    out = planner.pathfind(mem, manifest_at((0, 0), 10), records, goal, L)
+    assert out.latch["out"] and out.fallback == "none"
+    assert all(not (3 <= c[0] <= 8 and abs(c[1]) <= 7) for c in out.path[1:]), out.path
+    records.append({"step": 10, "planner": out.to_dict()})
+    again = planner.pathfind(mem, manifest_at((1, 0), 11), records, goal, L)
+    assert again.latch["out"]
+    assert all(not (4 <= c[0] <= 8 and abs(c[1]) <= 7) for c in again.path[1:]), again.path
+
+
+def test_a78_sentence_only_inside_a_latched_corridor_with_toward_on_the_turn_around():
+    notes = agent.NAVIGATOR_A78
+    manifest = {"actions": [{"index": 0, "turn_around": True}, {"index": 3}]}
+    back = {0: [spatial.WORDS["toward_target"]]}
+    on = {3: [spatial.WORDS["toward_target"]]}
+    latch = {"out": False}
+    said = orchestrator.behind_note(notes, manifest, back, {"latch": latch})
+    assert said == notes["dead_end"] + " " + notes["route_behind"]
+    assert orchestrator.behind_note(notes, manifest, on, {"latch": latch}) is None
+    assert orchestrator.behind_note(notes, manifest, back, {}) is None
+    assert orchestrator.behind_note(notes, manifest, back, {"latch": {"out": True}}) is None
+    # a70 is unchanged: its sentence needs no latch.
+    assert orchestrator.behind_note(agent.NAVIGATOR_A70, manifest, back, None) == \
+        agent.NAVIGATOR_A70["route_behind"]
+    assert orchestrator.behind_note({}, manifest, back, None) is None
+
+
+def test_dead_end_confirmer_is_asked_on_a_closed_door_in_the_centre_three_strips():
+    def lanes(**doors):
+        return {"lanes": [{"strip": s, "floor": "open_near", "floor_end": "bottom",
+                           "doorway": doors.get(s, False)} for s in spatial.STRIPS]}
+    assert orchestrator.dead_end_strips(lanes(centre="closed", far_left="closed")) == ["centre"]
+    assert orchestrator.dead_end_strips(lanes(far_right="closed")) == []
+    assert orchestrator.dead_end_strips(lanes(left="open")) == []
+    assert orchestrator.dead_end_strips(None) == []
+    mem = spatial.SpatialMemory(cfg=spatial.A17F)
+    mem.observe(3, pose((0, 0)), dict(lanes(centre="closed"), dead_end="yes"))
+    mem.observe(4, pose((0, 0)), lanes(centre="closed"))
+    assert mem.dead_end_reads == [(3, "yes")]
+
+
+def test_a78_is_a66_plus_the_latch_its_confirmer_and_its_sentence():
+    assert agent.get("a66").sha() == "de7f23d07186"
+    assert agent.get("a75").sha() == "81d682c1424b"
+    assert agent.get("a77").sha() == "6744446339b0"
+    a66 = agent.get("a66").features["orchestrator"]
+    a78 = agent.get("a78").features["orchestrator"]
+    added = ("pathfinder", "dead_end_confirmer", "navigator_notes")
+    assert {k: v for k, v in a78.items() if k not in added} == \
+        {k: v for k, v in a66.items() if k != "pathfinder"}
+    assert spatial.config_for(a78) == spatial.config_for(a66)
+    assert {k: v for k, v in a78["pathfinder"].items() if k != "dead_end_latch"} == \
+        agent.PATHFINDER_A65
+    assert [p.version for p in agent.get("a78").subagent_prompts] == ["g05", "d01", "e01"]
+    assert [s.name for s in orchestrator.pipeline(a78)][:4] == \
+        ["perceiver", "door_confirmer", "dead_end_confirmer", "mapper"]
+    assert "dead_end_confirmer" not in [s.name for s in orchestrator.pipeline(a66)]
+    assert agent.get("a78").sha() not in {agent.get(a).sha() for a in ("a66", "a68", "a70")}

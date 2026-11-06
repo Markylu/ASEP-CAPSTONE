@@ -1,0 +1,89 @@
+a78 replay, answers: probe:e01, on the held-out runs (open loop; eval/probes/a78_replay.py)
+
+run                          | won | latch step, left | s03 route out a66 a78 (after latch) | sentence | s02 gap crossing a66 a78 | no route
+final/s01/initial/seed1      | yes |    -    - |                                 |   0 |                 |   0
+final/s01/initial/seed2      | yes |    -    - |                                 |   0 |                 |   0
+final/s01/initial/seed3      | yes |    -    - |                                 |   0 |                 |   0
+final/s01/initial/seed4      | yes |    -    - |                                 |   0 |                 |   0
+final/s01/initial/seed5      | yes |    -    - |                                 |   0 |                 |   0
+final/s02a/initial/seed1     | yes |    -    - |                                 |   0 |                 |   0
+final/s02a/initial/seed2     | yes |    -    - |                                 |   0 |                 |   0
+final/s02a/initial/seed3     | yes |    -    - |                                 |   0 |                 |   0
+final/s02a/initial/seed4     | yes |    -    - |                                 |   0 |                 |   0
+final/s02a/initial/seed5     | yes |    -    - |                                 |   0 |                 |   0
+final/s02c/initial/seed1     | yes |    -    - |                                 |   0 |                 |   0
+final/s02c/initial/seed2     | yes |    -    - |                                 |   0 |                 |   0
+final/s02c/initial/seed3     | yes |    -    - |                                 |   0 |                 |   0
+final/s02c/initial/seed4     | yes |    -    - |                                 |   0 |                 |   0
+final/s02c/initial/seed5     | yes |    -    - |                                 |   0 |                 |   0
+final/s02va/initial/seed1    | yes |    -    - |                                 |   0 |                 |   0
+final/s02va/initial/seed2    | yes |    -    - |                                 |   0 |                 |   0
+final/s02va/initial/seed3    | yes |    -    - |                                 |   0 |                 |   0
+final/s02va/initial/seed4    | yes |    -    - |                                 |   0 |                 |   0
+final/s02va/initial/seed5    | yes |    -    - |                                 |   0 |                 |   0
+final/s02vc/initial/seed1    | yes |    -    - |                                 |   0 |                 |   0
+final/s02vc/initial/seed2    | yes |    -    - |                                 |   0 |                 |   0
+final/s02vc/initial/seed3    | yes |    -    - |                                 |   0 |                 |   0
+final/s02vc/initial/seed4    | yes |    -    - |                                 |   0 |                 |   0
+final/s02vc/initial/seed5    | yes |    -    - |                                 |   0 |                 |   0
+final/s03/initial/seed1      | yes |    -    - |                                 |   0 |                 |   0
+final/s03/initial/seed2      | yes |    -    - |                                 |   0 |                 |   0
+final/s03/initial/seed3      | yes |    -    - |                                 |   0 |                 |   0
+final/s03/initial/seed4      | yes |   30   30 |                                 |   0 |                 |   0
+final/s03/initial/seed5      | yes |    -    - |                                 |   0 |                 |   0
+R30/s01/dynamic/seed1        | yes |    -    - |                                 |   0 |   0   0 of  23  |   0
+R30/s01/final/seed1          | yes |    -    - |                                 |   0 |   0   0 of  18  |   0
+R30/s01/initial/seed1        | yes |    -    - |                                 |   0 |                 |   0
+R30/s02a/dynamic/seed1       | no  |   28   32 |                                 |   0 |   0   0 of  57  |   2
+R30/s02a/final/seed1         | yes |    -    - |                                 |   0 |   1   1 of  10  |   0
+R30/s02a/initial/seed1       | yes |    -    - |                                 |   0 |                 |   0
+R30/s02c/dynamic/seed1       | yes |    -    - |                                 |   0 |   2   2 of  15  |   0
+R30/s02c/final/seed1         | yes |    -    - |                                 |   0 |   1   1 of  38  |   0
+R30/s02c/initial/seed1       | yes |    -    - |                                 |   0 |                 |   0
+R30/s02va/dynamic/seed1      | yes |   16   44 |                                 |   0 |   1   0 of  16  |   1
+R30/s02va/final/seed1        | no  |   28   32 |                                 |   0 |   0   0 of  58  |   0
+R30/s02va/initial/seed1      | yes |    -    - |                                 |   0 |                 |   0
+R30/s02vc/dynamic/seed1      | yes |   11   49 |                                 |   0 |   7   7 of  43  |   4
+R30/s02vc/final/seed1        | no  |   26   34 |                                 |   0 |   0   0 of  56  |   0
+R30/s02vc/initial/seed1      | yes |    -    - |                                 |   0 |                 |   0
+R30/s03/dynamic/seed1        | no  |   19   41 |   0  37 of  38 ( 37 of  37)     |  11 |                 |   0
+R30/s03/final/seed1          | yes |    -    - |   0   0 of   0 (  0 of   0)     |   0 |                 |   0
+R30/s03/initial/seed1        | yes |    -    - |                                 |   0 |                 |   0
+R32/s02a/dynamic/seed1       | yes |    -    - |                                 |   0 |   0   2 of  14  |   0
+R32/s02a/dynamic/seed2       | no  |    5   55 |                                 |   0 |   0  13 of  54  |  21
+R32/s02a/dynamic/seed3       | no  |    6   54 |                                 |   0 |   0  21 of  51  |   5
+R32/s02a/final/seed1         | yes |    9   51 |                                 |   0 |   0   0 of  39  |   1
+R32/s02a/final/seed2         | yes |    5   55 |                                 |   0 |   0  10 of  35  |   5
+R32/s02a/final/seed3         | yes |    6   54 |                                 |   0 |   0  17 of  36  |   8
+R32/s02c/dynamic/seed1       | no  |   25   35 |                                 |   0 |   0  18 of  57  |   0
+R32/s02c/dynamic/seed2       | no  |    5   55 |                                 |   0 |   0  12 of  55  |   1
+R32/s02c/dynamic/seed3       | no  |   16   44 |                                 |   0 |   0   3 of  55  |   7
+R32/s02c/final/seed1         | yes |    -    - |                                 |   0 |   0   1 of  18  |   0
+R32/s02c/final/seed2         | no  |    5   55 |                                 |   0 |   0  12 of  60  |   3
+R32/s02c/final/seed3         | no  |   15   45 |                                 |   0 |   0  15 of  60  |   3
+R32/s02va/dynamic/seed1      | no  |   11   49 |                                 |   0 |   0  41 of  54  |   0
+R32/s02va/dynamic/seed2      | yes |   13   47 |                                 |   0 |   0   2 of  43  |   0
+R32/s02va/dynamic/seed3      | no  |   15   45 |                                 |   0 |   0  22 of  55  |   0
+R32/s02va/final/seed1        | no  |   21   39 |                                 |   0 |   0  23 of  59  |   1
+R32/s02va/final/seed2        | yes |   19   41 |                                 |   0 |   0   0 of  42  |   2
+R32/s02va/final/seed3        | yes |    -    - |                                 |   0 |   0   1 of  24  |   0
+R32/s02vc/dynamic/seed1      | no  |   11   49 |                                 |   0 |   0   0 of  53  |   1
+R32/s02vc/dynamic/seed2      | no  |   25   35 |                                 |   0 |   0   7 of  55  |   0
+R32/s02vc/dynamic/seed3      | no  |   38   22 |                                 |   0 |   0   0 of  55  |   0
+R32/s02vc/final/seed1        | yes |   11   49 |                                 |   0 |   0   2 of  20  |   7
+R32/s02vc/final/seed2        | no  |   26   34 |                                 |   0 |   0   7 of  52  |   7
+R32/s02vc/final/seed3        | yes |    -    - |                                 |   0 |   0   2 of  25  |   0
+R32/s03/dynamic/seed1        | no  |   36   24 |   0  20 of  29 ( 20 of  20)     |   4 |                 |   0
+R32/s03/dynamic/seed2        | no  |   27   33 |   0   0 of  30 (  0 of  23)     |  11 |                 |   0
+R32/s03/dynamic/seed3        | no  |    -    - |   0   0 of   0 (  0 of   0)     |   0 |                 |   0
+R32/s03/final/seed1          | yes |    -    - |   0   0 of   0 (  0 of   0)     |   0 |                 |   0
+R32/s03/final/seed2          | no  |   23   37 |   0  29 of  29 ( 29 of  29)     |  14 |                 |   0
+R32/s03/final/seed3          | no  |   37   23 |   0  22 of  23 ( 22 of  22)     |  10 |                 |   0
+
+s03 shut-tine steps after the first closed read whose route leaves by the crossbar: a66 0/38 (0%), a78 108/149 (72%).
+  of the shut-tine steps from the latch on: a78 108/131 (82%); the sentence would be said on 50 latched steps.
+s03 dynamic: the latch fires in 3 of 4 runs; steps left when it does: median 33, 2 with 25 or more.
+s02 change arms: the latch fires before the crossing in 8 of 17 won runs and 17 of 17 lost runs.
+initial arms: the latch fires in 1 of 36 won runs and 0 of 0 lost runs.
+s02 near-side steps after the switch whose route crosses the divider inside the open door's gap: a66 12/334 (4%), a78 242/1405 (17%).
+Steps with no route (soft or frontier fallback): 79 of 2800.

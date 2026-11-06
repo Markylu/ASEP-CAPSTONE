@@ -1,0 +1,130 @@
+a78 replay, answers: oracle (open loop; eval/probes/a78_replay.py)
+
+run                          | won | latch step, left | s03 route out a66 a78 (after latch) | sentence | s02 gap crossing a66 a78 | no route
+final/s01/dynamic/seed1      | yes |    -    - |                                 |   0 |   0   0 of  10  |   0
+final/s01/dynamic/seed2      | yes |    -    - |                                 |   0 |   0   0 of  10  |   0
+final/s01/dynamic/seed3      | yes |    -    - |                                 |   0 |   0   0 of  11  |   0
+final/s01/dynamic/seed4      | yes |    -    - |                                 |   0 |   0   0 of   9  |   0
+final/s01/dynamic/seed5      | yes |    -    - |                                 |   0 |   0   0 of   6  |   0
+final/s01/final/seed1        | yes |    -    - |                                 |   0 |   0   0 of  18  |   0
+final/s01/final/seed2        | yes |    -    - |                                 |   0 |   0   0 of  40  |   0
+final/s01/final/seed3        | yes |    -    - |                                 |   0 |   0   0 of  20  |   0
+final/s01/final/seed4        | yes |    -    - |                                 |   0 |   0   0 of  20  |   0
+final/s01/final/seed5        | yes |    -    - |                                 |   0 |   0   0 of  11  |   0
+final/s02a/dynamic/seed1     | no  |    -    - |                                 |   0 |   1   1 of  46  |   0
+final/s02a/dynamic/seed2     | yes |    -    - |                                 |   0 |   0   0 of  22  |   0
+final/s02a/dynamic/seed3     | yes |    -    - |                                 |   0 |   3   3 of  29  |   0
+final/s02a/dynamic/seed4     | no  |    -    - |                                 |   0 |   0   0 of  49  |   0
+final/s02a/dynamic/seed5     | yes |    -    - |                                 |   0 |   3   3 of  39  |   0
+final/s02a/final/seed1       | no  |    -    - |                                 |   0 |   0   0 of  60  |   0
+final/s02a/final/seed2       | no  |    -    - |                                 |   0 |   3   3 of  60  |   0
+final/s02a/final/seed3       | yes |    -    - |                                 |   0 |   5   5 of  32  |   0
+final/s02a/final/seed4       | no  |    -    - |                                 |   0 |   6   6 of  59  |   0
+final/s02a/final/seed5       | no  |    -    - |                                 |   0 |   0   0 of  57  |   0
+final/s02c/dynamic/seed1     | no  |    -    - |                                 |   0 |   0   0 of  55  |   0
+final/s02c/dynamic/seed2     | no  |    -    - |                                 |   0 |   0   0 of  57  |   0
+final/s02c/dynamic/seed3     | yes |    -    - |                                 |   0 |   6   6 of  19  |   0
+final/s02c/dynamic/seed4     | no  |    -    - |                                 |   0 |   0   0 of  57  |   0
+final/s02c/dynamic/seed5     | no  |    -    - |                                 |   0 |   0   0 of  51  |   0
+final/s02c/final/seed1       | yes |    -    - |                                 |   0 |   1   1 of  39  |   0
+final/s02c/final/seed2       | no  |    -    - |                                 |   0 |   0   0 of  58  |   3
+final/s02c/final/seed3       | no  |    -    - |                                 |   0 |   0   0 of  56  |   0
+final/s02c/final/seed4       | yes |    -    - |                                 |   0 |   9   9 of  18  |   0
+final/s02c/final/seed5       | no  |    -    - |                                 |   0 |   0   0 of  56  |   0
+final/s02va/dynamic/seed1    | yes |    -    - |                                 |   0 |   0   0 of  14  |   0
+final/s02va/dynamic/seed2    | no  |    -    - |                                 |   0 |   6   6 of  57  |   0
+final/s02va/dynamic/seed3    | yes |    -    - |                                 |   0 |   0   0 of  19  |   0
+final/s02va/dynamic/seed4    | yes |    -    - |                                 |   0 |   6   6 of  27  |   0
+final/s02va/dynamic/seed5    | yes |    -    - |                                 |   0 |   0   0 of  34  |   0
+final/s02va/final/seed1      | yes |    -    - |                                 |   0 |   1   1 of  19  |   0
+final/s02va/final/seed2      | no  |    -    - |                                 |   0 |   1   1 of  60  |   0
+final/s02va/final/seed3      | yes |    -    - |                                 |   0 |   1   1 of  21  |   0
+final/s02va/final/seed4      | yes |    -    - |                                 |   0 |   2   2 of  18  |   0
+final/s02va/final/seed5      | yes |    -    - |                                 |   0 |   1   1 of  19  |   0
+final/s02vc/dynamic/seed1    | yes |    -    - |                                 |   0 |   1   1 of  21  |   0
+final/s02vc/dynamic/seed2    | yes |    -    - |                                 |   0 |   2   2 of  40  |   0
+final/s02vc/dynamic/seed3    | no  |    -    - |                                 |   0 |   0   0 of  54  |   0
+final/s02vc/dynamic/seed4    | yes |    -    - |                                 |   0 |   8   8 of  36  |   0
+final/s02vc/dynamic/seed5    | yes |    -    - |                                 |   0 |   1   1 of  25  |   0
+final/s02vc/final/seed1      | no  |    -    - |                                 |   0 |   0   0 of  57  |   0
+final/s02vc/final/seed2      | no  |    -    - |                                 |   0 |   2   2 of  58  |   0
+final/s02vc/final/seed3      | no  |    -    - |                                 |   0 |   0   0 of  60  |   0
+final/s02vc/final/seed4      | yes |    -    - |                                 |   0 |  16  16 of  35  |   0
+final/s02vc/final/seed5      | no  |    -    - |                                 |   0 |   0   0 of  45  |   0
+final/s03/dynamic/seed1      | no  |   25   35 |   0  31 of  36 ( 31 of  31)     |  11 |                 |   0
+final/s03/dynamic/seed2      | no  |   37   23 |   0  22 of  30 ( 22 of  22)     |   6 |                 |   0
+final/s03/dynamic/seed3      | no  |   20   40 |   0  32 of  33 ( 32 of  32)     |  18 |                 |   0
+final/s03/dynamic/seed4      | no  |   19   41 |   0  39 of  42 ( 39 of  41)     |  11 |                 |   0
+final/s03/dynamic/seed5      | no  |   35   25 |   0  23 of  32 ( 23 of  23)     |   8 |                 |   0
+final/s03/final/seed1        | no  |   16   44 |   0  34 of  37 ( 34 of  36)     |  17 |                 |   0
+final/s03/final/seed2        | yes |    -    - |   0   0 of   0 (  0 of   0)     |   0 |                 |   0
+final/s03/final/seed3        | yes |   17   43 |   0  12 of  13 ( 12 of  12)     |   4 |                 |   0
+final/s03/final/seed4        | yes |    -    - |   0   0 of   0 (  0 of   0)     |   0 |                 |   0
+final/s03/final/seed5        | yes |    -    - |   0   0 of   0 (  0 of   0)     |   0 |                 |   0
+R32P/s02a/dynamic/seed1      | no  |    -    - |                                 |   0 |   0   0 of  52  |   0
+R32P/s02a/dynamic/seed2      | yes |    -    - |                                 |   0 |   2   2 of  13  |   0
+R32P/s02a/dynamic/seed3      | yes |    -    - |                                 |   0 |  16  16 of  32  |   0
+R32P/s02a/final/seed1        | yes |    -    - |                                 |   0 |   2   2 of  28  |   0
+R32P/s02a/final/seed2        | yes |    -    - |                                 |   0 |   1   1 of  13  |   0
+R32P/s02a/final/seed3        | no  |    -    - |                                 |   0 |   2   2 of  55  |   0
+R32P/s02c/dynamic/seed1      | no  |    -    - |                                 |   0 |   0   0 of  54  |   0
+R32P/s02c/dynamic/seed2      | no  |    -    - |                                 |   0 |   0   0 of  57  |   0
+R32P/s02c/dynamic/seed3      | no  |    -    - |                                 |   0 |   0   0 of  57  |   0
+R32P/s02c/final/seed1        | no  |    -    - |                                 |   0 |   0   0 of  60  |   0
+R32P/s02c/final/seed2        | no  |    -    - |                                 |   0 |   0   0 of  58  |   0
+R32P/s02c/final/seed3        | yes |    -    - |                                 |   0 |   0   0 of  43  |   0
+R32P/s02va/dynamic/seed1     | yes |    -    - |                                 |   0 |   1   1 of  16  |   0
+R32P/s02va/dynamic/seed2     | no  |    -    - |                                 |   0 |   0   0 of  57  |   0
+R32P/s02va/dynamic/seed3     | yes |    -    - |                                 |   0 |   2   2 of  35  |   0
+R32P/s02va/final/seed1       | yes |    -    - |                                 |   0 |   0   0 of  26  |   0
+R32P/s02va/final/seed2       | no  |    -    - |                                 |   0 |   0   0 of  60  |   0
+R32P/s02va/final/seed3       | yes |    -    - |                                 |   0 |   1   1 of  36  |   0
+R32P/s02vc/dynamic/seed1     | yes |    -    - |                                 |   0 |   3   3 of  39  |   0
+R32P/s02vc/dynamic/seed2     | yes |    -    - |                                 |   0 |   0   0 of  25  |   0
+R32P/s02vc/dynamic/seed3     | no  |    -    - |                                 |   0 |   3   3 of  53  |   0
+R32P/s02vc/final/seed1       | no  |    -    - |                                 |   0 |   0   0 of  50  |   0
+R32P/s02vc/final/seed2       | no  |    -    - |                                 |   0 |   0   0 of  60  |   0
+R32P/s02vc/final/seed3       | yes |    -    - |                                 |   0 |  18  18 of  51  |   0
+R32P/s03/dynamic/seed1       | no  |   23   37 |   0  33 of  38 ( 33 of  37)     |   9 |                 |   0
+R32P/s03/dynamic/seed2       | no  |   25   35 |   0  34 of  36 ( 34 of  35)     |   8 |                 |   0
+R32P/s03/dynamic/seed3       | no  |   55    5 |   0   0 of  20 (  0 of   5)     |   0 |                 |   0
+R32P/s03/final/seed1         | yes |    -    - |   0   0 of   0 (  0 of   0)     |   0 |                 |   0
+R32P/s03/final/seed2         | yes |    -    - |   0   0 of   0 (  0 of   0)     |   0 |                 |   0
+R32P/s03/final/seed3         | yes |    -    - |   0   0 of   0 (  0 of   0)     |   0 |                 |   0
+R35/s02a/dynamic/seed1       | yes |    -    - |                                 |   0 |   2   2 of  11  |   0
+R35/s02a/dynamic/seed2       | yes |    -    - |                                 |   0 |   1   1 of  22  |   0
+R35/s02a/dynamic/seed3       | yes |    -    - |                                 |   0 |   4   4 of  25  |   0
+R35/s02a/final/seed1         | yes |    -    - |                                 |   0 |   2   2 of  14  |   0
+R35/s02a/final/seed2         | yes |    -    - |                                 |   0 |   0   0 of  12  |   0
+R35/s02a/final/seed3         | yes |    -    - |                                 |   0 |   1   1 of   9  |   1
+R35/s02c/dynamic/seed1       | no  |    -    - |                                 |   0 |   0   0 of  53  |   0
+R35/s02c/dynamic/seed2       | no  |    -    - |                                 |   0 |   0   0 of  55  |   0
+R35/s02c/dynamic/seed3       | no  |    -    - |                                 |   0 |   2   2 of  57  |   0
+R35/s02c/final/seed1         | no  |    -    - |                                 |   0 |   0   0 of  60  |   0
+R35/s02c/final/seed2         | no  |    -    - |                                 |   0 |   0   0 of  56  |   0
+R35/s02c/final/seed3         | yes |    -    - |                                 |   0 |   1   1 of  18  |   0
+R35/s02va/dynamic/seed1      | yes |    -    - |                                 |   0 |   3   3 of  18  |   0
+R35/s02va/dynamic/seed2      | no  |    -    - |                                 |   0 |   0   0 of  55  |   0
+R35/s02va/dynamic/seed3      | yes |    -    - |                                 |   0 |   1   1 of  23  |   0
+R35/s02va/final/seed1        | no  |    -    - |                                 |   0 |   0   0 of  60  |   0
+R35/s02va/final/seed2        | no  |    -    - |                                 |   0 |  15  15 of  60  |   0
+R35/s02va/final/seed3        | yes |    -    - |                                 |   0 |   4   4 of  37  |   0
+R35/s02vc/dynamic/seed1      | no  |    -    - |                                 |   0 |   0   0 of  35  |   0
+R35/s02vc/dynamic/seed2      | no  |    -    - |                                 |   0 |   0   0 of  53  |   0
+R35/s02vc/dynamic/seed3      | yes |    -    - |                                 |   0 |   1   1 of  18  |   0
+R35/s02vc/final/seed1        | no  |    -    - |                                 |   0 |   0   0 of  58  |   0
+R35/s02vc/final/seed2        | no  |    -    - |                                 |   0 |   0   0 of  57  |   0
+R35/s02vc/final/seed3        | no  |    -    - |                                 |   0 |   0   0 of  56  |   0
+R35/s03/dynamic/seed1        | no  |   24   36 |   0  33 of  37 ( 33 of  36)     |   8 |                 |   0
+R35/s03/dynamic/seed2        | no  |   26   34 |   0  30 of  33 ( 30 of  32)     |   9 |                 |   0
+R35/s03/dynamic/seed3        | no  |   37   23 |   0   0 of  24 (  0 of  23)     |   8 |                 |   0
+R35/s03/final/seed1          | no  |   18   42 |   0  31 of  33 ( 31 of  31)     |  11 |                 |   0
+R35/s03/final/seed2          | yes |    -    - |   0   0 of   0 (  0 of   0)     |   0 |                 |   0
+R35/s03/final/seed3          | yes |    -    - |   0   0 of   0 (  0 of   0)     |   0 |                 |   0
+
+s03 shut-tine steps after the first closed read whose route leaves by the crossbar: a66 0/444 (0%), a78 354/444 (80%).
+  of the shut-tine steps from the latch on: a78 354/396 (89%); the sentence would be said on 128 latched steps.
+s03 dynamic: the latch fires in 11 of 11 runs; steps left when it does: median 35, 8 with 25 or more.
+s02 change arms: the latch fires before the crossing in 0 of 53 won runs and 0 of 45 lost runs.
+s02 near-side steps after the switch whose route crosses the divider inside the open door's gap: a66 173/3745 (5%), a78 173/3745 (5%).
+Steps with no route (soft or frontier fallback): 4 of 5653.
