@@ -307,6 +307,13 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a66 with a dead-end latch, contested cells",
             "agent": "a78", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R39: a79 (a66 with R38's dead-end latch fired by the drone's own trail,
+    # planner.confined_run, no confirmer), the same screen. Read against R32P
+    # (a66, 15/30). Overnight run 2026-11-05.
+    "R39": {"folder": "R39_confined_latch",
+            "title": "a66 with the dead-end latch fired by the trail, contested cells",
+            "agent": "a79", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

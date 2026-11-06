@@ -307,6 +307,19 @@ PATHFINDER_A78: Dict[str, Any] = dict(
                                     "max_back_m": 15.0, "mouth_m": 2.0, "ahead_m": 2.0,
                                     "lane_m": 1.5, "seal_cells": 8})
 
+#: a79 (R39): a78's latch with the trail as its trigger (planner.confined_run)
+#: and no confirmer. The drone has not left the lane of a straight run of
+#: min_run_m or more that it turned into (half_m either side of its axis,
+#: back_m behind its start), has got no more than advance_m farther down it in
+#: dwell_steps, has read a closed door in the centre three strips looking along
+#: it (within facing_deg) on `reads` steps, and has never stood beside the lane
+#: within beside_m. eval/phase2/R39_confined_latch/README.md.
+PATHFINDER_A79: Dict[str, Any] = dict(
+    PATHFINDER_A65, dead_end_latch=dict(
+        PATHFINDER_A78["dead_end_latch"], min_run_m=5.0,
+        confined={"half_m": 1.5, "back_m": 1.0, "facing_deg": 70.0, "reads": 2,
+                  "dwell_steps": 5, "advance_m": 1.0, "beside_m": 4.0}))
+
 #: a78: a70's route-behind sentence, said only inside a latched corridor and
 #: with the reason before it. No critic. R30 shakedown: a63, a67 and a68
 #: declined marker 0 on about half its "toward your target" offers, and a68
@@ -1517,6 +1530,32 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "0/52 in Phase 2; a68's seal left the tine in flight but yielded to later floor "
           "reads and fired in the s02 hall. Not flown before probe DE passes "
           "(eval/phase2/R38_dead_end_latch/README.md)."),
+    Agent("a79", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A79,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a66 with a78's dead-end latch fired by the drone's own trail, no confirmer. "
+          "The latch fires when the drone has not left the lane of a straight run of 5 m "
+          "or more that it turned into (1.5 m either side of its axis), has got no "
+          "farther down it for five steps, has read a closed door in the centre three "
+          "strips twice while looking along it, and has never stood beside the lane "
+          "within 4 m: a corridor confines the drone, a hall does not. The corridor is "
+          "then shut on the route's map as a78 shuts it, and the navigator is told it is "
+          "a dead end when the route's next point is behind it. R38: the latch was sound "
+          "on the record with a confirmer that is never wrong, and the model could not be "
+          "that confirmer (e01 yes on 37% of s02 steps). Round F, R32P and R35: the rule "
+          "fires in the shut tine in 9 of 11 s03 dynamic runs and in none of 53 won s02 "
+          "runs before the crossing (eval/phase2/R39_confined_latch/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"
