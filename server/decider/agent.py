@@ -553,6 +553,20 @@ PATHFINDER_A101: Dict[str, Any] = dict(PATHFINDER_A100, inflate_stop_walls=1)
 PATHFINDER_A102: Dict[str, Any] = dict(
     PATHFINDER_A100, dead_end_latch=PATHFINDER_A94["dead_end_latch"])
 
+#: a103 (R68): a102's planner (stations held 10 steps, a94's latch) with a99's
+#: stop walls one cell wide. Batch 4 on H100 frames: a102 23/30 and a101 (a100
+#: with the one-cell walls) 22/30 against the reference a100's 18/30.
+#: eval/phase2/R68_wait_latch_inflate/README.md.
+PATHFINDER_A103: Dict[str, Any] = dict(PATHFINDER_A102, inflate_stop_walls=1)
+
+#: a104 (R69): a102 with the goal check at 20 degrees, not 26. R49 to R55's
+#: 1389 goal reports: at 26 degrees the check drops 82 of 210 made with no line
+#: of sight and 17 of 1179 made with one; at 20, 93 and 43 (a strip is 17
+#: degrees wide: a report two strips off). R53 s02a dynamic seed 2 step 33: a
+#: far-left report 25 degrees off, the goal behind the wall, taken, and the
+#: drone left the open door it faced. eval/phase2/R69_goal_check_20/README.md.
+GOAL_CHECK_A104: Dict[str, Any] = {"off_deg": 20.0, "min_m": 4.0}
+
 
 #: a90 (R50): a89's planner, and it tells the navigator's notes when the
 #: first way in is over (way_in): a survey started, a latch, the drone more
@@ -2331,6 +2345,43 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "turn from where the trail left the direct line. The latch fired within 6 steps of "
           "the read in 5 of 5 runs that reached the shut s03 door in R56 and R59 "
           "(eval/phase2/R66_wait_latch/README.md)."),
+    Agent("a103", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "goal_check": GOAL_CHECK_A93,
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A103,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a102 (a93 with the survey's stations held 10 steps and a94's latch) with a99's "
+          "stop walls one cell wide either side. Batch 4 on H100 frames: a102 23/30, a101 "
+          "22/30 against the reference a100's 18/30 (eval/phase2/R68_wait_latch_inflate/README.md)."),
+    Agent("a104", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "goal_check": GOAL_CHECK_A104,
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A102,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a102 (a93 with the survey's stations held 10 steps and a94's latch) with the goal "
+          "check at 20 degrees off the bearing to the goal, not 26: a report two strips off is "
+          "dropped. R49 to R55: 93 of 210 blind reports dropped (a93: 82), 43 of 1179 with a "
+          "line of sight (17) (eval/phase2/R69_goal_check_20/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"

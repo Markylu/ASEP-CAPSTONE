@@ -1,0 +1,12 @@
+{
+  "round": "R70",
+  "title": "a102 again, batch 5's reference lane on H100 frames (host round), contested cells",
+  "citable": false,
+  "agent_version": "a102",
+  "status": "planned",
+  "git_sha": null,
+  "started": null,
+  "finished": null,
+  "operator": null,
+  "notes": ""
+}

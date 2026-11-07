@@ -502,6 +502,25 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a100 again, batch 4's reference lane on H100 frames (host round), contested cells",
             "agent": "a100", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R68: a103 (a102 with a99's stop walls one cell wide). Batch 5, the last
+    # of the night of 2026-11-06, on H100 frames beside R69 and the reference
+    # R70 (a102, carried in batch 4). The reference flies on :8004 this time,
+    # the candidates on the copies: the four earlier reference lanes all flew
+    # on :8007 and all landed below their candidates.
+    "R68": {"folder": "R68_wait_latch_inflate",
+            "title": "a102 with a stop wall one cell wide either side, contested cells",
+            "agent": "a103", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R69: a104 (a102 with the goal check at 20 degrees). The same batch.
+    "R69": {"folder": "R69_goal_check_20",
+            "title": "a102 with the goal check at 20 degrees, not 26, contested cells",
+            "agent": "a104", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R70: the reference lane of batch 5: a102 on H100 frames, on :8004.
+    "R70": {"folder": "R70_ref_a102",
+            "title": "a102 again, batch 5's reference lane on H100 frames (host round), contested cells",
+            "agent": "a102", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
