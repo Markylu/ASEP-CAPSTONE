@@ -521,6 +521,12 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a102 again, batch 5's reference lane on H100 frames (host round), contested cells",
             "agent": "a102", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # F2: the night's best agent, a102, on the full Phase 1 design (6 sites x 3
+    # arms x seeds 1-5, 90 runs), Godot under lavapipe as Phase 1 and Round F
+    # were, eight lanes on :8004 as Round F was. Operator 2026-11-07: "fly it on
+    # lavapipe, but use the final format". Order random.Random("phase2-F2").
+    "F2": {"folder": "final_a102", "title": "Final design: a102 on the full design, lavapipe",
+           "agent": "a102", "sites": ROUND_SITES, "seeds": list(SEEDS), "citable": True},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
@@ -670,11 +676,12 @@ def cmd_results(_args: argparse.Namespace) -> int:
     lines.append("")
 
     final_runs: List[Dict[str, Any]] = []
-    if finals:
-        final_runs = PHASE.collect_runs(finals)
-        lines += ["# Final round ({0}, agent {1})".format(
-            ", ".join(finals), ", ".join(ROUNDS[u]["agent"] for u in finals)), ""]
-        lines += s11_tables(final_runs)
+    for unit in finals:  # one §11 section per final-design round, never pooled
+        runs = PHASE.collect_runs([unit])
+        final_runs += runs
+        lines += ["# Final round {0} (agent {1}): {2}".format(
+            unit, ROUNDS[unit]["agent"], ROUNDS[unit]["title"]), ""]
+        lines += s11_tables(runs)
 
     PHASE.results_dir.mkdir(parents=True, exist_ok=True)
     (PHASE.results_dir / "results.md").write_text("\n".join(lines))

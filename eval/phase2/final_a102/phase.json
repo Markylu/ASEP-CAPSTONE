@@ -1,0 +1,13 @@
+{
+  "round": "F2",
+  "title": "Final design: a102 on the full design, lavapipe",
+  "citable": true,
+  "agent_version": "a102",
+  "status": "complete",
+  "git_sha": null,
+  "started": null,
+  "finished": "2026-11-07T20:31:31+00:00",
+  "operator": null,
+  "notes": "Flown 2026-11-07 16:01-17:04 UTC on the operator's instruction (\"fly it on lavapipe, but use the final format\"), a102 frozen after the night's screen (R56-R70).",
+  "lanes": "sctsvr6 lanes 1-8 (asep-r68-l1..8), shared vLLM :8004, Godot under lavapipe (llvmpipe on all 90)"
+}
