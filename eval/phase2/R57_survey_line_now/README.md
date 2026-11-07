@@ -2,7 +2,7 @@
 
 **Agent:** `a95` (`f4cb70320370`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) ·
-**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep), not flown
+**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep); **flown 2026-11-07**
 
 Written before flying. Spec: `docs/phase2-test-plan.md` §2–§5; host layout: the operator's rule of
 2026-11-06. Design: the ten contested cells, seeds 1–3, 30 runs, **read against R58, the reference
@@ -93,4 +93,8 @@ R53/R54 (`a93`). Branch `phase2/r56-latch-line` (shared with R56 and R58).
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 22/30** (s02 19/24, s03 3/6) against the reference lane's 20/30 in the same batch (R58, `a93`,
+H100 frames): two above, a draw by the rule, not carried. The rule acted in 2 of 24 s02 runs (both lost); the two cells
+lost without a survey in R55 never left the line this time and were won; s02a 6/6. No survey in s03 (0 of 6). Walls: s03
+phantom 17.4 against 12.7, outside the 4 allowed; the rest held. [summary.md](summary.md). Rides in R59 (`a98`, with
+`a94`'s latch).

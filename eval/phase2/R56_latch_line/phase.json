@@ -3,10 +3,11 @@
   "title": "a93 with the latch fired by one square read and from the line's departure, contested cells",
   "citable": false,
   "agent_version": "a94",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
+  "status": "complete",
+  "git_sha": "755a89d",
+  "started": "2026-11-07T02:52:26+00:00",
+  "finished": "2026-11-07T03:37:30+00:00",
   "operator": null,
-  "notes": ""
+  "notes": "Batch 1 of the night of 2026-11-06, flown by Claude alone (operator asleep): a94 beside a95 and the reference a93, same commit, same minutes, read against R58.",
+  "lanes": "12 lanes in the batch of 2026-11-07 (~/asep-r56-l1..l12): R56 on lanes 1-4, :8004; R57 lanes 5-8 on a copy on GPU 3 (:8006); R58 (reference a93) lanes 9-12 on a copy on GPU 4 (:8007); four lanes to an instance; Godot rendered on an H100 (GPU 5, GODOT_VK=nvidia), not lavapipe"
 }

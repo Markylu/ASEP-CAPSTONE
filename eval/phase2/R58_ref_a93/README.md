@@ -2,7 +2,7 @@
 
 **Agent:** `a93` (`8cc0bfc63d4e`), as R53 and R54 flew it, unchanged · **Prompt:** `p17`
 (`cb3578251cfe`) · **Perceiver:** `g05` · **Door confirmer:** `d01` · **Memory:** `a17f` ·
-**Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) · **Status:** laid out 2026-11-07 (Claude, overnight),
+**Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) · **Status:** laid out 2026-11-07 (Claude, overnight); **flown 2026-11-07**,
 not flown
 
 Written before flying. A host round under the operator's rule of 2026-11-06 ("3+1 with reference
@@ -71,4 +71,6 @@ R54 (the same agent and renderer). Branch `phase2/r56-latch-line` (shared with R
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 20/30** (s02 17/24, s03 3/6): within the 15–23 predicted, one above R54's 19 on the same renderer;
+the hypothesis held. s03 `dynamic` 0/3 (one run never left the lobby: a stop wall at step 4, 56 steps in the lobby; one
+latched 33 steps after the read). The bar for R56 and R57. [summary.md](summary.md).

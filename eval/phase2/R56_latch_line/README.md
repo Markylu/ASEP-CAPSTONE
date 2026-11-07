@@ -2,7 +2,7 @@
 
 **Agent:** `a94` (`3ac7eac6e09d`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) ·
-**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep), not flown
+**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep); **flown 2026-11-07**
 
 Written before flying. Spec: `docs/phase2-test-plan.md` §2–§5; host layout: the operator's rule of
 2026-11-06 (`eval/docker/README.md`, changelog). Design: the ten contested cells, seeds 1–3, 30 runs,
@@ -129,4 +129,8 @@ R58 share the branch and the PR, as R53 and R54 did.
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 20/30** (s02 16/24, s03 4/6) against the reference lane's 20/30 in the same batch (R58, `a93`,
+H100 frames): a draw, not carried. s03 `dynamic` 2/3 (`a93` 0/3), both wins through a latch 6 steps after the first
+square read; every latch within 6 steps of its read (`a93` R58: 5 and 33). s02 16 against 17. Every other check held
+or held where it applied (two s03 runs read a door and did not latch: one read from the open tine's mouth, one after
+the crossing). [summary.md](summary.md). The latch is carried into R59 (`a98`, with `a95`'s survey start).
