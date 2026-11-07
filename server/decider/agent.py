@@ -468,6 +468,34 @@ PATHFINDER_A88: Dict[str, Any] = dict(
 PATHFINDER_A89: Dict[str, Any] = dict(
     PATHFINDER_A88, dead_end_latch=dict(PATHFINDER_A88["dead_end_latch"], reopen_inside=True))
 
+#: a94 (R56): a89's planner with the trail trigger of the dead-end latch
+#: (planner.confined_run) fired by one closed read taken square (reads 1, not
+#: 2), and a corridor the drone drifted into without a turn recognised from
+#: where its trail left the direct line (planner._from_line). R49 to R55, 15
+#: s03 dynamic runs: the shut tine held the drone 22 to 33 steps before a
+#: latch in three (R51 seed 2, R54 seed 3, R55 seed 1), and 22 to 27 steps in
+#: two final runs (R49 seed 2, R54 seed 1); on the record the one condition
+#: unmet in R55 seed 1 from step 25 was the second read (the drone turned
+#: about at the door and never faced it again), and in the other four the
+#: straight run reached back to the spawn (the stem-to-tine drift under 30
+#: degrees), so no corridor was found until the drone turned about.
+#: eval/phase2/R56_latch_line/README.md.
+PATHFINDER_A94: Dict[str, Any] = dict(
+    PATHFINDER_A89, dead_end_latch=dict(
+        PATHFINDER_A89["dead_end_latch"],
+        confined=dict(PATHFINDER_A89["dead_end_latch"]["confined"], reads=1, from_line=True)))
+
+#: a95 (R57): a89's planner with the survey's line test on where the drone is
+#: now (line_now), not on every position of its trail. R49, R53, R54, R55
+#: s02vc final seed 3 (lost four of four) and R55 s02va dynamic seed 1: a
+#: turn-about at the spawn took the drone 4 m off the direct line, and the
+#: trail test failed for the rest of the run though the shut door was read
+#: square from the line later (R55: steps 12 to 14). On R44 to R55's 296 runs
+#: the test on the position now starts a survey in 11 runs that had none
+#: (eval/phase2/R57_survey_line_now/README.md).
+PATHFINDER_A95: Dict[str, Any] = dict(
+    PATHFINDER_A89, survey=dict(PATHFINDER_A89["survey"], line_now=True))
+
 #: a90 (R50): a89's planner, and it tells the navigator's notes when the
 #: first way in is over (way_in): a survey started, a latch, the drone more
 #: than the survey's line_m off the direct line, or step 8 (R45's and R46's
@@ -2081,6 +2109,50 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "in R44 to R52. In s03 seed 1 the report at step 2 (far right, the goal "
           "straight ahead behind walls) turned the drone off the stem's line in 12 of "
           "14 runs, and 8 of the 12 were lost (eval/phase2/R53_goal_check/README.md)."),
+    Agent("a94", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "goal_check": GOAL_CHECK_A93,
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A94,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a93 with the dead-end latch's trail trigger fired by one closed read taken "
+          "square, not two, and a corridor the drone drifted into without a turn "
+          "recognised from where its trail left the direct line. R49 to R55: the shut "
+          "s03 tine held the drone 22 to 33 steps before a latch in five runs, where "
+          "the one condition unmet was the second read (R55 dynamic seed 1) or the "
+          "straight run reached back to the spawn (R49 final seed 2, R54 final seed 1, "
+          "R54 dynamic seed 3, R51 dynamic seed 2) "
+          "(eval/phase2/R56_latch_line/README.md)."),
+    Agent("a95", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "goal_check": GOAL_CHECK_A93,
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A95,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a93 with the wall survey started for a drone on the direct line now, not only "
+          "for one that never left it. s02vc final seed 3 was lost in four of four "
+          "flights (R49, R53, R54, R55) with no survey: a turn-about at the spawn took "
+          "the drone 4 m off the line and the trail test never passed again, though "
+          "the shut door was read square from the line later; R55 s02va dynamic seed 1 "
+          "the same (eval/phase2/R57_survey_line_now/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"

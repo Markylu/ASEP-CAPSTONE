@@ -1421,6 +1421,39 @@ def _turned_into(trail: List[Tuple[int, float, float, float]], began: spatial.Po
     return False
 
 
+def _from_line(trail: List[Tuple[int, float, float, float]], upto: int,
+               goal: spatial.Point, d: Dict[str, Any], c: Dict[str, Any]
+               ) -> Optional[Tuple[spatial.Point, int, float, float]]:
+    """a94: the corridor a drone flew into without a turn, as the trail tells
+    it: (where it left the direct line from the spawn to the goal, the step it
+    left it at, the bearing from there to where it is now, the metres), or
+    None. A straight run that reaches back to the spawn is not a corridor
+    turned into (its mouth would be the spawn), but a drone that drifted from
+    the stem into a tine within off_axis_deg of its line made no turn either,
+    and the straight run found reaches the spawn until the drone turns about
+    (R54 s03 final seed 1: closed reads from step 13, latch at 35; R49 s03
+    final seed 2: 17 and 44). Where the trail was last within off_line_m of
+    the direct line is the mouth; the drone must now be more than off_line_m
+    off it, min_run_m or more from there."""
+    pts = [(s, x, y) for s, x, y, _ in trail if s <= upto]
+    if len(pts) < 2:
+        return None
+    line = {"origin": trail[0][1:3], "axis_deg": spatial.bearing(trail[0][1:3], goal)}
+    here = pts[-1]
+    if abs(latch_frame(line, here[1:3])[1]) <= float(c["off_line_m"]):
+        return None
+    left = None
+    for s, x, y in pts[:-1]:
+        if abs(latch_frame(line, (x, y))[1]) <= float(c["off_line_m"]):
+            left = (s, x, y)
+    if left is None:
+        return None
+    run = spatial.dist(left[1:3], here[1:3])
+    if run < float(d["min_run_m"]):
+        return None
+    return (left[1], left[2]), left[0], spatial.bearing(left[1:3], here[1:3]), run
+
+
 def confined_run(trail: List[Tuple[int, float, float, float]], closed: List[int],
                  here: spatial.Pose, step: int, d: Dict[str, Any],
                  goal: Optional[spatial.Point] = None
@@ -1457,14 +1490,23 @@ def confined_run(trail: List[Tuple[int, float, float, float]], closed: List[int]
     head: Dict[int, float] = {s: h for s, _, _, h in trail}
     best: Optional[Tuple[spatial.Point, int, float, float]] = None
     tried = set()
+    cands: List[Tuple[Tuple[spatial.Point, int, float, float], bool]] = []
     for upto in range(max(0, min(closed) - int(d["look_back_steps"])), step + 1):
         found = straight_run(trail, upto, d)
         if found is None:
             continue
-        began, since, axis, run = found
-        if not _turned_into(trail, began, since, axis, float(d["off_axis_deg"])):
+        if not _turned_into(trail, found[0], found[1], found[2], float(d["off_axis_deg"])):
             continue  # the run from the spawn, or one cut short by max_back_m
-        if c.get("off_line_m") and goal is not None and trail:
+        cands.append((found, False))
+    if c.get("from_line") and goal is not None:
+        # a94: the corridor the drone drifted into without a turn, its mouth
+        # where the trail left the direct line (_from_line).
+        found = _from_line(trail, step, goal, d, c)
+        if found is not None:
+            cands.append((found, True))
+    for found, from_line in cands:
+        began, since, axis, run = found
+        if c.get("off_line_m") and goal is not None and trail and not from_line:
             # a86: a lane along the direct line from the spawn to the goal is
             # the drone's way in, not a corridor it turned into, however it
             # wobbled on it (R44 s02va dynamic seed 2: a sidestep at x = 10 on
@@ -1509,7 +1551,9 @@ def confined_run(trail: List[Tuple[int, float, float, float]], closed: List[int]
         wide = float(c["beside_m"])
         mid, reach = ((lo + hi) / 2.0, float(span) / 2.0) if span else (0.0, half)
         beside = False
-        for _, x, y, _ in trail:
+        for s, x, y, _ in trail:
+            if from_line and s < since:
+                continue  # a94: the way in along the line lies behind this mouth
             along, left = latch_frame(frame, (x, y))
             if (float(d["mouth_m"]) <= along <= now + float(d["ahead_m"])
                     and reach < abs(left - mid) <= wide):
@@ -1850,7 +1894,15 @@ def survey_start(mem: spatial.SpatialMemory, cm: spatial.CostMap, here: spatial.
     line = {"origin": spawn, "axis_deg": axis}
     if latch_frame(line, here[:2])[0] < float(c["run_m"]):
         return None
-    if any(abs(latch_frame(line, (x, y))[1]) > float(c["line_m"]) for _, x, y, _ in mem.trail):
+    if c.get("line_now"):
+        # a95: the drone is on the direct line now (R53, R54 and R55 s02vc final
+        # seed 3, R55 s02va dynamic seed 1: a turn-about at the spawn took the
+        # drone 4 m off the line, and the test over the whole trail never
+        # passed again, the shut door read square from the line at steps 9
+        # to 14 or not).
+        if abs(latch_frame(line, here[:2])[1]) > float(c["line_m"]):
+            return None
+    elif any(abs(latch_frame(line, (x, y))[1]) > float(c["line_m"]) for _, x, y, _ in mem.trail):
         return None
     if at_wall(mem, records, step):
         sv["wall"] = float(c["wall_m"])     # already stopped by it: its range is known
