@@ -2,7 +2,7 @@
 
 **Agent:** `a100` (`22e2941dc494`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) ·
-**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep), not flown
+**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep); **flown 2026-11-07**
 
 Written before flying. Spec: `docs/phase2-test-plan.md` §2–§5; host layout: the operator's rule of
 2026-11-06. Design: the ten contested cells, seeds 1–3, 30 runs, **read against R64, the reference lane
@@ -76,4 +76,7 @@ R53/R54 (`a93`); R52 (`a92`) for the idea. Branch `phase2/r62-mouth-stall` (shar
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 22/30** (s02 18/24, s03 4/6) against the reference lane's 16/30 (R64): six above, **carried**;
+`a100` is batch 4's parent and reference (R65–R67). One station given up in transit, at its tenth step (`a93`: five,
+each at the sixth, all four runs lost); s02vc `dynamic` 2/3 against 0/3, s02a 6/6 against 3/6. Every check held.
+Caveat: R64 is `a93`'s low flight; against its four H100 flights the gain is +3 on the mean. [summary.md](summary.md).

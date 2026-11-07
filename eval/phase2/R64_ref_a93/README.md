@@ -2,7 +2,7 @@
 
 **Agent:** `a93` (`8cc0bfc63d4e`), unchanged · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) ·
-**Status:** laid out 2026-11-07 (Claude, overnight), not flown
+**Status:** laid out 2026-11-07 (Claude, overnight); **flown 2026-11-07**
 
 Written before flying. A host round under the operator's rule of 2026-11-06 ("3+1 with reference lane").
 Design: the ten contested cells, seeds 1–3, 30 runs.
@@ -58,4 +58,6 @@ R61 (the same agent, renderer and role). Branch `phase2/r62-mouth-stall` (shared
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 16/30** (s02 13/24, s03 3/6): the low edge of the 17–23 predicted, `a93`'s lowest of four H100
+flights (19, 20, 21, 16). Five stations given up in transit at the sixth step in four runs, all lost. The bar for
+R62 and R63. [summary.md](summary.md).

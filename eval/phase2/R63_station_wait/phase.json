@@ -3,10 +3,11 @@
   "title": "a93 with the survey's stations held 10 steps in transit, contested cells",
   "citable": false,
   "agent_version": "a100",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
+  "status": "complete",
+  "git_sha": "62bee170",
+  "started": "2026-11-07T05:17:11+00:00",
+  "finished": "2026-11-07T06:09:40+00:00",
   "operator": null,
-  "notes": ""
+  "notes": "Batch 3 of the night of 2026-11-06, flown by Claude alone: a100 beside a99 and the reference a93, read against R64.",
+  "lanes": "12 lanes in batch 3 of 2026-11-07 (~/asep-r62-l1..l12): R62 on lanes 1-4, :8004; R63 lanes 5-8 on a copy on GPU 3 (:8006); R64 (reference a93) lanes 9-12 on a copy on GPU 4 (:8007); four lanes to an instance; Godot rendered on an H100 (GPU 5, GODOT_VK=nvidia), not lavapipe"
 }
