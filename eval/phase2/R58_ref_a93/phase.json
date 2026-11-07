@@ -1,0 +1,13 @@
+{
+  "round": "R58",
+  "title": "a93 again, the batch's reference lane on H100 frames (host round), contested cells",
+  "citable": false,
+  "agent_version": "a93",
+  "status": "complete",
+  "git_sha": "755a89d",
+  "started": "2026-11-07T02:52:27+00:00",
+  "finished": "2026-11-07T03:37:31+00:00",
+  "operator": null,
+  "notes": "The batch's reference lane (operator's rule of 2026-11-06): a93 as R53/R54 flew it, on H100 frames beside R56 and R57, flown by Claude alone.",
+  "lanes": "12 lanes in the batch of 2026-11-07 (~/asep-r56-l1..l12): R56 on lanes 1-4, :8004; R57 lanes 5-8 on a copy on GPU 3 (:8006); R58 (reference a93) lanes 9-12 on a copy on GPU 4 (:8007); four lanes to an instance; Godot rendered on an H100 (GPU 5, GODOT_VK=nvidia), not lavapipe"
+}

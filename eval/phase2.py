@@ -429,6 +429,27 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a89 again with Godot rendered on an H100 (host round), contested cells",
             "agent": "a89", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R56: a94 (a93 with the dead-end latch's trail trigger fired by one square
+    # closed read, and a corridor drifted into without a turn recognised from
+    # where the trail left the direct line). Flown on H100 frames beside R57
+    # and the reference R58 (a93), read against R58.
+    "R56": {"folder": "R56_latch_line",
+            "title": "a93 with the latch fired by one square read and from the line's departure, contested cells",
+            "agent": "a94", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R57: a95 (a93 with the wall survey started for a drone on the direct
+    # line now, not only one that never left it). The same batch, read
+    # against R58.
+    "R57": {"folder": "R57_survey_line_now",
+            "title": "a93 with the survey started for a drone on the direct line now, contested cells",
+            "agent": "a95", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R58: the reference lane of the batch (operator's rule, 2026-11-06): a93
+    # as R53 and R54 flew it, on H100 frames beside R56 and R57.
+    "R58": {"folder": "R58_ref_a93",
+            "title": "a93 again, the batch's reference lane on H100 frames (host round), contested cells",
+            "agent": "a93", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
