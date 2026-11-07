@@ -517,6 +517,27 @@ PATHFINDER_A96: Dict[str, Any] = dict(PATHFINDER_A89, spawn_ahead=True)
 PATHFINDER_A98: Dict[str, Any] = dict(
     PATHFINDER_A94, survey=dict(PATHFINDER_A89["survey"], line_now=True))
 
+#: a99 (R62): a89's planner with a stop wall one cell wide either side of the
+#: bump, not two (inflate_stop_walls). R58 and R59 s03 dynamic seed 2 (a93 and
+#: a98, two flights of two agents): stopped at the stem's mouth at step 3 or 4
+#: (x = 16, y = 1.7), the bump sealed the mouth two cells either side over
+#: unknown ground, and the route went looking for a way round through the
+#: lobby's unknown north for 56 steps (min x 15.2, no goal report, no latch).
+#: Two cells were set at a63, when the s03 divider and the s02 door wall were
+#: unknown to the map until bumped; since a17d/a17f the shut door and nose-on
+#: walls are written from reads. eval/phase2/R62_mouth_inflate/README.md.
+PATHFINDER_A99: Dict[str, Any] = dict(PATHFINDER_A89, inflate_stop_walls=1)
+
+#: a100 (R63): a89's planner with the survey waiting 10 steps, not 6, before it
+#: gives a station up in transit. Batch 2 (R59, R60, R61), nine s02 losses of
+#: three agents with a93's survey: in six the drone was flying straight at the
+#: shut door with "toward your target" on the sharp turn to the station and the
+#: station was given up at the sixth step (R59 s02vc dynamic 2 and 3: both
+#: stations, no look at all). R52 (a92, 12 steps on a91): +1 on its parent, the
+#: one run that called on it won. eval/phase2/R63_station_wait/README.md.
+PATHFINDER_A100: Dict[str, Any] = dict(
+    PATHFINDER_A89, survey=dict(PATHFINDER_A89["survey"], stall_steps=10))
+
 
 #: a90 (R50): a89's planner, and it tells the navigator's notes when the
 #: first way in is over (way_in): a survey started, a latch, the drone more
@@ -2217,6 +2238,45 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "H100 frames): a94 20/30 with s03 dynamic 2/3 (a93 0/3), a95 22/30 with s02 19/24 "
           "(a93 17/24); two draws by the rule, the gains on different sites "
           "(eval/phase2/R59_latch_survey/README.md)."),
+    Agent("a99", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "goal_check": GOAL_CHECK_A93,
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A99,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a93 with a stop wall one cell wide either side of the bump, not two. R58 and R59 "
+          "s03 dynamic seed 2: a bump at the stem's mouth at step 3 or 4 sealed the mouth over "
+          "unknown ground and the route spent 56 steps in the lobby looking for a way round "
+          "(eval/phase2/R62_mouth_inflate/README.md)."),
+    Agent("a100", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "goal_check": GOAL_CHECK_A93,
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A100,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a93 with the survey waiting 10 steps, not 6, before it gives a station up in "
+          "transit. Batch 2: six of nine s02 losses gave a station up at the sixth step while "
+          "the navigator flew straight at the shut door with the tag on the sharp turn; R59 "
+          "s02vc dynamic 2 and 3 gave both up and never looked "
+          "(eval/phase2/R63_station_wait/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"
