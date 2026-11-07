@@ -61,6 +61,15 @@ LITELLM_BASE_URL=http://127.0.0.1:8006 GODOT_VK=nvidia GODOT_RENDER_GPU=5 \
     sh ~/round_lane.sh 5 4 ~/asep-r53-l5 a89 85cda76df25b R53 R53_folder
 ```
 
+**The rule for rounds (operator, 2026-11-06).** Screening rounds fly on three instances, four
+lanes each, Godot on a spare H100, and **one instance always flies the reference agent** (the
+bar's, `a89` at the time of writing) beside the candidates on the same renderer; a candidate is
+read against that reference flight. H100 frames cost about 5 runs in 30 against lavapipe
+(R54: `a93` 24 → 19; R55: `a89` 23 → 18, both on s02) although `g05` reads matched frames the
+same (`eval/phase2/R55_h100_a89/summary.md`); the cause is unresolved, so the reference flies
+every time. A round that must be read against the lavapipe bar's own numbers flies on
+lavapipe, two instances, four lanes each (R53, 21 minutes).
+
 `round_lane.sh` here is the lane script (the host's `~/round_lane.sh` is a copy);
 it prints the lane's layout before flying and every flight's renderer line after.
 Limits and cautions:
