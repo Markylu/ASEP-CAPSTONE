@@ -1,0 +1,13 @@
+{
+  "round": "R55",
+  "title": "a89 again with Godot rendered on an H100 (host round), contested cells",
+  "citable": false,
+  "agent_version": "a89",
+  "status": "complete",
+  "git_sha": "c329864",
+  "started": "2026-11-06T23:40:19+00:00",
+  "finished": "2026-11-07T00:05:54+00:00",
+  "operator": null,
+  "notes": "Host round on the operator's call after R54 (Yes, fly a89): the bar's agent on H100 frames. Flown by Claude 2026-11-06; copies stopped after.",
+  "lanes": "12 lanes: ~/asep-r55-l1..l12; lanes 1-4 on :8004, 5-8 on a copy on GPU 3 (:8006), 9-12 on a copy on GPU 4 (:8007), four lanes to an instance; Godot rendered on an H100 (GPU 5, GODOT_VK=nvidia), not lavapipe"
+}
