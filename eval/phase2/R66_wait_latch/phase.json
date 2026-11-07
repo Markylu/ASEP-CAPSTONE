@@ -1,0 +1,12 @@
+{
+  "round": "R66",
+  "title": "a100 with a94's latch (one square read, the corridor drifted into), contested cells",
+  "citable": false,
+  "agent_version": "a102",
+  "status": "planned",
+  "git_sha": null,
+  "started": null,
+  "finished": null,
+  "operator": null,
+  "notes": ""
+}
