@@ -484,6 +484,24 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a93 again, batch 3's reference lane on H100 frames (host round), contested cells",
             "agent": "a93", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R65: a101 (a100 with a99's stop walls one cell wide). Batch 4 of the
+    # night of 2026-11-06, on H100 frames beside R66 and the reference R67,
+    # a100 (carried in batch 3: 22/30 against a93's 16/30).
+    "R65": {"folder": "R65_wait_inflate",
+            "title": "a100 with a stop wall one cell wide either side, contested cells",
+            "agent": "a101", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R66: a102 (a100 with a94's latch). The same batch, read against R67.
+    "R66": {"folder": "R66_wait_latch",
+            "title": "a100 with a94's latch (one square read, the corridor drifted into), contested cells",
+            "agent": "a102", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R67: the reference lane of batch 4: a100, the agent carried in batch 3,
+    # on H100 frames again.
+    "R67": {"folder": "R67_ref_a100",
+            "title": "a100 again, batch 4's reference lane on H100 frames (host round), contested cells",
+            "agent": "a100", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the

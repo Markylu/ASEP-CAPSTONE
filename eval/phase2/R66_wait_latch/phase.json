@@ -1,0 +1,13 @@
+{
+  "round": "R66",
+  "title": "a100 with a94's latch (one square read, the corridor drifted into), contested cells",
+  "citable": false,
+  "agent_version": "a102",
+  "status": "complete",
+  "git_sha": "364b3c88",
+  "started": "2026-11-07T06:32:08+00:00",
+  "finished": "2026-11-07T07:17:35+00:00",
+  "operator": null,
+  "notes": "Batch 4 of the night of 2026-11-06, flown by Claude alone: a102 beside a101 and the reference a100, read against R67.",
+  "lanes": "12 lanes in batch 4 of 2026-11-07 (~/asep-r65-l1..l12): R65 on lanes 1-4, :8004; R66 lanes 5-8 on a copy on GPU 3 (:8006); R67 (reference a100) lanes 9-12 on a copy on GPU 4 (:8007); four lanes to an instance; Godot rendered on an H100 (GPU 5, GODOT_VK=nvidia), not lavapipe"
+}

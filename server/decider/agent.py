@@ -538,6 +538,21 @@ PATHFINDER_A99: Dict[str, Any] = dict(PATHFINDER_A89, inflate_stop_walls=1)
 PATHFINDER_A100: Dict[str, Any] = dict(
     PATHFINDER_A89, survey=dict(PATHFINDER_A89["survey"], stall_steps=10))
 
+#: a101 (R65): a100's planner (the survey's stations held 10 steps) with a99's
+#: stop walls one cell wide. Batch 3 (R62, R63, R64, one flight each on H100
+#: frames): a100 22/30 against the reference a93's 16/30, carried; a99 20/30,
+#: also 3 or more above. The two changes are on different parts (the survey's
+#: transit; the cost map's bumps). eval/phase2/R65_wait_inflate/README.md.
+PATHFINDER_A101: Dict[str, Any] = dict(PATHFINDER_A100, inflate_stop_walls=1)
+
+#: a102 (R66): a100's planner with a94's latch (one square read; the corridor
+#: drifted into without a turn, from the line's departure). R56 and R59: the
+#: latch fired within 6 steps of the first square read in 5 of 5 runs that
+#: reached the shut door (a93 in the same batches: 5, 33, 6, 6, never).
+#: eval/phase2/R66_wait_latch/README.md.
+PATHFINDER_A102: Dict[str, Any] = dict(
+    PATHFINDER_A100, dead_end_latch=PATHFINDER_A94["dead_end_latch"])
+
 
 #: a90 (R50): a89's planner, and it tells the navigator's notes when the
 #: first way in is over (way_in): a survey started, a latch, the drone more
@@ -2277,6 +2292,45 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "the navigator flew straight at the shut door with the tag on the sharp turn; R59 "
           "s02vc dynamic 2 and 3 gave both up and never looked "
           "(eval/phase2/R63_station_wait/README.md)."),
+    Agent("a101", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "goal_check": GOAL_CHECK_A93,
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A101,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a100 (a93 with the survey's stations held 10 steps in transit) with a99's stop "
+          "walls one cell wide either side, not two. Batch 3 on H100 frames: a100 22/30 and "
+          "a99 20/30 against the reference a93's 16/30, a100 carried "
+          "(eval/phase2/R65_wait_inflate/README.md)."),
+    Agent("a102", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "goal_check": GOAL_CHECK_A93,
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A102,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a100 (a93 with the survey's stations held 10 steps in transit) with a94's dead-end "
+          "latch: fired by one square closed read, and for a corridor drifted into without a "
+          "turn from where the trail left the direct line. The latch fired within 6 steps of "
+          "the read in 5 of 5 runs that reached the shut s03 door in R56 and R59 "
+          "(eval/phase2/R66_wait_latch/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"
