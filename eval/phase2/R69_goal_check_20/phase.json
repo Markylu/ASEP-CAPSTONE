@@ -3,10 +3,11 @@
   "title": "a102 with the goal check at 20 degrees, not 26, contested cells",
   "citable": false,
   "agent_version": "a104",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
+  "status": "complete",
+  "git_sha": "bbb511b4",
+  "started": "2026-11-07T07:40:26+00:00",
+  "finished": "2026-11-07T08:24:20+00:00",
   "operator": null,
-  "notes": ""
+  "notes": "Batch 5 (the last) of the night of 2026-11-06, flown by Claude alone: a104 beside a103 and the reference a102 (on :8004), read against R70.",
+  "lanes": "12 lanes in batch 5 of 2026-11-07 (~/asep-r68-l1..l12): R70 (reference a102) on lanes 1-4, :8004; R68 lanes 5-8 on a copy on GPU 3 (:8006); R69 lanes 9-12 on a copy on GPU 4 (:8007); four lanes to an instance; Godot rendered on an H100 (GPU 5, GODOT_VK=nvidia), not lavapipe"
 }

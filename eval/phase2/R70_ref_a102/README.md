@@ -2,7 +2,7 @@
 
 **Agent:** `a102` (`e405aeb4a004`), as R66 flew it, unchanged · **Prompt:** `p17` (`cb3578251cfe`) ·
 **Perceiver:** `g05` · **Door confirmer:** `d01` · **Memory:** `a17f` · **Renderer:** NVIDIA H100
-(`GODOT_VK=nvidia`) · **Status:** laid out 2026-11-07 (Claude, overnight), not flown
+(`GODOT_VK=nvidia`) · **Status:** laid out 2026-11-07 (Claude, overnight); **flown 2026-11-07**
 
 Written before flying. A host round under the operator's rule of 2026-11-06 ("3+1 with reference lane"). `a102`
 was carried in batch 4 (R66, 23/30 against `a100`'s 18/30), so it is batch 5's parent and reference. **This
@@ -64,4 +64,7 @@ R66 (the same agent). Branch `phase2/r68-latch-inflate-20` (shared with R68 and 
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 21/30** (s02 18/24, s03 3/6) on `:8004`: within the 19–25 predicted, two below R66's 23; `a102`
+over two flights is 22 a flight (`a100` 20, `a93` 19). The first reference lane off `:8007` landed between its two
+candidates (20, 23): the instance is not what made the night's reference lanes low. The bar for R68 and R69.
+[summary.md](summary.md).

@@ -2,7 +2,7 @@
 
 **Agent:** `a103` (`e53c86de68a7`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) ·
-**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep), not flown
+**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep); **flown 2026-11-07**
 
 Written before flying. Spec: `docs/phase2-test-plan.md` §2–§5; host layout: the operator's rule of
 2026-11-06. Design: the ten contested cells, seeds 1–3, 30 runs, **read against R70, the reference lane
@@ -73,4 +73,6 @@ R66 (`a102`), R65 (`a101`), R62 (`a99`). Branch `phase2/r68-latch-inflate-20` fr
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 20/30** (s02 15/24, s03 5/6) against the reference lane's 21/30 (R70, `a102` on `:8004`): one
+below, a draw, not carried. No lobby stall for any agent for the third flight; every check held; s03 5/6 is the latch's
+work (gaps 0–6). [summary.md](summary.md).

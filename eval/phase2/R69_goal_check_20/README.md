@@ -2,7 +2,7 @@
 
 **Agent:** `a104` (`df66b94d8c6a`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) ·
-**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep), not flown
+**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep); **flown 2026-11-07**
 
 Written before flying. Spec: `docs/phase2-test-plan.md` §2–§5; host layout: the operator's rule of
 2026-11-06. Design: the ten contested cells, seeds 1–3, 30 runs, **read against R70, the reference lane
@@ -77,4 +77,6 @@ R66 (`a102`), R53 (`a93`'s check). Branch `phase2/r68-latch-inflate-20` (shared 
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 23/30** (s02 20/24, s03 3/6) against the reference lane's 21/30 (R70): two above, a draw by the
+rule, not carried. The check dropped 43% of blind reports and 4.5% of true ones, no goal tag on a dropped step; s02a
+6/6. Every check held. [summary.md](summary.md).
