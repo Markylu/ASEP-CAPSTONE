@@ -1,0 +1,11 @@
+{
+  "max_pos_drift": 0.0,
+  "max_yaw_drift": 0.0,
+  "steps_original": 35,
+  "steps_replay": 35,
+  "ok": true,
+  "problems": 0,
+  "events_match": true,
+  "tolerance": 0.001,
+  "replay_dir": "eval/phase2/R60_spawn_ahead/runs/s02a/final/seed3/replay"
+}

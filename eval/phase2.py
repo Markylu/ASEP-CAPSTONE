@@ -450,6 +450,23 @@ ROUNDS: Dict[str, Dict[str, Any]] = {
             "title": "a93 again, the batch's reference lane on H100 frames (host round), contested cells",
             "agent": "a93", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
             "seeds": REPEAT_SEEDS, "citable": False},
+    # R59: a98 (a94's latch and a95's survey start together). Batch 2 of the
+    # night of 2026-11-06, on H100 frames beside R60 and the reference R61.
+    "R59": {"folder": "R59_latch_survey",
+            "title": "a94's latch and a95's survey start together on a93, contested cells",
+            "agent": "a98", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R60: a96 (a93 with the route's first waypoint never behind the drone at
+    # the spawn). The same batch, read against R61.
+    "R60": {"folder": "R60_spawn_ahead",
+            "title": "a93 with the spawn's waypoint never behind the drone, contested cells",
+            "agent": "a96", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
+    # R61: the reference lane of batch 2: a93 again on H100 frames.
+    "R61": {"folder": "R61_ref_a93",
+            "title": "a93 again, batch 2's reference lane on H100 frames (host round), contested cells",
+            "agent": "a93", "sites": CONTESTED_SITES, "arms": CONTESTED_ARMS,
+            "seeds": REPEAT_SEEDS, "citable": False},
 }
 
 #: Phase 1 §3 and §6, minus the prompt: in Phase 2 the prompt is part of the
