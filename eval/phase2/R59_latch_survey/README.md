@@ -2,7 +2,7 @@
 
 **Agent:** `a98` (`6905821be0ab`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) ·
-**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep), not flown
+**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep); **flown 2026-11-07**
 
 Written before flying. Spec: `docs/phase2-test-plan.md` §2–§5; host layout: the operator's rule of
 2026-11-06. Design: the ten contested cells, seeds 1–3, 30 runs, **read against R61, the reference lane
@@ -84,4 +84,7 @@ R56 (`a94`) and R57 (`a95`), on R53/R54's `a93`. Branch `phase2/r59-latch-survey
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 20/30** (s02 17/24, s03 3/6) against the reference lane's 21/30 (R61): one below, a draw, not
+carried; the two changes did not add (s02 +1, s03 −2). The latch fired 5 steps after the read in both runs that reached
+the shut door; the two other s03 `dynamic` runs never got there (one never left the lobby). The survey rule started one
+survey in the s03 stem (won anyway) and none in s02 that the old rule would have refused. [summary.md](summary.md).

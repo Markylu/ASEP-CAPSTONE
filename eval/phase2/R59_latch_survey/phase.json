@@ -3,10 +3,11 @@
   "title": "a94's latch and a95's survey start together on a93, contested cells",
   "citable": false,
   "agent_version": "a98",
-  "status": "planned",
-  "git_sha": null,
-  "started": null,
-  "finished": null,
+  "status": "complete",
+  "git_sha": "13456b0",
+  "started": "2026-11-07T04:03:22+00:00",
+  "finished": "2026-11-07T04:52:16+00:00",
   "operator": null,
-  "notes": ""
+  "notes": "Batch 2 of the night of 2026-11-06, flown by Claude alone: a98 beside a96 and the reference a93, same commit, same minutes, read against R61.",
+  "lanes": "12 lanes in batch 2 of 2026-11-07 (~/asep-r59-l1..l12): R59 on lanes 1-4, :8004; R60 lanes 5-8 on a copy on GPU 3 (:8006); R61 (reference a93) lanes 9-12 on a copy on GPU 4 (:8007); four lanes to an instance; Godot rendered on an H100 (GPU 5, GODOT_VK=nvidia), not lavapipe"
 }

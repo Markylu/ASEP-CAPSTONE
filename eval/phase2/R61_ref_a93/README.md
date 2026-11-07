@@ -2,8 +2,7 @@
 
 **Agent:** `a93` (`8cc0bfc63d4e`), as R53, R54 and R58 flew it, unchanged · **Prompt:** `p17`
 (`cb3578251cfe`) · **Perceiver:** `g05` · **Door confirmer:** `d01` · **Memory:** `a17f` ·
-**Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) · **Status:** laid out 2026-11-07 (Claude, overnight),
-not flown
+**Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) · **Status:** laid out 2026-11-07 (Claude, overnight); **flown 2026-11-07**
 
 Written before flying. A host round under the operator's rule of 2026-11-06 ("3+1 with reference lane"):
 the reference agent flies beside the candidates on the same renderer in every batch, and the candidates
@@ -60,4 +59,6 @@ R58 (the same agent, renderer and role). Branch `phase2/r59-latch-survey` (share
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 21/30** (s02 16/24, s03 5/6): within the 16–24 predicted; `a93` on H100 frames is 19, 20, 21 in
+three flights. s02vc `dynamic` 0/3 (1 of 9 across the batch for three agents with `a93`'s code there). The bar for R59
+and R60. [summary.md](summary.md).

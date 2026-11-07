@@ -241,6 +241,9 @@ R55,s02a,final,1,p2_R55_s02a_final_seed1_a01,True,success,Claude review,46,4,0.9
 R56,s02a,final,1,p2_R56_s02a_final_seed1_a01,True,success,Claude review,27,0,0.394,goal_reached,1428.0,2480.3,755a89d
 R57,s02a,final,1,p2_R57_s02a_final_seed1_a01,True,success,Claude review,24,0,0.199,goal_reached,1464.3,2270.5,755a89d
 R58,s02a,final,1,p2_R58_s02a_final_seed1_a01,True,success,Claude review,24,1,0.326,goal_reached,1763.2,2182.7,755a89d
+R59,s02a,final,1,p2_R59_s02a_final_seed1_a01,True,success,Claude review,40,0,0.202,goal_reached,1352.6,2377.7,13456b0
+R60,s02a,final,1,p2_R60_s02a_final_seed1_a01,True,success,Claude review,25,0,0.833,goal_reached,1567.9,2737.0,13456b0
+R61,s02a,final,1,p2_R61_s02a_final_seed1_a01,False,replan_failure,Claude review,60,7,12.491,max_steps,1867.2,3780.2,13456b0
 F,s02a,final,1,p2_F_s02a_final_seed1_a01,False,replan_failure,Claude review,60,6,14.687,max_steps,2417.9,4786.3,8d50901
 R32,s02a,final,2,p2_R32_s02a_final_seed2_a01,True,success,Claude review,48,2,0.38,goal_reached,2537.1,5630.0,6ebcaf2
 R32P,s02a,final,2,p2_R32P_s02a_final_seed2_a01,True,success,Claude review,22,0,0.737,goal_reached,1997.3,3266.5,6ebcaf2
@@ -259,6 +262,9 @@ R55,s02a,final,2,p2_R55_s02a_final_seed2_a01,True,success,Claude review,30,0,0.3
 R56,s02a,final,2,p2_R56_s02a_final_seed2_a01,True,success,Claude review,25,1,0.313,goal_reached,1458.9,2197.9,755a89d
 R57,s02a,final,2,p2_R57_s02a_final_seed2_a01,True,success,Claude review,32,0,0.751,goal_reached,1634.7,2336.6,755a89d
 R58,s02a,final,2,p2_R58_s02a_final_seed2_a01,False,replan_failure,Claude review,60,2,14.053,max_steps,1825.6,2871.5,755a89d
+R59,s02a,final,2,p2_R59_s02a_final_seed2_a01,True,success,Claude review,18,0,0.817,goal_reached,1396.7,3635.5,13456b0
+R60,s02a,final,2,p2_R60_s02a_final_seed2_a01,True,success,Claude review,20,0,0.727,goal_reached,1625.5,2901.0,13456b0
+R61,s02a,final,2,p2_R61_s02a_final_seed2_a01,True,success,Claude review,30,0,0.594,goal_reached,1517.2,2739.1,13456b0
 F,s02a,final,2,p2_F_s02a_final_seed2_a01,False,replan_failure,Claude review,60,4,14.696,max_steps,2464.1,4681.9,8d50901
 R32,s02a,final,3,p2_R32_s02a_final_seed3_a01,True,success,Claude review,49,3,0.308,goal_reached,2451.1,9898.0,6ebcaf2
 R32P,s02a,final,3,p2_R32P_s02a_final_seed3_a01,False,replan_failure,Claude review,60,6,14.22,max_steps,2346.2,11129.0,6ebcaf2
@@ -277,6 +283,9 @@ R55,s02a,final,3,p2_R55_s02a_final_seed3_a01,True,success,Claude review,40,1,0.6
 R56,s02a,final,3,p2_R56_s02a_final_seed3_a01,True,success,Claude review,26,0,0.651,goal_reached,1234.2,5709.6,755a89d
 R57,s02a,final,3,p2_R57_s02a_final_seed3_a01,True,success,Claude review,43,1,0.332,goal_reached,1745.4,3146.6,755a89d
 R58,s02a,final,3,p2_R58_s02a_final_seed3_a01,True,success,Claude review,35,1,0.118,goal_reached,1545.9,2695.7,755a89d
+R59,s02a,final,3,p2_R59_s02a_final_seed3_a01,False,replan_failure,Claude review,60,4,16.442,max_steps,1811.8,3660.0,13456b0
+R60,s02a,final,3,p2_R60_s02a_final_seed3_a01,True,success,Claude review,35,1,0.473,goal_reached,1663.1,3031.5,13456b0
+R61,s02a,final,3,p2_R61_s02a_final_seed3_a01,True,success,Claude review,23,0,0.488,goal_reached,1555.9,2486.5,13456b0
 F,s02a,final,3,p2_F_s02a_final_seed3_a01,True,success,Claude review,40,2,0.991,goal_reached,2217.9,6552.7,8d50901
 F,s02a,final,4,p2_F_s02a_final_seed4_a01,False,replan_failure,Claude review,60,5,12.906,max_steps,2226.1,4315.0,8d50901
 F,s02a,final,5,p2_F_s02a_final_seed5_a01,False,replan_failure,Claude review,60,4,16.813,max_steps,2403.8,4875.3,8d50901
@@ -338,6 +347,9 @@ R55,s02a,dynamic,1,p2_R55_s02a_dynamic_seed1_a01,True,success,Claude review,46,1
 R56,s02a,dynamic,1,p2_R56_s02a_dynamic_seed1_a01,False,replan_failure,Claude review,60,3,13.038,max_steps,1862.5,3911.4,755a89d
 R57,s02a,dynamic,1,p2_R57_s02a_dynamic_seed1_a01,True,success,Claude review,53,2,0.471,goal_reached,1743.8,3487.4,755a89d
 R58,s02a,dynamic,1,p2_R58_s02a_dynamic_seed1_a01,True,success,Claude review,45,1,0.197,goal_reached,1575.7,2839.4,755a89d
+R59,s02a,dynamic,1,p2_R59_s02a_dynamic_seed1_a01,True,success,Claude review,41,1,0.568,goal_reached,1674.9,2867.7,13456b0
+R60,s02a,dynamic,1,p2_R60_s02a_dynamic_seed1_a01,False,replan_failure,Claude review,60,2,19.816,max_steps,1831.3,3247.7,13456b0
+R61,s02a,dynamic,1,p2_R61_s02a_dynamic_seed1_a01,False,replan_failure,Claude review,60,5,12.885,max_steps,1839.0,3233.2,13456b0
 F,s02a,dynamic,1,p2_F_s02a_dynamic_seed1_a01,False,timeout,Claude review,60,4,9.795,max_steps,2372.9,5221.9,8d50901
 R32,s02a,dynamic,2,p2_R32_s02a_dynamic_seed2_a01,False,timeout,Claude review,60,5,10.348,max_steps,2416.0,14589.5,6ebcaf2
 R32P,s02a,dynamic,2,p2_R32P_s02a_dynamic_seed2_a01,True,success,Claude review,25,2,0.739,goal_reached,2263.0,4209.2,6ebcaf2
@@ -356,6 +368,9 @@ R55,s02a,dynamic,2,p2_R55_s02a_dynamic_seed2_a01,True,success,Claude review,45,1
 R56,s02a,dynamic,2,p2_R56_s02a_dynamic_seed2_a01,True,success,Claude review,44,0,0.929,goal_reached,1642.3,3046.3,755a89d
 R57,s02a,dynamic,2,p2_R57_s02a_dynamic_seed2_a01,True,success,Claude review,39,1,0.674,goal_reached,1648.8,2270.7,755a89d
 R58,s02a,dynamic,2,p2_R58_s02a_dynamic_seed2_a01,True,success,Claude review,37,0,0.4,goal_reached,1629.3,3061.6,755a89d
+R59,s02a,dynamic,2,p2_R59_s02a_dynamic_seed2_a01,True,success,Claude review,41,1,0.489,goal_reached,1563.5,2936.3,13456b0
+R60,s02a,dynamic,2,p2_R60_s02a_dynamic_seed2_a01,False,replan_failure,Claude review,60,3,12.491,max_steps,1798.5,3939.8,13456b0
+R61,s02a,dynamic,2,p2_R61_s02a_dynamic_seed2_a01,True,success,Claude review,39,0,0.701,goal_reached,1579.3,4261.4,13456b0
 F,s02a,dynamic,2,p2_F_s02a_dynamic_seed2_a01,True,success,Claude review,39,1,0.459,goal_reached,2311.3,4423.0,8d50901
 R32,s02a,dynamic,3,p2_R32_s02a_dynamic_seed3_a01,False,replan_failure,Claude review,60,5,20.339,max_steps,2672.5,5265.1,6ebcaf2
 R32P,s02a,dynamic,3,p2_R32P_s02a_dynamic_seed3_a01,True,success,Claude review,46,5,0.65,goal_reached,1747.1,4798.1,6ebcaf2
@@ -374,6 +389,9 @@ R55,s02a,dynamic,3,p2_R55_s02a_dynamic_seed3_a01,False,replan_failure,Claude rev
 R56,s02a,dynamic,3,p2_R56_s02a_dynamic_seed3_a01,True,success,Claude review,51,2,0.373,goal_reached,1715.0,2525.6,755a89d
 R57,s02a,dynamic,3,p2_R57_s02a_dynamic_seed3_a01,True,success,Claude review,39,3,0.838,goal_reached,1636.0,2822.1,755a89d
 R58,s02a,dynamic,3,p2_R58_s02a_dynamic_seed3_a01,False,replan_failure,Claude review,60,5,15.969,max_steps,1853.5,4150.7,755a89d
+R59,s02a,dynamic,3,p2_R59_s02a_dynamic_seed3_a01,True,success,Claude review,43,1,0.559,goal_reached,1556.8,2574.3,13456b0
+R60,s02a,dynamic,3,p2_R60_s02a_dynamic_seed3_a01,False,replan_failure,Claude review,60,8,14.714,max_steps,1944.8,3898.6,13456b0
+R61,s02a,dynamic,3,p2_R61_s02a_dynamic_seed3_a01,True,success,Claude review,40,0,0.502,goal_reached,1616.0,10567.4,13456b0
 F,s02a,dynamic,3,p2_F_s02a_dynamic_seed3_a01,True,success,Claude review,41,2,0.418,goal_reached,2146.3,3911.3,8d50901
 F,s02a,dynamic,4,p2_F_s02a_dynamic_seed4_a01,False,replan_failure,Claude review,60,4,14.746,max_steps,2353.2,4434.6,8d50901
 F,s02a,dynamic,5,p2_F_s02a_dynamic_seed5_a01,True,success,Claude review,55,3,0.623,goal_reached,2261.2,3906.4,8d50901
@@ -481,6 +499,9 @@ R55,s02c,final,1,p2_R55_s02c_final_seed1_a01,False,replan_failure,Claude review,
 R56,s02c,final,1,p2_R56_s02c_final_seed1_a01,True,success,Claude review,24,0,0.629,goal_reached,1387.1,2145.6,755a89d
 R57,s02c,final,1,p2_R57_s02c_final_seed1_a01,False,replan_failure,Claude review,60,1,14.442,max_steps,1774.6,3291.6,755a89d
 R58,s02c,final,1,p2_R58_s02c_final_seed1_a01,False,replan_failure,Claude review,60,5,16.354,max_steps,1723.4,3791.9,755a89d
+R59,s02c,final,1,p2_R59_s02c_final_seed1_a01,True,success,Claude review,54,2,0.329,goal_reached,1434.8,2508.1,13456b0
+R60,s02c,final,1,p2_R60_s02c_final_seed1_a01,False,replan_failure,Claude review,60,4,16.758,max_steps,1832.8,4312.5,13456b0
+R61,s02c,final,1,p2_R61_s02c_final_seed1_a01,True,success,Claude review,28,1,0.414,goal_reached,1544.3,2505.1,13456b0
 F,s02c,final,1,p2_F_s02c_final_seed1_a01,True,success,Claude review,47,1,0.868,goal_reached,1678.4,3977.0,8d50901
 R32,s02c,final,2,p2_R32_s02c_final_seed2_a01,False,replan_failure,Claude review,60,5,13.382,max_steps,2233.2,13611.9,6ebcaf2
 R32P,s02c,final,2,p2_R32P_s02c_final_seed2_a01,False,replan_failure,Claude review,60,1,12.861,max_steps,2360.9,5679.7,6ebcaf2
@@ -499,6 +520,9 @@ R55,s02c,final,2,p2_R55_s02c_final_seed2_a01,False,replan_failure,Claude review,
 R56,s02c,final,2,p2_R56_s02c_final_seed2_a01,False,timeout,Claude review,60,3,3.427,max_steps,1732.2,3468.8,755a89d
 R57,s02c,final,2,p2_R57_s02c_final_seed2_a01,True,success,Claude review,51,2,0.356,goal_reached,1722.3,3465.0,755a89d
 R58,s02c,final,2,p2_R58_s02c_final_seed2_a01,True,success,Claude review,28,0,0.396,goal_reached,1590.8,3404.7,755a89d
+R59,s02c,final,2,p2_R59_s02c_final_seed2_a01,False,replan_failure,Claude review,60,4,20.079,max_steps,1831.2,3414.4,13456b0
+R60,s02c,final,2,p2_R60_s02c_final_seed2_a01,True,success,Claude review,47,2,0.625,goal_reached,1735.6,2830.4,13456b0
+R61,s02c,final,2,p2_R61_s02c_final_seed2_a01,False,replan_failure,Claude review,60,4,14.152,max_steps,1783.5,3030.1,13456b0
 F,s02c,final,2,p2_F_s02c_final_seed2_a01,False,replan_failure,Claude review,60,6,14.435,max_steps,2482.4,5960.5,8d50901
 R32,s02c,final,3,p2_R32_s02c_final_seed3_a01,False,replan_failure,Claude review,60,6,18.23,max_steps,2529.9,10284.6,6ebcaf2
 R32P,s02c,final,3,p2_R32P_s02c_final_seed3_a01,True,success,Claude review,52,3,0.45,goal_reached,2205.3,3556.3,6ebcaf2
@@ -517,6 +541,9 @@ R55,s02c,final,3,p2_R55_s02c_final_seed3_a01,False,replan_failure,Claude review,
 R56,s02c,final,3,p2_R56_s02c_final_seed3_a01,False,replan_failure,Claude review,60,2,14.688,max_steps,1932.8,3420.0,755a89d
 R57,s02c,final,3,p2_R57_s02c_final_seed3_a01,True,success,Claude review,60,2,0.709,goal_reached,1441.9,4296.9,755a89d
 R58,s02c,final,3,p2_R58_s02c_final_seed3_a01,True,success,Claude review,32,3,0.513,goal_reached,1661.0,2500.1,755a89d
+R59,s02c,final,3,p2_R59_s02c_final_seed3_a01,True,success,Claude review,34,1,0.61,goal_reached,1742.0,5914.8,13456b0
+R60,s02c,final,3,p2_R60_s02c_final_seed3_a01,False,replan_failure,Claude review,60,7,13.02,max_steps,1235.6,2813.4,13456b0
+R61,s02c,final,3,p2_R61_s02c_final_seed3_a01,True,success,Claude review,30,0,0.665,goal_reached,1748.6,2292.3,13456b0
 F,s02c,final,3,p2_F_s02c_final_seed3_a01,False,replan_failure,Claude review,60,6,14.157,max_steps,2688.9,4692.3,8d50901
 F,s02c,final,4,p2_F_s02c_final_seed4_a01,True,success,Claude review,27,2,0.393,goal_reached,1597.9,3071.4,8d50901
 F,s02c,final,5,p2_F_s02c_final_seed5_a01,False,replan_failure,Claude review,60,8,13.214,max_steps,1615.8,8711.9,8d50901
@@ -578,6 +605,9 @@ R55,s02c,dynamic,1,p2_R55_s02c_dynamic_seed1_a01,True,success,Claude review,29,0
 R56,s02c,dynamic,1,p2_R56_s02c_dynamic_seed1_a01,False,replan_failure,Claude review,60,5,14.168,max_steps,1808.3,5031.3,755a89d
 R57,s02c,dynamic,1,p2_R57_s02c_dynamic_seed1_a01,True,success,Claude review,27,0,0.116,goal_reached,1175.5,1736.7,755a89d
 R58,s02c,dynamic,1,p2_R58_s02c_dynamic_seed1_a01,False,timeout,Claude review,60,3,9.661,max_steps,1764.4,3849.9,755a89d
+R59,s02c,dynamic,1,p2_R59_s02c_dynamic_seed1_a01,False,timeout,Claude review,60,0,6.807,max_steps,1733.7,2970.0,13456b0
+R60,s02c,dynamic,1,p2_R60_s02c_dynamic_seed1_a01,True,success,Claude review,26,0,0.716,goal_reached,1016.4,1776.4,13456b0
+R61,s02c,dynamic,1,p2_R61_s02c_dynamic_seed1_a01,False,replan_failure,Claude review,60,5,14.284,max_steps,1860.5,5781.3,13456b0
 F,s02c,dynamic,1,p2_F_s02c_dynamic_seed1_a01,False,timeout,Claude review,60,4,14.234,max_steps,2347.2,4330.0,8d50901
 R32,s02c,dynamic,2,p2_R32_s02c_dynamic_seed2_a01,False,replan_failure,Claude review,60,5,12.806,max_steps,1808.8,9945.0,6ebcaf2
 R32P,s02c,dynamic,2,p2_R32P_s02c_dynamic_seed2_a01,False,replan_failure,Claude review,60,3,13.179,max_steps,2446.4,4225.2,6ebcaf2
@@ -596,6 +626,9 @@ R55,s02c,dynamic,2,p2_R55_s02c_dynamic_seed2_a01,False,replan_failure,Claude rev
 R56,s02c,dynamic,2,p2_R56_s02c_dynamic_seed2_a01,True,success,Claude review,30,0,0.786,goal_reached,1613.3,2533.3,755a89d
 R57,s02c,dynamic,2,p2_R57_s02c_dynamic_seed2_a01,True,success,Claude review,47,0,0.47,goal_reached,1627.0,2732.9,755a89d
 R58,s02c,dynamic,2,p2_R58_s02c_dynamic_seed2_a01,True,success,Claude review,26,0,0.578,goal_reached,1521.5,3663.7,755a89d
+R59,s02c,dynamic,2,p2_R59_s02c_dynamic_seed2_a01,True,success,Claude review,29,0,0.82,goal_reached,1498.8,2840.6,13456b0
+R60,s02c,dynamic,2,p2_R60_s02c_dynamic_seed2_a01,True,success,Claude review,23,0,0.603,goal_reached,1492.4,2254.7,13456b0
+R61,s02c,dynamic,2,p2_R61_s02c_dynamic_seed2_a01,True,success,Claude review,24,1,0.968,goal_reached,1462.2,2030.4,13456b0
 F,s02c,dynamic,2,p2_F_s02c_dynamic_seed2_a01,False,replan_failure,Claude review,60,3,13.154,max_steps,2626.5,5310.7,8d50901
 R32,s02c,dynamic,3,p2_R32_s02c_dynamic_seed3_a01,False,replan_failure,Claude review,60,5,15.631,max_steps,2876.1,15304.5,6ebcaf2
 R32P,s02c,dynamic,3,p2_R32P_s02c_dynamic_seed3_a01,False,replan_failure,Claude review,60,2,25.031,max_steps,2568.6,5885.1,6ebcaf2
@@ -614,6 +647,9 @@ R55,s02c,dynamic,3,p2_R55_s02c_dynamic_seed3_a01,True,success,Claude review,25,1
 R56,s02c,dynamic,3,p2_R56_s02c_dynamic_seed3_a01,False,replan_failure,Claude review,60,4,23.358,max_steps,1700.4,3651.1,755a89d
 R57,s02c,dynamic,3,p2_R57_s02c_dynamic_seed3_a01,False,replan_failure,Claude review,60,3,13.223,max_steps,1930.9,4430.2,755a89d
 R58,s02c,dynamic,3,p2_R58_s02c_dynamic_seed3_a01,False,timeout,Claude review,60,7,13.665,max_steps,1808.8,3652.8,755a89d
+R59,s02c,dynamic,3,p2_R59_s02c_dynamic_seed3_a01,True,success,Claude review,40,0,0.529,goal_reached,1760.6,3187.9,13456b0
+R60,s02c,dynamic,3,p2_R60_s02c_dynamic_seed3_a01,True,success,Claude review,25,1,0.967,goal_reached,1554.1,9001.6,13456b0
+R61,s02c,dynamic,3,p2_R61_s02c_dynamic_seed3_a01,True,success,Claude review,57,3,0.424,goal_reached,1682.9,2734.0,13456b0
 F,s02c,dynamic,3,p2_F_s02c_dynamic_seed3_a01,True,success,Claude review,32,1,0.581,goal_reached,2094.9,3021.4,8d50901
 F,s02c,dynamic,4,p2_F_s02c_dynamic_seed4_a01,False,replan_failure,Claude review,60,5,18.037,max_steps,2533.9,5372.6,8d50901
 F,s02c,dynamic,5,p2_F_s02c_dynamic_seed5_a01,False,replan_failure,Claude review,60,3,15.772,max_steps,2615.9,5292.6,8d50901
@@ -721,6 +757,9 @@ R55,s02va,final,1,p2_R55_s02va_final_seed1_a01,True,success,Claude review,26,1,0
 R56,s02va,final,1,p2_R56_s02va_final_seed1_a01,True,success,Claude review,28,0,0.689,goal_reached,1362.8,1988.9,755a89d
 R57,s02va,final,1,p2_R57_s02va_final_seed1_a01,False,replan_failure,Claude review,60,3,16.939,max_steps,1848.4,2890.1,755a89d
 R58,s02va,final,1,p2_R58_s02va_final_seed1_a01,False,replan_failure,Claude review,60,7,16.003,max_steps,1884.5,3708.4,755a89d
+R59,s02va,final,1,p2_R59_s02va_final_seed1_a01,True,success,Claude review,29,0,0.398,goal_reached,1458.6,1966.2,13456b0
+R60,s02va,final,1,p2_R60_s02va_final_seed1_a01,True,success,Claude review,27,1,0.725,goal_reached,1536.9,2817.1,13456b0
+R61,s02va,final,1,p2_R61_s02va_final_seed1_a01,True,success,Claude review,22,0,0.847,goal_reached,1521.7,1894.0,13456b0
 F,s02va,final,1,p2_F_s02va_final_seed1_a01,True,success,Claude review,28,1,0.922,goal_reached,2153.2,3330.9,8d50901
 R32,s02va,final,2,p2_R32_s02va_final_seed2_a01,True,success,Claude review,53,1,0.522,goal_reached,2439.1,4577.3,6ebcaf2
 R32P,s02va,final,2,p2_R32P_s02va_final_seed2_a01,False,replan_failure,Claude review,60,4,12.629,max_steps,2432.1,5879.1,6ebcaf2
@@ -739,6 +778,9 @@ R55,s02va,final,2,p2_R55_s02va_final_seed2_a01,True,success,Claude review,36,0,0
 R56,s02va,final,2,p2_R56_s02va_final_seed2_a01,False,timeout,Claude review,60,3,14.618,max_steps,1837.3,3859.3,755a89d
 R57,s02va,final,2,p2_R57_s02va_final_seed2_a01,True,success,Claude review,26,0,0.559,goal_reached,1590.5,1976.3,755a89d
 R58,s02va,final,2,p2_R58_s02va_final_seed2_a01,True,success,Claude review,23,0,0.308,goal_reached,1452.4,2150.7,755a89d
+R59,s02va,final,2,p2_R59_s02va_final_seed2_a01,True,success,Claude review,32,0,0.688,goal_reached,1449.5,2280.0,13456b0
+R60,s02va,final,2,p2_R60_s02va_final_seed2_a01,True,success,Claude review,29,0,0.879,goal_reached,1599.6,2202.3,13456b0
+R61,s02va,final,2,p2_R61_s02va_final_seed2_a01,True,success,Claude review,50,2,0.364,goal_reached,1651.8,2532.6,13456b0
 F,s02va,final,2,p2_F_s02va_final_seed2_a01,False,replan_failure,Claude review,60,6,13.587,max_steps,2507.9,5997.1,8d50901
 R32,s02va,final,3,p2_R32_s02va_final_seed3_a01,True,success,Claude review,32,0,0.649,goal_reached,2177.7,3783.8,6ebcaf2
 R32P,s02va,final,3,p2_R32P_s02va_final_seed3_a01,True,success,Claude review,46,1,0.781,goal_reached,2387.4,4436.9,6ebcaf2
@@ -757,6 +799,9 @@ R55,s02va,final,3,p2_R55_s02va_final_seed3_a01,True,success,Claude review,30,0,0
 R56,s02va,final,3,p2_R56_s02va_final_seed3_a01,True,success,Claude review,30,0,0.723,goal_reached,1820.3,2553.7,755a89d
 R57,s02va,final,3,p2_R57_s02va_final_seed3_a01,True,success,Claude review,23,0,0.329,goal_reached,1480.7,2038.2,755a89d
 R58,s02va,final,3,p2_R58_s02va_final_seed3_a01,True,success,Claude review,29,1,0.507,goal_reached,1759.8,2193.2,755a89d
+R59,s02va,final,3,p2_R59_s02va_final_seed3_a01,True,success,Claude review,27,0,0.501,goal_reached,1415.0,2890.0,13456b0
+R60,s02va,final,3,p2_R60_s02va_final_seed3_a01,True,success,Claude review,30,0,0.432,goal_reached,1530.4,2194.1,13456b0
+R61,s02va,final,3,p2_R61_s02va_final_seed3_a01,True,success,Claude review,29,0,0.826,goal_reached,1712.3,2676.2,13456b0
 F,s02va,final,3,p2_F_s02va_final_seed3_a01,True,success,Claude review,30,0,0.817,goal_reached,2143.8,2798.9,8d50901
 F,s02va,final,4,p2_F_s02va_final_seed4_a01,True,success,Claude review,29,0,0.287,goal_reached,2276.2,3918.3,8d50901
 F,s02va,final,5,p2_F_s02va_final_seed5_a01,True,success,Claude review,28,0,0.433,goal_reached,2250.1,3947.7,8d50901
@@ -818,6 +863,9 @@ R55,s02va,dynamic,1,p2_R55_s02va_dynamic_seed1_a01,False,timeout,Claude review,6
 R56,s02va,dynamic,1,p2_R56_s02va_dynamic_seed1_a01,True,success,Claude review,29,0,0.594,goal_reached,1400.1,2637.6,755a89d
 R57,s02va,dynamic,1,p2_R57_s02va_dynamic_seed1_a01,True,success,Claude review,60,5,0.508,goal_reached,1826.3,5120.0,755a89d
 R58,s02va,dynamic,1,p2_R58_s02va_dynamic_seed1_a01,True,success,Claude review,29,0,0.916,goal_reached,1506.9,2335.0,755a89d
+R59,s02va,dynamic,1,p2_R59_s02va_dynamic_seed1_a01,True,success,Claude review,25,0,0.657,goal_reached,1400.5,1753.2,13456b0
+R60,s02va,dynamic,1,p2_R60_s02va_dynamic_seed1_a01,True,success,Claude review,28,0,0.772,goal_reached,1446.4,2374.9,13456b0
+R61,s02va,dynamic,1,p2_R61_s02va_dynamic_seed1_a01,True,success,Claude review,28,0,0.505,goal_reached,1581.5,2110.3,13456b0
 F,s02va,dynamic,1,p2_F_s02va_dynamic_seed1_a01,True,success,Claude review,26,0,0.739,goal_reached,2077.1,2992.6,8d50901
 R32,s02va,dynamic,2,p2_R32_s02va_dynamic_seed2_a01,True,success,Claude review,56,2,0.938,goal_reached,2407.3,4576.2,6ebcaf2
 R32P,s02va,dynamic,2,p2_R32P_s02va_dynamic_seed2_a01,False,replan_failure,Claude review,60,0,13.48,max_steps,2427.7,8233.0,6ebcaf2
@@ -836,6 +884,9 @@ R55,s02va,dynamic,2,p2_R55_s02va_dynamic_seed2_a01,True,success,Claude review,23
 R56,s02va,dynamic,2,p2_R56_s02va_dynamic_seed2_a01,True,success,Claude review,29,0,0.538,goal_reached,1512.6,1996.5,755a89d
 R57,s02va,dynamic,2,p2_R57_s02va_dynamic_seed2_a01,False,replan_failure,Claude review,60,1,20.2,max_steps,1524.5,2925.8,755a89d
 R58,s02va,dynamic,2,p2_R58_s02va_dynamic_seed2_a01,True,success,Claude review,28,0,0.409,goal_reached,1503.5,2114.0,755a89d
+R59,s02va,dynamic,2,p2_R59_s02va_dynamic_seed2_a01,True,success,Claude review,29,0,0.307,goal_reached,1485.2,2934.5,13456b0
+R60,s02va,dynamic,2,p2_R60_s02va_dynamic_seed2_a01,True,success,Claude review,28,0,0.781,goal_reached,1563.0,2241.2,13456b0
+R61,s02va,dynamic,2,p2_R61_s02va_dynamic_seed2_a01,True,success,Claude review,28,0,0.942,goal_reached,1388.9,2907.0,13456b0
 F,s02va,dynamic,2,p2_F_s02va_dynamic_seed2_a01,False,replan_failure,Claude review,60,6,17.166,max_steps,2504.2,6343.0,8d50901
 R32,s02va,dynamic,3,p2_R32_s02va_dynamic_seed3_a01,False,replan_failure,Claude review,60,2,15.78,max_steps,2638.8,13632.1,6ebcaf2
 R32P,s02va,dynamic,3,p2_R32P_s02va_dynamic_seed3_a01,True,success,Claude review,47,3,0.956,goal_reached,2192.8,3588.4,6ebcaf2
@@ -854,6 +905,9 @@ R55,s02va,dynamic,3,p2_R55_s02va_dynamic_seed3_a01,True,success,Claude review,31
 R56,s02va,dynamic,3,p2_R56_s02va_dynamic_seed3_a01,True,success,Claude review,23,0,0.779,goal_reached,1349.5,1743.3,755a89d
 R57,s02va,dynamic,3,p2_R57_s02va_dynamic_seed3_a01,True,success,Claude review,37,0,0.707,goal_reached,1677.8,2919.3,755a89d
 R58,s02va,dynamic,3,p2_R58_s02va_dynamic_seed3_a01,True,success,Claude review,29,0,0.524,goal_reached,1579.1,2281.5,755a89d
+R59,s02va,dynamic,3,p2_R59_s02va_dynamic_seed3_a01,True,success,Claude review,23,0,0.492,goal_reached,1401.3,1957.5,13456b0
+R60,s02va,dynamic,3,p2_R60_s02va_dynamic_seed3_a01,True,success,Claude review,37,0,0.707,goal_reached,1616.6,2478.9,13456b0
+R61,s02va,dynamic,3,p2_R61_s02va_dynamic_seed3_a01,True,success,Claude review,23,0,0.35,goal_reached,1431.7,2206.0,13456b0
 F,s02va,dynamic,3,p2_F_s02va_dynamic_seed3_a01,True,success,Claude review,31,1,0.597,goal_reached,2128.0,3143.8,8d50901
 F,s02va,dynamic,4,p2_F_s02va_dynamic_seed4_a01,True,success,Claude review,39,2,0.288,goal_reached,2310.2,3918.6,8d50901
 F,s02va,dynamic,5,p2_F_s02va_dynamic_seed5_a01,True,success,Claude review,46,5,0.498,goal_reached,2220.4,12375.2,8d50901
@@ -961,6 +1015,9 @@ R55,s02vc,final,1,p2_R55_s02vc_final_seed1_a01,True,success,Claude review,36,3,0
 R56,s02vc,final,1,p2_R56_s02vc_final_seed1_a01,False,replan_failure,Claude review,60,2,19.917,max_steps,1717.2,3392.9,755a89d
 R57,s02vc,final,1,p2_R57_s02vc_final_seed1_a01,True,success,Claude review,38,0,0.256,goal_reached,1575.9,2048.2,755a89d
 R58,s02vc,final,1,p2_R58_s02vc_final_seed1_a01,True,success,Claude review,29,0,0.561,goal_reached,1473.7,2327.2,755a89d
+R59,s02vc,final,1,p2_R59_s02vc_final_seed1_a01,False,timeout,Claude review,60,0,7.943,max_steps,1893.5,2837.3,13456b0
+R60,s02vc,final,1,p2_R60_s02vc_final_seed1_a01,True,success,Claude review,29,0,0.815,goal_reached,1708.2,2338.9,13456b0
+R61,s02vc,final,1,p2_R61_s02vc_final_seed1_a01,False,replan_failure,Claude review,60,3,16.557,max_steps,1796.3,3755.5,13456b0
 F,s02vc,final,1,p2_F_s02vc_final_seed1_a01,False,replan_failure,Claude review,60,3,13.186,max_steps,2561.1,7046.3,8d50901
 R32,s02vc,final,2,p2_R32_s02vc_final_seed2_a01,False,timeout,Claude review,60,3,7.723,max_steps,2390.8,14428.8,6ebcaf2
 R32P,s02vc,final,2,p2_R32P_s02vc_final_seed2_a01,False,replan_failure,Claude review,60,3,13.118,max_steps,2514.5,4384.9,6ebcaf2
@@ -979,6 +1036,9 @@ R55,s02vc,final,2,p2_R55_s02vc_final_seed2_a01,False,replan_failure,Claude revie
 R56,s02vc,final,2,p2_R56_s02vc_final_seed2_a01,True,success,Claude review,27,0,0.375,goal_reached,1695.1,2438.7,755a89d
 R57,s02vc,final,2,p2_R57_s02vc_final_seed2_a01,True,success,Claude review,25,0,0.618,goal_reached,1656.8,2299.7,755a89d
 R58,s02vc,final,2,p2_R58_s02vc_final_seed2_a01,True,success,Claude review,32,2,0.569,goal_reached,1513.2,2958.0,755a89d
+R59,s02vc,final,2,p2_R59_s02vc_final_seed2_a01,False,timeout,Claude review,60,4,10.211,max_steps,1777.3,3600.8,13456b0
+R60,s02vc,final,2,p2_R60_s02vc_final_seed2_a01,False,timeout,Claude review,60,4,2.157,max_steps,1856.0,3454.4,13456b0
+R61,s02vc,final,2,p2_R61_s02vc_final_seed2_a01,True,success,Claude review,27,1,0.709,goal_reached,1695.4,3533.8,13456b0
 F,s02vc,final,2,p2_F_s02vc_final_seed2_a01,False,replan_failure,Claude review,60,3,14.773,max_steps,1837.6,3358.8,8d50901
 R32,s02vc,final,3,p2_R32_s02vc_final_seed3_a01,True,success,Claude review,34,0,0.265,goal_reached,2102.6,2967.2,6ebcaf2
 R32P,s02vc,final,3,p2_R32P_s02vc_final_seed3_a01,True,success,Claude review,60,5,0.641,goal_reached,2367.8,4342.1,6ebcaf2
@@ -997,6 +1057,9 @@ R55,s02vc,final,3,p2_R55_s02vc_final_seed3_a01,False,replan_failure,Claude revie
 R56,s02vc,final,3,p2_R56_s02vc_final_seed3_a01,True,success,Claude review,35,1,0.057,goal_reached,1534.4,2626.3,755a89d
 R57,s02vc,final,3,p2_R57_s02vc_final_seed3_a01,True,success,Claude review,30,0,0.183,goal_reached,1532.2,2782.3,755a89d
 R58,s02vc,final,3,p2_R58_s02vc_final_seed3_a01,True,success,Claude review,43,2,0.765,goal_reached,1663.8,3279.8,755a89d
+R59,s02vc,final,3,p2_R59_s02vc_final_seed3_a01,True,success,Claude review,31,1,0.24,goal_reached,1585.4,2188.2,13456b0
+R60,s02vc,final,3,p2_R60_s02vc_final_seed3_a01,True,success,Claude review,35,2,0.497,goal_reached,1860.3,3017.4,13456b0
+R61,s02vc,final,3,p2_R61_s02vc_final_seed3_a01,True,success,Claude review,30,1,0.994,goal_reached,1594.2,1997.3,13456b0
 F,s02vc,final,3,p2_F_s02vc_final_seed3_a01,False,replan_failure,Claude review,60,7,18.815,max_steps,1919.9,10122.2,8d50901
 F,s02vc,final,4,p2_F_s02vc_final_seed4_a01,True,success,Claude review,44,0,0.357,goal_reached,2319.0,5437.7,8d50901
 F,s02vc,final,5,p2_F_s02vc_final_seed5_a01,False,replan_failure,Claude review,60,7,14.857,max_steps,2714.0,14585.2,8d50901
@@ -1058,6 +1121,9 @@ R55,s02vc,dynamic,1,p2_R55_s02vc_dynamic_seed1_a01,True,success,Claude review,46
 R56,s02vc,dynamic,1,p2_R56_s02vc_dynamic_seed1_a01,False,replan_failure,Claude review,60,4,12.491,max_steps,1776.8,2837.2,755a89d
 R57,s02vc,dynamic,1,p2_R57_s02vc_dynamic_seed1_a01,False,replan_failure,Claude review,60,3,15.124,max_steps,1924.3,3545.0,755a89d
 R58,s02vc,dynamic,1,p2_R58_s02vc_dynamic_seed1_a01,True,success,Claude review,26,0,0.746,goal_reached,1445.3,2197.4,755a89d
+R59,s02vc,dynamic,1,p2_R59_s02vc_dynamic_seed1_a01,True,success,Claude review,26,0,0.868,goal_reached,1395.3,1999.4,13456b0
+R60,s02vc,dynamic,1,p2_R60_s02vc_dynamic_seed1_a01,False,replan_failure,Claude review,60,9,13.954,max_steps,1942.2,4778.2,13456b0
+R61,s02vc,dynamic,1,p2_R61_s02vc_dynamic_seed1_a01,False,replan_failure,Claude review,60,6,14.687,max_steps,1823.0,2916.8,13456b0
 F,s02vc,dynamic,1,p2_F_s02vc_dynamic_seed1_a01,True,success,Claude review,48,0,0.255,goal_reached,2340.7,3925.6,8d50901
 R32,s02vc,dynamic,2,p2_R32_s02vc_dynamic_seed2_a01,False,replan_failure,Claude review,60,5,14.413,max_steps,1972.8,4023.1,6ebcaf2
 R32P,s02vc,dynamic,2,p2_R32P_s02vc_dynamic_seed2_a01,True,success,Claude review,40,1,0.389,goal_reached,2191.6,4639.9,6ebcaf2
@@ -1076,6 +1142,9 @@ R55,s02vc,dynamic,2,p2_R55_s02vc_dynamic_seed2_a01,True,success,Claude review,28
 R56,s02vc,dynamic,2,p2_R56_s02vc_dynamic_seed2_a01,True,success,Claude review,32,0,0.745,goal_reached,1547.2,2523.7,755a89d
 R57,s02vc,dynamic,2,p2_R57_s02vc_dynamic_seed2_a01,True,success,Claude review,28,0,0.808,goal_reached,1628.7,2462.6,755a89d
 R58,s02vc,dynamic,2,p2_R58_s02vc_dynamic_seed2_a01,True,success,Claude review,30,4,0.489,goal_reached,1546.5,2505.7,755a89d
+R59,s02vc,dynamic,2,p2_R59_s02vc_dynamic_seed2_a01,False,replan_failure,Claude review,60,6,13.13,max_steps,2019.7,10396.6,13456b0
+R60,s02vc,dynamic,2,p2_R60_s02vc_dynamic_seed2_a01,False,timeout,Claude review,60,2,7.554,max_steps,1905.0,3100.7,13456b0
+R61,s02vc,dynamic,2,p2_R61_s02vc_dynamic_seed2_a01,False,timeout,Claude review,60,4,5.824,max_steps,1724.6,4242.2,13456b0
 F,s02vc,dynamic,2,p2_F_s02vc_dynamic_seed2_a01,True,success,Claude review,52,1,0.457,goal_reached,2234.8,9952.9,8d50901
 R32,s02vc,dynamic,3,p2_R32_s02vc_dynamic_seed3_a01,False,replan_failure,Claude review,60,4,14.791,max_steps,2694.6,7982.9,6ebcaf2
 R32P,s02vc,dynamic,3,p2_R32P_s02vc_dynamic_seed3_a01,False,replan_failure,Claude review,60,6,15.623,max_steps,2482.1,4831.1,6ebcaf2
@@ -1094,6 +1163,9 @@ R55,s02vc,dynamic,3,p2_R55_s02vc_dynamic_seed3_a01,False,replan_failure,Claude r
 R56,s02vc,dynamic,3,p2_R56_s02vc_dynamic_seed3_a01,True,success,Claude review,31,2,0.423,goal_reached,1428.8,4058.0,755a89d
 R57,s02vc,dynamic,3,p2_R57_s02vc_dynamic_seed3_a01,True,success,Claude review,32,2,0.363,goal_reached,1535.2,3497.5,755a89d
 R58,s02vc,dynamic,3,p2_R58_s02vc_dynamic_seed3_a01,False,replan_failure,Claude review,60,5,14.087,max_steps,1989.7,3099.8,755a89d
+R59,s02vc,dynamic,3,p2_R59_s02vc_dynamic_seed3_a01,False,replan_failure,Claude review,60,5,12.546,max_steps,1896.2,3119.3,13456b0
+R60,s02vc,dynamic,3,p2_R60_s02vc_dynamic_seed3_a01,False,replan_failure,Claude review,60,1,18.027,max_steps,1766.3,3107.3,13456b0
+R61,s02vc,dynamic,3,p2_R61_s02vc_dynamic_seed3_a01,False,replan_failure,Claude review,60,5,13.929,max_steps,1727.2,2979.9,13456b0
 F,s02vc,dynamic,3,p2_F_s02vc_dynamic_seed3_a01,False,replan_failure,Claude review,60,3,17.139,max_steps,2315.6,6587.7,8d50901
 F,s02vc,dynamic,4,p2_F_s02vc_dynamic_seed4_a01,True,success,Claude review,48,2,0.219,goal_reached,1705.7,2600.2,8d50901
 F,s02vc,dynamic,5,p2_F_s02vc_dynamic_seed5_a01,True,success,Claude review,37,1,0.469,goal_reached,2210.0,3944.9,8d50901
@@ -1201,6 +1273,9 @@ R55,s03,final,1,p2_R55_s03_final_seed1_a01,True,success,Claude review,37,1,0.37,
 R56,s03,final,1,p2_R56_s03_final_seed1_a01,True,success,Claude review,22,0,0.143,goal_reached,1592.4,2677.4,755a89d
 R57,s03,final,1,p2_R57_s03_final_seed1_a01,False,replan_failure,Claude review,60,4,10.84,max_steps,1864.2,4262.3,755a89d
 R58,s03,final,1,p2_R58_s03_final_seed1_a01,True,success,Claude review,35,1,0.819,goal_reached,1590.5,3537.2,755a89d
+R59,s03,final,1,p2_R59_s03_final_seed1_a01,True,success,Claude review,45,3,0.139,goal_reached,1736.4,2978.7,13456b0
+R60,s03,final,1,p2_R60_s03_final_seed1_a01,False,timeout,Claude review,60,0,3.075,max_steps,1540.0,2272.0,13456b0
+R61,s03,final,1,p2_R61_s03_final_seed1_a01,True,success,Claude review,38,3,0.383,goal_reached,1731.6,2504.4,13456b0
 F,s03,final,1,p2_F_s03_final_seed1_a01,False,replan_failure,Claude review,60,6,9.337,max_steps,1695.9,2783.4,8d50901
 R32,s03,final,2,p2_R32_s03_final_seed2_a01,False,replan_failure,Claude review,60,6,9.839,max_steps,2525.4,16093.4,6ebcaf2
 R32P,s03,final,2,p2_R32P_s03_final_seed2_a01,True,success,Claude review,56,4,0.871,goal_reached,2634.6,5732.6,6ebcaf2
@@ -1219,6 +1294,9 @@ R55,s03,final,2,p2_R55_s03_final_seed2_a01,True,success,Claude review,25,1,0.39,
 R56,s03,final,2,p2_R56_s03_final_seed2_a01,False,replan_failure,Claude review,60,3,12.451,max_steps,1766.0,3903.6,755a89d
 R57,s03,final,2,p2_R57_s03_final_seed2_a01,True,success,Claude review,29,1,0.433,goal_reached,1490.4,2710.7,755a89d
 R58,s03,final,2,p2_R58_s03_final_seed2_a01,True,success,Claude review,25,0,0.465,goal_reached,1603.1,2643.9,755a89d
+R59,s03,final,2,p2_R59_s03_final_seed2_a01,True,success,Claude review,32,2,0.866,goal_reached,1660.7,2622.9,13456b0
+R60,s03,final,2,p2_R60_s03_final_seed2_a01,True,success,Claude review,26,1,0.653,goal_reached,1552.8,2004.6,13456b0
+R61,s03,final,2,p2_R61_s03_final_seed2_a01,True,success,Claude review,38,1,0.938,goal_reached,1795.8,3249.6,13456b0
 F,s03,final,2,p2_F_s03_final_seed2_a01,True,success,Claude review,26,1,0.027,goal_reached,1597.3,2252.2,8d50901
 R32,s03,final,3,p2_R32_s03_final_seed3_a01,False,replan_failure,Claude review,60,3,7.288,max_steps,2405.1,5046.9,6ebcaf2
 R32P,s03,final,3,p2_R32P_s03_final_seed3_a01,True,success,Claude review,25,0,0.76,goal_reached,2290.2,3390.8,6ebcaf2
@@ -1237,6 +1315,9 @@ R55,s03,final,3,p2_R55_s03_final_seed3_a01,False,timeout,Claude review,60,2,2.33
 R56,s03,final,3,p2_R56_s03_final_seed3_a01,True,success,Claude review,50,1,0.72,goal_reached,1727.0,2595.4,755a89d
 R57,s03,final,3,p2_R57_s03_final_seed3_a01,True,success,Claude review,52,0,0.651,goal_reached,1872.9,3707.9,755a89d
 R58,s03,final,3,p2_R58_s03_final_seed3_a01,True,success,Claude review,32,1,0.475,goal_reached,1638.6,2510.0,755a89d
+R59,s03,final,3,p2_R59_s03_final_seed3_a01,False,replan_failure,Claude review,60,2,20.354,max_steps,1744.5,3749.9,13456b0
+R60,s03,final,3,p2_R60_s03_final_seed3_a01,True,success,Claude review,43,0,0.715,goal_reached,1648.1,11009.1,13456b0
+R61,s03,final,3,p2_R61_s03_final_seed3_a01,True,success,Claude review,27,1,0.406,goal_reached,1667.6,2042.5,13456b0
 F,s03,final,3,p2_F_s03_final_seed3_a01,True,success,Claude review,51,2,0.545,goal_reached,2423.5,6124.9,8d50901
 F,s03,final,4,p2_F_s03_final_seed4_a01,True,success,Claude review,55,2,0.914,goal_reached,2454.2,3695.6,8d50901
 F,s03,final,5,p2_F_s03_final_seed5_a01,True,success,Claude review,29,0,0.672,goal_reached,1200.9,1694.3,8d50901
@@ -1298,6 +1379,9 @@ R55,s03,dynamic,1,p2_R55_s03_dynamic_seed1_a01,False,replan_failure,Claude revie
 R56,s03,dynamic,1,p2_R56_s03_dynamic_seed1_a01,False,timeout,Claude review,60,4,17.153,max_steps,1792.2,3444.7,755a89d
 R57,s03,dynamic,1,p2_R57_s03_dynamic_seed1_a01,True,success,Claude review,45,0,0.664,goal_reached,1736.5,2695.9,755a89d
 R58,s03,dynamic,1,p2_R58_s03_dynamic_seed1_a01,False,replan_failure,Claude review,60,3,13.003,max_steps,1166.2,2592.6,755a89d
+R59,s03,dynamic,1,p2_R59_s03_dynamic_seed1_a01,False,timeout,Claude review,60,3,2.58,max_steps,1718.2,3047.9,13456b0
+R60,s03,dynamic,1,p2_R60_s03_dynamic_seed1_a01,True,success,Claude review,55,3,0.528,goal_reached,1519.2,2987.3,13456b0
+R61,s03,dynamic,1,p2_R61_s03_dynamic_seed1_a01,True,success,Claude review,59,0,0.423,goal_reached,1711.3,3540.5,13456b0
 F,s03,dynamic,1,p2_F_s03_dynamic_seed1_a01,False,replan_failure,Claude review,60,6,15.051,max_steps,2406.3,4652.3,8d50901
 R32,s03,dynamic,2,p2_R32_s03_dynamic_seed2_a01,False,replan_failure,Claude review,60,4,12.083,max_steps,2349.3,4567.5,6ebcaf2
 R32P,s03,dynamic,2,p2_R32P_s03_dynamic_seed2_a01,False,replan_failure,Claude review,60,5,11.418,max_steps,2462.9,4296.4,6ebcaf2
@@ -1316,6 +1400,9 @@ R55,s03,dynamic,2,p2_R55_s03_dynamic_seed2_a01,True,success,Claude review,55,2,0
 R56,s03,dynamic,2,p2_R56_s03_dynamic_seed2_a01,True,success,Claude review,59,2,0.599,goal_reached,1669.0,2330.3,755a89d
 R57,s03,dynamic,2,p2_R57_s03_dynamic_seed2_a01,False,replan_failure,Claude review,60,4,22.324,max_steps,1748.6,3156.0,755a89d
 R58,s03,dynamic,2,p2_R58_s03_dynamic_seed2_a01,False,pre_change_failure,Claude review,60,1,29.107,max_steps,1870.2,2894.6,755a89d
+R59,s03,dynamic,2,p2_R59_s03_dynamic_seed2_a01,False,pre_change_failure,Claude review,60,5,35.839,max_steps,1905.8,3010.7,13456b0
+R60,s03,dynamic,2,p2_R60_s03_dynamic_seed2_a01,True,success,Claude review,57,3,0.333,goal_reached,1729.6,3136.0,13456b0
+R61,s03,dynamic,2,p2_R61_s03_dynamic_seed2_a01,True,success,Claude review,51,3,0.441,goal_reached,1780.2,2961.4,13456b0
 F,s03,dynamic,2,p2_F_s03_dynamic_seed2_a01,False,replan_failure,Claude review,60,4,7.276,max_steps,2287.1,4898.1,8d50901
 R32,s03,dynamic,3,p2_R32_s03_dynamic_seed3_a01,False,pre_change_failure,Claude review,60,3,22.54,max_steps,2458.2,14408.1,6ebcaf2
 R32P,s03,dynamic,3,p2_R32P_s03_dynamic_seed3_a01,False,replan_failure,Claude review,60,4,11.709,max_steps,2423.4,4501.7,6ebcaf2
@@ -1334,6 +1421,9 @@ R55,s03,dynamic,3,p2_R55_s03_dynamic_seed3_a01,False,replan_failure,Claude revie
 R56,s03,dynamic,3,p2_R56_s03_dynamic_seed3_a01,True,success,Claude review,49,2,0.697,goal_reached,1680.5,2927.8,755a89d
 R57,s03,dynamic,3,p2_R57_s03_dynamic_seed3_a01,False,replan_failure,Claude review,60,1,22.752,max_steps,1865.0,3034.3,755a89d
 R58,s03,dynamic,3,p2_R58_s03_dynamic_seed3_a01,False,replan_failure,Claude review,60,3,18.714,max_steps,1274.4,2235.0,755a89d
+R59,s03,dynamic,3,p2_R59_s03_dynamic_seed3_a01,True,success,Claude review,58,4,0.186,goal_reached,1607.8,2724.4,13456b0
+R60,s03,dynamic,3,p2_R60_s03_dynamic_seed3_a01,False,replan_failure,Claude review,60,5,19.099,max_steps,1864.3,3408.7,13456b0
+R61,s03,dynamic,3,p2_R61_s03_dynamic_seed3_a01,False,timeout,Claude review,60,3,7.876,max_steps,1831.8,3305.7,13456b0
 F,s03,dynamic,3,p2_F_s03_dynamic_seed3_a01,False,replan_failure,Claude review,60,5,9.209,max_steps,2411.8,4856.8,8d50901
 F,s03,dynamic,4,p2_F_s03_dynamic_seed4_a01,False,replan_failure,Claude review,60,4,12.181,max_steps,2355.1,4039.4,8d50901
 F,s03,dynamic,5,p2_F_s03_dynamic_seed5_a01,False,replan_failure,Claude review,60,5,10.874,max_steps,2457.8,5571.4,8d50901
