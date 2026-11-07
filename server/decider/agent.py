@@ -499,6 +499,25 @@ PATHFINDER_A94: Dict[str, Any] = dict(
 PATHFINDER_A95: Dict[str, Any] = dict(
     PATHFINDER_A89, survey=dict(PATHFINDER_A89["survey"], line_now=True))
 
+#: a96 (R60): a89's planner with the route's waypoint never behind the drone
+#: at the spawn (spawn_ahead, planner.pathfind). R49 to R55: in 13 of 150 runs
+#: the first waypoint lay 0.8 to 1.5 m behind the drone (every strip read
+#: blocked_near from 20 m, a wall painted one cell ahead, the route going
+#: round it); "toward your target" sat on the turn-around and the navigator
+#: took it in 5 (R49, R53, R54 s02vc final seed 3 among them, all lost).
+#: eval/phase2/R60_spawn_ahead/README.md.
+PATHFINDER_A96: Dict[str, Any] = dict(PATHFINDER_A89, spawn_ahead=True)
+
+#: a98 (R59): a94's latch (one square read; the corridor drifted into, from
+#: the line's departure) and a95's survey start (the line test on the position
+#: now) together on a89's planner. R56 and R58, same batch: a94 20 against 20
+#: with s03 dynamic 2/3 against 0/3; R57: a95 22 against 20 with s02 19/24
+#: against 17/24. Two draws on different sites: the batch asks whether they
+#: add. eval/phase2/R59_latch_survey/README.md.
+PATHFINDER_A98: Dict[str, Any] = dict(
+    PATHFINDER_A94, survey=dict(PATHFINDER_A89["survey"], line_now=True))
+
+
 #: a90 (R50): a89's planner, and it tells the navigator's notes when the
 #: first way in is over (way_in): a survey started, a latch, the drone more
 #: than the survey's line_m off the direct line, or step 8 (R45's and R46's
@@ -2156,6 +2175,48 @@ AGENTS: Dict[str, Agent] = {a.version: a for a in (
           "the drone 4 m off the line and the trail test never passed again, though "
           "the shut door was read square from the line later; R55 s02va dynamic seed 1 "
           "the same (eval/phase2/R57_survey_line_now/README.md)."),
+    Agent("a96", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "goal_check": GOAL_CHECK_A93,
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A96,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a93 with the route's first waypoint never behind the drone at the spawn: "
+          "when every strip reads blocked_near from 20 m the memory paints a wall one "
+          "cell ahead and the route goes round it, behind the drone, and the "
+          "turn-around carries 'toward your target' (13 of 150 runs in R49 to R55, the "
+          "turn taken in 5, s02vc final seed 3 lost that way in R49, R53 and R54); the "
+          "goal lying ahead, the waypoint goes to it (eval/phase2/R60_spawn_ahead/README.md)."),
+    Agent("a98", "p17", {"orchestrator": {"perceiver": "g05",
+                                          "door_confirmer": "d01",
+                                          "critic": "none", "frame": "clean",
+                                          "goal_truth": "planner",
+                                          "goal_check": GOAL_CHECK_A93,
+                                          "turn_rule": "no_repeat_when_open",
+                                          "target_policy": "pathfinder",
+                                          "pathfinder": PATHFINDER_A98,
+                                          "memory": "a17f",
+                                          "navigator_notes": NAVIGATOR_A78,
+                                          "floor_map": {"no_floor": "blocked_near",
+                                                        "bottom": "open_near",
+                                                        "lower": "open_far",
+                                                        "middle": "open_far"},
+                                          "spatial": "server/decider/spatial.py"}},
+          "a94's latch and a95's survey start together on a93: the dead-end latch fired by "
+          "one square closed read and for a corridor drifted into without a turn, and the "
+          "wall survey started for a drone on the direct line now. R56/R57/R58 (one batch, "
+          "H100 frames): a94 20/30 with s03 dynamic 2/3 (a93 0/3), a95 22/30 with s02 19/24 "
+          "(a93 17/24); two draws by the rule, the gains on different sites "
+          "(eval/phase2/R59_latch_survey/README.md)."),
 )}
 
 DEFAULT_AGENT = "a00"
