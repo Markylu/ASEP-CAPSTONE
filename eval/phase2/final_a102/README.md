@@ -4,7 +4,7 @@
 **Door confirmer:** `d01` · **Planner:** `planner.pathfind` (`PATHFINDER_A102`: survey stations held
 10 steps in transit, a94's dead-end latch) · **Goal check:** 26° · **Status:** flown 2026-11-07 at `00e8b2b`, 90/90 valid, **76/90** ([summary](summary.md))
 
-Written before flying. Spec: `docs/phase2-test-plan.md` §6 and P1 §5–§7. **Citable.** Flown on
+Written before flying. Spec: `docs/phase2-test-plan.md` §6 and P1 §5–§7. **Citable. Phase 2's closing round:** the operator froze `a102` as the Phase 2 agent after the flight (2026-11-07, "Freeze a102"); the tip is tagged `phase2-complete`. Flown on
 the operator's instruction (2026-11-07, after the night's screen): "fly it on lavapipe, but use
 the final format, so the same test we used for phase 1".
 
@@ -104,3 +104,10 @@ against 23 and 21). Manipulation check held: one SHA on 90 runs, llvmpipe on all
 `final_closed` L/R/L/R/L, latch within seven steps of every shut-door read in a tine. Flown
 16:01–17:04 UTC on eight lanes. Labels Claude review, operator to confirm.
 Details: [summary.md](summary.md); tables and contrasts: [results](../results/results.md).
+
+**Frozen.** Operator, 2026-11-07, after reading this round beside the night's screen (R56–R70):
+"Freeze a102". `a102` (`e405aeb4a004`, prompt `p17` `cb3578251cfe`) is the Phase 2 agent; this
+round is Phase 2's citable result; the tip of `phase2/f2-a102-lavapipe` is tagged `phase2-complete`.
+Round F stays a citable 90-run measurement of `a66`. Labels remain Claude review until the operator
+confirms them. Not changed: the decider's default agent (`DEFAULT_AGENT = "a00"`, Phase 1's), served
+agents are chosen with `--agent`.
