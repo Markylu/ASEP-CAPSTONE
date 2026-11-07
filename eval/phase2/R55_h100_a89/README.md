@@ -4,7 +4,8 @@
 **Perceiver:** `g05` · **Door confirmer:** `d01` · **Memory:** `a17f` ·
 **Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`), not lavapipe ·
 **Status:** laid out 2026-11-06 on the operator's call ("Yes, fly a89") after R54; the layout is
-Claude's, with its reason; not flown
+Claude's, with its reason; **flown 2026-11-06, 18/30 against R49's 23/30: below the line, the
+renderer costs runs**
 
 Written before flying. Spec: `docs/phase2-test-plan.md` (host rounds, changelog 2026-11-02).
 Design: the ten contested cells, seeds 1–3, 30 runs, read against R49 (`a89` on lavapipe,
@@ -74,4 +75,7 @@ R54 (the renderer), R49 (the agent). Branch `phase2/r55-h100-a89` from `phase2/r
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to [summary.md](summary.md).
+**Flown 2026-11-06, 18/30** (s02 15/24, s03 3/6) against R49's 23/30 for the same agent on lavapipe:
+the hypothesis did not hold; with R54 that is two agents each 5 runs lower on H100 frames, both on s02.
+H100 frames are read against H100 rounds only (R54 19, R55 18, their bar); rounds read against
+`a85`/`a89` fly on lavapipe. Every other check held. [summary.md](summary.md).
