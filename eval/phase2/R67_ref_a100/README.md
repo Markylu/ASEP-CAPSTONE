@@ -2,7 +2,7 @@
 
 **Agent:** `a100` (`22e2941dc494`), as R63 flew it, unchanged · **Prompt:** `p17` (`cb3578251cfe`) ·
 **Perceiver:** `g05` · **Door confirmer:** `d01` · **Memory:** `a17f` · **Renderer:** NVIDIA H100
-(`GODOT_VK=nvidia`) · **Status:** laid out 2026-11-07 (Claude, overnight), not flown
+(`GODOT_VK=nvidia`) · **Status:** laid out 2026-11-07 (Claude, overnight); **flown 2026-11-07**
 
 Written before flying. A host round under the operator's rule of 2026-11-06 ("3+1 with reference lane"): the
 candidates' parent flies beside them on the same renderer. `a100` was carried in batch 3 (R63, 22/30 against
@@ -61,4 +61,6 @@ R63 (the same agent). Branch `phase2/r65-wait-inflate` (shared with R65 and R66)
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 18/30** (s02 15/24, s03 3/6): the low edge of the 18–24 predicted, four below R63's 22; `a100`
+over two flights is 20 a flight, as `a93` over four. One station given up in transit, at its tenth step. The bar for
+R65 and R66, with the instance caveat (every reference lane of the night flew on `:8007`). [summary.md](summary.md).

@@ -2,7 +2,7 @@
 
 **Agent:** `a101` (`42ae7616cca1`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) ·
-**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep), not flown
+**Status:** laid out 2026-11-07 (Claude, overnight, operator asleep); **flown 2026-11-07**
 
 Written before flying. Spec: `docs/phase2-test-plan.md` §2–§5; host layout: the operator's rule of
 2026-11-06. Design: the ten contested cells, seeds 1–3, 30 runs, **read against R67, the reference lane
@@ -72,4 +72,7 @@ R67 share the branch and the PR.
 
 ## Outcome
 
-Not flown yet.
+**Flown 2026-11-07, 22/30** (s02 20/24, s03 2/6) against the reference lane's 18/30 (R67, `a100`): four above, a
+carry by the rule but not the parent (`a102` at 23 in the same batch); no lobby stall for either agent again, the
+mechanism still untested, no visible cost at the divider in 60 runs. Instance caveat: the reference flew on `:8007`
+as in every batch. [summary.md](summary.md). Rides into R68 (`a103`) on `a102`.
