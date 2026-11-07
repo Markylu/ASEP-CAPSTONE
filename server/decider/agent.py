@@ -471,7 +471,9 @@ PATHFINDER_A89: Dict[str, Any] = dict(
 #: a94 (R56): a89's planner with the trail trigger of the dead-end latch
 #: (planner.confined_run) fired by one closed read taken square (reads 1, not
 #: 2), and a corridor the drone drifted into without a turn recognised from
-#: where its trail left the direct line (planner._from_line). R49 to R55, 15
+#: where its trail left the direct line (planner._from_line: the first point
+#: beyond line_m off it is the mouth, the line's bearing the axis, the lane's
+#: span from_line_span_m, the tine's width). R49 to R55, 15
 #: s03 dynamic runs: the shut tine held the drone 22 to 33 steps before a
 #: latch in three (R51 seed 2, R54 seed 3, R55 seed 1), and 22 to 27 steps in
 #: two final runs (R49 seed 2, R54 seed 1); on the record the one condition
@@ -483,7 +485,8 @@ PATHFINDER_A89: Dict[str, Any] = dict(
 PATHFINDER_A94: Dict[str, Any] = dict(
     PATHFINDER_A89, dead_end_latch=dict(
         PATHFINDER_A89["dead_end_latch"],
-        confined=dict(PATHFINDER_A89["dead_end_latch"]["confined"], reads=1, from_line=True)))
+        confined=dict(PATHFINDER_A89["dead_end_latch"]["confined"], reads=1, from_line=True,
+                      from_line_span_m=3.4)))
 
 #: a95 (R57): a89's planner with the survey's line test on where the drone is
 #: now (line_now), not on every position of its trail. R49, R53, R54, R55

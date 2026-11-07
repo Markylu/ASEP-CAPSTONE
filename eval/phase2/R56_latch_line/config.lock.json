@@ -43,7 +43,7 @@
     "s03_fork_deadend": 2
   },
   "agent_version": "a94",
-  "agent_sha": "a9ec95d52fb6",
+  "agent_sha": "3ac7eac6e09d",
   "prompt_version": "p17",
   "prompt_sha": "cb3578251cfe",
   "subagent_prompts": {

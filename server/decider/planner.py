@@ -1433,8 +1433,8 @@ def _from_line(trail: List[Tuple[int, float, float, float]], upto: int,
     and the straight run found reaches the spawn until the drone turns about
     (R54 s03 final seed 1: closed reads from step 13, latch at 35; R49 s03
     final seed 2: 17 and 44). Where the trail was last within off_line_m of
-    the direct line is the mouth; the drone must now be more than off_line_m
-    off it, min_run_m or more from there."""
+    the direct line is the mouth, the line's bearing the axis; the drone must
+    now be more than off_line_m off it, min_run_m or more from there."""
     pts = [(s, x, y) for s, x, y, _ in trail if s <= upto]
     if len(pts) < 2:
         return None
@@ -1443,15 +1443,23 @@ def _from_line(trail: List[Tuple[int, float, float, float]], upto: int,
     if abs(latch_frame(line, here[1:3])[1]) <= float(c["off_line_m"]):
         return None
     left = None
-    for s, x, y in pts[:-1]:
+    for i, (s, x, y) in enumerate(pts[:-1]):
         if abs(latch_frame(line, (x, y))[1]) <= float(c["off_line_m"]):
-            left = (s, x, y)
+            left = i
     if left is None:
         return None
-    run = spatial.dist(left[1:3], here[1:3])
+    # The mouth is the first point beyond the line's band, not the last within
+    # it: measured from a point on the line the lane's span takes in the
+    # diagonal the drone drifted in on (R56 shakedown s03 final seed 1: 4.1 m,
+    # read at 13, latched at 31).
+    began = pts[left + 1]
+    run = spatial.dist(began[1:3], here[1:3])
     if run < float(d["min_run_m"]):
         return None
-    return (left[1], left[2]), left[0], spatial.bearing(left[1:3], here[1:3]), run
+    # The axis is the direct line's: a corridor drifted into without a turn
+    # runs the way the drone was going (the bearing from the mouth to the
+    # drone swings as it turns about at the door, and the lane's span with it).
+    return (began[1], began[2]), began[0], float(line["axis_deg"]), run
 
 
 def confined_run(trail: List[Tuple[int, float, float, float]], closed: List[int],
@@ -1528,6 +1536,11 @@ def confined_run(trail: List[Tuple[int, float, float, float]], closed: List[int]
         before = now = None  # farthest down the lane: dwell_steps ago, and to date
         lo = hi = 0.0        # a84 (span_m): how far either side of the axis it has been
         span = c.get("span_m")
+        if from_line and c.get("from_line_span_m") is not None:
+            # a94: measured off the direct line's bearing, not the run's own
+            # axis, the lane is the corridor's full width (the 3 m s03 tine:
+            # R56 shakedown s03 final seed 1 stood 2.9 m across it).
+            span = c["from_line_span_m"]
         for s, x, y, _ in trail:
             if s < since:
                 continue
@@ -1843,8 +1856,17 @@ def survey_station(sv: Dict[str, Any], c: Dict[str, Any]) -> Optional[spatial.Po
     it. None when no station is left."""
     if int(sv["i"]) >= len(sv["order"]):
         return None
-    along = (-float(c["back_m"]) if sv.get("wall") is None
-             else float(sv["wall"]) - float(c["standoff_m"]))
+    if sv.get("wall") is not None:
+        along = float(sv["wall"]) - float(c["standoff_m"])
+    elif c.get("fwd_m") is not None:
+        # a97: the wall's range unknown, the stations lie fwd_m toward it, not
+        # level with where the survey began (R49, R54, R55 s02c final: the
+        # first station, 90 degrees to the side, was given up at step 8 in 5
+        # of 12 runs, the navigator flying on at the shut door with the tag
+        # on sharp left; a station ahead and to the side is one turn away).
+        along = float(c["fwd_m"])
+    else:
+        along = -float(c["back_m"])
     return survey_point(sv, along, float(sv["order"][int(sv["i"])]))
 
 
@@ -2366,6 +2388,17 @@ def pathfind(mem: spatial.SpatialMemory, manifest: Dict[str, Any],
         survey = survey_from(records, step)
         if survey is not None and survey["phase"] != "done":
             survey["phase"] = "done"
+    if (p.get("spawn_ahead") and not records and latch is None and survey is None
+            and abs(spatial.wrap(spatial.bearing(here[:2], wp) - here[2])) > 90.0
+            and abs(spatial.wrap(spatial.bearing(here[:2], goal) - here[2])) <= 90.0):
+        # a96: at the spawn the route's first point lies behind the drone in
+        # 13 of 150 runs (R49 to R55): every strip read blocked_near from 20 m,
+        # a wall painted one cell ahead, the route going round it. The
+        # turn-around then carries "toward your target" and the navigator
+        # takes it (R49, R53, R54 s02vc final seed 3, lost; 5 of the 13). The
+        # goal lies ahead: the waypoint goes to it, waypoint_min_m away.
+        wp = spatial.ahead(here[:2], spatial.bearing(here[:2], goal),
+                           float(p.get("waypoint_min_m", 1.0)))
     path_m = round(sum(spatial.dist(_centre(a), _centre(b)) for a, b in zip(path, path[1:])), 2)
     unknown = sum(1 for c in path[1:-1] if c not in cm.known)
     target = spatial.Target("path", "path", wp[0], wp[1], p["words"]["path"], step)

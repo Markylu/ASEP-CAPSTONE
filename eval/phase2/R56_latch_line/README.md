@@ -1,6 +1,6 @@
 # R56: a93 with the latch fired by one square read and from the line's departure, contested cells
 
-**Agent:** `a94` (`a9ec95d52fb6`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
+**Agent:** `a94` (`3ac7eac6e09d`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Memory:** `a17f` · **Renderer:** NVIDIA H100 (`GODOT_VK=nvidia`) ·
 **Status:** laid out 2026-11-07 (Claude, overnight, operator asleep), not flown
 
@@ -20,10 +20,12 @@ One change to the planner, in the dead-end latch's trail trigger (`planner.confi
    down it, no ground stood on beside it) are unchanged.
 2. **A corridor the drone drifted into without a turn** is recognised from where its trail left the
    direct line from the spawn to the goal (`planner._from_line`, `confined.from_line`): when the
-   drone is now more than `off_line_m` (2.5 m) off that line, the last trail point within 2.5 m of
-   it is the run's start and the bearing from there to the drone its axis; the same confinement,
-   advance, beside and read checks apply from that point on. Before, a straight run that reached
-   back to the spawn was never a corridor (its mouth would have been the spawn).
+   drone is now more than `off_line_m` (2.5 m) off that line, the first trail point beyond that
+   band (after the last one within it) is the corridor's mouth and the line's own bearing its
+   axis; the same confinement, advance, beside and read checks apply from that point on, the
+   lane's span measured as `from_line_span_m` (3.4 m, the tine's width and a little, against
+   `span_m` 2.8 for a run's own axis). Before, a straight run that reached back to the spawn was
+   never a corridor (its mouth would have been the spawn).
 
 Everything else is `a93`: the goal-report check, the survey, the latch's exit, the reopening, the
 navigator's notes.
@@ -44,15 +46,22 @@ navigator's notes.
   turned about and a shorter run ended at the door.
 - **The change on the record, gated as in flight** (no latch while a survey runs;
   `python eval/probes/a94_latch_check.py --agent a94 --folders R44_survey_latch_fixed,R45_survey_lineup,R46_behind_always,R47_station_guard,R49_no_sentence,R51_no_station_guard,R52_station_stall,R53_goal_check,R54_h100_frames,R55_h100_a89 --runs`,
-  300 runs): the latch fires in the shut tine in **27 of 30** s03 `dynamic` runs (`a93`: 26), never
-  later than `a93`'s and earlier in 8 of the 60 s03 runs: R55 `dynamic` 1 at **25, not 58**; R54
-  `final` 1 at **20, not 35**; R49 `dynamic` 2 at 46, not 56; R53 `dynamic` 3 at 27, not 32; R44
-  `dynamic` 1 at 43, not 47; R47 `dynamic` 1 at 54, not 58; R55 `dynamic` 2 at 22, not 24; R51
-  `dynamic` 1 at 58 where `a93` never fired. It fires in the wrong tine in none. Three slow runs
-  stay slow (R54 `dynamic` 3, R51 `dynamic` 2, R49 `final` 2: the zigzag there leaves the lane's
-  span or stands beside it).
+  300 runs): the latch fires in the shut tine in **29 of 30** s03 `dynamic` runs (`a93`: 26), never
+  later than `a93`'s and earlier in 10 of the 60 s03 runs: R55 `dynamic` 1 at **25, not 58**; R54
+  `final` 1 at **21, not 35**; R54 `dynamic` 3 at **24** and R51 `dynamic` 2 at **22** where `a93`
+  never fired (closed reads from 18 in both); R49 `dynamic` 2 at 46, not 56; R53 `dynamic` 3 at 27,
+  not 32; R44 `dynamic` 1 at 43, not 47; R47 `dynamic` 1 at 54, not 58; R55 `dynamic` 2 at 22, not
+  24; R51 `dynamic` 1 at 58 where `a93` never fired. It fires in the wrong tine in none. R49 `final`
+  2 stays at 44 (the drone stood beside the lane).
 - **Cost in s02, same replay:** a latch before the drone crossed the divider in **7 of 167 won runs**
-  (`a93`: 6) and 45 of 73 lost runs (`a93`: 24). Open loop: the replay cannot say what the drone
+  (`a93`: 6) and 35 of 73 lost runs (`a93`: 24).
+- **First shakedown (at `c403f7b`, the from-line axis then the bearing from the mouth to the
+  drone):** s03 `final` 1 read the shut door at 13 and latched at 31 (lost), s03 `dynamic` 1 read at
+  18, latched at 24, won in 50. On the record of that `final` run the mouth-to-drone axis swung with
+  the zigzag and the lane's span with it (2.9 to 3.4 m against 2.8); with the line's bearing as the
+  axis, the mouth at the first point off the line and `from_line_span_m` 3.4 the trigger fires at 26
+  on that trail. The agent was changed before flying (its sha moved; this round's lock with it) and
+  the shakedown re-flown at the flying commit. Open loop: the replay cannot say what the drone
   does after a latch, only where one would have fired.
 - Offline: `python -m pytest server/decider/tests -q` 82 passed; `VLM_AGENT=a94 python
   eval/probes/a63_smoke.py` 627/627 steps planned, 0 failed.
@@ -77,7 +86,7 @@ Against R58 (`a93`, the same batch, H100 frames; `a93`'s earlier H100 flight R54
 
 ## Manipulation check
 
-- Every `run.json` carries `a94`, `a9ec95d52fb6`; every `godot.log` names `NVIDIA H100 PCIe`.
+- Every `run.json` carries `a94`, `3ac7eac6e09d`; every `godot.log` names `NVIDIA H100 PCIe`.
 - In the s03 runs that read a closed door in the centre three strips, the gap from the first such
   read to the latch is **at most 9 steps in at least 7 of them** and **the longest gap is under 22**
   (`a93`, R53+R54: 7 of 10 within 9; gaps of 22 and 42 in the other two; one run never latched).
@@ -98,7 +107,7 @@ parent and reference.
 Not needed: the change touches nothing the model perceives or is told (the latch is read from the
 trail and the perceiver's existing closed-door reads). The offline gate above (fires in the shut
 tine in at least 26 of 30 s03 `dynamic` runs, never later than `a93`, at most 8 of 167 won s02
-runs with a latch before crossing) passed: 27, never later, 7.
+runs with a latch before crossing) passed: 29, never later, 7.
 
 ## Shakedown
 
