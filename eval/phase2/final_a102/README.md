@@ -2,7 +2,7 @@
 
 **Agent:** `a102` (`e405aeb4a004`) · **Prompt:** `p17` (`cb3578251cfe`) · **Perceiver:** `g05` ·
 **Door confirmer:** `d01` · **Planner:** `planner.pathfind` (`PATHFINDER_A102`: survey stations held
-10 steps in transit, a94's dead-end latch) · **Goal check:** 26° · **Status:** pre-registered, not flown
+10 steps in transit, a94's dead-end latch) · **Goal check:** 26° · **Status:** flown 2026-11-07 at `00e8b2b`, 90/90 valid, **76/90** ([summary](summary.md))
 
 Written before flying. Spec: `docs/phase2-test-plan.md` §6 and P1 §5–§7. **Citable.** Flown on
 the operator's instruction (2026-11-07, after the night's screen): "fly it on lavapipe, but use
@@ -94,5 +94,13 @@ per final-design round, so F and F2 are never pooled.
 
 ## Outcome
 
-Not flown. After the round: one line on whether the hypothesis held, and a link to
-[summary.md](summary.md).
+**76/90: `initial` 30/30, `final` 23/30, `dynamic` 23/30** (Round F 64/90, 30/17/17; Phase 1 25/90,
+25/0/0). Predicted 72–83, landed 76; `final` one under its 24–28, `dynamic` inside 20–25. The
+hypothesis held: twelve over Round F (p = 0.048), the gain on the change arms (s02 out of view
+15/20 against 7/20; s03 `dynamic` 4/5 against 0/5, the cell's first wins in Phase 2), the eight
+settled cells 40/40. At least 50% on every layout: s01 15, s02a 13, s02c 12, s02va 12, s02vc 11,
+s03 13 of 15. Lavapipe gave no lift over the H100 flights (19/30 on the thirty cells they share,
+against 23 and 21). Manipulation check held: one SHA on 90 runs, llvmpipe on all 90, s03
+`final_closed` L/R/L/R/L, latch within seven steps of every shut-door read in a tine. Flown
+16:01–17:04 UTC on eight lanes. Labels Claude review, operator to confirm.
+Details: [summary.md](summary.md); tables and contrasts: [results](../results/results.md).

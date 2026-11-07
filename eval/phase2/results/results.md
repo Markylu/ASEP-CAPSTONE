@@ -115,7 +115,7 @@ Spec: `docs/phase2-test-plan.md`. One run per cell (seed 1), so each cell is a s
 | s03 | final | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✓ 54 | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✗ replan_failure | ✓ 35 | ✗ replan_failure | ✓ 39 | ✓ 35 | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✓ 47 | ✗ max_steps | ✓ 53 | ✓ 34 | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✓ 34 | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ replan_failure | ✓ 28 | 1/3: 55, replan_failure, replan_failure | 3/3: 22, 56, 25 | 2/3: replan_failure, 26, 31 | 2/3: replan_failure, 31, 25 | 3/3: 58, 30, 57 | 3/3: 40, 30, 31 | 3/3: 28, 31, 33 | 0/3: replan_failure, timeout, replan_failure | 1/3: replan_failure, replan_failure, 25 | 1/3: replan_failure, replan_failure, 40 | 2/3: 48, replan_failure, 33 | 3/3: 26, 48, 40 | 1/3: replan_failure, replan_failure, 50 | 2/3: 37, 25, timeout | 2/3: 22, replan_failure, 50 | 2/3: replan_failure, 29, 52 | 3/3: 35, 25, 32 | 2/3: 45, 32, replan_failure | 2/3: timeout, 26, 43 | 3/3: 38, 38, 27 | 2/3: 28, 24, replan_failure | 3/3: 49, 43, 32 | 1/3: 38, replan_failure, timeout | 1/3: timeout, 58, timeout | 2/3: replan_failure, 53, 29 | 2/3: 29, timeout, 30 | 3/3: 48, 25, 48 | 1/3: 33, replan_failure, timeout | 2/3: replan_failure, 32, 55 |
 | s03 | dynamic | ✗ pre_change_failure | ✗ replan_failure | ✗ pre_change_failure | ✗ pre_change_failure | ✗ pre_change_failure | ✗ replan_failure | ✗ pre_change_failure | ✗ pre_change_failure | ✗ replan_failure | ✗ pre_change_failure | ✗ pre_change_failure | ✗ replan_failure | ✗ pre_change_failure | ✗ pre_change_failure | ✗ replan_failure | ✗ replan_failure | ✗ pre_change_failure | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ max_steps | ✗ replan_failure | ✗ replan_failure | 0/3: replan_failure, replan_failure, pre_change_failure | 0/3: replan_failure, replan_failure, replan_failure | 0/3: replan_failure, replan_failure, replan_failure | 0/3: timeout, replan_failure, replan_failure | 2/3: replan_failure, 47, 46 | 1/3: replan_failure, replan_failure, 51 | 2/3: 57, replan_failure, 60 | 1/3: replan_failure, replan_failure, 60 | 1/3: replan_failure, replan_failure, 53 | 0/3: replan_failure, replan_failure, replan_failure | 1/3: replan_failure, 60, replan_failure | 1/3: 60, replan_failure, timeout | 1/3: 58, replan_failure, replan_failure | 1/3: replan_failure, 55, replan_failure | 2/3: timeout, 59, 49 | 1/3: 45, replan_failure, replan_failure | 0/3: replan_failure, pre_change_failure, replan_failure | 1/3: timeout, pre_change_failure, 58 | 2/3: 55, 57, replan_failure | 2/3: 59, 51, timeout | 2/3: 60, 59, timeout | 1/3: 58, replan_failure, replan_failure | 2/3: replan_failure, 43, 59 | 1/3: timeout, timeout, 58 | 1/3: timeout, replan_failure, 52 | 1/3: 54, timeout, timeout | 2/3: 57, 45, timeout | 2/3: 52, 49, timeout | 1/3: 42, replan_failure, replan_failure |
 
-# Final round (F, agent a66)
+# Final round F (agent a66): Final: a66 (R30's route planner) on the full design
 
 ## Main table (§11)
 
@@ -200,4 +200,91 @@ Fisher's exact test, two-sided. Seeds are near-replicates at temperature 0 (§7.
 | d | dynamic | s02a (A) vs s02c (C) | 3/5 vs 1/5 | +0.40 | 0.524 |
 | d | final | s02va (A) vs s02vc (C) | 4/5 vs 1/5 | +0.60 | 0.206 |
 | d | dynamic | s02va (A) vs s02vc (C) | 4/5 vs 4/5 | +0.00 | 1 |
+| d | s03 final | L closed (odd seeds) vs R closed (even seeds) | 2/3 vs 2/2 | -0.33 | 1 |
+
+# Final round F2 (agent a102): Final design: a102 on the full design, lavapipe
+
+## Main table (§11)
+
+### L1 Object Appearance
+
+| Site | Arm | n | SR | 95% CI | success | ignore | replan | collision | timeout | pre-change | latency p50 / p95 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| s01 | initial | 5 | **1.00** | 0.57–1.00 | 5 | 0 | 0 | 0 | 0 | 0 | 1.69 / 2.04 s |
+| s01 | final | 5 | **1.00** | 0.57–1.00 | 5 | 0 | 0 | 0 | 0 | 0 | 2.33 / 3.87 s |
+| s01 | dynamic | 5 | **1.00** | 0.57–1.00 | 5 | 0 | 0 | 0 | 0 | 0 | 2.14 / 3.41 s |
+
+### L2a Door Switch, out of view
+
+| Site | Arm | n | SR | 95% CI | success | ignore | replan | collision | timeout | pre-change | latency p50 / p95 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| s02a | initial | 5 | **1.00** | 0.57–1.00 | 5 | 0 | 0 | 0 | 0 | 0 | 1.71 / 2.29 s |
+| s02a | final | 5 | **0.80** | 0.38–0.96 | 4 | 0 | 1 | 0 | 0 | 0 | 2.35 / 4.29 s |
+| s02a | dynamic | 5 | **0.80** | 0.38–0.96 | 4 | 0 | 1 | 0 | 0 | 0 | 2.21 / 4.22 s |
+| s02c | initial | 5 | **1.00** | 0.57–1.00 | 5 | 0 | 0 | 0 | 0 | 0 | 1.74 / 2.16 s |
+| s02c | final | 5 | **0.60** | 0.23–0.88 | 3 | 0 | 1 | 0 | 1 | 0 | 2.34 / 4.43 s |
+| s02c | dynamic | 5 | **0.80** | 0.38–0.96 | 4 | 0 | 1 | 0 | 0 | 0 | 2.10 / 3.46 s |
+| pooled | initial | 10 | **1.00** | 0.72–1.00 | 10 | 0 | 0 | 0 | 0 | 0 | 1.73 / 2.26 s |
+| pooled | final | 10 | **0.70** | 0.40–0.89 | 7 | 0 | 2 | 0 | 1 | 0 | 2.34 / 4.42 s |
+| pooled | dynamic | 10 | **0.80** | 0.49–0.94 | 8 | 0 | 2 | 0 | 0 | 0 | 2.16 / 4.02 s |
+
+### L2b Door Switch, in view
+
+| Site | Arm | n | SR | 95% CI | success | ignore | replan | collision | timeout | pre-change | latency p50 / p95 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| s02va | initial | 5 | **1.00** | 0.57–1.00 | 5 | 0 | 0 | 0 | 0 | 0 | 1.66 / 2.22 s |
+| s02va | final | 5 | **0.60** | 0.23–0.88 | 3 | 0 | 1 | 0 | 1 | 0 | 2.00 / 4.08 s |
+| s02va | dynamic | 5 | **0.80** | 0.38–0.96 | 4 | 0 | 1 | 0 | 0 | 0 | 2.08 / 3.58 s |
+| s02vc | initial | 5 | **1.00** | 0.57–1.00 | 5 | 0 | 0 | 0 | 0 | 0 | 1.80 / 2.24 s |
+| s02vc | final | 5 | **0.80** | 0.38–0.96 | 4 | 0 | 0 | 0 | 1 | 0 | 2.26 / 3.69 s |
+| s02vc | dynamic | 5 | **0.40** | 0.12–0.77 | 2 | 1 | 2 | 0 | 0 | 0 | 2.05 / 4.43 s |
+| pooled | initial | 10 | **1.00** | 0.72–1.00 | 10 | 0 | 0 | 0 | 0 | 0 | 1.73 / 2.24 s |
+| pooled | final | 10 | **0.70** | 0.40–0.89 | 7 | 0 | 1 | 0 | 2 | 0 | 2.09 / 3.83 s |
+| pooled | dynamic | 10 | **0.60** | 0.31–0.83 | 6 | 1 | 3 | 0 | 0 | 0 | 2.07 / 4.05 s |
+
+### L3 Split Path
+
+| Site | Arm | n | SR | 95% CI | success | ignore | replan | collision | timeout | pre-change | latency p50 / p95 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| s03 | initial | 5 | **1.00** | 0.57–1.00 | 5 | 0 | 0 | 0 | 0 | 0 | 2.24 / 3.88 s |
+| s03 | final | 5 | **0.80** | 0.38–0.96 | 4 | 0 | 0 | 0 | 1 | 0 | 2.14 / 3.72 s |
+| s03 | dynamic | 5 | **0.80** | 0.38–0.96 | 4 | 0 | 0 | 0 | 0 | 1 | 2.20 / 4.39 s |
+
+### Pooled, all six sites
+
+| Site | Arm | n | SR | 95% CI | success | ignore | replan | collision | timeout | pre-change | latency p50 / p95 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| all | initial | 30 | **1.00** | 0.89–1.00 | 30 | 0 | 0 | 0 | 0 | 0 | 1.80 / 2.98 s |
+| all | final | 30 | **0.77** | 0.59–0.88 | 23 | 0 | 3 | 0 | 4 | 0 | 2.23 / 3.91 s |
+| all | dynamic | 30 | **0.77** | 0.59–0.88 | 23 | 1 | 5 | 0 | 0 | 1 | 2.14 / 4.05 s |
+
+## Planned contrasts (§11)
+
+Fisher's exact test, two-sided. Seeds are near-replicates at temperature 0 (§7.3), so p is a robustness check across start poses, not sampling inference.
+
+| # | Scope | Contrast | Successes | ΔSR | p |
+|---|---|---|---|---|---|
+| a | s01 | dynamic vs initial | 5/5 vs 5/5 | +0.00 | 1 |
+| a | s02a | dynamic vs initial | 4/5 vs 5/5 | -0.20 | 1 |
+| a | s02c | dynamic vs initial | 4/5 vs 5/5 | -0.20 | 1 |
+| a | s02va | dynamic vs initial | 4/5 vs 5/5 | -0.20 | 1 |
+| a | s02vc | dynamic vs initial | 2/5 vs 5/5 | -0.60 | 0.167 |
+| a | s03 | dynamic vs initial | 4/5 vs 5/5 | -0.20 | 1 |
+| a | L2a pooled | dynamic vs initial | 8/10 vs 10/10 | -0.20 | 0.474 |
+| a | L2b pooled | dynamic vs initial | 6/10 vs 10/10 | -0.40 | 0.0867 |
+| a | all sites | dynamic vs initial | 23/30 vs 30/30 | -0.23 | 0.0105 |
+| b | s01 | dynamic vs final | 5/5 vs 5/5 | +0.00 | 1 |
+| b | s02a | dynamic vs final | 4/5 vs 4/5 | +0.00 | 1 |
+| b | s02c | dynamic vs final | 4/5 vs 3/5 | +0.20 | 1 |
+| b | s02va | dynamic vs final | 4/5 vs 3/5 | +0.20 | 1 |
+| b | s02vc | dynamic vs final | 2/5 vs 4/5 | -0.40 | 0.524 |
+| b | s03 | dynamic vs final | 4/5 vs 4/5 | +0.00 | 1 |
+| b | L2a pooled | dynamic vs final | 8/10 vs 7/10 | +0.10 | 1 |
+| b | L2b pooled | dynamic vs final | 6/10 vs 7/10 | -0.10 | 1 |
+| b | all sites | dynamic vs final | 23/30 vs 23/30 | +0.00 | 1 |
+| c | dynamic arm | L2b vs L2a | 6/10 vs 8/10 | -0.20 | 0.628 |
+| d | final | s02a (A) vs s02c (C) | 4/5 vs 3/5 | +0.20 | 1 |
+| d | dynamic | s02a (A) vs s02c (C) | 4/5 vs 4/5 | +0.00 | 1 |
+| d | final | s02va (A) vs s02vc (C) | 3/5 vs 4/5 | -0.20 | 1 |
+| d | dynamic | s02va (A) vs s02vc (C) | 4/5 vs 2/5 | +0.40 | 0.524 |
 | d | s03 final | L closed (odd seeds) vs R closed (even seeds) | 2/3 vs 2/2 | -0.33 | 1 |
